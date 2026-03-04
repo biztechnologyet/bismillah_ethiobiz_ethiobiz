@@ -1,0 +1,95 @@
+/* Walta CSS - Global Branding */
+
+/* 1. Helpdesk Modal Logo Override */
+/* Target the logo container in the Onboarding Modal */
+.onboarding-step-wrapper .step-icon,
+.getting-started-icon {
+    /* Hide the original SVG/Image */
+    background-image: url("/assets/bismillah_ethiobiz/walta_real_logo.png") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    color: transparent !important;
+    /* Hide text if any */
+    fill: transparent !important;
+    /* Hide SVG fill */
+}
+
+.onboarding-step-wrapper .step-icon svg,
+.getting-started-icon svg {
+    display: none !important;
+}
+
+/* 2. LMS (Dagu) Modal Logo Override */
+/* Assuming similar structure or class */
+.lms-onboarding-icon,
+.course-card-img-top[alt="Welcome to Dagu"] {
+    /* Placeholder for Dagu logo - using Walta/Shield for now or finding a Dagu reference */
+    /* Since user said "Update the logo too as shown in getting started", 
+       and we only have one new logo uploaded, I will use walta_real_logo.png 
+       BUT if Dagu needs a different one, I should check. 
+       For now, I'll apply the shield to Dagu as well per "Update the logo too". */
+    background-image: url("/assets/bismillah_ethiobiz/walta_real_logo.png") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+/* 3. Navbar Overrides */
+.navbar-brand .app-logo {
+    display: none !important;
+}
+
+.navbar-brand::before {
+    content: "";
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-image: url("/assets/bismillah_ethiobiz/walta_real_logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+
+/* BISMALLAH v3.5.0 - Helpdesk Cleanup */
+
+/* 1. Hide "Getting Started" Onboarding */
+div[class*="onboarding"],
+div[id*="onboard"],
+.onboarding-modal,
+.help-modal,
+.fixed.z-50.right-0.w-80.bg-surface-modal, 
+div[data-testid="onboarding-panel"],
+div:contains("Getting Started") {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* 2. Hide "Getting Started" Sidebar Widget */
+.bg-surface-modal.shadow-sm.rounded-lg.py-2\.5.px-3 {
+    display: none !important;
+}
+
+/* 3. Disable/Hide "Helpdesk" Sidebar Menu */
+[data-name="Helpdesk"],
+[data-name="helpdesk"],
+a[href="/app/helpdesk"],
+a[href="/app/support"] {
+    display: none !important;
+}
+
+
+/* BISMALLAH v3.5.1 - Corrected Hiding Rule */
+div[class*="onboarding"],
+div[id*="onboard"],
+.onboarding-modal,
+.help-modal,
+.fixed.z-50.right-0.w-80.bg-surface-modal, 
+div[data-testid="onboarding-panel"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}

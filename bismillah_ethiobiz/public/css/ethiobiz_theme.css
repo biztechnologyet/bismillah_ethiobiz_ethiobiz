@@ -1,0 +1,2737 @@
+/**
+ * EthioBiz Theme - Glassmorphism Design System
+ * Bismillah Ar-Rahman Ar-Rahim
+ * 
+ * A Copilot-inspired dark mode theme with frosted glass effects
+ * for the EthioBiz ERPNext ecosystem.
+ * 
+ * © 2025 EthioBiz | Powered by Biz Technology Solutions
+ */
+
+/* ============================================
+   1. CSS VARIABLES & COLOR SYSTEM
+   ============================================ */
+
+:root {
+    /* ===== MASTER BRAND COLORS ===== */
+    --ethiobiz-turquoise: #1FB6AE;
+    --ethiobiz-turquoise-rgb: 31, 182, 174;
+    --ethiobiz-turquoise-light: #4dd4cc;
+    --ethiobiz-turquoise-dark: #168c86;
+
+    /* ===== NEUTRAL PALETTE ===== */
+    --obsidian-black: #0E1A1A;
+    --obsidian-rgb: 14, 26, 26;
+    --sacred-ivory: #F8F6F2;
+    --ivory-rgb: 248, 246, 242;
+    --ethiopian-gold: #C9A24D;
+
+    /* ===== PILLAR COLORS ===== */
+    --tibeb-gold: #C9A24D;
+    --tibeb-night: #1A2C44;
+    --dagu-indigo: #2E3A8C;
+    --dagu-parchment: #EFEDE7;
+    --magala-green: #2F6B4F;
+    --magala-clay: #7A5C3A;
+    --walta-blue: #0F3557;
+    --walta-silver: #B8C2CC;
+    --afocha-red: #B83A3A;
+    --afocha-rose: #F2C6C2;
+
+    /* ===== GLASSMORPHISM EFFECTS ===== */
+    --glass-blur: 5px;
+    /* Reduced from 20px */
+    --glass-bg-dark: rgba(255, 255, 255, 0.01);
+    /* Almost invisible */
+    --glass-bg-light: rgba(0, 0, 0, 0.01);
+    --glass-border-dark: rgba(255, 255, 255, 0.08);
+    --glass-border-light: rgba(0, 0, 0, 0.05);
+    --glass-shadow-dark: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --glass-shadow-light: 0 4px 16px rgba(0, 0, 0, 0.05);
+
+    /* ===== BORDER RADIUS ===== */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* ===== SPACING ===== */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* ===== TYPOGRAPHY ===== */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-heading: 'Outfit', var(--font-primary);
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* ===== TRANSITIONS ===== */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+
+    /* ===== DYNAMIC (Set by current theme/pillar) ===== */
+    --primary-color: var(--ethiobiz-turquoise);
+    --primary-rgb: var(--ethiobiz-turquoise-rgb);
+    --current-pillar-color: var(--ethiobiz-turquoise);
+
+    /* ===== FRAPPE OVERRIDE VARIABLES ===== */
+    --primary: var(--primary-color) !important;
+    --blue-500: var(--primary-color) !important;
+    --blue-600: var(--primary-color) !important;
+    --btn-primary-bg: var(--primary-color) !important;
+}
+
+/* ============================================
+   2. DARK MODE (DEFAULT)
+   ============================================ */
+
+[data-theme="dark"],
+.dark,
+html[data-theme-mode="Timeless Night"],
+body.dark-theme {
+    --bg-primary: var(--obsidian-black);
+    --bg-secondary: transparent;
+    --bg-tertiary: transparent;
+    --bg-card: var(--glass-bg-dark);
+    --bg-input: rgba(255, 255, 255, 0.05);
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.9);
+    --text-muted: rgba(255, 255, 255, 0.7);
+
+    --border-color: var(--glass-border-dark);
+    --shadow-color: var(--glass-shadow-dark);
+
+    --navbar-bg: rgba(14, 26, 26, 0.2) !important;
+    --sidebar-bg: rgba(14, 26, 26, 0.2) !important;
+
+    /* Atmospheric gradient overlay - REMOVED for clarity */
+    --atmospheric-gradient: none !important;
+
+    /* FORCE DARK BACKGROUND COLOR AS FALLBACK */
+    background-color: var(--obsidian-black) !important;
+}
+
+/* Force dark background on body when dark mode is active */
+body[data-theme="dark"],
+body.dark-theme,
+html[data-theme="dark"] body {
+    background-color: var(--obsidian-black) !important;
+}
+
+/* Dark mode as default for Frappe */
+body,
+html {
+    --bg-primary: var(--obsidian-black);
+    --bg-secondary: transparent;
+    --bg-tertiary: transparent;
+    --bg-card: var(--glass-bg-dark);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.9);
+    --border-color: var(--glass-border-dark);
+}
+
+/* ============================================
+   3. LIGHT MODE
+   ============================================ */
+
+[data-theme="light"],
+.light,
+html[data-theme-mode="Frappe Light"],
+body.light-theme {
+    --bg-primary: var(--sacred-ivory);
+    --bg-secondary: rgba(255, 255, 255, 0.4);
+    --bg-tertiary: rgba(255, 255, 255, 0.2);
+    --bg-card: rgba(255, 255, 255, 0.5);
+    --bg-input: rgba(0, 0, 0, 0.05);
+
+    /* Extreme High Contrast for Light Mode */
+    --text-primary: #000000 !important;
+    --text-secondary: #111111 !important;
+    --text-muted: #444444 !important;
+    --heading-color: #000000 !important;
+
+    --border-color: rgba(0, 0, 0, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+
+    --navbar-bg: rgba(248, 246, 242, 0.8) !important;
+    --sidebar-bg: rgba(255, 255, 255, 0.8) !important;
+
+    --atmospheric-gradient: none !important;
+}
+
+/* Force dark text for specific elements in light mode across all components */
+[data-theme="light"] .page-title,
+[data-theme="light"] .standard-filter-section .label,
+[data-theme="light"] .form-section .section-head,
+[data-theme="light"] .btn-default,
+[data-theme="light"] .btn-secondary,
+[data-theme="light"] .widget-head .widget-title,
+[data-theme="light"] .sidebar-item-label,
+[data-theme="light"] .navbar-brand,
+[data-theme="light"] .navbar-nav .nav-link,
+[data-theme="light"] .navbar-nav .dropdown-toggle,
+[data-theme="light"] .breadcrumb-item,
+[data-theme="light"] .breadcrumb-item a,
+[data-theme="light"] .search-bar input,
+[data-theme="light"] .label-area,
+[data-theme="light"] .control-label,
+[data-theme="light"] .form-group .label,
+[data-theme="light"] .section-head,
+[data-theme="light"] .section-title,
+[data-theme="light"] .header-title,
+[data-theme="light"] .comment-content,
+[data-theme="light"] .timeline-item .content,
+[data-theme="light"] .menu-item-label,
+[data-theme="light"] .dropdown-header,
+[data-theme="light"] .dropdown-item,
+[data-theme="light"] .list-row-head .level-item,
+[data-theme="light"] .list-header-column,
+[data-theme="light"] .list-subject,
+[data-theme="light"] .list-row-container .level-item,
+[data-theme="light"] .filter-label,
+[data-theme="light"] .text-muted,
+[data-theme="light"] .form-control,
+[data-theme="light"] .input-with-feedback,
+[data-theme="light"] .grid-heading-row *,
+[data-theme="light"] .filter-row *,
+[data-theme="light"] .widget-title,
+[data-theme="light"] .shortcut-widget-box *,
+[data-theme="light"] .link-text,
+[data-theme="light"] .indicator,
+[data-theme="light"] .comment-text,
+[data-theme="light"] .widget-body .widget-control,
+[data-theme="light"] .widget-body .widget-control *,
+[data-theme="light"] .shortcut-widget-box .widget-control,
+[data-theme="light"] .shortcut-widget-box .widget-control *,
+[data-theme="light"] .widget-control .link-content,
+[data-theme="light"] .widget-control .link-content *,
+[data-theme="light"] .widget-body a,
+[data-theme="light"] .widget-body .link,
+[data-theme="light"] .widget-body .ellipsis,
+[data-theme="light"] .shortcut-widget-box a,
+[data-theme="light"] .shortcut-widget-box .link,
+[data-theme="light"] .shortcut-widget-box .ellipsis {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+
+/* DEEP SPECIFICITY: Target all children of problematic containers in LIGHT THEME */
+[data-theme="light"] .dropdown-menu *,
+[data-theme="light"] .list-row-head *,
+[data-theme="light"] .breadcrumb *,
+[data-theme="light"] .navbar-nav *,
+[data-theme="light"] .form-layout *,
+[data-theme="light"] .report-grid *,
+[data-theme="light"] .awesomplete * {
+    color: #000000 !important;
+}
+
+[data-theme="light"] .dropdown-item:hover *,
+[data-theme="light"] .dropdown-menu li>a:hover * {
+    color: var(--primary-color) !important;
+}
+
+
+/* Light Theme Dropdown & Menu Visibility Override - ABSOLUTE BLACK */
+[data-theme="light"] .dropdown-menu,
+[data-theme="light"] .dropdown-menu * {
+    color: #000000 !important;
+}
+
+[data-theme="light"] .dropdown-menu {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ultra-specific dropdown item text color for Light Theme */
+[data-theme="light"] .dropdown-item,
+[data-theme="light"] .dropdown-item *,
+[data-theme="light"] .dropdown-item a,
+[data-theme="light"] .dropdown-item span,
+[data-theme="light"] .dropdown-menu li,
+[data-theme="light"] .dropdown-menu li *,
+[data-theme="light"] .dropdown-menu li>a,
+[data-theme="light"] .dropdown-menu li>a *,
+[data-theme="light"] .dropdown-menu .dropdown-item,
+[data-theme="light"] .dropdown-menu .dropdown-item * {
+    color: #000000 !important;
+    background: transparent !important;
+}
+
+
+
+[data-theme="light"] .dropdown-item:hover,
+[data-theme="light"] .dropdown-item:hover *,
+[data-theme="light"] .dropdown-menu li>a:hover,
+[data-theme="light"] .dropdown-menu li>a:hover * {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    color: var(--primary-color) !important;
+}
+
+
+
+
+/* ============================================
+   4. ATMOSPHERIC BACKGROUND
+   ============================================ */
+
+/* Global Background Enforcement */
+html::before {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+    z-index: -1000 !important;
+    pointer-events: none !important;
+}
+
+/* 1. WEBSITE BACKGROUND (White Minimalist) */
+body[data-path]::before,
+body.web-page::before,
+body.login-page::before,
+.login-page::before {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-image: url("/assets/bismillah_ethiobiz/images/ethiobiz_background.png") !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+    z-index: -1000 !important;
+    pointer-events: none !important;
+}
+
+
+/* 2. DESK DARK THEME (Current Atmospheric) */
+html[data-theme="dark"]::before,
+body.dark-theme::before {
+    content: "" !important;
+    background-image: url("/assets/bismillah_ethiobiz/images/ethiobiz_desk_bg.png") !important;
+}
+
+/* 3. DESK LIGHT THEME (User Requested Specific Background) */
+html[data-theme="light"]::before,
+body:not(.dark-theme):not(.web-page):not(.login-page):not([data-path])::before {
+    content: "" !important;
+    background-image: url("/assets/bismillah_ethiobiz/images/ethiobiz_desk_bg_light_1.jpeg") !important;
+}
+
+
+
+body,
+html {
+    background: transparent !important;
+    min-height: 100vh;
+}
+
+body {
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Make desk-container and main sections translucent */
+.desk-container,
+.layout-main,
+.page-container,
+.workspace-page,
+.form-page,
+.content,
+.page-head {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Specific User Request: Nuclear Transparency for Wrapper */
+.layout-main-section-wrapper,
+div.layout-main-section-wrapper,
+.col.layout-main-section-wrapper,
+.layout-main-section,
+.layout-main-section-wrapper>div,
+.layout-main-section-wrapper>.layout-main-section {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.layout-main-section,
+.layout-side-section {
+    background: transparent !important;
+    backdrop-filter: blur(2px) !important;
+    /* Minimal blur */
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Website Pages - Make content areas transparent to show background */
+body[data-path] .web-page-content,
+body[data-path] .section,
+body[data-path] article,
+body[data-path] main,
+body.web-page .web-page-content,
+body.web-page .section,
+body.web-page article,
+body.web-page main {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Main page container with subtle pattern */
+.page-container,
+.frappe-control,
+#page-container {
+    position: relative;
+}
+
+/* .page-container::before removed for nuclear transparency */
+
+/* ============================================
+   5. GLASSMORPHISM CARDS
+   ============================================ */
+
+.frappe-card,
+.widget,
+.form-dashboard-section,
+.frappe-list,
+.page-form,
+.form-column,
+/* .layout-main-section removed */
+.workspace-sidebar-item,
+.desk-sidebar .desk-sidebar-item,
+.modal-content,
+.dropdown-menu,
+.awesomplete>ul,
+.search-dialog .modal-body {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-color) !important;
+    transition: all var(--transition-normal);
+}
+
+/* Ensure Dropdowns are not fixed and stay on top */
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 10050 !important;
+}
+
+.frappe-card:hover,
+.widget:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(var(--primary-rgb), 0.3) !important;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   6. NAVBAR STYLING
+   ============================================ */
+
+.navbar,
+#navbar,
+.frappe-control>.navbar,
+header.navbar {
+    background: var(--navbar-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* === SIDEBAR TOGGLE BUTTONS === */
+/* Hide the toggle button in the page title area (keep only navbar toggle) */
+.page-title .sidebar-toggle-btn,
+.page-head .sidebar-toggle-btn,
+.col-md-12>.sidebar-toggle-btn {
+    display: none !important;
+}
+
+/* Navbar Toggle Button - Dark Mode (default) */
+#ethio-toggle-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+#ethio-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Navbar Toggle Button - Light Mode */
+[data-theme="light"] #ethio-toggle-btn {
+    background: rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    color: #333333 !important;
+}
+
+[data-theme="light"] #ethio-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+
+
+.navbar-brand,
+.navbar .navbar-brand {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    font-size: 1.25rem;
+}
+
+.navbar-nav .nav-link,
+.navbar-nav .dropdown-toggle {
+    color: var(--text-secondary) !important;
+    transition: color var(--transition-fast);
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .dropdown-toggle:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Sidebar Toggle Glass Effect */
+#ethio-toggle-btn {
+    background: var(--glass-bg-light) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-secondary) !important;
+    margin-right: var(--space-sm) !important;
+    padding: 6px 10px !important;
+    transition: all var(--transition-fast) !important;
+    /* Ensure flex alignment if needed */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#ethio-toggle-btn:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.2) !important;
+}
+
+#ethio-toggle-btn svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+/* ============================================
+   7. SIDEBAR STYLING
+   ============================================ */
+
+.desk-sidebar,
+.sidebar,
+/* .layout-side-section removed */
+#sidebar,
+.standard-sidebar {
+    background: var(--sidebar-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+/* EXPLICT DARK MODE SIDEBAR OVERRIDE (High Specificity) */
+html[data-theme="dark"] .desk-sidebar.list-unstyled.sidebar-menu,
+[data-theme="dark"] .desk-sidebar.list-unstyled.sidebar-menu,
+html[data-theme="dark"] .desk-sidebar,
+html[data-theme="dark"] .standard-sidebar,
+[data-theme="dark"] .desk-sidebar,
+[data-theme="dark"] .standard-sidebar,
+[data-theme="dark"] .layout-side-section {
+    background: rgba(14, 26, 26, 0.4) !important;
+    background-color: rgba(14, 26, 26, 0.4) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* EXPLICT LIGHT MODE SIDEBAR OVERRIDE */
+html[data-theme="light"] .desk-sidebar,
+html[data-theme="light"] .standard-sidebar,
+[data-theme="light"] .desk-sidebar,
+[data-theme="light"] .standard-sidebar {
+    background: rgba(255, 255, 255, 0.6) !important;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.desk-sidebar .desk-sidebar-item,
+.sidebar-menu .sidebar-item {
+    border-radius: var(--radius-md) !important;
+    margin: var(--space-xs) var(--space-sm) !important;
+    padding: var(--space-sm) var(--space-md) !important;
+    transition: all var(--transition-fast);
+}
+
+.desk-sidebar .desk-sidebar-item:hover,
+.sidebar-menu .sidebar-item:hover {
+    background: rgba(var(--primary-rgb), 0.15) !important;
+}
+
+.desk-sidebar .desk-sidebar-item.active,
+.sidebar-menu .sidebar-item.active {
+    background: rgba(var(--primary-rgb), 0.2) !important;
+    border-left: 3px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Ensure Page Header and Actions are on top for dropdowns */
+.page-head,
+.page-head-container,
+.page-actions,
+.standard-actions,
+.header-actions {
+    z-index: 1001 !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* ============================================
+   8. BUTTON STYLING
+   ============================================ */
+
+.btn,
+button,
+.btn-primary,
+.btn-default,
+.btn-secondary {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent !important;
+}
+
+.btn-primary,
+.btn-primary-dark,
+.primary-btn,
+[data-action="primary"] {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+}
+
+.btn-primary:hover,
+.btn-primary-dark:hover,
+.primary-btn:hover {
+    background: var(--ethiobiz-turquoise-light) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+}
+
+.btn-secondary,
+.btn-default,
+.btn-light {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(10px) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-secondary:hover,
+.btn-default:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* ============================================
+   9. FORM INPUTS
+   ============================================ */
+
+input,
+textarea,
+select,
+.form-control,
+.input-with-feedback,
+.frappe-control input,
+.frappe-control textarea,
+.frappe-control select {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-primary) !important;
+    padding: var(--space-sm) var(--space-md) !important;
+    transition: all var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2) !important;
+    outline: none !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ============================================
+   10. WORKSPACE SHORTCUTS (Dashboard Cards)
+   ============================================ */
+
+.widget.shortcut-widget-box,
+.shortcut-widget,
+.number-widget,
+.onboarding-widget {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: var(--space-lg) !important;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all var(--transition-normal);
+}
+
+.widget.shortcut-widget-box:hover,
+.shortcut-widget:hover,
+.number-widget:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(var(--primary-rgb), 0.2) !important;
+    border-color: rgba(var(--primary-rgb), 0.4) !important;
+}
+
+.shortcut-widget .widget-title,
+.number-widget .widget-title {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-sm);
+}
+
+.shortcut-widget .widget-label,
+.number-widget h1,
+.number-widget .number {
+    color: var(--text-primary) !important;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+}
+
+/* ============================================
+   11. WORKSPACE HEADER
+   ============================================ */
+
+.workspace-title,
+.page-title,
+h1.ellipsis {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--text-primary) !important;
+    margin-bottom: var(--space-lg);
+}
+
+/* Greeting style (Copilot inspired) */
+.workspace-header::before {
+    content: 'Welcome to';
+    display: block;
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-bottom: var(--space-xs);
+}
+
+/* ============================================
+   12. SCROLLBAR STYLING
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-rgb), 0.3);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-rgb), 0.5);
+}
+
+/* ============================================
+   13. DATA TABLES
+   ============================================ */
+
+.frappe-list,
+.datatable,
+table.table {
+    background: var(--bg-card) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+}
+
+.frappe-list .list-row,
+.datatable tr,
+table.table tr {
+    border-bottom: 1px solid var(--border-color) !important;
+    transition: background var(--transition-fast);
+}
+
+.frappe-list .list-row:hover,
+.datatable tr:hover,
+table.table tbody tr:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+th,
+.frappe-list .list-row-head,
+.datatable th {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================
+   14. MODALS & DIALOGS
+   ============================================ */
+
+.modal-backdrop {
+    background: rgba(14, 26, 26, 0.8) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+.modal-content {
+    background: var(--bg-secondary) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: var(--space-lg) !important;
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--text-primary) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    padding: var(--space-md) var(--space-lg) !important;
+}
+
+/* ============================================
+   15. PILLAR-SPECIFIC COLORS (Dynamic)
+   ============================================ */
+
+/* Tibeb - Soul & Belief (Sacred Gold) */
+body[data-pillar="tibeb"],
+.pillar-tibeb {
+    --primary-color: var(--tibeb-gold);
+    --primary-rgb: 201, 162, 77;
+    --atmospheric-gradient: linear-gradient(135deg, rgba(201, 162, 77, 0.1) 0%, var(--obsidian-black) 100%);
+}
+
+/* Dagu - Mind & Knowledge (Illuminated Indigo) */
+body[data-pillar="dagu"],
+.pillar-dagu {
+    --primary-color: var(--dagu-indigo);
+    --primary-rgb: 46, 58, 140;
+    --atmospheric-gradient: linear-gradient(135deg, rgba(46, 58, 140, 0.1) 0%, var(--obsidian-black) 100%);
+}
+
+/* Magala - Work & Economy (Earth Green) */
+body[data-pillar="magala"],
+.pillar-magala {
+    --primary-color: var(--magala-green);
+    --primary-rgb: 47, 107, 79;
+    --atmospheric-gradient: linear-gradient(135deg, rgba(47, 107, 79, 0.1) 0%, var(--obsidian-black) 100%);
+}
+
+/* Walta - Security & Self (Guardian Blue) */
+body[data-pillar="walta"],
+.pillar-walta {
+    --primary-color: var(--walta-blue);
+    --primary-rgb: 15, 53, 87;
+    --atmospheric-gradient: linear-gradient(135deg, rgba(15, 53, 87, 0.1) 0%, var(--obsidian-black) 100%);
+}
+
+/* Afocha - Community (Warm Unity Red) */
+body[data-pillar="afocha"],
+.pillar-afocha {
+    --primary-color: var(--afocha-red);
+    --primary-rgb: 184, 58, 58;
+    --atmospheric-gradient: linear-gradient(135deg, rgba(184, 58, 58, 0.1) 0%, var(--obsidian-black) 100%);
+}
+
+/* ============================================
+   16. MOBILE RESPONSIVENESS
+   ============================================ */
+
+@media (max-width: 768px) {
+    :root {
+        --glass-blur: 15px;
+        --radius-lg: 12px;
+    }
+
+    .navbar {
+        padding: var(--space-sm) var(--space-md) !important;
+    }
+
+    .workspace-title,
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .widget.shortcut-widget-box,
+    .shortcut-widget {
+        min-height: 100px;
+        padding: var(--space-md) !important;
+    }
+
+    .modal-content {
+        margin: var(--space-md);
+        border-radius: var(--radius-lg) !important;
+    }
+
+    .modal-content {
+        margin: var(--space-md);
+        border-radius: var(--radius-lg) !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .shortcut-widget .widget-label,
+    .number-widget h1 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: var(--space-sm) var(--space-md) !important;
+        font-size: 0.9rem;
+    }
+}
+
+/* UI Polish: Form Input & Select Heights */
+.form-control,
+input.form-control,
+select.form-control,
+.awesomplete input {
+    height: 41px !important;
+    /* Adjusted for better visibility */
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+}
+
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-left: 12px !important;
+    color: var(--text-primary) !important;
+    background-color: var(--bg-input) !important;
+}
+
+/* Fix Select Dropdown Options (Force Visibility) */
+select.form-control option {
+    background-color: var(--obsidian-black) !important;
+    color: white !important;
+    padding: 10px !important;
+}
+
+/* Fix custom dropdown items visibility (Frappe/Bootstrap) */
+.dropdown-menu .dropdown-item,
+.dropdown-menu li>a {
+    color: var(--text-primary) !important;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu li>a:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* ============================================
+   GLOBAL FIXES (Z-Index & Sidebar)
+   ============================================ */
+
+/* Fix Dropdown and Popover Stacking Issues (Global) */
+/* Ensure these are higher than any sidebar or content wrapper */
+.dropdown-menu,
+.popover,
+.awesomplete>ul,
+.modal,
+.modal-backdrop {
+    z-index: 10050 !important;
+}
+
+/* Ensure main section allows overflowing content like dropdowns */
+.layout-main-section,
+.layout-main,
+.page-content,
+.form-section,
+.section-body {
+    overflow: visible !important;
+    z-index: auto !important;
+}
+
+/* Fix stacking context for Form Sections to prevent clipping */
+.form-section {
+    position: relative !important;
+    z-index: 2 !important;
+    /* Higher than the section below it */
+}
+
+.form-section+.form-section {
+    z-index: 1 !important;
+    /* Decreasing z-index for subsequent sections */
+}
+
+/* Specific fix for Link Field Dropdowns (Awesomplete) */
+.awesomplete>ul {
+    z-index: 10100 !important;
+    position: absolute !important;
+    /* Changed from fixed to absolute for better alignment */
+}
+
+/* SIDEBAR COLLAPSE BASE (GLASS ENFORCEMENT) */
+@media (min-width: 769px) {
+
+    /* Hide specific Frappe labels when collapsed via standard framework classes */
+    .desk-sidebar.collapsed .sidebar-item-label,
+    .layout-side-section.collapsed .sidebar-item-label {
+        display: none !important;
+    }
+}
+
+/* END DESKTOP MEDIA QUERY */
+
+/* ============================================
+   FINAL GLOBALS (THE "NUCLEAR" OPTION)
+   ============================================ */
+/* ENSURE THIS IS OUTSIDE ANY MEDIA QUERY */
+
+body .layout-main-section,
+body .layout-side-section,
+body .layout-main-section-wrapper,
+body .page-container,
+body .page-body,
+body .page-content,
+body .layout-main,
+body .widget-group,
+body .standard-sidebar,
+body .desk-sidebar,
+body .workspace-page,
+body .layout-footer,
+body footer,
+div[data-page-route] .layout-main-section {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure children don't inherit weirdness but CARDS do show up */
+body .layout-main-section>div,
+body .layout-main>div,
+body .page-content>div {
+    background-color: transparent !important;
+}
+
+/* Restore Glass Effect explicitly for Cards/Widgets/Groups */
+.frappe-card,
+.widget,
+.form-dashboard-section,
+.dashboard-widget-box,
+.login-content,
+.for-login .page-card {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-color) !important;
+}
+
+/* Fix for potential footer area */
+.layout-footer,
+.page-footer {
+    display: none !important;
+    background: transparent !important;
+    border-top: none !important;
+}
+
+/* ============================================
+   MOBILE SPECIFIC FIXES (SCROLLING & GLASS)
+   ============================================ */
+@media (max-width: 768px) {
+
+    /* Fix background scrolling issue on mobile */
+    body {
+        background-attachment: scroll !important;
+        /* Fixed often breaks on mobile */
+        min-height: 100vh !important;
+        background-size: cover !important;
+    }
+
+    /* Ensure login card is translucent on mobile */
+    .login-content,
+    .for-login .page-card,
+    .page-card {
+        background: rgba(255, 255, 255, 0.1) !important;
+        /* Forced translucency */
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Dark mode specific tweak for mobile login */
+    [data-theme="dark"] .login-content,
+    [data-theme="dark"] .for-login .page-card {
+        background: rgba(0, 0, 0, 0.3) !important;
+    }
+}
+
+
+
+/* MOBILE REFACTOR: State-Driven Visibility (No JS Inline Styles) */
+@media (max-width: 768px) {
+
+    /* 1. Default Hidden State */
+    .desk-sidebar,
+    .layout-side-section,
+    .list-sidebar {
+        display: none !important;
+        /* Hide by default on mobile to prevent flash */
+        width: 0 !important;
+        transition: transform 0.3s ease;
+    }
+
+    /* 2. Active State (driven by body class) */
+    body.ethiobiz-sidebar-open .desk-sidebar,
+    body.ethiobiz-sidebar-open .layout-side-section,
+    body.ethiobiz-sidebar-open .list-sidebar {
+        display: block !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh !important;
+        width: 280px !important;
+        z-index: 10040 !important;
+        /* High Z-index */
+        background: var(--sidebar-bg) !important;
+        backdrop-filter: blur(20px) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+        transform: translateX(0) !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Overlay for clicking off to close */
+    body.ethiobiz-sidebar-open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10039 !important;
+        /* Just behind sidebar */
+        backdrop-filter: blur(2px);
+    }
+}
+
+
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   17. ANIMATIONS & MICRO-INTERACTIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.4);
+    }
+}
+
+.widget,
+.frappe-card {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.widget:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.widget:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.widget:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.widget:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.widget:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+.btn-primary:focus {
+    animation: pulseGlow 2s infinite;
+}
+
+/* ============================================
+   18. PRINT STYLES
+   ============================================ */
+
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .navbar,
+    .sidebar,
+    .desk-sidebar {
+        display: none !important;
+    }
+
+    .frappe-card,
+    .widget {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        background: #ffffff !important;
+    }
+}
+
+/* ============================================
+   19. UTILITY CLASSES
+   ============================================ */
+
+.ethiobiz-glass {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--glass-border-dark) !important;
+    border-radius: var(--radius-lg) !important;
+}
+
+/* Translucent Workspace Cards */
+.widget,
+.frappe-card,
+.form-section,
+.dashboard-widget-box {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ethiobiz-text-primary {
+    color: var(--primary-color) !important;
+}
+
+/* Translucent Workspace Sections (Nuclear) - Updated to 20% */
+.layout-side-section,
+.layout-main-section,
+.workspace-list,
+.form-container,
+.form-section,
+.dashboard-widget-box,
+.widget,
+.frappe-card {
+    background: rgba(var(--obsidian-rgb), 0.2) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Background overlay specifically for form and workspace content */
+.page-container {
+    background: transparent !important;
+}
+
+.ethiobiz-text-gold {
+    color: var(--ethiopian-gold) !important;
+}
+
+.ethiobiz-bg-primary {
+    background: var(--primary-color) !important;
+}
+
+.ethiobiz-rounded-sm {
+    border-radius: var(--radius-sm) !important;
+}
+
+.ethiobiz-rounded-md {
+    border-radius: var(--radius-md) !important;
+}
+
+.ethiobiz-rounded-lg {
+    border-radius: var(--radius-lg) !important;
+}
+
+.ethiobiz-rounded-xl {
+    border-radius: var(--radius-xl) !important;
+}
+
+/* ============================================
+   20. FRAPPE SPECIFIC OVERRIDES
+   ============================================ */
+
+/* Awesomplete autocomplete */
+.awesomplete>ul {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.awesomplete>ul>li:hover,
+.awesomplete>ul>li[aria-selected="true"] {
+    background: rgba(var(--primary-rgb), 0.2) !important;
+}
+
+/* Control labels */
+.frappe-control label,
+.control-label {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--ethiobiz-turquoise-light);
+}
+
+/* Form sections */
+.form-section {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-lg) !important;
+    margin-bottom: var(--space-md) !important;
+}
+
+/* Alerts */
+.alert {
+    border-radius: var(--radius-md) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.alert-info {
+    background: rgba(var(--primary-rgb), 0.15) !important;
+    border-color: rgba(var(--primary-rgb), 0.3) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Page breadcrumbs */
+.breadcrumb {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.breadcrumb-item a {
+    color: var(--text-muted) !important;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary) !important;
+}
+
+/* Indicator colors override */
+.indicator-pill {
+    border-radius: var(--radius-full) !important;
+}
+
+/* ============================================
+   21. LOGIN PAGE STYLING
+   ============================================ */
+
+/* Login page container */
+.login-page,
+body.login-page {
+    background: linear-gradient(135deg, #0E1A1A 0%, #162525 50%, #0E1A1A 100%) !important;
+}
+
+.page-wrapper {
+    background: transparent !important;
+}
+
+/* Login page atmospheric overlay */
+.login-page::before,
+body[data-page="login"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(31, 182, 174, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 70% 70%, rgba(47, 107, 79, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(201, 162, 77, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Login card glassmorphism */
+.login-content,
+.for-login .login-content,
+.page-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* Login header/title */
+.for-login h3,
+.login-content h3,
+.page-card-head h4 {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* LOGIN BUTTON - Force Turquoise */
+.login-content .btn-primary,
+.for-login .btn-primary,
+.page-card .btn-primary,
+.login-content .btn-primary-dark,
+button[data-label="Login"],
+.for-login button[type="submit"],
+.for-login .btn.btn-primary,
+.login-content button.btn-default.btn-block.btn-primary,
+.for-login .btn-block.btn-primary {
+    background: #1FB6AE !important;
+    background-color: #1FB6AE !important;
+    border-color: #1FB6AE !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(31, 182, 174, 0.35) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+
+.login-content .btn-primary:hover,
+.for-login .btn-primary:hover,
+button[data-label="Login"]:hover {
+    background: #4dd4cc !important;
+    background-color: #4dd4cc !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(31, 182, 174, 0.5) !important;
+}
+
+/* Login with email link button */
+.login-content .btn-default,
+.for-login .btn-default,
+.for-login .btn-outline {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 10px !important;
+}
+
+.login-content .btn-default:hover,
+.for-login .btn-default:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #1FB6AE !important;
+}
+
+/* Login input fields */
+.login-content input,
+.for-login input,
+.login-content .form-control {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+}
+
+.login-content input:focus,
+.for-login input:focus {
+    border-color: #1FB6AE !important;
+    box-shadow: 0 0 0 3px rgba(31, 182, 174, 0.25) !important;
+}
+
+.login-content input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Login labels */
+.login-content label,
+.for-login label {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Forgot password link */
+.login-content a,
+.for-login a.text-muted {
+    color: #1FB6AE !important;
+}
+
+/* Login page footer */
+.page-container.page-card .page-footer,
+.login-footer {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Products link in navbar on login */
+.for-login .navbar-nav a,
+.login-page .navbar-nav a {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ============================================
+   22. ADDITIONAL BUTTON FORCE OVERRIDES
+   ============================================ */
+
+/* Force ALL primary buttons to turquoise */
+.btn.btn-primary,
+.btn-primary-sm,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary,
+.modal-footer .btn-primary,
+.form-footer .btn-primary,
+.page-actions .btn-primary,
+.primary-btn,
+.action-btn.btn-primary {
+    background: #1FB6AE !important;
+    background-color: #1FB6AE !important;
+    border-color: #1FB6AE !important;
+    color: #ffffff !important;
+}
+
+/* Override any inline orange/warning styles */
+.btn[style*="background"],
+.btn[style*="background-color"] {
+    background: #1FB6AE !important;
+    background-color: #1FB6AE !important;
+}
+
+/* ==========================================================================
+   LOGIN PAGE CUSTOMIZATION
+   ========================================================================== */
+
+body.login-page {
+    background-image: url("/assets/bismillah_ethiobiz/images/ethiopian_login_bg_ethiobiz.png") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.login-page .for-login {
+    background: rgba(var(--obsidian-rgb), 0.4) !important;
+    backdrop-filter: blur(25px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 40px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    max-width: 450px !important;
+    width: 100% !important;
+}
+
+body.login-page .login-content {
+    background: transparent !important;
+}
+
+body.login-page .form-signin {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+body.login-page .page-card-head {
+    margin-bottom: 30px !important;
+}
+
+body.login-page .app-logo {
+    width: 120px !important;
+    margin-bottom: 15px !important;
+}
+
+/* ============================================
+   END OF ETHIOBIZ THEME
+   ============================================ */
+
+/* ============================================
+   23. UI FIXES
+   ============================================ */
+
+/* Standard Sidebar Item Fixes */
+.standard-sidebar-item {
+    transform: none !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+
+/* ============================================
+   23. UI FIXES & UNIVERSAL GLASSMOPRHISM
+   ============================================ */
+
+/* A. FIXED BACKGROUND ENFORCEMENT */
+body {
+    background-attachment: fixed !important;
+}
+
+/* B. STRUCTURAL TRANSPARENCY (Invisible Containers) */
+.layout-main-section,
+.layout-main-section-wrapper,
+.page-container,
+.page-body,
+.page-content,
+.page-head,
+.page-head-container,
+.page-actions,
+.layout-main,
+.widget-group,
+.workspace-page,
+.desk-container,
+.desk-sidebar,
+.list-view,
+.list-body,
+.form-view,
+.report-view,
+.dashboard,
+.dashboard-widget-box,
+.dashboard-section,
+div[data-page-route],
+div[data-page-route] .layout-main-section,
+.layout-main-section>div,
+.layout-main>div,
+.page-content>div,
+.standard-actions,
+.standard-filter-section,
+.kanban-column,
+.kanban-column.list-col {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* B2. STRUCTURAL FORM WRAPPERS (Fully Transparent to prevent darkening) */
+.form-layout,
+.form-column,
+.form-group,
+.frappe-control,
+.control-input-wrapper,
+.form-layout-container,
+.form-page-container,
+.form-inner-container,
+.section-body {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* C. UNIVERSAL GLASS CARDS (20% Opacity) */
+/* Targets every UI element that should be translucent glass */
+.frappe-card,
+.widget,
+.form-dashboard-section,
+.dashboard-widget-box,
+input.form-control,
+select.form-control,
+textarea,
+.input-with-feedback,
+.form-tabs,
+.tab-content,
+.form-section,
+.section-head,
+.list-row,
+.grid-row,
+.grid-footer,
+.grid-header,
+.standard-sidebar-item,
+.sidebar-item-container,
+.modal-content,
+.dropdown-menu,
+.popover,
+.toast,
+.alert,
+.awesomplete>ul,
+.list-row-head,
+.desk-sidebar,
+.standard-sidebar,
+.layout-side-section,
+.navbar {
+    background: rgba(255, 255, 255, 0.1) !important;
+    /* System Default Tint (Light) */
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+/* FIX: Ensure Dropdowns (like Allocated To) fit their container */
+.awesomplete>ul {
+    position: absolute !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    top: 100% !important;
+    /* Below input */
+    margin-top: 5px !important;
+    z-index: 1050 !important;
+    /* High Z-index */
+}
+
+/* DARK MODE: 20% Opacity (80% Translucent) as requested */
+[data-theme="dark"] .frappe-card,
+[data-theme="dark"] .widget,
+[data-theme="dark"] .form-dashboard-section,
+[data-theme="dark"] .dashboard-widget-box,
+[data-theme="dark"] input.form-control,
+[data-theme="dark"] select.form-control,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .input-with-feedback,
+[data-theme="dark"] .form-tabs,
+[data-theme="dark"] .tab-content,
+[data-theme="dark"] .form-section,
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .list-row,
+[data-theme="dark"] .grid-row,
+[data-theme="dark"] .grid-footer,
+[data-theme="dark"] .grid-header,
+[data-theme="dark"] .standard-sidebar-item,
+[data-theme="dark"] .sidebar-item-container,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .popover,
+[data-theme="dark"] .toast,
+[data-theme="dark"] .alert,
+[data-theme="dark"] .awesomplete>ul,
+[data-theme="dark"] .list-row-head,
+[data-theme="dark"] .desk-sidebar,
+[data-theme="dark"] .standard-sidebar,
+[data-theme="dark"] .layout-side-section,
+[data-theme="dark"] .navbar {
+    background: rgba(var(--obsidian-rgb), 0.2) !important;
+    /* Exactly 20% Opacity Tint */
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Kanban Card Specific Fix */
+.kanban-card,
+.kanban-card-body,
+.kanban-card.frappe-card,
+[data-theme="dark"] .kanban-card,
+[data-theme="dark"] .kanban-card-body {
+    background: rgba(var(--obsidian-rgb), 0.2) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+/* D. CHECKBOX STYLING ENHANCEMENT */
+/* Unchecked State: Glass frosted box */
+input[type="checkbox"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    /* Thick border for visibility */
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    position: relative !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+/* Checked State: System Turquoise Background */
+input[type="checkbox"]:checked {
+    background: var(--ethiobiz-turquoise) !important;
+    border-color: var(--ethiobiz-turquoise) !important;
+}
+
+/* Checkmark Icon (White) */
+input[type="checkbox"]:checked::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 6px !important;
+    top: 2px !important;
+    width: 6px !important;
+    height: 11px !important;
+    border: solid white !important;
+    border-width: 0 2px 2px 0 !important;
+    transform: rotate(45deg) !important;
+}
+
+/* Hover effect */
+input[type="checkbox"]:hover {
+    border-color: var(--ethiobiz-turquoise) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* E. MOBILE SPECIFIC REFINEMENT */
+@media (max-width: 768px) {
+    body {
+        /* Force Fixed background on mobile as well */
+        background-attachment: fixed !important;
+        background-size: cover !important;
+    }
+
+    /* Force mobile sidebars to use the glass tint */
+    .desk-sidebar,
+    .layout-side-section,
+    body.ethiobiz-sidebar-open .desk-sidebar {
+        background: rgba(var(--obsidian-rgb), 0.2) !important;
+        backdrop-filter: blur(15px) !important;
+    }
+}
+
+/* Standard Sidebar Item Fix */
+.standard-sidebar-item {
+    transform: none !important;
+    margin: 0 !important;
+}
+
+/* ============================================
+   24. FINAL POLISH FIXES (SIDEBAR & DROPDOWNS)
+   ============================================ */
+
+/* 1. Sidebar Double Background Fix */
+/* We remove the background from the outer wrapper so only the inner container/button has it */
+.standard-sidebar-item {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Dropdown Z-Index & Visibility Override */
+/* Ensure dropdowns fly out above everything else */
+.awesomplete>ul {
+    z-index: 99999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+    /* Extra shadow for lift */
+}
+
+/* 3. Force Overflow Visible on ALL Form Containers */
+/* This is critical to let the dropdown overflow its container */
+.form-section,
+.section-body,
+.form-column,
+.form-layout-row,
+.form-grid,
+.grid-body,
+.layout-main-section,
+.frappe-control,
+.form-group {
+    overflow: visible !important;
+}
+
+/* Ensure the stacking context helps rather than looking weird */
+/* Ensure the stacking context helps rather than looking weird */
+.form-section {
+    z-index: auto !important;
+    /* Let natural DOM order handle it mainly, or use the + .form-section trick if needed */
+}
+
+/* ============================================
+   25. GLOBAL STACKING CONTEXT FIX (REVERSE ORDER)
+   ============================================ */
+/* 
+   Problem: backdrop-filter creates a stacking context. Sibling sections follow DOM order (later covers earlier).
+   Fix: Force EARLIER sections to have HIGHER z-index than LATER sections.
+*/
+
+.form-section {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* Reverse Stacking Order for up to 20 sections */
+.form-section:nth-child(1) {
+    z-index: 30 !important;
+}
+
+.form-section:nth-child(2) {
+    z-index: 29 !important;
+}
+
+.form-section:nth-child(3) {
+    z-index: 28 !important;
+}
+
+.form-section:nth-child(4) {
+    z-index: 27 !important;
+}
+
+.form-section:nth-child(5) {
+    z-index: 26 !important;
+}
+
+.form-section:nth-child(6) {
+    z-index: 25 !important;
+}
+
+.form-section:nth-child(7) {
+    z-index: 24 !important;
+}
+
+.form-section:nth-child(8) {
+    z-index: 23 !important;
+}
+
+.form-section:nth-child(9) {
+    z-index: 22 !important;
+}
+
+.form-section:nth-child(10) {
+    z-index: 21 !important;
+}
+
+.form-section:nth-child(11) {
+    z-index: 20 !important;
+}
+
+.form-section:nth-child(12) {
+    z-index: 19 !important;
+}
+
+.form-section:nth-child(13) {
+    z-index: 18 !important;
+}
+
+.form-section:nth-child(14) {
+    z-index: 17 !important;
+}
+
+.form-section:nth-child(15) {
+    z-index: 16 !important;
+}
+
+.form-section:nth-child(16) {
+    z-index: 15 !important;
+}
+
+.form-section:nth-child(17) {
+    z-index: 14 !important;
+}
+
+.form-section:nth-child(18) {
+    z-index: 13 !important;
+}
+
+.form-section:nth-child(19) {
+    z-index: 12 !important;
+}
+
+.form-section:nth-child(20) {
+    z-index: 11 !important;
+}
+
+/* ============================================
+   26. DROPDOWN GLASSMORPHISM POLISH
+   ============================================ */
+/* Ensure the list itself is purely glass */
+.awesomplete>ul {
+    /* Slightly more transparent to allow blur to show through (75% opacity) */
+    background: rgba(18, 18, 18, 0.75) !important;
+
+    /* Stronger Blur */
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+
+    /* Stack cleaning */
+    transform: translateZ(0) !important;
+    /* Force GPU layer */
+
+    /* Borders & Depth */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 5px !important;
+}
+
+/* Ensure items are transparent until hovered */
+[data-theme="dark"] .awesomplete>ul>li,
+.awesomplete>ul>li {
+    background: transparent !important;
+    color: #f0f0f0 !important;
+    /* Bright text for dark mode default */
+    border-radius: var(--radius-sm) !important;
+    transition: background 0.2s ease !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Light Mode Overrides for Awesomplete */
+[data-theme="light"] .awesomplete>ul {
+    background: rgba(248, 246, 242, 0.95) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .awesomplete>ul>li {
+    color: #000000 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .awesomplete>ul>li:hover,
+[data-theme="light"] .awesomplete>ul>li[aria-selected="true"] {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Hover/Selected state */
+[data-theme="dark"] .awesomplete>ul>li:hover,
+[data-theme="dark"] .awesomplete>ul>li[aria-selected="true"] {
+    background: rgba(var(--primary-rgb), 0.6) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* ============================================
+   26B. DROPDOWN SPECIFICITY FIX (DARK MODE)
+   ============================================ */
+/* We must target [data-theme="dark"] to override the default theme rules */
+[data-theme="dark"] .awesomplete>ul,
+.awesomplete>ul {
+    /* Hardcoded Dark Glass - 80% Opacity to ensure blur is visible but text is readable */
+    background: rgba(20, 20, 20, 0.80) !important;
+
+    /* Maximum Blur to fix "transparent but not blurred" issue */
+    backdrop-filter: blur(50px) !important;
+    -webkit-backdrop-filter: blur(50px) !important;
+
+    /* Ensure it pops out */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ============================================
+   27. WORKSPACE WIDGET CONTEXT MENU FIX
+   ============================================ */
+/* FIX STACKING CONTEXT: When hovering a widget, bring it to the front
+   so its overflowing menu sits ON TOP of subsequent widgets. */
+.widget:hover,
+.grid-item:hover,
+.widget-key:hover,
+.dashboard-widget-box:hover {
+    z-index: 1000 !important;
+    position: relative !important;
+    /* Ensure z-index applies */
+}
+
+/* Ensure all widget containers allow overflow so menus can fly out */
+.widget,
+.grid-item,
+.widget-group,
+.widget-control,
+.widget-head,
+.widget-body,
+.widget-content {
+    overflow: visible !important;
+}
+
+/* Ensure the context menu itself is on top of everything */
+.widget-options .dropdown-menu,
+.widget-head .dropdown-menu {
+    z-index: 100000 !important;
+    position: absolute !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+
+    /* Apply Glassmorphism to this menu too for consistency */
+    background: rgba(20, 20, 20, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+/* Fix dropdown item styling */
+.widget-options .dropdown-menu li>a,
+.widget-head .dropdown-menu li>a {
+    color: #e0e0e0 !important;
+}
+
+.widget-options .dropdown-menu li>a:hover,
+.widget-head .dropdown-menu li>a:hover {
+    background: rgba(var(--primary-rgb), 0.5) !important;
+    color: white !important;
+}
+
+/* ============================================
+   WORKSPACE SIDEBAR MENU Z-INDEX FIX
+   ============================================ */
+
+/* Ensure sidebar items and their containers allow overflow */
+.sidebar-item,
+.sidebar-menu,
+.workspace-sidebar,
+.workspace-sidebar-item {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* When dropdown is shown, boost the parent's z-index */
+.sidebar-item.show,
+.sidebar-item .show,
+.workspace-sidebar-item.show,
+.sidebar-item:has(.dropdown-menu.show) {
+    z-index: 100001 !important;
+    position: relative !important;
+}
+
+/* Ensure sidebar dropdown menus appear on top */
+.sidebar-item .dropdown-menu,
+.workspace-sidebar .dropdown-menu,
+.workspace-sidebar-item .dropdown-menu {
+    z-index: 100002 !important;
+    position: absolute !important;
+}
+
+/* ============================================
+   COMPREHENSIVE WORKSPACE DROPDOWN Z-INDEX FIX
+   ============================================ */
+
+/* CRITICAL: Force all dropdown menus to appear on top of EVERYTHING */
+/* IMPROVED: Use absolute for better coordinate alignment, but keep Z-Index boost */
+.dropdown-menu,
+.widget-options .dropdown-menu,
+.widget-head .dropdown-menu,
+.sidebar-item .dropdown-menu,
+.workspace-sidebar .dropdown-menu,
+.workspace-sidebar-item .dropdown-menu,
+.grid-dropdown .dropdown-menu,
+[data-toggle="dropdown"]+.dropdown-menu {
+    z-index: 999999 !important;
+    position: absolute !important;
+}
+
+/* Ensure parent containers don't create new stacking contexts */
+.widget,
+.grid-item,
+.widget-group,
+.widget-control,
+.widget-head,
+.widget-body,
+.widget-content,
+.sidebar-item,
+.sidebar-menu,
+.workspace-sidebar,
+.workspace-sidebar-item,
+.shortcut-widget-box {
+    overflow: visible !important;
+    /* Don't set z-index here to avoid creating stacking context */
+}
+
+/* Only boost z-index when dropdown is actually shown */
+.widget:has(.dropdown-menu.show),
+.grid-item:has(.dropdown-menu.show),
+.sidebar-item:has(.dropdown-menu.show),
+.workspace-sidebar-item:has(.dropdown-menu.show) {
+    z-index: 999998 !important;
+    position: relative !important;
+}
+
+/* Alternative approach for browsers that don't support :has() */
+.widget.show,
+.grid-item.show,
+.sidebar-item.show,
+.workspace-sidebar-item.show,
+.dropdown.show {
+    z-index: 999998 !important;
+    position: relative !important;
+}
+
+[data-toggle="dropdown"] {
+    position: relative !important;
+    z-index: 999997 !important;
+}
+
+/* ============================================
+   EDITOR.JS MOBILE & DAGU THEME FIXES
+   ============================================ */
+
+/* 1. Global Editor.js Plus Button Style (Visual Confirmation) */
+.ce-toolbar__plus,
+.ce-toolbar__plus:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 2. Prevent Editor.js Toolbar from jumping/hiding on mobile */
+@media (max-width: 768px) {
+    .ce-toolbar {
+        z-index: 1000 !important;
+    }
+
+    .ce-toolbar__content {
+        max-width: none !important;
+    }
+
+    /* Fix jumpiness in content area */
+    .ce-block {
+        width: 100% !important;
+    }
+
+    /* Ensure the toolbar is not hidden by layout overflows */
+    .ce-toolbar__actions {
+        right: 0 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-radius: 4px !important;
+        padding: 4px !important;
+    }
+}
+
+/* 2. Brand Isolation Transparency Controls */
+#app,
+.desk-container,
+.layout-main,
+.page-container,
+.workspace-page,
+.form-page,
+.content,
+#page-container,
+.layout-main-section-wrapper,
+.layout-main-section,
+.dagu-layout,
+.lms-content-wrapper,
+.course-view,
+.lesson-view {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Glassmorphism for actual content cards */
+.frappe-card,
+.widget,
+.lms-card,
+.dagu-page-card {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-color) !important;
+}
+
+/* ============================================
+   UI/UX REFINEMENT V2 (AGGRESSIVE FIXES)
+   ============================================ */
+
+/* 1. SIDEBAR STABILITY & COLLAPSE VISUALS */
+/* Fix the toggle row height rigidly to prevent jumping */
+.navbar-header,
+.navbar-header .container,
+.navbar-header .navbar-toggle {
+    height: 60px !important;
+    max-height: 60px !important;
+    overflow: hidden !important;
+}
+
+.toggle-sidebar {
+    height: 40px !important;
+    width: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 10px !important;
+    /* Center vertically in 60px header */
+}
+
+/* Reduce toolbar inputs to match toggle */
+.form-control.input-xs,
+.btn.btn-xs {
+    height: 28px !important;
+    font-size: 12px !important;
+}
+
+/* 2. WORKSPACE TRANSPARENCY (DOUBLE CONTAINER FIX) */
+/* Nuke backgrounds on all sidebar item layers */
+.workspace-sidebar,
+.workspace-sidebar .standard-sidebar-item,
+.workspace-sidebar .sidebar-item-control,
+.workspace-sidebar .sidebar-section {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Only apply background on hover/selected to the OUTERMOST container */
+.workspace-sidebar .standard-sidebar-item.selected,
+.workspace-sidebar .standard-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--border-radius) !important;
+}
+
+/* Ensure Edit button is visible */
+.sidebar-item-control .edit-sidebar-item,
+.standard-sidebar-item:hover .edit-sidebar-item {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    color: var(--text-color) !important;
+    z-index: 99 !important;
+}
+
+/* 3. FORM & LAYOUT (REVERTED TO STANDARD) */
+.page-form {
+    position: relative !important;
+    display: block !important;
+    clear: both !important;
+}
+
+/* SIDEBAR FLOATING OVERLAY V17 - DESKTOP & MOBILE */
+.layout-side-section {
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: calc(100vh - 60px) !important;
+    z-index: 2000 !important;
+    /* Floating above content */
+    width: 260px !important;
+
+    /* Nuclear Visibility & Flex for Items */
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    /* Premium Glassmorphism */
+    background: rgba(30, 30, 30, 0.7) !important;
+    backdrop-filter: blur(25px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5) !important;
+
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    transform: translateX(0) !important;
+}
+
+/* Ensure Mobile Content is Visible (Override Bootstrap hidden-xs) */
+.layout-side-section .list-sidebar,
+.layout-side-section .sidebar-menu,
+.layout-side-section .sidebar-items {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* 3. FORCED COLLAPSE STATE */
+body.sidebar-collapsed .layout-side-section {
+    transform: translateX(-280px) !important;
+    /* Move fully off-screen */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: flex !important;
+}
+
+
+
+
+/* WALTA NUCLEAR BRANDING OVERRIDE */
+
+/* Ensure controls don't overlap tabs */
+.page-controls,
+.form-sidebar {
+    z-index: 100 !important;
+}
+
+/* 4. INPUT ICONS */
+.control-input {
+    position: relative !important;
+}
+
+.control-input input+.icon,
+.control-input input+.fa {
+    position: absolute !important;
+    left: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+.control-input input[data-format="date"],
+.control-input input[data-format="time"],
+.control-input .search-icon-input,
+.control-input input:has(+ .icon) {
+    padding-left: 32px !important;
+}
+
+/* 5. LIGHT MODE KANBAN FIX */
+[data-theme="light"] .kanban-column {
+    background-color: #f7f7f7 !important;
+    border: 1px solid #e2e2e2 !important;
+}
+
+[data-theme="light"] .kanban-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e2e2 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    color: #000 !important;
+}
+
+[data-theme="light"] .kanban-card .kanban-card-title {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+/* ============================================
+   NUCLEAR SIDEBAR OVERRIDE - ABSOLUTE PRIORITY
+   Added after all other styles to guarantee precedence
+   ============================================ */
+
+/* Target the EXACT classes Frappe uses for sidebar */
+html[data-theme="dark"] body .layout-side-section .standard-sidebar .desk-sidebar.list-unstyled.sidebar-menu,
+html[data-theme="dark"] body .layout-side-section .desk-sidebar.list-unstyled.sidebar-menu,
+html[data-theme="dark"] .layout-side-section .desk-sidebar.list-unstyled.sidebar-menu,
+html[data-theme="dark"] .desk-sidebar.list-unstyled.sidebar-menu,
+[data-theme="dark"] .desk-sidebar.list-unstyled.sidebar-menu,
+html[data-theme="dark"] .desk-sidebar.sidebar-menu.list-unstyled,
+.desk-sidebar.list-unstyled.sidebar-menu {
+    background: rgba(14, 26, 26, 0.85) !important;
+    background-color: rgba(14, 26, 26, 0.85) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+}
+
+/* Also target the sidebar items for proper text visibility */
+html[data-theme="dark"] .desk-sidebar .desk-sidebar-item,
+[data-theme="dark"] .desk-sidebar .desk-sidebar-item,
+html[data-theme="dark"] .sidebar-menu .item-anchor,
+[data-theme="dark"] .sidebar-menu .item-anchor {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Standard sidebar container */
+html[data-theme="dark"] .standard-sidebar,
+[data-theme="dark"] .standard-sidebar,
+html[data-theme="dark"] .layout-side-section,
+[data-theme="dark"] .layout-side-section {
+    background: rgba(14, 26, 26, 0.7) !important;
+    background-color: rgba(14, 26, 26, 0.7) !important;
+}
+
+/* END NUCLEAR OVERRIDE */
+
+/* ============================================
+   28. HEADER REDESIGN (VERTICAL LAYOUT & GLASS TITLE)
+   ============================================ */
+
+/* 1. Page Head Container (Overflow Fix for Dropdowns) */
+.page-head {
+    height: auto !important;
+    overflow: visible !important;
+    z-index: 101 !important;
+}
+
+/* 2. Vertical Stacking of Header Content */
+.page-head-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    display: flex !important;
+    /* Unset row behavior */
+    flex-wrap: nowrap !important;
+}
+
+/* 2b. Force full width on the flex item wrapper if it exists (Bootstrap col) */
+.page-head-content>div,
+.page-head-content>.container,
+.page-head-content>.row {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+}
+
+/* 3. Full Width Glass Title - AGGRESSIVE OVERRIDE */
+.page-title,
+.page-head-content .page-title {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 12px !important;
+    margin-right: 0 !important;
+
+    /* Reset Bootstrap Grid columns */
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+
+    /* Glass Effect */
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 8px !important;
+    padding: 10px 15px !important;
+
+    /* Ensure title text expands */
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Dynamic Title Truncation with Visible Status - FLEXBOX FINAL FIX */
+/* 1. Constrain all parents to prevent overflow */
+.page-title .title-area,
+.page-title .title-area>div,
+.page-title .title-area .flex {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    /* CRITICAL */
+}
+
+/* 2. Title Text: Truncate and grow */
+.page-title h1,
+.page-title h2,
+.page-title h3,
+.page-title .title-text {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    /* CRITICAL */
+    width: auto !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: normal !important;
+    line-height: 1.4 !important;
+    height: auto !important;
+    display: block !important;
+    margin-right: 10px !important;
+}
+
+/* 3. Status Pill: Fixed width, do not shrink, stay right */
+.page-title .indicator-pill {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    /* Push to right just in case */
+    white-space: nowrap !important;
+    display: inline-flex !important;
+}
+
+/* 4. Fix Height & Overlap Issues - CRITICAL */
+.page-head,
+.page-head-content {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* 5. Separate Actions Row */
+.page-actions {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    flex-wrap: wrap !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+}
+
+/* 6. Push Content Down */
+.layout-main-section-wrapper,
+.page-body {
+    margin-top: 20px !important;
+    padding-top: 10px !important;
+}
+
+/* 7. Ensure Filters don't overlap */
+.list-filters {
+    margin-top: 15px !important;
+    position: relative !important;
+    z-index: 9 !important;
+}
+
+/* Dark Mode Glass Title Adjustment */
+[data-theme="dark"] .page-title {
+    background: rgba(20, 20, 20, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Force actions to new line (Safe backup) */
+.page-title+.page-actions {
+    clear: both !important;
+}
+
+/* 8. Hide Specific User Menu Items */
+.dropdown-menu a.dropdown-item[href="/app"],
+.dropdown-menu a.dropdown-item[href="/apps"] {
+    display: none !important;
+}
+
+/* 9. Hide Dagu LMS "Getting Started" Right Panel */
+/* Broad selector for reliability */
+div[class*="bg-surface-modal"][class*="fixed"][class*="right-0"] {
+    display: none !important;
+}
+
+/* Backup specific selector */
+.fixed.z-50.right-0.w-80.bg-surface-modal {
+    display: none !important;
+}
+
+/* 10. Hide Dagu Sidebar Widget */
+.sidebar-container div.p-3.rounded-lg.bg-surface-white {
+    display: none !important;
+}
+
+/* Debug verification marker */
+body {
+    --ethiobiz-theme-loaded: "true";
+}
+
+
+/* BISMALLAH v3.5.0 - Helpdesk Cleanup */
+
+/* 1. Hide "Getting Started" Onboarding */
+div[class*="onboarding"],
+div[id*="onboard"],
+.onboarding-modal,
+.help-modal,
+.fixed.z-50.right-0.w-80.bg-surface-modal, 
+div[data-testid="onboarding-panel"],
+div:contains("Getting Started") {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* 2. Hide "Getting Started" Sidebar Widget */
+.bg-surface-modal.shadow-sm.rounded-lg.py-2\.5.px-3 {
+    display: none !important;
+}
+
+/* 3. Disable/Hide "Helpdesk" Sidebar Menu */
+[data-name="Helpdesk"],
+[data-name="helpdesk"],
+a[href="/app/helpdesk"],
+a[href="/app/support"] {
+    display: none !important;
+}
+
+
+/* BISMALLAH v3.5.1 - Corrected Hiding Rule */
+div[class*="onboarding"],
+div[id*="onboard"],
+.onboarding-modal,
+.help-modal,
+.fixed.z-50.right-0.w-80.bg-surface-modal, 
+div[data-testid="onboarding-panel"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}

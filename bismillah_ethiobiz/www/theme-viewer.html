@@ -1,0 +1,395 @@
+<!--
+EthioBiz Theme Viewer
+Bismillah Ar-Rahman Ar-Rahim
+
+A readonly page showing all applied theme customizations.
+Simple HTML without Jinja extends to avoid template errors.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EthioBiz Theme Viewer</title>
+    <link rel="icon" href="/assets/bismillah_ethiobiz/images/ethiobiz_logo.png">
+    <style>
+        /* Reset and Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0E1A1A 0%, #162525 50%, #0E1A1A 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            padding: 40px 20px;
+        }
+
+        /* Atmospheric Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(31, 182, 174, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(47, 107, 79, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(201, 162, 77, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .theme-viewer {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .theme-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .theme-header img {
+            width: 100px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 20px rgba(31, 182, 174, 0.3));
+        }
+
+        .theme-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1FB6AE;
+            margin-bottom: 8px;
+        }
+
+        .theme-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .readonly-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(201, 162, 77, 0.15);
+            border: 1px solid rgba(201, 162, 77, 0.3);
+            color: #C9A24D;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        /* Sections */
+        .section {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #C9A24D;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title span {
+            font-size: 1.5rem;
+        }
+
+        /* Color Grid */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .color-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .color-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .color-swatch {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .color-hex {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Pillar Grid */
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+        }
+
+        .pillar-card {
+            border-radius: 18px;
+            padding: 25px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pillar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .pillar-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .pillar-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .pillar-domain {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .pillar-tagline {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.8rem;
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: rgba(31, 182, 174, 0.08);
+            border: 1px solid rgba(31, 182, 174, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .feature-icon {
+            color: #1FB6AE;
+            font-size: 1.3rem;
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-note p {
+            margin-bottom: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1FB6AE;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .theme-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .pillar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-viewer">
+        <!-- Header -->
+        <div class="theme-header">
+            <img src="/assets/bismillah_ethiobiz/images/ethiobiz_logo.png" alt="EthioBiz Logo">
+            <h1>EthioBiz Theme</h1>
+            <p>Uniting Humanity Through Shared Progress</p>
+            <div class="readonly-badge">
+                <span>&#128274;</span>
+                <span>Static Deployment - All customizations are pre-configured</span>
+            </div>
+        </div>
+
+        <!-- Applied Customizations -->
+        <div class="section">
+            <h2 class="section-title">
+                <span>&#10024;</span> Applied Customizations
+            </h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <span class="feature-icon">&#127912;</span>
+                    <span>Glassmorphism Dark Mode UI</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">&#129419;</span>
+                    <span>EthioBiz Logo & Branding</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">&#127919;</span>
+                    <span>Five Pillar Color System</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">&#128241;</span>
+                    <span>Mobile-Responsive Design</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">&#127769;</span>
+                    <span>Dark/Light Mode Support</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">&#9889;</span>
+                    <span>Route-Based Color Switching</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="section">
+            <h2 class="section-title">
+                <span>&#127912;</span> Core Color Palette
+            </h2>
+            <div class="color-grid">
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #1FB6AE;"></div>
+                    <div class="color-name">EthioBiz Turquoise</div>
+                    <div class="color-hex">#1FB6AE</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #0E1A1A;"></div>
+                    <div class="color-name">Obsidian Black</div>
+                    <div class="color-hex">#0E1A1A</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #F8F6F2;"></div>
+                    <div class="color-name">Sacred Ivory</div>
+                    <div class="color-hex">#F8F6F2</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #C9A24D;"></div>
+                    <div class="color-name">Ethiopian Gold</div>
+                    <div class="color-hex">#C9A24D</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Five Pillars -->
+        <div class="section">
+            <h2 class="section-title">
+                <span>&#127963;</span> The Five Pillars
+            </h2>
+            <div class="pillar-grid">
+                <div class="pillar-card"
+                    style="background: linear-gradient(135deg, rgba(201,162,77,0.25) 0%, rgba(14,26,26,0.95) 100%);">
+                    <div class="pillar-icon">&#9728;</div>
+                    <div class="pillar-name">Tibeb</div>
+                    <div class="pillar-domain">Soul & Belief</div>
+                    <div class="pillar-tagline">"One Source. Many Rivers."</div>
+                </div>
+                <div class="pillar-card"
+                    style="background: linear-gradient(135deg, rgba(46,58,140,0.25) 0%, rgba(14,26,26,0.95) 100%);">
+                    <div class="pillar-icon">&#128218;</div>
+                    <div class="pillar-name">Dagu</div>
+                    <div class="pillar-domain">Mind & Knowledge</div>
+                    <div class="pillar-tagline">"Learning That Illuminates Life."</div>
+                </div>
+                <div class="pillar-card"
+                    style="background: linear-gradient(135deg, rgba(47,107,79,0.25) 0%, rgba(14,26,26,0.95) 100%);">
+                    <div class="pillar-icon">&#127793;</div>
+                    <div class="pillar-name">Magala</div>
+                    <div class="pillar-domain">Work & Economy</div>
+                    <div class="pillar-tagline">"From Seed to Success."</div>
+                </div>
+                <div class="pillar-card"
+                    style="background: linear-gradient(135deg, rgba(15,53,87,0.25) 0%, rgba(14,26,26,0.95) 100%);">
+                    <div class="pillar-icon">&#128737;</div>
+                    <div class="pillar-name">Walta</div>
+                    <div class="pillar-domain">Security & Self</div>
+                    <div class="pillar-tagline">"Securing the Self."</div>
+                </div>
+                <div class="pillar-card"
+                    style="background: linear-gradient(135deg, rgba(184,58,58,0.25) 0%, rgba(14,26,26,0.95) 100%);">
+                    <div class="pillar-icon">&#10084;</div>
+                    <div class="pillar-name">Afocha</div>
+                    <div class="pillar-domain">Community</div>
+                    <div class="pillar-tagline">"One Human Family."</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <p>&copy; 2025 EthioBiz | Powered by Biz Technology Solutions</p>
+            <p><small>Rooted in Ethiopia. Built for Humanity.</small></p>
+            <a href="/app" class="back-link">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+
+</html>
