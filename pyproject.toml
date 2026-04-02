@@ -1,0 +1,19 @@
+[project]
+name = "bismillah_ethiobiz"
+authors = [
+    { name = "Biz Technology Solutions", email = "biz.technology@outlook.com" }
+]
+description = "Beautiful, static branding theme for EthioBiz ERPNext with glassmorphism design"
+requires-python = ">=3.10"
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["bismillah_ethiobiz*"]
+exclude = ["*.tests*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "bismillah_ethiobiz.__version__"}
+dependencies = {file = ["requirements.txt"]}
