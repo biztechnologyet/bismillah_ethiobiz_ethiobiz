@@ -2740,28 +2740,96 @@ div[data-testid="onboarding-panel"] {
    9.5 WEB FORMS / PUBLIC FORMS SPECIFIC
    ============================================ */
 
-/* Fix invisible labels on public web forms by giving them the theme's glassmorphism background */
+/*
+ * Public web forms (e.g. /trial/new) render on the LIGHT website context.
+ * Labels must use DARK text on a high-contrast opaque background
+ * so they are always readable against the light frosted form wrapper.
+ */
+
+/* --- Web Form Labels: Dark text, solid opaque pill --- */
 .web-form-wrapper .control-label,
-.frappe-control .control-label,
-.form-group > label {
-    color: var(--text-primary) !important;
-    background: var(--bg-card) !important;
-    backdrop-filter: blur(var(--glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
-    border: 1px solid var(--border-color) !important;
-    padding: 4px 10px !important;
+.web-form-wrapper .form-group > label,
+.web-form-wrapper .frappe-control .control-label,
+body[data-path] .web-form-wrapper .control-label,
+body.web-page .web-form-wrapper .control-label {
+    color: #1a1a2e !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    padding: 5px 12px !important;
     border-radius: var(--radius-sm) !important;
     display: inline-block !important;
     margin-bottom: 6px !important;
-    font-weight: 600 !important;
-    box-shadow: var(--shadow-color) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    text-shadow: none !important;
 }
 
+/* --- Web Form Title / Header --- */
+.web-form-wrapper .web-form-title,
+.web-form-wrapper h1,
+.web-form-wrapper h2,
+.web-form-wrapper .page-header-title {
+    color: #1a1a2e !important;
+    font-weight: 800 !important;
+    text-shadow: none !important;
+}
+
+/* --- Web Form Container: Frosted white card --- */
 .web-form-wrapper {
-    background: var(--bg-card) !important;
-    backdrop-filter: blur(var(--glass-blur)) !important;
-    border: 1px solid var(--border-color) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-radius: var(--radius-xl) !important;
     padding: var(--space-xl) !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* --- Web Form Inputs: Visible with dark text --- */
+.web-form-wrapper input,
+.web-form-wrapper textarea,
+.web-form-wrapper select,
+.web-form-wrapper .form-control {
+    color: #1a1a2e !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+}
+
+.web-form-wrapper input::placeholder,
+.web-form-wrapper textarea::placeholder {
+    color: #888 !important;
+}
+
+/* --- Web Form Section Headings --- */
+.web-form-wrapper .section-head,
+.web-form-wrapper .form-section .section-head {
+    color: #1a1a2e !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    padding: 6px 14px !important;
+    border-radius: var(--radius-sm) !important;
+    border-left: 3px solid var(--primary-color) !important;
+    font-weight: 700 !important;
+}
+
+/* --- Dark Mode Override for Desk Forms (keep existing dark behavior) --- */
+[data-theme="dark"] .frappe-control .control-label {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+[data-theme="dark"] .form-group > label {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
