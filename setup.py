@@ -9,7 +9,7 @@ from bismillah_ethiobiz import __version__ as version
 setup(
 	name="bismillah_ethiobiz",
 	version=version,
-	description="Beautiful, static branding theme for EthioBiz ERPNext with glassmorphism design",
+	description="Beautiful, static branding theme for EthioBiz with glassmorphism design",
 	author="Biz Technology Solutions",
 	author_email="biz.technology@outlook.com",
 	packages=find_packages(),

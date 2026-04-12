@@ -2735,3 +2735,33 @@ div[data-testid="onboarding-panel"] {
     visibility: hidden !important;
     pointer-events: none !important;
 }
+
+/* ============================================
+   9.5 WEB FORMS / PUBLIC FORMS SPECIFIC
+   ============================================ */
+
+/* Fix invisible labels on public web forms by giving them the theme's glassmorphism background */
+.web-form-wrapper .control-label,
+.frappe-control .control-label,
+.form-group > label {
+    color: var(--text-primary) !important;
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 4px 10px !important;
+    border-radius: var(--radius-sm) !important;
+    display: inline-block !important;
+    margin-bottom: 6px !important;
+    font-weight: 600 !important;
+    box-shadow: var(--shadow-color) !important;
+}
+
+.web-form-wrapper {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: var(--space-xl) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+}
