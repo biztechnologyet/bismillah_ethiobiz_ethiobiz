@@ -110,6 +110,18 @@ def get_custom_fields():
         # Stock
         "Item",
         "Item Price",
+        
+        # Quality Management
+        "Quality Action",
+        "Quality Feedback",
+        "Quality Feedback Template",
+        "Quality Goal",
+        "Quality Meeting",
+        "Quality Procedure",
+        "Quality Review",
+        "Quality Inspection Parameter",
+        "Quality Inspection Parameter Group",
+        "Quality Inspection Template",
     ]
     
     custom_fields = {}
