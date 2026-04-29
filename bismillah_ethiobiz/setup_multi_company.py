@@ -8,7 +8,7 @@ are properly created for multi-company isolation.
 """
 
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from bismillah_ethiobiz.multi_company import get_custom_fields, get_property_setters
 
 
@@ -33,8 +33,20 @@ def setup_custom_fields():
         return
     
     print(f"  Creating custom fields for {len(custom_fields)} DocTypes...")
-    create_custom_fields(custom_fields, update=True)
-    print(f"  Custom fields created/updated successfully.")
+    # This creates/updates the records in tabCustom Field
+    create_custom_field_api = __import__("frappe.custom.doctype.custom_field.custom_field", fromlist=["create_custom_fields"]).create_custom_fields
+    create_custom_field_api(custom_fields, update=True)
+    
+    # Force schema update to ensure the column is actually created in the DB table
+    count = 0
+    for doctype in custom_fields.keys():
+        try:
+            frappe.db.updatedb(doctype)
+            count += 1
+        except Exception as e:
+            print(f"  Failed to update db schema for {doctype}: {e}")
+            
+    print(f"  {count} Custom fields schema updated successfully.")
 
 
 def setup_property_setters():
@@ -61,7 +73,15 @@ def setup_property_setters():
                     frappe.db.set_value("Property Setter", existing, "value", ps["value"])
                     count += 1
             else:
-                frappe.make_property_setter(ps, validate_fields_for_doctype=False)
+                frappe.make_property_setter({
+                    "doctype_or_field": "DocField",
+                    "doc_type": ps["doc_type"],
+                    "field_name": ps["field_name"],
+                    "property": ps["property"],
+                    "value": ps["value"],
+                    "property_type": ps["property_type"],
+                    "is_system_generated": 0
+                }, validate_fields_for_doctype=False)
                 count += 1
         except Exception as e:
             # Skip silently - some DocTypes may not exist on this site
@@ -92,15 +112,15 @@ def update_existing_records():
             if not columns:
                 continue
             
-            # Count and update records with NULL company
+            # Count and update records with NULL or 'Company'
             count = frappe.db.sql(
-                f"SELECT COUNT(*) FROM `{table_name}` WHERE company IS NULL OR company = ''",
+                f"SELECT COUNT(*) FROM `{table_name}` WHERE company IS NULL OR company = '' OR company = 'Company'",
                 as_list=True
             )[0][0]
             
             if count > 0:
                 frappe.db.sql(
-                    f"UPDATE `{table_name}` SET company = %s WHERE company IS NULL OR company = ''",
+                    f"UPDATE `{table_name}` SET company = %s WHERE company IS NULL OR company = '' OR company = 'Company'",
                     (default_company,)
                 )
                 total_updated += count
