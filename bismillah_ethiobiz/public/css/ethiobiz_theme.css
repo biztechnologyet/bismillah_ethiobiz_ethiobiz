@@ -2740,182 +2740,124 @@ div[data-testid="onboarding-panel"] {
    9.5 WEB FORMS / PUBLIC FORMS SPECIFIC
    ============================================ */
 
-/*
- * Match the Login Form's glassmorphism look:
- * Semi-transparent frosted glass container that lets the
- * background landscape show through with a soft blur.
- * Dark text labels for legibility inside the glass card.
+/* 
+ * PREMIUM GLASSMORPHISM: Mirrors the Login form.
+ * Features: High blur, semi-transparency, and crisp dark text.
  */
 
-/* --- Main Web Form Container: Glassmorphism Card (matches Login .page-card) --- */
-.web-form-container,
-.web-form,
-main.web-form-container {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(16px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 20px !important;
-    padding: 32px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
-    max-width: 720px !important;
+/* Force all public web page text to be dark by default */
+body[data-path], body.web-page {
+    --text-primary: #1a1a2e !important;
+    --text-secondary: #2d3436 !important;
+    --text-muted: #636e72 !important;
+    --heading-color: #000000 !important;
+    color: #1a1a2e !important;
+}
+
+/* Main Container: The Glass Card */
+.web-form-container, 
+.web-form, 
+.web-form-wrapper {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(25px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 24px !important;
+    padding: 40px !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
     margin: 40px auto !important;
+    max-width: 800px !important;
 }
 
-/* --- Inner Form Sections: Transparent so outer glass shows through --- */
-.web-form-container .form-section,
-.web-form .form-section,
-.web-form-container .section-body,
-.web-form .section-body,
-.web-form-container .web-form-wrapper,
-.web-form .web-form-wrapper {
+/* Remove nested backgrounds that kill the glass effect */
+.web-form-container *, 
+.web-form *, 
+.form-section, 
+.section-body, 
+.form-column, 
+.frappe-control {
+    background-color: transparent !important;
     background: transparent !important;
-    backdrop-filter: none !important;
-    border: none !important;
+    border-color: transparent !important;
     box-shadow: none !important;
 }
 
-/* --- Form Section Cards: Subtle inner glass panels --- */
-.web-form-container .form-section .section-body,
-.web-form .form-section .section-body {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
-    margin-bottom: 12px !important;
-}
-
-/* --- Web Form Labels: Dark text, high contrast, no pill needed --- */
-.web-form-container .control-label,
-.web-form-container .form-group > label,
-.web-form .control-label,
-.web-form .form-group > label,
-body[data-path] .web-form-container .control-label,
-body[data-path] .web-form .control-label {
-    color: #1a1a2e !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    padding: 0 0 4px 0 !important;
-    margin-bottom: 4px !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    letter-spacing: 0.2px !important;
-    box-shadow: none !important;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-    display: block !important;
-}
-
-/* --- Web Form Title / Header --- */
-.web-form-container .web-form-title,
-.web-form-container h1,
-.web-form-container h2,
-.web-form .web-form-title,
-.web-form .page-header-title,
-.web-form h1 {
-    color: #1a1a2e !important;
-    font-weight: 800 !important;
-    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5) !important;
-    text-align: center !important;
-    margin-bottom: 24px !important;
-}
-
-/* --- Web Form Inputs: Frosted glass inputs matching login --- */
-.web-form-container input,
-.web-form-container textarea,
-.web-form-container select,
-.web-form-container .form-control,
-.web-form input,
-.web-form textarea,
-.web-form select,
-.web-form .form-control {
-    color: #1a1a2e !important;
-    background: rgba(255, 255, 255, 0.45) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
-    transition: all 0.2s ease !important;
-}
-
-.web-form-container input:focus,
-.web-form-container textarea:focus,
-.web-form-container select:focus,
-.web-form input:focus,
-.web-form textarea:focus,
-.web-form select:focus {
-    background: rgba(255, 255, 255, 0.6) !important;
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2) !important;
-    outline: none !important;
-}
-
-.web-form-container input::placeholder,
-.web-form-container textarea::placeholder,
-.web-form input::placeholder,
-.web-form textarea::placeholder {
-    color: rgba(0, 0, 0, 0.4) !important;
-}
-
-/* --- Web Form Section Headings: Visible inside glass --- */
-.web-form-container .section-head,
-.web-form-container .form-section .section-head,
-.web-form .section-head {
-    color: #1a1a2e !important;
-    background: transparent !important;
+/* Force Label Visibility: Absolute Dark */
+body[data-path] .control-label,
+body[data-path] label.control-label,
+body[data-path] .form-group > label,
+body.web-page .control-label,
+body.web-page label,
+.web-form-container label,
+.web-form label {
+    color: #000000 !important;
     font-weight: 700 !important;
-    font-size: 15px !important;
-    border-bottom: 2px solid rgba(var(--primary-rgb), 0.3) !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 16px !important;
+    font-size: 14px !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+    display: inline-block !important;
+    margin-bottom: 8px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-/* --- Submit / Save Button: Match Login button style --- */
-.web-form-container .btn-primary-dark,
-.web-form-container .btn-primary,
-.web-form .btn-primary-dark,
-.web-form .btn-primary {
+/* Section Headings inside the card */
+.web-form .section-head, 
+.web-form-container .section-head {
+    color: #000000 !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    padding-bottom: 15px !important;
+    margin-bottom: 25px !important;
+    font-weight: 800 !important;
+    font-size: 18px !important;
+}
+
+/* Inputs: Semi-transparent frosted glass inputs */
+.web-form input, 
+.web-form textarea, 
+.web-form select, 
+.web-form .form-control {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    color: #000000 !important;
+    border-radius: 12px !important;
+    padding: 12px 18px !important;
+    backdrop-filter: blur(5px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.web-form input:focus {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15) !important;
+}
+
+/* Submit Button: Premium look */
+.web-form .btn-primary, 
+.btn-primary-dark {
     background: var(--primary-color) !important;
+    color: #ffffff !important;
     border: none !important;
-    color: #fff !important;
-    border-radius: 10px !important;
-    padding: 12px 32px !important;
+    border-radius: 12px !important;
+    padding: 14px 40px !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
-    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.35) !important;
-    transition: all 0.25s ease !important;
+    box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.4) !important;
+    transition: all 0.3s transform ease !important;
 }
 
-.web-form-container .btn-primary:hover,
 .web-form .btn-primary:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.5) !important;
+    box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.6) !important;
 }
 
-/* --- Web Form required asterisks --- */
-.web-form-container .reqd,
-.web-form .reqd {
-    color: var(--primary-color) !important;
+/* Required star */
+.reqd {
+    color: #e74c3c !important;
+    font-weight: bold !important;
 }
 
-/* --- Dark Mode Override for Desk Forms (keep existing dark behavior) --- */
-[data-theme="dark"] .frappe-control .control-label {
+/* Ensure desk remains unaffected */
+[data-theme="dark"] .desk .control-label,
+[data-theme="dark"] .desk label {
     color: var(--text-primary) !important;
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    font-weight: 600 !important;
-    text-shadow: none !important;
-}
-
-[data-theme="dark"] .form-group > label {
-    color: var(--text-primary) !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
     text-shadow: none !important;
 }

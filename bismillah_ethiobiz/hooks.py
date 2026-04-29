@@ -146,3 +146,10 @@ after_install = "bismillah_ethiobiz.install.after_install"
 
 # Before uninstall hook
 before_uninstall = "bismillah_ethiobiz.install.before_uninstall"
+
+# ============================================
+# MULTI-COMPANY ISOLATION
+# ============================================
+
+# Apply multi-company custom fields and property setters after every migrate
+after_migrate = "bismillah_ethiobiz.setup_multi_company.after_migrate"
