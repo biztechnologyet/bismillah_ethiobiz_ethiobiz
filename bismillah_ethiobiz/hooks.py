@@ -75,6 +75,14 @@ website_route_rules = [
 # Inject data into frappe.boot at session start
 boot_session = "bismillah_ethiobiz.boot.boot_session"
 
+# ============================================
+# SESSION CREATION (AUTO-COMPANY)
+# ============================================
+
+# Automatically set user's company default on login (new device fix)
+# Reads from DocType: User > company field with fallback chain
+on_session_creation = "bismillah_ethiobiz.auto_company.on_session_creation"
+
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
 

@@ -6,8 +6,18 @@ Inject theme configuration into frappe.boot
 
 import frappe
 
+from bismillah_ethiobiz.auto_company import ensure_company_default
+
 def boot_session(bootinfo):
     """Inject EthioBiz theme configuration into boot"""
+    
+    # LAYER 2: Ensure user has a company default (safety net for new device/cache clear)
+    company_info = ensure_company_default()
+    if company_info:
+        bootinfo["ethiobiz_active_company"] = company_info.get("company")
+        # If no company could be resolved, flag it so the UI can show a helpful message
+        if company_info.get("needs_setup"):
+            bootinfo["ethiobiz_company_needs_setup"] = True
     
     # Use dictionary access to be safe, as bootinfo might not be an attr_dict
     bootinfo["ethiobiz_theme"] = {
