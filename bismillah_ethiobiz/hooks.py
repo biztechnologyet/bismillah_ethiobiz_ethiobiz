@@ -105,9 +105,9 @@ update_website_context = "bismillah_ethiobiz.api.update_website_context"
 # ============================================
 
 # Override whitelisted methods
-# override_whitelisted_methods = {
-#     "frappe.desk.doctype.event.event.get_events": "bismillah_ethiobiz.event.get_events"
-# }
+override_whitelisted_methods = {
+    "frappe.desk.search.get_names_for_mentions": "bismillah_ethiobiz.mentions.get_names_for_mentions"
+}
 
 # ============================================
 # SCHEDULED TASKS
