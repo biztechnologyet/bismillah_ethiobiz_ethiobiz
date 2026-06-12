@@ -120,6 +120,7 @@ class Embedding {
 // ============================================
 
 (function () {
+    if (!document.querySelector('.desk-container')) return;
     console.log('[EthioBiz] Super Nuclear Interceptor initializing...');
 
     const TOOL_NAME = 'embedding';
@@ -144,7 +145,9 @@ class Embedding {
         });
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 
     function injectToolManually(container) {
         // Find the list of tools

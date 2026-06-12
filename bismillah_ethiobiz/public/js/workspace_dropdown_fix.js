@@ -5,6 +5,8 @@
 (function () {
     'use strict';
 
+    if (document.querySelector('.web-form')) return;
+
     // Function to fix dropdown z-index
     function fixDropdownZIndex() {
         // Find all visible dropdown menus
@@ -56,12 +58,14 @@
         }
     });
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class']
-    });
+    if (document.body) {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
 
     // Also listen for Bootstrap dropdown events
     if (typeof $ !== 'undefined') {

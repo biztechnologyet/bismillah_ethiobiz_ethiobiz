@@ -61,11 +61,13 @@ walta.init_observer = function () {
         walta.timer = setTimeout(walta.apply_branding, 50);
     });
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: true
-    });
+    if (document.body) {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    }
 
     // 2. Fallback Interval (every 1 sec) to catch anything missed
     setInterval(walta.apply_branding, 1000);
@@ -73,6 +75,7 @@ walta.init_observer = function () {
 
 // Init
 $(document).ready(function () {
+    if (document.querySelector('.web-form')) return;
     walta.setup();
     walta.init_observer();
     walta.apply_branding();

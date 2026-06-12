@@ -2754,99 +2754,109 @@ body[data-path], body.web-page {
     color: #1a1a2e !important;
 }
 
-/* Main Container: The Glass Card */
-.web-form-container, 
-.web-form, 
+/* ============================================
+   WEB FORM RESET - Restore Frappe defaults
+   ============================================ */
+.web-form-container,
+.web-form,
 .web-form-wrapper {
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(25px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 24px !important;
-    padding: 40px !important;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
-    margin: 40px auto !important;
-    max-width: 800px !important;
-}
-
-/* Remove nested backgrounds that kill the glass effect */
-.web-form-container *, 
-.web-form *, 
-.form-section, 
-.section-body, 
-.form-column, 
-.frappe-control {
-    background-color: transparent !important;
-    background: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-}
-
-/* Force Label Visibility: Absolute Dark */
-body[data-path] .control-label,
-body[data-path] label.control-label,
-body[data-path] .form-group > label,
-body.web-page .control-label,
-body.web-page label,
-.web-form-container label,
-.web-form label {
-    color: #000000 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-    display: inline-block !important;
-    margin-bottom: 8px !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* Section Headings inside the card */
-.web-form .section-head, 
-.web-form-container .section-head {
-    color: #000000 !important;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
-    padding-bottom: 15px !important;
-    margin-bottom: 25px !important;
-    font-weight: 800 !important;
-    font-size: 18px !important;
-}
-
-/* Inputs: Semi-transparent frosted glass inputs */
-.web-form input, 
-.web-form textarea, 
-.web-form select, 
-.web-form .form-control {
-    background: rgba(255, 255, 255, 0.6) !important;
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    color: #000000 !important;
-    border-radius: 12px !important;
-    padding: 12px 18px !important;
-    backdrop-filter: blur(5px) !important;
-    transition: all 0.3s ease !important;
-}
-
-.web-form input:focus {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15) !important;
-}
-
-/* Submit Button: Premium look */
-.web-form .btn-primary, 
-.btn-primary-dark {
-    background: var(--primary-color) !important;
-    color: #ffffff !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     border: none !important;
-    border-radius: 12px !important;
-    padding: 14px 40px !important;
+    border-radius: 8px !important;
+    padding: 24px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    margin: 20px auto !important;
+    max-width: 720px !important;
+}
+
+.web-form .page-card {
+    background: #fff !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.web-form .form-section,
+.web-form .form-column,
+.web-form .form-group,
+.web-form .frappe-control,
+.web-form .control-label,
+.web-form .form-control,
+.web-form input,
+.web-form textarea,
+.web-form select {
+    background: #fff !important;
+    background-color: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    color: #333 !important;
+    height: auto !important;
+    min-height: 38px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    position: static !important;
+    border-radius: 6px !important;
+    transform: none !important;
+    display: block !important;
+    font-weight: 400 !important;
+}
+
+.web-form .form-section {
+    padding: 16px !important;
+    margin-bottom: 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.web-form .control-label,
+.web-form label {
+    color: #374151 !important;
     font-weight: 600 !important;
-    box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.4) !important;
-    transition: all 0.3s transform ease !important;
+    font-size: 13px !important;
+    text-shadow: none !important;
+}
+
+.web-form .section-head {
+    color: #111 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+}
+
+.web-form input:focus,
+.web-form textarea:focus,
+.web-form select:focus,
+.web-form .form-control:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+}
+
+.web-form .btn-primary {
+    background: #2563eb !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    transition: all 0.2s !important;
 }
 
 .web-form .btn-primary:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.6) !important;
+    background: #1d4ed8 !important;
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
 }
 
 /* Required star */

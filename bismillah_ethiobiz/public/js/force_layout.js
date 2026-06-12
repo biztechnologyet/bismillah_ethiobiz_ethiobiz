@@ -33,9 +33,12 @@ frappe.ui.force_vertical_layout = function () {
 
 // Run on page change
 $(document).on('page-change', function () {
+    if (document.querySelector('.web-form')) return;
     setTimeout(frappe.ui.force_vertical_layout, 500);
     setTimeout(frappe.ui.force_vertical_layout, 2000); // Retry for slow loads
 });
 
 // Run immediately
-frappe.ui.force_vertical_layout();
+if (!document.querySelector('.web-form')) {
+    frappe.ui.force_vertical_layout();
+}

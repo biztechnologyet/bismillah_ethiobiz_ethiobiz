@@ -11,6 +11,12 @@
 (function () {
     'use strict';
 
+    if (window.__ethiobizBrandInitialized) return;
+    if (document.querySelector('.web-form') || window.location.pathname.match(/\/(trial|new|edit)\//)) {
+        window.__ethiobizBrandInitialized = true;
+        return;
+    }
+
     const BRAND_CONFIG = {
         app_name: "EthioBiz",
         default_logo: "/assets/bismillah_ethiobiz/images/ethiobiz-glass-logo.png",
@@ -83,10 +89,13 @@
         constructor() {
             this.currentPillar = BRAND_CONFIG.default;
             this.initialized = false;
+            this.contentObserver = null;
+            this.textObserver = null;
         }
 
         init() {
             if (this.initialized) return;
+            window.__ethiobizBrandInitialized = true;
             console.log('%c✨ EthioBiz Brand Manager Initializing...', 'color: #1FB6AE; font-weight: bold;');
 
             this.detectAndApply();
@@ -181,9 +190,11 @@
         }
 
         applyContentFixes(p) {
-            const observer = new MutationObserver((mutations) => {
+            if (this.contentObserver) this.contentObserver.disconnect();
+            if (this.textObserver) this.textObserver.disconnect();
+
+            this.contentObserver = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
-                    // Header/Tab reordering removed as per user request
                     if (window.location.href.includes('walta') || window.location.href.includes('helpdesk')) {
                         document.querySelectorAll('h1, h2, .onboarding-step-title, .desk-sidebar-item-label, .onboarding-step-description').forEach(el => {
                             if (el.innerText.includes('Frappe Helpdesk')) {
@@ -194,13 +205,16 @@
                 });
             });
 
-            observer.observe(document.body, { childList: true, subtree: true });
+            if (document.body) {
+                this.contentObserver.observe(document.body, { childList: true, subtree: true });
+            }
 
             if (window.location.href.includes('walta') || window.location.href.includes('helpdesk')) {
                 const targetText = "Frappe Helpdesk";
                 const replaceText = "Walta Support";
 
                 const globalScrub = () => {
+                    if (!document.body) return;
                     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
                     let node;
                     while (node = walker.nextNode()) {
@@ -218,8 +232,10 @@
                     });
                 };
 
-                const textObserver = new MutationObserver(() => globalScrub());
-                textObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+                this.textObserver = new MutationObserver(() => globalScrub());
+                if (document.body) {
+                    this.textObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+                }
 
                 let scrubCount = 0;
                 const scrubInt = setInterval(() => {
@@ -318,6 +334,7 @@
 
 // BISMALLAH ETHIOBIZ FLOATING SIDEBAR V6
 frappe.ready(function () {
+    if (document.querySelector('.web-form')) return;
     console.log('[EthioBiz] V6 Sidebar Init via Theme - ' + new Date().toISOString());
 
     const css = `
@@ -512,26 +529,33 @@ frappe.ready(function () {
         });
     }
 
+    let sidebarObserver = null;
+
     function init() {
         forceUI();
 
-        // Force Collapse (3s grace)
-        let collapseInterval = setInterval(() => {
-            if (!document.body.classList.contains('sidebar-collapsed')) {
-                document.body.classList.add('sidebar-collapsed');
-                console.log('[EthioBiz] Forced collapse');
-            }
-        }, 100);
-        setTimeout(() => clearInterval(collapseInterval), 3000);
+        // Force Collapse (3s grace) - Desk only
+        if (document.querySelector('.desk-container')) {
+            let collapseInterval = setInterval(() => {
+                if (!document.body.classList.contains('sidebar-collapsed')) {
+                    document.body.classList.add('sidebar-collapsed');
+                    console.log('[EthioBiz] Forced collapse');
+                }
+            }, 100);
+            setTimeout(() => clearInterval(collapseInterval), 3000);
+        }
     }
 
-    // Observer
-    const observer = new MutationObserver(() => {
+    // Observer (with disconnect to avoid accumulation)
+    if (sidebarObserver) sidebarObserver.disconnect();
+    sidebarObserver = new MutationObserver(() => {
         forceUI();
     });
 
     init();
-    observer.observe(document.body, { childList: true, subtree: true });
+    if (document.body) {
+        sidebarObserver.observe(document.body, { childList: true, subtree: true });
+    }
 
     // Fallback
     setInterval(forceUI, 500);
