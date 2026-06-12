@@ -2755,108 +2755,84 @@ body[data-path], body.web-page {
 }
 
 /* ============================================
-   WEB FORM RESET - Restore Frappe defaults
+   WEB FORM GLASSMORPHISM — Premium Frosted Glass
+   No universal selectors. No layout breakage.
    ============================================ */
-.web-form-container,
-.web-form,
-.web-form-wrapper {
-    background: #fff !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+/* Outer Glass Card */
+.web-form-container {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(25px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 24px !important;
+    padding: 2rem !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
+    margin: 40px auto !important;
+    max-width: 800px !important;
+}
+
+/* Form body — transparent so container glass shows through */
+.web-form {
+    background: transparent !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 24px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
-    margin: 20px auto !important;
-    max-width: 720px !important;
 }
 
-.web-form .page-card {
-    background: #fff !important;
-    backdrop-filter: none !important;
-    box-shadow: none !important;
-    border: none !important;
-}
-
-.web-form .form-section,
-.web-form .form-column,
-.web-form .form-group,
-.web-form .frappe-control,
-.web-form .control-label,
-.web-form .form-control,
-.web-form input,
-.web-form textarea,
-.web-form select {
-    background: #fff !important;
-    background-color: #fff !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 1px solid #d1d5db !important;
-    box-shadow: none !important;
-    color: #333 !important;
-    height: auto !important;
-    min-height: 38px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 8px 12px !important;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    position: static !important;
-    border-radius: 6px !important;
-    transform: none !important;
-    display: block !important;
-    font-weight: 400 !important;
-}
-
+/* Sections — transparent */
 .web-form .form-section {
-    padding: 16px !important;
-    margin-bottom: 12px !important;
-    border-radius: 8px !important;
-    border: 1px solid #e5e7eb !important;
+    background: transparent !important;
 }
 
+/* Labels — always dark, no transparency */
 .web-form .control-label,
+.web-form label.control-label,
 .web-form label {
-    color: #374151 !important;
+    color: #000 !important;
     font-weight: 600 !important;
-    font-size: 13px !important;
-    text-shadow: none !important;
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
 }
 
+/* Section headings */
 .web-form .section-head {
-    color: #111 !important;
+    color: #000 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
     font-weight: 700 !important;
     font-size: 16px !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    padding-bottom: 12px !important;
+    padding-bottom: 10px !important;
     margin-bottom: 16px !important;
 }
 
-.web-form input:focus,
-.web-form textarea:focus,
-.web-form select:focus,
-.web-form .form-control:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-    background: #fff !important;
-    backdrop-filter: none !important;
+/* Inputs — frosted glass, opaque enough to read */
+.web-form .form-control {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    color: #1a1a2e !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
 }
 
+.web-form .form-control:focus {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: var(--primary-color, #1FB6AE) !important;
+    box-shadow: 0 0 0 3px rgba(31, 182, 174, 0.15) !important;
+}
+
+/* Primary submit button */
 .web-form .btn-primary {
-    background: #2563eb !important;
+    background: var(--primary-color, #1FB6AE) !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
+    border-radius: 12px !important;
+    padding: 12px 32px !important;
     font-weight: 600 !important;
-    box-shadow: none !important;
-    color: #fff !important;
+    box-shadow: 0 8px 25px rgba(31, 182, 174, 0.4) !important;
     transition: all 0.2s !important;
 }
 
 .web-form .btn-primary:hover {
-    background: #1d4ed8 !important;
-    transform: none !important;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 12px 30px rgba(31, 182, 174, 0.5) !important;
 }
 
 /* Required star */
