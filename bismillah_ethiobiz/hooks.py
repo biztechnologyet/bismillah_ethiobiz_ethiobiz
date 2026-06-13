@@ -63,6 +63,12 @@ website_route_rules = [
     {"from_route": "/theme-viewer/<path:app>", "to_route": "theme-viewer"},
     {"from_route": "/walta", "to_route": "helpdesk"},
     {"from_route": "/walta/<path:app>", "to_route": "helpdesk"},
+    {"from_route": "/helpdesk", "to_route": "helpdesk"},
+    {"from_route": "/helpdesk/<path:app_path>", "to_route": "helpdesk"},
+    {"from_route": "/lms", "to_route": "lms"},
+    {"from_route": "/lms/<path:app_path>", "to_route": "lms"},
+    {"from_route": "/dagu", "to_route": "lms"},
+    {"from_route": "/dagu/<path:app_path>", "to_route": "lms"},
 ]
 
 # Home page (optional override)
