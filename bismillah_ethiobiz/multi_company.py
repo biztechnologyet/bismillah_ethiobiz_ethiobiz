@@ -21,9 +21,12 @@ def get_custom_fields():
     """
     
     # All DocTypes that need a company field added for multi-company isolation
-    # These were identified by analyzing 631+ DocTypes on ethiobiz.et production
-    # Excludes: System/Core DocTypes, DocTypes that already have native company fields
+    # Analysis of 1355 DocTypes on ethiobiz.et production (2026-06-16)
+    # 235 native + 86 existing custom = 321 with company
+    # ~183 new custom fields added here = ~504 total with company
+    # Remaining: system/core DocTypes that should NEVER have company
     DOCTYPES_NEEDING_COMPANY = [
+        # === EXISTING (from v1) ===
         # Accounts
         "Bank Guarantee",
         "Cashier Closing",
@@ -110,7 +113,6 @@ def get_custom_fields():
         # Stock
         "Item",
         "Item Price",
-        
         # Quality Management
         "Quality Action",
         "Quality Feedback",
@@ -122,6 +124,211 @@ def get_custom_fields():
         "Quality Inspection Parameter",
         "Quality Inspection Parameter Group",
         "Quality Inspection Template",
+
+        # === NEW PHASE 1 (2026-06-16) ===
+        
+        # Contacts
+        "Address",
+        "Contact",
+
+        # Desk — user daily work
+        "Event",
+        "Note",
+        "ToDo",
+
+        # FTelephony
+        "TP Call Log",
+        "TP Exotel Settings",
+        "TP Telephony Agent",
+        "TP Twilio Settings",
+
+        # Healthcare — ALL non-table DocTypes
+        "ABDM Request",
+        "Antibiotic",
+        "Appointment Type",
+        "Body Part",
+        "Clinical Note",
+        "Clinical Note Type",
+        "Clinical Procedure Template",
+        "Code System",
+        "Code Value",
+        "Code Value Set",
+        "Complaint",
+        "Diagnosis",
+        "Dosage Form",
+        "Exercise Difficulty Level",
+        "Exercise Type",
+        "Fee Validity",
+        "Healthcare Activity",
+        "Healthcare Practitioner",
+        "Healthcare Service Unit Type",
+        "Healthcare Settings",
+        "Lab Test Sample",
+        "Lab Test Template",
+        "Lab Test UOM",
+        "Medical Department",
+        "Medication",
+        "Medication Class",
+        "Nursing Checklist Template",
+        "Observation Template",
+        "Organism",
+        "Patient",
+        "Patient Assessment Parameter",
+        "Patient Assessment Template",
+        "Patient Care Type",
+        "Patient History Settings",
+        "Patient Medical Record",
+        "Practitioner Schedule",
+        "Prescription Dosage",
+        "Prescription Duration",
+        "Sample Type",
+        "Sensitivity",
+        "Service Request Category",
+        "Service Request Reason",
+        "Specimen",
+        "Therapy Plan Template",
+        "Therapy Type",
+        "Treatment Plan Template",
+
+        # Helpdesk — ALL non-table DocTypes
+        "HD Action",
+        "HD Agent",
+        "HD Article",
+        "HD Article Category",
+        "HD Article Feedback",
+        "HD Customer",
+        "HD Desk Account Request",
+        "HD Email Feedback",
+        "HD Escalation Rule",
+        "HD Form Script",
+        "HD Notification",
+        "HD Organization",
+        "HD Portal Signup Request",
+        "HD Saved Reply",
+        "HD Service Holiday List",
+        "HD Service Level Agreement",
+        "HD Settings",
+        "HD Stopword",
+        "HD Synonyms",
+        "HD Team",
+        "HD Ticket",
+        "HD Ticket Activity",
+        "HD Ticket Comment",
+        "HD Ticket Feedback Option",
+        "HD Ticket Priority",
+        "HD Ticket Status",
+        "HD Ticket Template",
+        "HD Ticket Type",
+        "HD View",
+
+        # IT Management — ALL non-table DocTypes
+        "Configuration Item",
+        "Configuration Item Type",
+        "Cycle Type",
+        "Encryption Type",
+        "Floor",
+        "Host Domain",
+        "IP Address",
+        "IT Backup",
+        "IT Checklist",
+        "IT Checklist Type",
+        "IT Hardware",
+        "IT Landscape",
+        "IT Management Settings",
+        "IT Service Report",
+        "IT Software",
+        "ITM Host Item",
+        "ITM Landscape",
+        "ITM Location",
+        "ITM Software",
+        "ITM Software Instance",
+        "ITM Solution",
+        "ITM Solution Type",
+        "ITM User Account",
+        "ITM User Account Type",
+        "ITM User Group",
+        "ITM User Group Type",
+        "Licence",
+        "Local Area Network",
+        "Location Room",
+        "Network Interface Controller",
+        "Network Jack",
+        "Retention Type",
+        "Socket",
+        "Software Instance",
+        "Software Version",
+        "Solution",
+        "Solution Type",
+        "Subnet",
+        "Trip",
+        "User Account",
+        "User Account Type",
+        "User Group",
+        "User Group Type",
+
+        # LMS — ALL non-table DocTypes
+        "Course Chapter",
+        "Course Evaluator",
+        "Course Lesson",
+        "Function",
+        "Industry",
+        "LMS Assignment",
+        "LMS Assignment Submission",
+        "LMS Badge",
+        "LMS Badge Assignment",
+        "LMS Batch",
+        "LMS Batch Enrollment",
+        "LMS Batch Feedback",
+        "LMS Category",
+        "LMS Certificate",
+        "LMS Certificate Evaluation",
+        "LMS Certificate Request",
+        "LMS Coupon",
+        "LMS Course",
+        "LMS Course Interest",
+        "LMS Course Mentor Mapping",
+        "LMS Course Progress",
+        "LMS Course Review",
+        "LMS Enrollment",
+        "LMS Lesson Note",
+        "LMS Live Class",
+        "LMS Live Class Participant",
+        "LMS Mentor Request",
+        "LMS Payment",
+        "LMS Program",
+        "LMS Programming Exercise",
+        "LMS Programming Exercise Submission",
+        "LMS Question",
+        "LMS Quiz",
+        "LMS Quiz Submission",
+        "LMS Settings",
+        "LMS Source",
+        "LMS Timetable Template",
+        "LMS Video Watch Duration",
+        "LMS Zoom Settings",
+        "User Skill",
+        "Zoom Settings",
+
+        # Non Profit — ALL non-table DocTypes
+        "Certification Application",
+        "Certified Consultant",
+        "Chapter",
+        "Donor Type",
+        "Member",
+        "Membership Type",
+        "Volunteer",
+        "Volunteer Type",
+
+        # Telephony
+        "Call Log",
+        "Incoming Call Settings",
+        "Telephony Call Type",
+        "Voice Call Settings",
+
+        # Webshop
+        "Item Review",
+        "Website Item",
+        "Wishlist",
     ]
     
     custom_fields = {}
@@ -139,7 +346,7 @@ def get_custom_fields():
                 "in_list_view": 0,
                 "in_standard_filter": 1,
                 "allow_on_submit": 1,
-                "insert_after": "",  # Frappe will place it at the end
+                "insert_after": "",
                 "translatable": 0,
             }
         ]
@@ -216,6 +423,9 @@ def get_property_setters():
         "Stock Reservation Entry", "Warehouse",
         "Subcontracting Order", "Subcontracting Receipt",
         "Issue", "Warranty Claim",
+        # Healthcare DocTypes with native company
+        "Inpatient Medication Entry", "Inpatient Medication Order", "Patient Appointment",
+        "Patient Encounter", "Therapy Plan",
     ]
     
     property_setters = []
