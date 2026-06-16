@@ -94,17 +94,17 @@ update_website_context = "bismillah_ethiobiz.api.update_website_context"
 
 # ============================================
 # DOC EVENTS
-
-# ============================================
-# DOC EVENTS
 # ============================================
 
-# Hook into document events (if needed for theme updates)
-# doc_events = {
-#     "EthioBiz Theme": {
-#         "on_update": "bismillah_ethiobiz.ethiobiz_theme.doctype.ethiobiz_theme.ethiobiz_theme.on_update"
-#     }
-# }
+doc_events = {
+    "Workspace": {
+        "before_insert": "bismillah_ethiobiz.overrides.validate_workspace_permissions",
+        "before_save": "bismillah_ethiobiz.overrides.validate_workspace_permissions"
+    },
+    "Company": {
+        "before_insert": "bismillah_ethiobiz.overrides.validate_company_permissions"
+    }
+}
 
 # ============================================
 # OVERRIDE METHODS
