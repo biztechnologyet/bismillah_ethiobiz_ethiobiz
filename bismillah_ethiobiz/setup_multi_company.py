@@ -16,6 +16,7 @@ def after_migrate():
     """Called after bench migrate to apply multi-company custom fields and property setters."""
     try:
         print("EthioBiz: Applying multi-company isolation fields...")
+        fix_bad_defaults()
         setup_custom_fields()
         setup_property_setters()
         update_existing_records()
@@ -135,3 +136,36 @@ def update_existing_records():
         print(f"  Total existing records updated: {total_updated}")
     else:
         print(f"  No existing records needed updating.")
+
+
+def fix_bad_defaults():
+    """
+    Fix property setters and custom fields that have default='Company'
+    (literal string). These should be empty so Frappe falls through to
+    frappe.defaults.get_user_default('company').
+    """
+    # Fix property setters
+    ps_list = frappe.db.sql(
+        "SELECT name, doc_type FROM `tabProperty Setter` "
+        "WHERE field_name='company' AND property='default' AND value='Company'",
+        as_dict=True
+    )
+    for ps in ps_list:
+        frappe.db.set_value("Property Setter", ps.name, "value", "")
+        print(f"  Fixed Property Setter: {ps.doc_type}.company default → ''")
+
+    # Fix custom fields
+    cf_list = frappe.db.sql(
+        "SELECT name, dt FROM `tabCustom Field` "
+        "WHERE fieldname='company' AND `default`='Company'",
+        as_dict=True
+    )
+    for cf in cf_list:
+        frappe.db.set_value("Custom Field", cf.name, "default", "")
+        print(f"  Fixed Custom Field: {cf.dt}.company default → ''")
+
+    if ps_list or cf_list:
+        frappe.db.commit()
+        print(f"  Fixed {len(ps_list)} property setters + {len(cf_list)} custom fields")
+    else:
+        print("  No bad defaults found.")

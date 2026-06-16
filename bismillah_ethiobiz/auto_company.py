@@ -20,84 +20,76 @@ import frappe
 
 
 def on_session_creation(login_manager):
-    """
-    LAYER 1 (PRIMARY): Called by Frappe immediately after a new session
-    is created (user login). Reads the company from DocType User > company
-    field and sets it as the session default.
-    
-    Hook: on_session_creation in hooks.py
-    """
     try:
         user = frappe.session.user
-        
-        # Skip for Guest and Administrator
         if user in ("Guest", "Administrator"):
             return
-        
-        # Check if user already has a company default set
-        current_default = frappe.defaults.get_user_default("Company")
+
+        current_default = frappe.defaults.get_user_default("company")
+        old_default = frappe.defaults.get_user_default("Company")
+
         if current_default:
-            # Already has a company set (e.g., returning on same device)
+            if old_default:
+                frappe.defaults.clear_user_default("Company")
             return
-        
-        # Resolve company using the fallback chain
+
+        if old_default:
+            frappe.defaults.set_user_default("company", old_default)
+            frappe.defaults.clear_user_default("Company")
+            return
+
         user_company, source = _resolve_user_company(user)
-        
+
         if user_company:
-            # Set the resolved company as the user's session default
-            frappe.defaults.set_user_default("Company", user_company)
+            frappe.defaults.set_user_default("company", user_company)
+            frappe.db.set_value("User", user, "company", user_company)
             frappe.logger("ethiobiz").info(
                 f"Auto-set company '{user_company}' for user '{user}' "
                 f"(source: {source}) on new session"
             )
         else:
-            # NO company could be resolved - log warning
             frappe.logger("ethiobiz").warning(
-                f"Could not resolve any company for user '{user}' on login. "
-                f"User.company field is empty, no active Employee found, "
-                f"and no Company exists in the system."
+                f"Could not resolve any company for user '{user}' on login."
             )
-        
+
     except Exception as e:
-        # NEVER break the login flow - log and continue silently
         frappe.logger("ethiobiz").error(
             f"Auto-company error for {frappe.session.user}: {e}"
         )
 
 
 def ensure_company_default():
-    """
-    LAYER 2 (FALLBACK): Called during boot_session to verify the user
-    has a company default. Acts as a safety net for cases where
-    on_session_creation didn't fire or the default was lost.
-    
-    Returns dict with company info and status.
-    """
     try:
         user = frappe.session.user
-        
         if user in ("Guest", "Administrator"):
             return None
-        
-        # Check if user already has a company default
-        current_default = frappe.defaults.get_user_default("Company")
+
+        current_default = frappe.defaults.get_user_default("company")
+        old_default = frappe.defaults.get_user_default("Company")
+
         if current_default:
+            if old_default:
+                frappe.defaults.clear_user_default("Company")
             return {"company": current_default, "source": "existing_default"}
-        
-        # No default set — resolve using the fallback chain
+
+        if old_default:
+            frappe.defaults.set_user_default("company", old_default)
+            frappe.defaults.clear_user_default("Company")
+            return {"company": old_default, "source": "migrated_from_uppercase"}
+
         user_company, source = _resolve_user_company(user)
-        
+
         if user_company:
-            frappe.defaults.set_user_default("Company", user_company)
+            frappe.defaults.set_user_default("company", user_company)
+            frappe.db.set_value("User", user, "company", user_company)
             frappe.logger("ethiobiz").info(
                 f"Boot fallback: set company '{user_company}' for '{user}' "
                 f"(source: {source})"
             )
             return {"company": user_company, "source": source}
-        
-        # No company could be resolved
+
         return {"company": None, "source": "none", "needs_setup": True}
-        
+
     except Exception:
         return None
 
