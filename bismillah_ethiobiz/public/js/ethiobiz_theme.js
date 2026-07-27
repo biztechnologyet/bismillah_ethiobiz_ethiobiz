@@ -132,9 +132,9 @@
         detectAndApply() {
             const route = this.getCurrentRoute();
 
-            if (route === '/' || route.includes('login') || route === '') {
+            if (route === '/' || route.includes('login') || route === '' || route.includes('ethiobiz_new') || route.includes('ethiobiz-new')) {
                 this.currentPillar = BRAND_CONFIG.default;
-                this.applyPillar();
+                this.applyColorsOnly(this.currentPillar);
                 return;
             }
 
@@ -160,6 +160,11 @@
             this.updateBackground(p);
             this.setDocumentBranding(p);
             this.applyContentFixes(p);
+        }
+
+        applyColorsOnly(p) {
+            this.updateColors(p.primary, p.rgb);
+            this.updateBackground(p);
         }
 
         setDocumentBranding(p) {
@@ -256,9 +261,10 @@
         }
 
         updateLogo(src, alt) {
-            const selectors = ['.navbar-brand img', '.app-logo', 'img[src*="logo"]', '#navbar-logo'];
+            const selectors = ['.navbar-brand img', '.app-logo', '#navbar-logo'];
             selectors.forEach(sel => {
                 document.querySelectorAll(sel).forEach(img => {
+                    if (img.closest('.pillar-icon, .sub-icon, .detail-logo, .footer-brand, .legacy-image, .hero-logo, .loader-logo, .pillar-card, .sub-system-card, .final-cta, .detail-image, .hero-content, .ethiobiz-landing, #loading-screen')) return;
                     img.src = src;
                     img.alt = alt;
                     img.style.maxHeight = '35px';
