@@ -533,6 +533,15 @@ frappe.ready(function () {
                 }
             }
         });
+
+        // D. Remove "Try the new Print Designer" link from print previews
+        const printLinks = document.querySelectorAll('span.inner-page-message a');
+        printLinks.forEach(link => {
+            if (link.textContent.trim().includes('Print Designer')) {
+                const span = link.closest('span.inner-page-message');
+                if (span) span.style.display = 'none';
+            }
+        });
     }
 
     let sidebarObserver = null;
