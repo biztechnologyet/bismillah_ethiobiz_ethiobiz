@@ -2,7 +2,7 @@
  "doctype": "DocType",
  "name": "HADEEDA Settings",
  "module": "EthioBiz Theme",
- "custom": 0,
+ "custom": 1,
  "issingle": 1,
  "fields": [
   {
