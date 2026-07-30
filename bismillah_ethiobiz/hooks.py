@@ -9,6 +9,19 @@ Static theme deployment for EthioBiz ERPNext ecosystem.
 
 from __future__ import unicode_literals
 
+# ============================================
+# EVENT NOTIFICATION PATCH
+# ============================================
+# Scope event email reminders to only event owners and participants,
+# rather than sending them to all users with reminders enabled.
+
+import frappe.desk.doctype.event.event as _event_module
+from bismillah_ethiobiz.event_notification import send_event_digest as _patched_send_event_digest
+
+_event_module.send_event_digest = _patched_send_event_digest
+
+# ============================================
+
 app_name = "bismillah_ethiobiz"
 app_title = "EthioBiz Theme"
 app_publisher = "Biz Technology Solutions"
