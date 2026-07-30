@@ -49,7 +49,9 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
-    "/assets/bismillah_ethiobiz/js/walta.js"
+    "/assets/bismillah_ethiobiz/js/walta.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js"
 ]
 
 # CSS for website (frontend/portal)
@@ -63,7 +65,9 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
-    "/assets/bismillah_ethiobiz/js/walta.js"
+    "/assets/bismillah_ethiobiz/js/walta.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js"
 ]
 
 # ============================================
@@ -142,12 +146,18 @@ override_whitelisted_methods = {
 # TRANSLATIONS
 # ============================================
 
-# Default translations for theme labels
+# Default fixtures (Translations + HADEEDA Settings)
 fixtures = [
     {
         "dt": "Translation",
         "filters": [
             ["source_text", "in", ["Frappe Light", "Timeless Night", "ERPNext", "Frappe"]]
+        ]
+    },
+    {
+        "dt": "HADEEDA Settings",
+        "filters": [
+            ["name", "=", "HADEEDA Settings"]
         ]
     }
 ]

@@ -5,21 +5,20 @@ Inject theme configuration into frappe.boot
 """
 
 import frappe
+import json
 
 from bismillah_ethiobiz.auto_company import ensure_company_default
 
 def boot_session(bootinfo):
-    """Inject EthioBiz theme configuration into boot"""
-    
+    """Inject EthioBiz theme + HADEEDA configuration into boot"""
+
     # LAYER 2: Ensure user has a company default (safety net for new device/cache clear)
     company_info = ensure_company_default()
     if company_info:
         bootinfo["ethiobiz_active_company"] = company_info.get("company")
-        # If no company could be resolved, flag it so the UI can show a helpful message
         if company_info.get("needs_setup"):
             bootinfo["ethiobiz_company_needs_setup"] = True
-    
-    # Use dictionary access to be safe, as bootinfo might not be an attr_dict
+
     bootinfo["ethiobiz_theme"] = {
         "app_name": "EthioBiz",
         "app_tagline": "Uniting Humanity Through Shared Progress",
@@ -33,6 +32,48 @@ def boot_session(bootinfo):
             {"id": "afocha", "name": "Afocha", "color": "#B83A3A", "domain": "Community"}
         ]
     }
-    
-    # Override default app name
+
     bootinfo["app_name"] = "EthioBiz"
+
+    # ============================================
+    # HADEEDA AI SETTINGS BOOT INJECTION
+    # ============================================
+    try:
+        settings = frappe.get_single("HADEEDA Settings")
+        bootinfo["hadeeda_settings"] = {
+            "enabled": bool(settings.enabled),
+            "chat_enabled": bool(settings.chat_enabled),
+            "inline_ai_enabled": bool(settings.inline_ai_enabled),
+            "bot_name": settings.bot_name or "HADEEDA",
+            "widget_title": settings.widget_title or "HADEEDA AI Assistant",
+            "widget_subtitle": settings.widget_subtitle or "",
+            "widget_position": settings.widget_position or "Right",
+            "widget_primary_color": settings.widget_primary_color or "#1FB6AE",
+            "widget_mode": settings.widget_mode or "window",
+            "trigger_character": settings.trigger_character or "/",
+            "show_trigger_hint": bool(settings.show_trigger_hint),
+            "excluded_doctypes": settings.excluded_doctypes or "",
+            "excluded_fields": settings.excluded_fields or "",
+            "default_language": settings.default_language or "en",
+            "allow_file_uploads": bool(settings.allow_file_uploads),
+            "allowed_mime_types": settings.allowed_mime_types or "",
+        }
+    except Exception:
+        bootinfo["hadeeda_settings"] = {
+            "enabled": True,
+            "chat_enabled": True,
+            "inline_ai_enabled": True,
+            "bot_name": "HADEEDA",
+            "widget_title": "HADEEDA AI Assistant",
+            "widget_subtitle": "",
+            "widget_position": "Right",
+            "widget_primary_color": "#1FB6AE",
+            "widget_mode": "window",
+            "trigger_character": "/",
+            "show_trigger_hint": True,
+            "excluded_doctypes": "",
+            "excluded_fields": "",
+            "default_language": "en",
+            "allow_file_uploads": False,
+            "allowed_mime_types": "",
+        }
