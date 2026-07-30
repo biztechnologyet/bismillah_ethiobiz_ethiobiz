@@ -2847,3 +2847,9 @@ body[data-path], body.web-page {
     color: var(--text-primary) !important;
     text-shadow: none !important;
 }
+
+/* Hide "Try the new Print Designer" ad in print preview (CSS fallback) */
+.page-head .inner-page-message a[href*="print_designer"],
+.page-head .inner-page-message a[href*="frappecloud.com/marketplace/apps/print_designer"] {
+    display: none !important;
+}
