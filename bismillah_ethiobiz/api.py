@@ -48,49 +48,6 @@ def get_chat_config():
     }
 
 
-def _markdown_to_html(text):
-    """Convert Markdown headings, bold/italics, bullet lists, and line breaks into clean HTML."""
-    if not text:
-        return text
-
-    text = text.replace('\\n', '\n')
-
-    # Convert horizontal rules
-    text = re.sub(r'^\s*[\*\-_]{3,}\s*$', '<hr style="border:0; border-top:1px solid rgba(255,255,255,0.15); margin:10px 0;">', text, flags=re.MULTILINE)
-
-    # Convert headings
-    text = re.sub(r'^\s*###\s+(.*)$', '<h3 style="margin:8px 0 4px 0; font-size:15px; font-weight:700; color:#1FB6AE;">\\1</h3>', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*##\s+(.*)$', '<h2 style="margin:10px 0 4px 0; font-size:16px; font-weight:700; color:#1FB6AE;">\\1</h2>', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*#\s+(.*)$', '<h1 style="margin:12px 0 6px 0; font-size:18px; font-weight:800; color:#1FB6AE;">\\1</h1>', text, flags=re.MULTILINE)
-
-    # Convert bold & italic
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
-    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
-
-    # Convert bullet lists
-    lines = text.split('\n')
-    in_list = False
-    new_lines = []
-    for line in lines:
-        stripped = line.strip()
-        if stripped.startswith('* ') or stripped.startswith('- '):
-            item_text = stripped[2:].strip()
-            if not in_list:
-                new_lines.append('<ul style="margin:6px 0; padding-left:18px; list-style-type:disc;">')
-                in_list = True
-            new_lines.append(f'  <li style="margin-bottom:4px;">{item_text}</li>')
-        else:
-            if in_list:
-                new_lines.append('</ul>')
-                in_list = False
-            new_lines.append(line)
-    if in_list:
-        new_lines.append('</ul>')
-
-    text = '\n'.join(new_lines)
-    text = text.replace('\n\n', '<br><br>').replace('\n', '<br>')
-    return text
-
 
 def _parse_ndjson(text):
     """Parse NDJSON (newline-delimited JSON) response from n8n Formatter node.
@@ -171,33 +128,30 @@ def chat_webhook_proxy():
         # 1. Parse NDJSON streaming format
         clean_text = _parse_ndjson(raw_text)
         if clean_text:
-            formatted_html = _markdown_to_html(clean_text)
-            body = json.dumps({"output": formatted_html})
+            body = json.dumps({"output": clean_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
 
         # 2. Try standard JSON
         try:
             data = json.loads(raw_text)
             if isinstance(data, dict) and "output" in data:
-                formatted_html = _markdown_to_html(data["output"])
-                body = json.dumps({"output": formatted_html})
+                body = json.dumps({"output": data["output"]})
             elif isinstance(data, list) and len(data) > 0:
                 item = data[0]
                 out_val = None
                 if isinstance(item, dict):
                     out_val = item.get("output") or item.get("json", {}).get("output") or item.get("message")
                 if out_val:
-                    formatted_html = _markdown_to_html(out_val)
-                    body = json.dumps({"output": formatted_html})
+                    body = json.dumps({"output": out_val})
                 else:
-                    body = json.dumps({"output": _markdown_to_html(raw_text)})
+                    body = json.dumps({"output": raw_text})
             elif isinstance(data, dict) and "message" in data:
-                body = json.dumps({"output": _markdown_to_html(data["message"])})
+                body = json.dumps({"output": data["message"]})
             else:
-                body = json.dumps({"output": _markdown_to_html(raw_text)})
+                body = json.dumps({"output": raw_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
         except (json.JSONDecodeError, TypeError):
-            body = json.dumps({"output": _markdown_to_html(raw_text)})
+            body = json.dumps({"output": raw_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
 
     except requests.exceptions.Timeout:
