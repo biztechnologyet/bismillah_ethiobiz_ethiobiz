@@ -9,6 +9,71 @@
 
     window.__ethiobizChatInitialized = true;
 
+    /**
+     * Parse NDJSON text (from n8n Formatter node) into clean Markdown text.
+     * Extracts all type="item" content fields and concatenates them.
+     */
+    function parseNDJSON(text) {
+        if (!text || !text.includes('"type"')) return null;
+        let result = '';
+        const lines = text.split('\n');
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+                const obj = JSON.parse(trimmed);
+                if (obj && obj.type === 'item' && obj.content) {
+                    result += obj.content;
+                } else if (obj && obj.type === 'error' && obj.content) {
+                    // Suppress internal n8n errors, return friendly message
+                    return '⚠️ I encountered an issue processing your request. Please try again.';
+                }
+            } catch (e) {
+                // Not valid JSON line, skip
+            }
+        }
+        return result || null;
+    }
+
+    /**
+     * Extract clean output text from any response format.
+     * Handles: NDJSON, {"output": "..."}, [{"output": "..."}],
+     * {"message": {"output": "..."}}, raw text
+     */
+    function extractOutput(text) {
+        if (!text) return '';
+
+        // 1. Try NDJSON
+        const ndjsonResult = parseNDJSON(text);
+        if (ndjsonResult) return ndjsonResult;
+
+        // 2. Try JSON
+        try {
+            const data = JSON.parse(text);
+
+            // Frappe wraps: {"message": {"output": "..."}}
+            if (data.message && typeof data.message === 'object' && data.message.output) {
+                return data.message.output;
+            }
+            // Frappe wraps: {"message": "text"}
+            if (data.message && typeof data.message === 'string') {
+                return data.message;
+            }
+            // Direct: {"output": "..."}
+            if (data.output) return data.output;
+            // Array: [{"output": "..."}]
+            if (Array.isArray(data) && data.length > 0) {
+                const item = data[0];
+                if (item.output) return item.output;
+                if (item.json && item.json.output) return item.json.output;
+                if (item.message) return item.message;
+            }
+            return text;
+        } catch (e) {
+            return text;
+        }
+    }
+
     async function initChat() {
         try {
             const resp = await fetch('/api/method/bismillah_ethiobiz.api.get_chat_config');
@@ -26,7 +91,41 @@
             // Import createChat from @n8n/chat bundle
             const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/chat.bundle.es.js');
 
-            // Inject theme CSS — matching biztechnology.et proven dark theme
+            // Use the server-side proxy URL
+            const proxyUrl = window.location.origin + '/api/method/bismillah_ethiobiz.api.chat_webhook_proxy';
+
+            // Intercept fetch calls to the proxy URL so we can guarantee
+            // clean output regardless of Frappe response wrapping or NDJSON format
+            const originalFetch = window.fetch;
+            window.fetch = async function (url, options) {
+                const urlStr = typeof url === 'string' ? url : (url && url.url ? url.url : '');
+
+                if (urlStr.includes('chat_webhook_proxy')) {
+                    try {
+                        const response = await originalFetch.call(window, url, options);
+                        const rawText = await response.text();
+                        const cleanOutput = extractOutput(rawText);
+
+                        // Return a synthetic Response with the exact format @n8n/chat expects
+                        return new Response(JSON.stringify({ output: cleanOutput }), {
+                            status: 200,
+                            statusText: 'OK',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    } catch (fetchErr) {
+                        console.warn('HADEEDA proxy fetch error:', fetchErr);
+                        return new Response(JSON.stringify({ output: '⚠️ Connection error. Please try again.' }), {
+                            status: 200,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    }
+                }
+
+                // All other fetch calls pass through unchanged
+                return originalFetch.call(window, url, options);
+            };
+
+            // Inject theme CSS — matching biztechnology.et dark theme
             const style = document.createElement('style');
             style.textContent = `
                 :root {
@@ -93,11 +192,6 @@
                     0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
                     50%      { box-shadow: 0 0 14px 2px rgba(124,58,237,0.4); }
                 }
-                @keyframes hadeeda-orb-float {
-                    0%, 100% { transform: translate(0,0) scale(1); }
-                    33%      { transform: translate(12px,-16px) scale(1.08); }
-                    66%      { transform: translate(-8px,8px) scale(0.94); }
-                }
 
                 /* ─── TOGGLE BUTTON ─── */
                 .chat-window-wrapper .chat-window-toggle .chat-icon,
@@ -133,7 +227,6 @@
                     box-shadow: 0 10px 40px rgba(124,58,237,0.55), 0 0 0 2px rgba(13,17,23,0.6) !important;
                     animation: none !important;
                 }
-                .chat-window-wrapper .chat-window-toggle:active { transform: scale(0.92) !important; }
 
                 /* ─── CHAT WINDOW ─── */
                 .chat-window-wrapper .chat-window {
@@ -170,10 +263,6 @@
                 }
                 .chat-message.chat-message-from-bot a { color: #7C3AED !important; }
                 .chat-message.chat-message-from-bot a:hover { color: #2581CD !important; }
-                .chat-message.chat-message-from-bot code {
-                    background: rgba(124,58,237,0.08) !important; color: #E6EDF3 !important;
-                    border-radius: 4px !important; padding: 0.15em 0.4em !important;
-                }
 
                 .chat-message.chat-message-from-user:not(.chat-message-transparent) {
                     background: linear-gradient(135deg, #7C3AED 0%, #2581CD 100%) !important;
@@ -182,46 +271,30 @@
                     box-shadow: 0 2px 12px rgba(124,58,237,0.22) !important;
                 }
 
-                /* ─── TYPING INDICATOR ─── */
+                /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #7C3AED !important; animation: hadeeda-typing-bounce 1.4s ease-in-out infinite !important; }
                 .chat-message-typing-circle:nth-child(2) { animation-delay: 0.16s !important; }
                 .chat-message-typing-circle:nth-child(3) { animation-delay: 0.32s !important; }
 
-                /* ─── INPUT / FOOTER ─── */
+                /* ─── INPUT ─── */
                 .chat-layout .chat-footer { background: #0D1117 !important; border-top: 1px solid rgba(124,58,237,0.08) !important; }
-                .chat-input {
-                    background: #0D1117 !important; color: #F0F4F8 !important;
-                    border: 2px solid transparent !important; border-radius: 12px !important;
-                }
-                .chat-input:focus {
-                    border-color: rgba(124,58,237,0.3) !important;
-                    box-shadow: 0 0 0 3px rgba(124,58,237,0.1) !important;
-                }
+                .chat-input { background: #0D1117 !important; color: #F0F4F8 !important; border: 2px solid transparent !important; border-radius: 12px !important; }
+                .chat-input:focus { border-color: rgba(124,58,237,0.3) !important; box-shadow: 0 0 0 3px rgba(124,58,237,0.1) !important; }
                 .chat-input::placeholder { color: #8B949E !important; }
                 .chat-input-send-button {
                     background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
                     color: #fff !important; border: none !important; border-radius: 10px !important;
                 }
-                .chat-input-send-button:hover {
-                    background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%) !important;
-                    transform: scale(1.08) !important;
-                    animation: hadeeda-send-glow 1.5s ease-in-out infinite !important;
-                }
+                .chat-input-send-button:hover { transform: scale(1.08) !important; animation: hadeeda-send-glow 1.5s ease-in-out infinite !important; }
 
                 /* ─── SCROLLBAR ─── */
                 .chat-messages-list::-webkit-scrollbar { width: 4px !important; }
                 .chat-messages-list::-webkit-scrollbar-track { background: transparent !important; }
-                .chat-messages-list::-webkit-scrollbar-thumb {
-                    background: linear-gradient(180deg, #7C3AED, #2581CD) !important;
-                    border-radius: 2px !important;
-                }
+                .chat-messages-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #7C3AED, #2581CD) !important; border-radius: 2px !important; }
 
                 /* ─── MOBILE ─── */
                 @media (max-width: 480px) {
-                    .chat-window-wrapper .chat-window {
-                        width: calc(100vw - 1rem) !important; height: calc(100vh - 5rem) !important;
-                        border-radius: 16px 16px 0 0 !important;
-                    }
+                    .chat-window-wrapper .chat-window { width: calc(100vw - 1rem) !important; height: calc(100vh - 5rem) !important; border-radius: 16px 16px 0 0 !important; }
                     .chat-window-wrapper .chat-window-toggle { height: 50px !important; min-width: 50px !important; }
                 }
             `;
@@ -234,17 +307,13 @@
             const sessionId = config.session_id || config.username;
             localStorage.setItem('n8n-chat-sessionId', sessionId);
 
-            // Use the DIRECT n8n webhook URL (not the proxy) — @n8n/chat handles
-            // NDJSON streaming natively with enableStreaming: true
-            const webhookUrl = config.webhook_url;
-
             createChat({
-                webhookUrl: webhookUrl,
+                webhookUrl: proxyUrl,
                 mode: config.widget_mode || 'window',
                 chatSessionKey: 'sessionId',
                 chatInputKey: 'chatInput',
-                loadPreviousSession: true,
-                enableStreaming: true,
+                loadPreviousSession: false,
+                enableStreaming: false,
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,

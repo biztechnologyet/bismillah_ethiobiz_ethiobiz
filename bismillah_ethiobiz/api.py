@@ -204,14 +204,30 @@ def chat_inline(prompt, context=None):
             headers=headers,
             timeout=60
         )
-        data = resp.json()
-        if isinstance(data, list) and len(data) > 0:
-            reply = data[0].get("json", {}).get("message", "") or data[0].get("message", "")
-        elif isinstance(data, dict):
-            reply = data.get("message", "") or data.get("output", "")
-        else:
-            reply = str(data)
-        return {"reply": reply}
+        raw_text = resp.text
+
+        # 1. Try NDJSON parsing first (n8n Formatter node output)
+        clean_text = _parse_ndjson(raw_text)
+        if clean_text:
+            return {"reply": clean_text}
+
+        # 2. Try standard JSON
+        try:
+            data = json.loads(raw_text)
+            if isinstance(data, list) and len(data) > 0:
+                item = data[0]
+                if isinstance(item, dict):
+                    reply = item.get("output") or item.get("json", {}).get("message", "") or item.get("message", "") or str(item)
+                else:
+                    reply = str(item)
+            elif isinstance(data, dict):
+                reply = data.get("output") or data.get("message", "") or str(data)
+            else:
+                reply = str(data)
+            return {"reply": reply}
+        except (json.JSONDecodeError, TypeError):
+            return {"reply": raw_text if raw_text else "No response received."}
+
     except Exception as e:
         frappe.logger("ethiobiz").error(f"chat_inline error: {e}")
         return {"reply": "⚠️ Sorry, I encountered an error processing your request. Please try again."}
