@@ -194,7 +194,7 @@ def chat_inline(prompt, context=None):
         "sessionId": f"{user}::{company}" if company else user,
         "chatInput": prompt,
         "metadata": {
-            "source": "inline",
+            "source": "widget",
             "username": user,
             "full_name": full_name,
             "company": company,
