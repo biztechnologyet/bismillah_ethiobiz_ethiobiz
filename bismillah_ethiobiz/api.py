@@ -47,6 +47,110 @@ def get_chat_config():
     }
 
 
+def _parse_ndjson(text):
+    """Parse NDJSON (newline-delimited JSON) response from n8n Formatter node.
+    Extracts content from type='item' lines and concatenates them into clean text."""
+    if not text:
+        return None
+    if '"type"' not in text:
+        return None
+
+    full_content = ""
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            parsed = json.loads(line)
+            if isinstance(parsed, dict) and parsed.get("type") == "item":
+                content = parsed.get("content", "")
+                if content:
+                    full_content += content
+        except (json.JSONDecodeError, TypeError, ValueError):
+            continue
+
+    return full_content if full_content else None
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def chat_webhook_proxy():
+    """Server-side proxy for @n8n/chat widget webhook.
+
+    Receives the chat payload from @n8n/chat, forwards it to n8n,
+    parses the NDJSON string response into clean text, and returns
+    [{"output": "clean text"}] as a raw JSON response.
+    """
+    from werkzeug.wrappers import Response as WerkzeugResponse
+
+    settings = _get_hadeeda_settings()
+    if not settings.enabled or not settings.chat_enabled:
+        return WerkzeugResponse(
+            json.dumps([{"output": "Chat is currently disabled."}]),
+            status=200, content_type="application/json"
+        )
+
+    # Read raw request body or form_dict
+    try:
+        raw_body = frappe.request.get_data(as_text=True)
+        if raw_body and raw_body.strip():
+            payload = json.loads(raw_body)
+        else:
+            payload = dict(frappe.form_dict)
+    except Exception:
+        payload = dict(frappe.form_dict)
+
+    webhook_url = settings.chat_webhook_url
+    if not webhook_url:
+        return WerkzeugResponse(
+            json.dumps([{"output": "Webhook URL not configured."}]),
+            status=500, content_type="application/json"
+        )
+
+    headers = {"Content-Type": "application/json"}
+    if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
+        headers[settings.webhook_auth_header] = settings.get_password("webhook_auth_value")
+
+    try:
+        resp = requests.post(
+            webhook_url,
+            json=payload,
+            headers=headers,
+            timeout=120
+        )
+        raw_text = resp.text
+
+        # 1. Parse NDJSON streaming format
+        clean_text = _parse_ndjson(raw_text)
+        if clean_text:
+            body = json.dumps([{"output": clean_text}])
+            return WerkzeugResponse(body, status=200, content_type="application/json")
+
+        # 2. Try standard JSON
+        try:
+            data = json.loads(raw_text)
+            if isinstance(data, list) and len(data) > 0 and "output" in data[0]:
+                body = json.dumps(data)
+            elif isinstance(data, dict) and "output" in data:
+                body = json.dumps([data])
+            elif isinstance(data, dict) and "message" in data:
+                body = json.dumps([{"output": data["message"]}])
+            else:
+                body = json.dumps([{"output": raw_text}])
+            return WerkzeugResponse(body, status=200, content_type="application/json")
+        except (json.JSONDecodeError, TypeError):
+            body = json.dumps([{"output": raw_text}])
+            return WerkzeugResponse(body, status=200, content_type="application/json")
+
+    except requests.exceptions.Timeout:
+        frappe.logger("ethiobiz").error("chat_webhook_proxy timeout")
+        body = json.dumps([{"output": "⚠️ Request timed out. Please try again."}])
+        return WerkzeugResponse(body, status=200, content_type="application/json")
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"chat_webhook_proxy error: {e}")
+        body = json.dumps([{"output": "⚠️ An error occurred. Please try again."}])
+        return WerkzeugResponse(body, status=200, content_type="application/json")
+
+
 @frappe.whitelist()
 def chat_inline(prompt, context=None):
     user = frappe.session.user

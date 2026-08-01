@@ -47,14 +47,16 @@
             const sessionId = config.session_id || config.username;
             localStorage.setItem('n8n-chat-sessionId', sessionId);
 
-            // Initialize chat widget identically to biztechnology.et working pattern
+            // Use server-side proxy URL to automatically parse n8n NDJSON responses into clean text
+            const proxyUrl = window.location.origin + '/api/method/bismillah_ethiobiz.api.chat_webhook_proxy';
+
             createChat({
-                webhookUrl: config.webhook_url,
+                webhookUrl: proxyUrl,
                 mode: config.widget_mode || 'window',
                 chatSessionKey: 'sessionId',
                 chatInputKey: 'chatInput',
-                loadPreviousSession: true,
-                enableStreaming: config.enable_streaming !== false,
+                loadPreviousSession: false,
+                enableStreaming: false,
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,
