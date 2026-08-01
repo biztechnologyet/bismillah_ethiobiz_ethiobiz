@@ -122,23 +122,30 @@ def chat_webhook_proxy():
         # 1. Parse NDJSON streaming format
         clean_text = _parse_ndjson(raw_text)
         if clean_text:
-            body = json.dumps([{"output": clean_text}])
+            body = json.dumps({"output": clean_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
 
         # 2. Try standard JSON
         try:
             data = json.loads(raw_text)
-            if isinstance(data, list) and len(data) > 0 and "output" in data[0]:
+            if isinstance(data, dict) and "output" in data:
                 body = json.dumps(data)
-            elif isinstance(data, dict) and "output" in data:
-                body = json.dumps([data])
+            elif isinstance(data, list) and len(data) > 0:
+                item = data[0]
+                out_val = None
+                if isinstance(item, dict):
+                    out_val = item.get("output") or item.get("json", {}).get("output") or item.get("message")
+                if out_val:
+                    body = json.dumps({"output": out_val})
+                else:
+                    body = json.dumps({"output": raw_text})
             elif isinstance(data, dict) and "message" in data:
-                body = json.dumps([{"output": data["message"]}])
+                body = json.dumps({"output": data["message"]})
             else:
-                body = json.dumps([{"output": raw_text}])
+                body = json.dumps({"output": raw_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
         except (json.JSONDecodeError, TypeError):
-            body = json.dumps([{"output": raw_text}])
+            body = json.dumps({"output": raw_text})
             return WerkzeugResponse(body, status=200, content_type="application/json")
 
     except requests.exceptions.Timeout:
