@@ -54,28 +54,35 @@ def _parse_ndjson(text):
     Extracts content from type='item' lines and concatenates them into clean text."""
     if not text:
         return None
-    if '"type"' not in text:
-        return None
 
     full_content = ""
+    has_error = False
+
     for line in text.split("\n"):
         line = line.strip()
         if not line:
             continue
         try:
             parsed = json.loads(line)
-            if isinstance(parsed, dict) and parsed.get("type") == "item":
-                content = parsed.get("content", "")
-                if content:
-                    full_content += content
+            if isinstance(parsed, dict):
+                msg_type = parsed.get("type")
+                if msg_type == "item":
+                    content = parsed.get("content", "")
+                    if content:
+                        full_content += content
+                elif msg_type == "error":
+                    has_error = True
         except (json.JSONDecodeError, TypeError, ValueError):
             continue
 
     if full_content:
-        # Ensure any literal escaped \n strings are converted to actual newlines
         full_content = full_content.replace('\\n', '\n')
+        return full_content
 
-    return full_content if full_content else None
+    if has_error and not full_content:
+        return "As-salamu alaykum! I am currently synchronizing my AI workflow. Please send your message again in a moment, InshaAllah!"
+
+    return None
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -83,8 +90,8 @@ def chat_webhook_proxy():
     """Server-side proxy for @n8n/chat widget webhook.
 
     Receives the chat payload from @n8n/chat, forwards it to n8n,
-    parses the NDJSON string response, converts Markdown into clean HTML,
-    and returns {"output": html_text} as a raw JSON response.
+    parses the NDJSON string response, and returns {"output": text}
+    as a raw JSON response.
     """
     from werkzeug.wrappers import Response as WerkzeugResponse
 
@@ -144,14 +151,18 @@ def chat_webhook_proxy():
                 if out_val:
                     body = json.dumps({"output": out_val})
                 else:
-                    body = json.dumps({"output": raw_text})
+                    body = json.dumps({"output": "As-salamu alaykum! Please send your message again, InshaAllah!"})
             elif isinstance(data, dict) and "message" in data:
                 body = json.dumps({"output": data["message"]})
             else:
-                body = json.dumps({"output": raw_text})
+                body = json.dumps({"output": "As-salamu alaykum! Please send your message again, InshaAllah!"})
             return WerkzeugResponse(body, status=200, content_type="application/json")
         except (json.JSONDecodeError, TypeError):
-            body = json.dumps({"output": raw_text})
+            if '"type":"error"' in raw_text or '"type": "error"' in raw_text:
+                fallback = "As-salamu alaykum! I am currently synchronizing my AI workflow. Please try again in a moment, InshaAllah!"
+            else:
+                fallback = raw_text if raw_text else "As-salamu alaykum! How can I assist you today?"
+            body = json.dumps({"output": fallback})
             return WerkzeugResponse(body, status=200, content_type="application/json")
 
     except requests.exceptions.Timeout:
@@ -252,8 +263,8 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js"
+        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.1.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.1.1"
     ]
     for js in js_files:
         if js not in context.web_include_js:
