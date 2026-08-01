@@ -68,6 +68,12 @@
    "default": "1"
   },
   {
+   "fieldname": "enable_streaming",
+   "fieldtype": "Check",
+   "label": "Enable Streaming Responses",
+   "default": "0"
+  },
+  {
    "fieldname": "widget_title",
    "fieldtype": "Data",
    "label": "Widget Title",
