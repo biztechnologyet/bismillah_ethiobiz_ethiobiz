@@ -17,6 +17,7 @@
 
     let popup = null;
     let activeField = null;
+    let savedRange = null;
 
     function getFormContext(el) {
         if (!cur_frm) return '';
@@ -53,11 +54,24 @@
         if (!el) return false;
         if (el.tagName === 'TEXTAREA') return true;
         if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || !el.type)) return true;
-        if (el.isContentEditable || el.classList.contains('ql-editor') || el.classList.contains('note-editable')) return true;
+        if (el.isContentEditable || el.closest('.ql-editor') || el.closest('.note-editable') || el.closest('[contenteditable="true"]')) return true;
         return false;
     }
 
+    function getQuillInstance(el) {
+        const fieldEl = el.closest('[data-fieldname]');
+        if (fieldEl && cur_frm) {
+            const fieldname = fieldEl.getAttribute('data-fieldname');
+            const ctrl = cur_frm.fields_dict && cur_frm.fields_dict[fieldname];
+            if (ctrl && ctrl.quill) return ctrl.quill;
+        }
+        const qlContainer = el.closest('.ql-container');
+        if (qlContainer && qlContainer.__quill) return qlContainer.__quill;
+        return null;
+    }
+
     function insertTextAtCursor(el, text) {
+        // 1. Inputs & Textareas
         if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
             const start = el.selectionStart || 0;
             const end = el.selectionEnd || 0;
@@ -67,23 +81,51 @@
             el.dispatchEvent(new Event('input', { bubbles: true }));
             el.dispatchEvent(new Event('change', { bubbles: true }));
             el.focus();
-        } else if (el.isContentEditable || el.classList.contains('ql-editor') || el.classList.contains('note-editable')) {
-            el.focus();
+            return;
+        }
+
+        // 2. Frappe Quill Rich Text Editor
+        const quill = getQuillInstance(el);
+        if (quill) {
+            const range = quill.getSelection() || { index: quill.getLength() - 1, length: 0 };
+            const htmlContent = text.replace(/\n/g, '<br>');
+            quill.clipboard.dangerouslyPasteHTML(range.index, htmlContent);
+            quill.setSelection(range.index + text.length);
+            return;
+        }
+
+        // 3. Generic ContentEditable / Rich Text Editors
+        const editableContainer = el.closest('[contenteditable="true"]') || el.closest('.ql-editor') || el.closest('.note-editable') || el;
+        editableContainer.focus();
+
+        if (savedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedRange);
+        }
+
+        if (document.queryCommandSupported && document.queryCommandSupported('insertHTML')) {
+            const formattedHtml = text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+            document.execCommand('insertHTML', false, formattedHtml);
+        } else if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+            document.execCommand('insertText', false, text);
+        } else {
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
                 range.deleteContents();
-                const node = document.createTextNode(text);
-                range.insertNode(node);
-                range.setStartAfter(node);
-                range.setEndAfter(node);
-                sel.removeAllRanges();
-                sel.addRange(range);
+                const fragment = document.createDocumentFragment();
+                const lines = text.split('\n');
+                lines.forEach((line, idx) => {
+                    if (idx > 0) fragment.appendChild(document.createElement('br'));
+                    fragment.appendChild(document.createTextNode(line));
+                });
+                range.insertNode(fragment);
             } else {
-                el.innerText += text;
+                editableContainer.innerText += text;
             }
-            el.dispatchEvent(new Event('input', { bubbles: true }));
         }
+        editableContainer.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     function removeTriggerChar(el) {
@@ -95,15 +137,28 @@
                 el.selectionStart = el.selectionEnd = idx - 1;
                 el.dispatchEvent(new Event('input', { bubbles: true }));
             }
-        } else if (el.isContentEditable || el.classList.contains('ql-editor')) {
-            const sel = window.getSelection();
-            if (sel.rangeCount > 0) {
-                const range = sel.getRangeAt(0);
-                if (range.startOffset > 0) {
-                    const textNode = range.startContainer;
-                    if (textNode.nodeType === Node.TEXT_NODE && textNode.textContent.endsWith(TRIGGER)) {
-                        textNode.textContent = textNode.textContent.slice(0, -1);
-                    }
+            return;
+        }
+
+        const quill = getQuillInstance(el);
+        if (quill) {
+            const range = quill.getSelection();
+            if (range && range.index > 0) {
+                quill.deleteText(range.index - 1, 1);
+            }
+            return;
+        }
+
+        // Generic contenteditable trigger removal
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            savedRange = sel.getRangeAt(0).cloneRange();
+            if (document.queryCommandSupported && document.queryCommandSupported('delete')) {
+                document.execCommand('delete', false, null);
+            } else if (savedRange.startOffset > 0) {
+                const textNode = savedRange.startContainer;
+                if (textNode.nodeType === Node.TEXT_NODE && textNode.textContent.endsWith(TRIGGER)) {
+                    textNode.textContent = textNode.textContent.slice(0, -1);
                 }
             }
         }
@@ -300,6 +355,7 @@
             popup = null;
         }
         activeField = null;
+        savedRange = null;
     }
 
     // Global listener for '/' trigger on any editable field
@@ -314,7 +370,6 @@
         const el = e.target;
         if (popup || !isEditable(el) || isExcluded(el)) return;
 
-        // Check if slash was just entered
         removeTriggerChar(el);
         showPopup(el);
     });
