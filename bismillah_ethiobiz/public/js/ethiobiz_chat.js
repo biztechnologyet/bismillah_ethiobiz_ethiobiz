@@ -19,10 +19,10 @@
 
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css';
+            link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/style.css';
             document.head.appendChild(link);
 
-            const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
+            const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/chat.bundle.es.js');
 
             const style = document.createElement('style');
             style.textContent = `
@@ -47,16 +47,11 @@
 
             createChat({
                 webhookUrl: config.webhook_url,
-                webhookConfig: {
-                    headers: {
-                        'X-Frappe-User': config.username,
-                        'X-Frappe-Company': config.company,
-                    }
-                },
                 mode: config.widget_mode || 'window',
                 chatSessionKey: 'sessionId',
                 chatInputKey: 'chatInput',
                 loadPreviousSession: true,
+                enableStreaming: true,
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,
@@ -67,8 +62,6 @@
                     full_name: config.full_name,
                     email: config.email,
                     company: config.company,
-                    api_key: config.api_key,
-                    api_secret: config.api_secret,
                     source: 'widget',
                 },
                 i18n: {
