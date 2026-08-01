@@ -26,7 +26,7 @@
             // Import createChat from @n8n/chat bundle
             const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/chat.bundle.es.js');
 
-            // Inject theme CSS
+            // Inject theme CSS + Typography & Line Break Formatting
             const style = document.createElement('style');
             style.textContent = `
                 :root {
@@ -36,6 +36,35 @@
                     --chat--window--right: var(--chat--spacing);
                     --chat--window--bottom: var(--chat--spacing);
                     --chat--window--z-index: 9999;
+                }
+
+                /* Ensure line breaks (\\n) and whitespace formatting render smoothly */
+                .chat-message,
+                .chat-message-from-bot,
+                .chat-message-from-user,
+                .chat-message-text,
+                .chat-message-content,
+                .chat-message-body {
+                    white-space: pre-wrap !important;
+                    word-break: break-word !important;
+                    line-height: 1.6 !important;
+                    font-size: 14px !important;
+                }
+
+                .chat-message-from-bot {
+                    background: #161B22 !important;
+                    color: #E6EDF3 !important;
+                    border: 1px solid rgba(31, 182, 174, 0.2) !important;
+                    border-left: 3px solid #1FB6AE !important;
+                    border-radius: 4px 14px 14px 14px !important;
+                    padding: 12px 14px !important;
+                }
+
+                .chat-message-from-user {
+                    background: linear-gradient(135deg, #1FB6AE 0%, #178a84 100%) !important;
+                    color: #FFFFFF !important;
+                    border-radius: 14px 4px 14px 14px !important;
+                    padding: 12px 14px !important;
                 }
             `;
             document.head.appendChild(style);
@@ -47,7 +76,7 @@
             const sessionId = config.session_id || config.username;
             localStorage.setItem('n8n-chat-sessionId', sessionId);
 
-            // Use server-side proxy URL to automatically parse n8n NDJSON responses into clean text
+            // Proxy URL for server-side response parsing
             const proxyUrl = window.location.origin + '/api/method/bismillah_ethiobiz.api.chat_webhook_proxy';
 
             createChat({

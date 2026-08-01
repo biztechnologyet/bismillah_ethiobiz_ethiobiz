@@ -69,6 +69,10 @@ def _parse_ndjson(text):
         except (json.JSONDecodeError, TypeError, ValueError):
             continue
 
+    if full_content:
+        # Ensure any literal escaped \n strings are converted to actual newlines
+        full_content = full_content.replace('\\n', '\n')
+
     return full_content if full_content else None
 
 
