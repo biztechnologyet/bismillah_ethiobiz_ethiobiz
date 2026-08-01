@@ -17,57 +17,22 @@
 
             if (!config.enabled) return;
 
+            // Load @n8n/chat stylesheet
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/style.css';
             document.head.appendChild(link);
 
+            // Import createChat from @n8n/chat bundle
             const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/chat.bundle.es.js');
 
-            const originalFetch = window.fetch;
-            window.fetch = async function (resource, options) {
-                const url = typeof resource === 'string' ? resource : (resource ? resource.url : '');
-                const response = await originalFetch.apply(this, arguments);
-
-                if (url && config.webhook_url && url.includes(config.webhook_url)) {
-                    try {
-                        const clone = response.clone();
-                        const text = await clone.text();
-                        if (text && (text.includes('"type":"item"') || text.includes('"type":"begin"'))) {
-                            const lines = text.split('\n');
-                            let fullContent = '';
-                            for (const line of lines) {
-                                const trimmed = line.trim();
-                                if (!trimmed) continue;
-                                try {
-                                    const parsed = JSON.parse(trimmed);
-                                    if (parsed && parsed.type === 'item' && parsed.content) {
-                                        fullContent += parsed.content;
-                                    }
-                                } catch (_) {}
-                            }
-                            if (fullContent) {
-                                const formattedBody = JSON.stringify([{ output: fullContent }]);
-                                return new Response(formattedBody, {
-                                    status: response.status,
-                                    statusText: response.statusText,
-                                    headers: { 'Content-Type': 'application/json' }
-                                });
-                            }
-                        }
-                    } catch (err) {
-                        console.warn('NDJSON parse error:', err);
-                    }
-                }
-                return response;
-            };
-
+            // Inject theme CSS
             const style = document.createElement('style');
             style.textContent = `
                 :root {
-                    --chat--color--primary: ${config.widget_primary_color};
-                    --chat--color--secondary: ${config.widget_primary_color};
-                    --chat--toggle--background: ${config.widget_primary_color};
+                    --chat--color--primary: ${config.widget_primary_color || '#1FB6AE'};
+                    --chat--color--secondary: ${config.widget_primary_color || '#1FB6AE'};
+                    --chat--toggle--background: ${config.widget_primary_color || '#1FB6AE'};
                     --chat--window--right: var(--chat--spacing);
                     --chat--window--bottom: var(--chat--spacing);
                     --chat--window--z-index: 9999;
@@ -80,20 +45,20 @@
                 : ['Selam! 👋', 'I am HADEEDA, your AI Executive Assistant. How can I help you today?'];
 
             const sessionId = config.session_id || config.username;
-
             localStorage.setItem('n8n-chat-sessionId', sessionId);
 
+            // Initialize chat widget identically to biztechnology.et working pattern
             createChat({
                 webhookUrl: config.webhook_url,
                 mode: config.widget_mode || 'window',
                 chatSessionKey: 'sessionId',
                 chatInputKey: 'chatInput',
                 loadPreviousSession: true,
-                enableStreaming: Boolean(config.enable_streaming),
+                enableStreaming: config.enable_streaming !== false,
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,
-                allowFileUploads: config.allow_file_uploads,
+                allowFileUploads: Boolean(config.allow_file_uploads),
                 allowedFilesMimeTypes: config.allowed_mime_types || '',
                 metadata: {
                     username: config.username,
