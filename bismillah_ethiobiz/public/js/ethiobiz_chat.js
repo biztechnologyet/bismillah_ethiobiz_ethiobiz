@@ -51,7 +51,7 @@
                 chatSessionKey: 'sessionId',
                 chatInputKey: 'chatInput',
                 loadPreviousSession: true,
-                enableStreaming: true,
+                enableStreaming: Boolean(config.enable_streaming),
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,

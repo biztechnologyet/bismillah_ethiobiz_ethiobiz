@@ -43,6 +43,7 @@ def get_chat_config():
         "allow_file_uploads": bool(settings.allow_file_uploads),
         "allowed_mime_types": settings.allowed_mime_types or "",
         "default_language": settings.default_language or "en",
+        "enable_streaming": bool(getattr(settings, "enable_streaming", False)),
     }
 
 
