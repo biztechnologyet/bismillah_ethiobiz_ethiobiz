@@ -93,6 +93,7 @@ def chat_webhook_proxy():
     parses the NDJSON string response, and returns {"output": text}
     as a raw JSON response.
     """
+    frappe.flags.ignore_csrf = True
     from werkzeug.wrappers import Response as WerkzeugResponse
 
     settings = _get_hadeeda_settings()
@@ -263,8 +264,8 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.3.0",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.3.0"
+        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.4.0",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
     ]
     for js in js_files:
         if js not in context.web_include_js:

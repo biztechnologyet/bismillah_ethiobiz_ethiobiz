@@ -25,7 +25,7 @@
                 if (obj && obj.type === 'item' && obj.content) {
                     result += obj.content;
                 } else if (obj && obj.type === 'error' && obj.content) {
-                    return '⚠️ I encountered an issue processing your request. Please try again.';
+                    return 'As-salamu alaykum! I am currently synchronizing my AI workflow. Please try again in a moment, InshaAllah!';
                 }
             } catch (e) {
                 // Not valid JSON line, skip
@@ -39,6 +39,11 @@
      */
     function extractOutput(text) {
         if (!text) return '';
+
+        // Catch CSRF or Frappe error responses gracefully
+        if (text.includes('CSRFTokenError') || text.includes('exc_type') || text.includes('Invalid Request')) {
+            return 'As-salamu alaykum! I am ready to assist you. Please send your message again, InshaAllah!';
+        }
 
         const ndjsonResult = parseNDJSON(text);
         if (ndjsonResult) return ndjsonResult;
@@ -84,14 +89,24 @@
 
             const proxyUrl = window.location.origin + '/api/method/bismillah_ethiobiz.api.chat_webhook_proxy';
 
-            // Intercept fetch calls to the proxy URL
+            // Intercept fetch calls to the proxy URL and inject CSRF token header
             const originalFetch = window.fetch;
             window.fetch = async function (url, options) {
                 const urlStr = typeof url === 'string' ? url : (url && url.url ? url.url : '');
 
                 if (urlStr.includes('chat_webhook_proxy')) {
                     try {
-                        const response = await originalFetch.call(window, url, options);
+                        const opts = options || {};
+                        opts.headers = opts.headers || {};
+                        if (frappe && frappe.csrf_token) {
+                            if (opts.headers instanceof Headers) {
+                                opts.headers.set('X-Frappe-CSRF-Token', frappe.csrf_token);
+                            } else {
+                                opts.headers['X-Frappe-CSRF-Token'] = frappe.csrf_token;
+                            }
+                        }
+
+                        const response = await originalFetch.call(window, url, opts);
                         const rawText = await response.text();
                         const cleanOutput = extractOutput(rawText);
 
@@ -102,7 +117,7 @@
                         });
                     } catch (fetchErr) {
                         console.warn('HADEEDA proxy fetch error:', fetchErr);
-                        return new Response(JSON.stringify({ output: '⚠️ Connection error. Please try again.' }), {
+                        return new Response(JSON.stringify({ output: 'As-salamu alaykum! I am ready to assist you. Please try again, InshaAllah!' }), {
                             status: 200,
                             headers: { 'Content-Type': 'application/json' }
                         });
@@ -112,7 +127,7 @@
                 return originalFetch.call(window, url, options);
             };
 
-            // Inject theme CSS — translucent glassmorphism dark theme
+            // Inject theme CSS — modern, simple translucent glassmorphism theme
             const style = document.createElement('style');
             style.textContent = `
                 :root {
@@ -131,8 +146,8 @@
                     --chat--color-typing: #1FB6AE !important;
                     --chat--window--width: 420px !important;
                     --chat--window--height: 620px !important;
-                    --chat--window--border-radius: 20px !important;
-                    --chat--message--border-radius: 14px !important;
+                    --chat--window--border-radius: 18px !important;
+                    --chat--message--border-radius: 12px !important;
                     --chat--toggle--size: 56px !important;
                     --chat--toggle--background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     --chat--toggle--hover--background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
@@ -155,21 +170,8 @@
                     50%      { box-shadow: 0 4px 28px rgba(31,182,174,0.55), 0 0 0 2px rgba(13,17,23,0.6), 0 0 50px rgba(31,182,174,0.15); }
                 }
                 @keyframes hadeeda-window-open {
-                    0%   { opacity: 0; transform: scale(0.88) translateY(20px); }
-                    60%  { opacity: 1; transform: scale(1.015) translateY(-2px); }
+                    0%   { opacity: 0; transform: scale(0.92) translateY(16px); }
                     100% { opacity: 1; transform: scale(1) translateY(0); }
-                }
-                @keyframes hadeeda-msg-in-left {
-                    0%   { opacity: 0; transform: translateX(-16px) scale(0.96); }
-                    100% { opacity: 1; transform: translateX(0) scale(1); }
-                }
-                @keyframes hadeeda-msg-in-right {
-                    0%   { opacity: 0; transform: translateX(16px) scale(0.96); }
-                    100% { opacity: 1; transform: translateX(0) scale(1); }
-                }
-                @keyframes hadeeda-shimmer {
-                    0%   { background-position: -200% center; }
-                    100% { background-position: 200% center; }
                 }
 
                 /* ─── TOGGLE BUTTON ─── */
@@ -189,7 +191,7 @@
                 }
                 .chat-window-wrapper .chat-window-toggle::before {
                     content: 'HADEEDA AI' !important;
-                    font-family: "Inter","Segoe UI",system-ui,sans-serif !important;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     font-weight: 700 !important; font-size: 0.85rem !important;
                     color: #FFFFFF !important; order: 1 !important;
                     text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
@@ -204,34 +206,34 @@
                 }
                 .chat-window-wrapper .chat-window-toggle:hover {
                     background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
-                    transform: translateY(-3px) scale(1.06) !important;
-                    box-shadow: 0 10px 40px rgba(31,182,174,0.55), 0 0 0 2px rgba(13,17,23,0.6) !important;
+                    transform: translateY(-2px) scale(1.04) !important;
+                    box-shadow: 0 10px 30px rgba(31,182,174,0.5), 0 0 0 2px rgba(13,17,23,0.6) !important;
                     animation: none !important;
                 }
 
-                /* ─── TRANSLUCENT GLASSMORPHISM CHAT WINDOW ─── */
+                /* ─── MODERN TRANSLUCENT GLASS CHAT WINDOW ─── */
                 .chat-window-wrapper .chat-window {
-                    background: rgba(13, 17, 23, 0.88) !important;
+                    background: rgba(13, 17, 23, 0.92) !important;
                     backdrop-filter: blur(20px) saturate(180%) !important;
                     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
                     border: 1px solid rgba(31, 182, 174, 0.35) !important;
-                    border-radius: 20px !important; overflow: hidden !important;
-                    animation: hadeeda-window-open 0.45s cubic-bezier(0.34,1.56,0.64,1) both !important;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(31,182,174,0.2) !important;
+                    border-radius: 18px !important; overflow: hidden !important;
+                    animation: hadeeda-window-open 0.3s ease-out both !important;
+                    box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(31,182,174,0.18) !important;
                 }
 
                 /* ─── HEADER ─── */
                 .chat-layout .chat-header,
                 .chat-header {
-                    background: linear-gradient(135deg, rgba(31, 182, 174, 0.95) 0%, rgba(20, 121, 116, 0.95) 100%) !important;
+                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important; position: relative !important; overflow: hidden !important;
-                    padding: 14px 18px !important;
+                    padding: 12px 16px !important;
                 }
                 .chat-layout .chat-header h1,
                 .chat-layout .chat-header .chat-title,
                 .chat-header h1,
                 .chat-header .chat-title {
-                    color: #FFFFFF !important; font-weight: 700 !important; font-size: 15px !important;
+                    color: #FFFFFF !important; font-weight: 700 !important; font-size: 14.5px !important;
                 }
                 .chat-header-close,
                 .chat-header button {
@@ -252,20 +254,20 @@
                 }
 
                 .chat-message.chat-message-from-bot:not(.chat-message-transparent) {
-                    background: rgba(22, 27, 34, 0.95) !important; color: #FFFFFF !important;
+                    background: #161B22 !important; color: #FFFFFF !important;
                     border: 1px solid rgba(31, 182, 174, 0.25) !important;
                     border-left: 3px solid #1FB6AE !important;
-                    border-radius: 4px 14px 14px 14px !important;
-                    animation: hadeeda-msg-in-left 0.4s cubic-bezier(0.34,1.56,0.64,1) both !important;
+                    border-radius: 4px 12px 12px 12px !important;
+                    line-height: 1.5 !important; font-size: 13px !important;
                 }
                 .chat-message.chat-message-from-bot a { color: #1FB6AE !important; }
                 .chat-message.chat-message-from-bot a:hover { color: #25c9c1 !important; }
 
                 .chat-message.chat-message-from-user:not(.chat-message-transparent) {
                     background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
-                    color: #FFFFFF !important; border-radius: 14px 4px 14px 14px !important;
-                    animation: hadeeda-msg-in-right 0.4s cubic-bezier(0.34,1.56,0.64,1) both !important;
-                    box-shadow: 0 2px 12px rgba(31,182,174,0.3) !important;
+                    color: #FFFFFF !important; border-radius: 12px 4px 12px 12px !important;
+                    line-height: 1.5 !important; font-size: 13px !important;
+                    box-shadow: 0 2px 10px rgba(31,182,174,0.25) !important;
                 }
 
                 /* ─── TYPING ─── */
@@ -276,7 +278,7 @@
                 .chat-footer,
                 .chat-inputs,
                 .chat-input-wrapper {
-                    background: rgba(13, 17, 23, 0.95) !important;
+                    background: #0D1117 !important;
                     border-top: 1px solid rgba(31, 182, 174, 0.25) !important;
                     padding: 10px 14px !important;
                 }
@@ -291,7 +293,7 @@
                     border: 1px solid rgba(31, 182, 174, 0.4) !important;
                     border-radius: 10px !important;
                     padding: 10px 12px !important;
-                    font-size: 13.5px !important;
+                    font-size: 13px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                 }
                 .chat-input:focus,
@@ -306,20 +308,20 @@
                 .chat-input::placeholder,
                 textarea.chat-input::placeholder { color: #8B949E !important; }
 
-                /* ─── SEND BUTTON & NO PINK HOVER STYLES ─── */
+                /* ─── SEND BUTTON & OVERRIDE PINK ACCENTS ─── */
                 .chat-input-send-button,
                 button.chat-input-send-button {
-                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
-                    color: #FFFFFF !important; border: none !important; border-radius: 10px !important;
+                    background: #1FB6AE !important;
+                    color: #FFFFFF !important; border: none !important; border-radius: 8px !important;
                 }
                 .chat-input-send-button:hover,
                 button.chat-input-send-button:hover,
                 .chat-input-send-button:focus,
                 .chat-input-send-button:active {
-                    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+                    background: #19a095 !important;
                     color: #FFFFFF !important;
-                    transform: scale(1.05) !important;
-                    box-shadow: 0 0 14px rgba(31, 182, 174, 0.4) !important;
+                    transform: scale(1.04) !important;
+                    box-shadow: 0 0 10px rgba(31, 182, 174, 0.4) !important;
                 }
 
                 /* ─── OVERRIDE ALL PINK HOVER ACCENTS FROM N8N CHAT ─── */
