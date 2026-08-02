@@ -11,7 +11,6 @@
 
     /**
      * Parse NDJSON text (from n8n Formatter node) into clean Markdown text.
-     * Extracts all type="item" content fields and concatenates them.
      */
     function parseNDJSON(text) {
         if (!text || !text.includes('"type"')) return null;
@@ -27,36 +26,22 @@
                 } else if (obj && obj.type === 'error' && obj.content) {
                     return 'As-salamu alaykum! I am currently synchronizing my AI workflow. Please try again in a moment, InshaAllah!';
                 }
-            } catch (e) {
-                // Not valid JSON line, skip
-            }
+            } catch (e) {}
         }
         return result || null;
     }
 
-    /**
-     * Extract clean output text from any response format.
-     */
     function extractOutput(text) {
         if (!text) return '';
-
-        // Catch CSRF or Frappe error responses gracefully
         if (text.includes('CSRFTokenError') || text.includes('exc_type') || text.includes('Invalid Request')) {
             return 'As-salamu alaykum! I am ready to assist you. Please send your message again, InshaAllah!';
         }
-
         const ndjsonResult = parseNDJSON(text);
         if (ndjsonResult) return ndjsonResult;
-
         try {
             const data = JSON.parse(text);
-
-            if (data.message && typeof data.message === 'object' && data.message.output) {
-                return data.message.output;
-            }
-            if (data.message && typeof data.message === 'string') {
-                return data.message;
-            }
+            if (data.message && typeof data.message === 'object' && data.message.output) return data.message.output;
+            if (data.message && typeof data.message === 'string') return data.message;
             if (data.output) return data.output;
             if (Array.isArray(data) && data.length > 0) {
                 const item = data[0];
@@ -65,9 +50,38 @@
                 if (item.message) return item.message;
             }
             return text;
-        } catch (e) {
-            return text;
-        }
+        } catch (e) { return text; }
+    }
+
+    /** Inject copy buttons into chat messages */
+    function injectCopyButtons() {
+        const messages = document.querySelectorAll('.chat-message:not(.chat-message-transparent):not([data-hadeeda-copy])');
+        messages.forEach(msg => {
+            msg.setAttribute('data-hadeeda-copy', '1');
+            const textEl = msg.querySelector('.chat-message-markdown, .chat-message-text, p');
+            if (!textEl) return;
+
+            const btn = document.createElement('button');
+            btn.className = 'hadeeda-copy-btn';
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            btn.title = 'Copy';
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const text = textEl.innerText || textEl.textContent || '';
+                navigator.clipboard.writeText(text.trim()).then(() => {
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+                    btn.classList.add('hadeeda-copy-done');
+                    setTimeout(() => {
+                        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+                        btn.classList.remove('hadeeda-copy-done');
+                    }, 2000);
+                });
+            });
+
+            // Wrap message content for relative positioning
+            msg.style.position = 'relative';
+            msg.appendChild(btn);
+        });
     }
 
     async function initChat() {
@@ -78,22 +92,18 @@
 
             if (!config.enabled) return;
 
-            // Load @n8n/chat stylesheet
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/style.css';
             document.head.appendChild(link);
 
-            // Import createChat from @n8n/chat bundle
             const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat@1.30.2/dist/chat.bundle.es.js');
 
             const proxyUrl = window.location.origin + '/api/method/bismillah_ethiobiz.api.chat_webhook_proxy';
 
-            // Intercept fetch calls to the proxy URL and inject CSRF token header
             const originalFetch = window.fetch;
             window.fetch = async function (url, options) {
                 const urlStr = typeof url === 'string' ? url : (url && url.url ? url.url : '');
-
                 if (urlStr.includes('chat_webhook_proxy')) {
                     try {
                         const opts = options || {};
@@ -105,29 +115,23 @@
                                 opts.headers['X-Frappe-CSRF-Token'] = frappe.csrf_token;
                             }
                         }
-
                         const response = await originalFetch.call(window, url, opts);
                         const rawText = await response.text();
                         const cleanOutput = extractOutput(rawText);
-
                         return new Response(JSON.stringify({ output: cleanOutput }), {
-                            status: 200,
-                            statusText: 'OK',
+                            status: 200, statusText: 'OK',
                             headers: { 'Content-Type': 'application/json' }
                         });
                     } catch (fetchErr) {
                         console.warn('HADEEDA proxy fetch error:', fetchErr);
-                        return new Response(JSON.stringify({ output: 'As-salamu alaykum! I am ready to assist you. Please try again, InshaAllah!' }), {
-                            status: 200,
-                            headers: { 'Content-Type': 'application/json' }
+                        return new Response(JSON.stringify({ output: 'As-salamu alaykum! Please try again, InshaAllah!' }), {
+                            status: 200, headers: { 'Content-Type': 'application/json' }
                         });
                     }
                 }
-
                 return originalFetch.call(window, url, options);
             };
 
-            // Inject theme CSS — modern translucent glassmorphism theme
             const style = document.createElement('style');
             style.textContent = `
                 :root {
@@ -158,7 +162,6 @@
                     --chat--window--z-index: 9999;
                 }
 
-                /* ─── KEYFRAMES ─── */
                 @keyframes hadeeda-toggle-enter {
                     0%   { opacity: 0; transform: scale(0.3) translateY(40px); }
                     50%  { opacity: 1; transform: scale(1.08) translateY(-4px); }
@@ -262,6 +265,7 @@
                     border-radius: 4px 12px 12px 12px !important;
                     line-height: 1.5 !important; font-size: 13px !important;
                     backdrop-filter: blur(8px) !important;
+                    position: relative !important;
                 }
                 .chat-message.chat-message-from-bot a { color: #1FB6AE !important; }
                 .chat-message.chat-message-from-bot a:hover { color: #25c9c1 !important; }
@@ -271,25 +275,24 @@
                     color: #FFFFFF !important; border-radius: 12px 4px 12px 12px !important;
                     line-height: 1.5 !important; font-size: 13px !important;
                     box-shadow: 0 2px 10px rgba(31,182,174,0.25) !important;
+                    position: relative !important;
                 }
 
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                /* ─── CLEAN FOOTER & SIMPLE INPUT TEXTBOX ─── */
+                /* ─── CLEAN BORDERLESS FOOTER & SIMPLE INPUT ─── */
                 .chat-layout .chat-footer,
                 .chat-footer,
                 .chat-inputs,
                 .chat-input-wrapper {
-                    background: rgba(13, 17, 23, 0.8) !important;
+                    background: rgba(13, 17, 23, 0.85) !important;
                     backdrop-filter: blur(12px) !important;
                     -webkit-backdrop-filter: blur(12px) !important;
-                    border-top: 1px solid rgba(31, 182, 174, 0.25) !important;
-                    border-bottom: none !important;
-                    border-left: none !important;
-                    border-right: none !important;
-                    padding: 10px 14px !important;
+                    border: none !important;
+                    padding: 10px 12px !important;
                     box-shadow: none !important;
+                    margin: 0 !important;
                 }
 
                 .chat-input,
@@ -297,62 +300,90 @@
                 input.chat-input,
                 .chat-inputs textarea,
                 .chat-inputs input {
-                    background: rgba(22, 27, 34, 0.85) !important;
+                    background: rgba(255, 255, 255, 0.06) !important;
                     color: #FFFFFF !important;
-                    border: 1px solid rgba(31, 182, 174, 0.35) !important;
-                    border-radius: 10px !important;
-                    padding: 10px 12px !important;
-                    font-size: 13px !important;
+                    border: none !important;
+                    border-radius: 12px !important;
+                    padding: 11px 14px !important;
+                    font-size: 13.5px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     box-shadow: none !important;
+                    transition: background 0.2s ease !important;
                 }
                 .chat-input:focus,
                 textarea.chat-input:focus,
                 input.chat-input:focus {
-                    background: rgba(28, 35, 51, 0.95) !important;
+                    background: rgba(255, 255, 255, 0.1) !important;
                     color: #FFFFFF !important;
-                    border-color: #1FB6AE !important;
-                    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.25) !important;
+                    border: none !important;
+                    box-shadow: none !important;
                     outline: none !important;
                 }
                 .chat-input::placeholder,
-                textarea.chat-input::placeholder { color: #8B949E !important; }
+                textarea.chat-input::placeholder { color: rgba(255,255,255,0.45) !important; }
 
-                /* ─── ATTACHMENT BUTTON & SEND BUTTON ─── */
+                /* ─── ATTACHMENT & SEND BUTTONS ─── */
                 .chat-footer button:not(.chat-input-send-button),
                 .chat-file-upload-button {
-                    background: rgba(255, 255, 255, 0.08) !important;
-                    color: #1FB6AE !important;
-                    border: 1px solid rgba(31, 182, 174, 0.25) !important;
+                    background: transparent !important;
+                    color: rgba(255,255,255,0.5) !important;
+                    border: none !important;
                     border-radius: 10px !important;
                     transition: all 0.2s ease !important;
                 }
                 .chat-footer button:not(.chat-input-send-button):hover,
                 .chat-file-upload-button:hover {
-                    background: rgba(31, 182, 174, 0.2) !important;
-                    color: #FFFFFF !important;
-                    border-color: #1FB6AE !important;
+                    background: rgba(255,255,255,0.08) !important;
+                    color: #1FB6AE !important;
+                    border: none !important;
                 }
 
                 .chat-input-send-button,
                 button.chat-input-send-button {
-                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
-                    color: #FFFFFF !important; border: none !important; border-radius: 8px !important;
-                    box-shadow: 0 2px 8px rgba(31, 182, 174, 0.3) !important;
+                    background: #1FB6AE !important;
+                    color: #FFFFFF !important; border: none !important; border-radius: 10px !important;
+                    box-shadow: none !important;
+                    transition: all 0.2s ease !important;
                 }
                 .chat-input-send-button:hover,
                 button.chat-input-send-button:hover,
                 .chat-input-send-button:focus,
                 .chat-input-send-button:active {
-                    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+                    background: #25c9c1 !important;
                     color: #FFFFFF !important;
                     transform: scale(1.04) !important;
-                    box-shadow: 0 4px 14px rgba(31, 182, 174, 0.45) !important;
+                    box-shadow: none !important;
+                    border: none !important;
                 }
 
-                /* ─── OVERRIDE ALL PINK HOVER ACCENTS ─── */
+                /* ─── COPY BUTTON ON EACH MESSAGE ─── */
+                .hadeeda-copy-btn {
+                    position: absolute !important;
+                    bottom: 6px !important; right: 6px !important;
+                    background: rgba(255,255,255,0.08) !important;
+                    color: rgba(255,255,255,0.45) !important;
+                    border: none !important; border-radius: 6px !important;
+                    width: 26px !important; height: 26px !important;
+                    display: flex !important; align-items: center !important; justify-content: center !important;
+                    cursor: pointer !important; padding: 0 !important;
+                    opacity: 0 !important; transition: all 0.2s ease !important;
+                    z-index: 5 !important;
+                }
+                .chat-message:hover .hadeeda-copy-btn {
+                    opacity: 1 !important;
+                }
+                .hadeeda-copy-btn:hover {
+                    background: rgba(31, 182, 174, 0.25) !important;
+                    color: #1FB6AE !important;
+                    border: none !important;
+                }
+                .hadeeda-copy-btn.hadeeda-copy-done {
+                    color: #1FB6AE !important;
+                    opacity: 1 !important;
+                }
+
+                /* ─── OVERRIDE PINK ACCENTS ─── */
                 a:hover,
-                button:hover,
                 .chat-action-button:hover,
                 .chat-chip:hover,
                 .chat-welcome-button:hover {
@@ -365,7 +396,7 @@
                 .chat-messages-list::-webkit-scrollbar-track { background: transparent !important; }
                 .chat-messages-list::-webkit-scrollbar-thumb { background: #1FB6AE !important; border-radius: 3px !important; }
 
-                /* ─── MOBILE RESPONSIVE ─── */
+                /* ─── MOBILE ─── */
                 @media (max-width: 480px) {
                     .chat-window-wrapper .chat-window {
                         width: calc(100vw - 1rem) !important;
@@ -413,6 +444,17 @@
                     },
                 },
             });
+
+            // Observe DOM for new messages and inject copy buttons
+            setTimeout(() => {
+                injectCopyButtons();
+                const chatBody = document.querySelector('.chat-messages-list') || document.querySelector('.chat-body');
+                if (chatBody) {
+                    const observer = new MutationObserver(() => { injectCopyButtons(); });
+                    observer.observe(chatBody, { childList: true, subtree: true });
+                }
+            }, 1500);
+
         } catch (e) {
             console.warn('HADEEDA Chat init failed:', e);
         }
