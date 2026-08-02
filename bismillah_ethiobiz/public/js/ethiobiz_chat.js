@@ -285,21 +285,43 @@
                 .chat-layout .chat-footer,
                 .chat-footer,
                 .chat-inputs,
-                .chat-input-wrapper {
+                .chat-input-wrapper,
+                [class*="chat-footer"],
+                [class*="chat-inputs"],
+                [class*="chat-input-wrapper"] {
                     background: rgba(13, 17, 23, 0.85) !important;
                     backdrop-filter: blur(12px) !important;
                     -webkit-backdrop-filter: blur(12px) !important;
                     border: none !important;
+                    border-top: none !important;
+                    border-bottom: none !important;
+                    border-left: none !important;
+                    border-right: none !important;
                     padding: 10px 12px !important;
                     box-shadow: none !important;
+                    outline: none !important;
                     margin: 0 !important;
+                }
+                /* Kill ALL borders inside footer */
+                .chat-footer *,
+                [class*="chat-footer"] *,
+                .chat-inputs *,
+                [class*="chat-inputs"] * {
+                    border: none !important;
+                    border-top: none !important;
+                    border-bottom: none !important;
+                    border-left: none !important;
+                    border-right: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                 }
 
                 .chat-input,
                 textarea.chat-input,
                 input.chat-input,
                 .chat-inputs textarea,
-                .chat-inputs input {
+                .chat-inputs input,
+                [class*="chat-input"]:not(button):not([class*="send"]) {
                     background: rgba(255, 255, 255, 0.06) !important;
                     color: #FFFFFF !important;
                     border: none !important;
@@ -308,11 +330,22 @@
                     font-size: 13.5px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     box-shadow: none !important;
+                    outline: none !important;
+                    /* Instant resize — no slow animation */
                     transition: background 0.2s ease !important;
+                    transition-property: background !important;
+                }
+                /* Override textarea height transition to be instant */
+                .chat-inputs textarea,
+                textarea.chat-input,
+                [class*="chat-input"] textarea {
+                    transition: background 0.2s ease !important;
+                    transition-property: background-color, background !important;
                 }
                 .chat-input:focus,
                 textarea.chat-input:focus,
-                input.chat-input:focus {
+                input.chat-input:focus,
+                [class*="chat-input"]:not(button):focus {
                     background: rgba(255, 255, 255, 0.1) !important;
                     color: #FFFFFF !important;
                     border: none !important;
@@ -320,7 +353,8 @@
                     outline: none !important;
                 }
                 .chat-input::placeholder,
-                textarea.chat-input::placeholder { color: rgba(255,255,255,0.45) !important; }
+                textarea.chat-input::placeholder,
+                [class*="chat-input"]::placeholder { color: rgba(255,255,255,0.45) !important; }
 
                 /* ─── ATTACHMENT & SEND BUTTONS ─── */
                 .chat-footer button:not(.chat-input-send-button),
@@ -445,15 +479,34 @@
                 },
             });
 
-            // Observe DOM for new messages and inject copy buttons
-            setTimeout(() => {
+            // Robust copy button injection: observe the whole chat wrapper
+            // so we catch messages whether the window is already open or opened later
+            function setupCopyObserver() {
                 injectCopyButtons();
                 const chatBody = document.querySelector('.chat-messages-list') || document.querySelector('.chat-body');
                 if (chatBody) {
                     const observer = new MutationObserver(() => { injectCopyButtons(); });
                     observer.observe(chatBody, { childList: true, subtree: true });
+                    return true;
                 }
-            }, 1500);
+                return false;
+            }
+            // Try immediately, retry on toggle click and via interval
+            if (!setupCopyObserver()) {
+                // Watch for the chat window to appear in DOM
+                const wrapperObserver = new MutationObserver(() => {
+                    if (setupCopyObserver()) wrapperObserver.disconnect();
+                });
+                wrapperObserver.observe(document.body, { childList: true, subtree: true });
+                // Also retry on toggle click
+                document.addEventListener('click', function onToggle(e) {
+                    if (e.target.closest('.chat-window-toggle') || e.target.closest('[class*="toggle"]')) {
+                        setTimeout(() => {
+                            if (setupCopyObserver()) document.removeEventListener('click', onToggle);
+                        }, 500);
+                    }
+                });
+            }
 
         } catch (e) {
             console.warn('HADEEDA Chat init failed:', e);
