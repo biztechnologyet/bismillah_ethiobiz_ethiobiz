@@ -54,7 +54,7 @@
         if (!el) return false;
         if (el.tagName === 'TEXTAREA') return true;
         if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || !el.type)) return true;
-        if (el.isContentEditable || el.closest('.ql-editor') || el.closest('.note-editable') || el.closest('[contenteditable="true"]')) return true;
+        if (el.isContentEditable || el.closest('.ql-editor') || el.closest('.note-editable') || el.closest('[contenteditable="true"]') || el.classList.contains('mentionable')) return true;
         return false;
     }
 
@@ -71,10 +71,14 @@
         const qlContainer = el.closest('.ql-container');
         if (qlContainer && qlContainer.__quill) return qlContainer.__quill;
 
-        // 3. Search DOM elements for Quill instance
+        // 3. Search sibling/parent elements for Quill instance
         const qlEditor = el.closest('.ql-editor');
-        if (qlEditor && qlEditor.previousElementSibling && qlEditor.previousElementSibling.__quill) {
-            return qlEditor.previousElementSibling.__quill;
+        if (qlEditor) {
+            const parent = qlEditor.parentElement;
+            if (parent && parent.__quill) return parent.__quill;
+            if (qlEditor.previousElementSibling && qlEditor.previousElementSibling.__quill) {
+                return qlEditor.previousElementSibling.__quill;
+            }
         }
         return null;
     }
@@ -188,7 +192,6 @@
                 q.insertText(idx, text);
             }
 
-            // Trigger change event on container
             if (q.container) {
                 q.container.dispatchEvent(new Event('input', { bubbles: true }));
                 $(q.container).trigger('change');
@@ -424,6 +427,16 @@
                     border-radius: 6px; background: rgba(31, 182, 174, 0.1);
                     border: 1px solid rgba(31, 182, 174, 0.2); color: #1FB6AE;
                 }
+
+                @media (max-width: 600px) {
+                    .hadeeda-inline-popup {
+                        width: calc(100vw - 24px) !important;
+                        left: 12px !important;
+                        top: auto !important;
+                        bottom: 16px !important;
+                        max-height: 80vh !important;
+                    }
+                }
             `;
             document.head.appendChild(headerStyle);
         }
@@ -538,19 +551,44 @@
         generatedResponse = '';
     }
 
-    // Global listener for '/' trigger on any editable field
+    // 1. Desktop Keyboard Trigger Listener (keyup)
     document.addEventListener('keyup', function (e) {
         if (popup && e.key === 'Escape') {
             closePopup();
             return;
         }
 
-        if (e.key !== TRIGGER) return;
+        if (e.key === TRIGGER || e.keyCode === 191) {
+            const el = e.target;
+            if (popup || !isEditable(el) || isExcluded(el)) return;
+            showPopup(el);
+        }
+    });
 
+    // 2. Mobile Soft Keyboard Trigger Listener (input)
+    document.addEventListener('input', function (e) {
+        if (popup) return;
         const el = e.target;
-        if (popup || !isEditable(el) || isExcluded(el)) return;
+        if (!isEditable(el) || isExcluded(el)) return;
 
-        showPopup(el);
+        let lastChar = '';
+        if (e.data) {
+            lastChar = e.data;
+        } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            const val = el.value || '';
+            const pos = el.selectionStart || val.length;
+            lastChar = val.charAt(pos - 1);
+        } else {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                const text = sel.anchorNode ? sel.anchorNode.textContent : '';
+                lastChar = text.charAt(sel.anchorOffset - 1);
+            }
+        }
+
+        if (lastChar === TRIGGER) {
+            showPopup(el);
+        }
     });
 
     document.addEventListener('click', function (e) {
