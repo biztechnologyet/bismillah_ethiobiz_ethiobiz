@@ -50,8 +50,8 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.4.0",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0"
 ]
 
 # CSS for website (frontend/portal)
@@ -66,8 +66,8 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.4.0",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0"
 ]
 
 # ============================================

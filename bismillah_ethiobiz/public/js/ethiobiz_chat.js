@@ -127,7 +127,7 @@
                 return originalFetch.call(window, url, options);
             };
 
-            // Inject theme CSS — modern, simple translucent glassmorphism theme
+            // Inject theme CSS — modern translucent glassmorphism theme
             const style = document.createElement('style');
             style.textContent = `
                 :root {
@@ -137,11 +137,11 @@
                     --chat--color--secondary: #1FB6AE !important;
                     --chat--color-secondary-shade-50: #19a095 !important;
                     --chat--color-white: #FFFFFF !important;
-                    --chat--color-light: #161B22 !important;
-                    --chat--color-light-shade-50: #1C2333 !important;
-                    --chat--color-light-shade-100: #2D333B !important;
+                    --chat--color-light: rgba(22, 27, 34, 0.85) !important;
+                    --chat--color-light-shade-50: rgba(28, 35, 51, 0.85) !important;
+                    --chat--color-light-shade-100: rgba(45, 51, 59, 0.85) !important;
                     --chat--color-medium: #30363D !important;
-                    --chat--color-dark: #0D1117 !important;
+                    --chat--color-dark: rgba(13, 17, 23, 0.75) !important;
                     --chat--color-disabled: #484F58 !important;
                     --chat--color-typing: #1FB6AE !important;
                     --chat--window--width: 420px !important;
@@ -197,12 +197,11 @@
                     text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
                 }
                 .chat-window-wrapper .chat-window-toggle::after {
-                    content: 'H' !important; display: inline-flex !important;
-                    align-items: center !important; justify-content: center !important;
-                    width: 34px !important; height: 34px !important; border-radius: 50% !important;
-                    background: rgba(255,255,255,0.22) !important; font-weight: 800 !important;
-                    font-size: 16px !important; flex-shrink: 0 !important; order: 0 !important;
-                    color: #FFFFFF !important;
+                    content: '' !important; display: inline-block !important;
+                    width: 36px !important; height: 36px !important; border-radius: 50% !important;
+                    background-image: url('/assets/bismillah_ethiobiz/images/hadeeda_logo.png') !important;
+                    background-size: cover !important; background-position: center !important;
+                    background-repeat: no-repeat !important; flex-shrink: 0 !important; order: 0 !important;
                 }
                 .chat-window-wrapper .chat-window-toggle:hover {
                     background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
@@ -211,9 +210,10 @@
                     animation: none !important;
                 }
 
-                /* ─── MODERN TRANSLUCENT GLASS CHAT WINDOW ─── */
-                .chat-window-wrapper .chat-window {
-                    background: rgba(13, 17, 23, 0.92) !important;
+                /* ─── TRANSLUCENT GLASS CHAT WINDOW ─── */
+                .chat-window-wrapper .chat-window,
+                .chat-layout {
+                    background: rgba(13, 17, 23, 0.75) !important;
                     backdrop-filter: blur(20px) saturate(180%) !important;
                     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
                     border: 1px solid rgba(31, 182, 174, 0.35) !important;
@@ -225,7 +225,7 @@
                 /* ─── HEADER ─── */
                 .chat-layout .chat-header,
                 .chat-header {
-                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+                    background: linear-gradient(135deg, rgba(31, 182, 174, 0.95) 0%, rgba(20, 121, 116, 0.95) 100%) !important;
                     color: #FFFFFF !important; position: relative !important; overflow: hidden !important;
                     padding: 12px 16px !important;
                 }
@@ -246,19 +246,22 @@
                     border-radius: 50% !important;
                 }
 
-                /* ─── MESSAGES BODY ─── */
+                /* ─── MESSAGES BODY TRANSLUCENT ─── */
                 .chat-layout .chat-body,
                 .chat-body,
                 .chat-messages-list {
-                    background: transparent !important;
+                    background: rgba(13, 17, 23, 0.65) !important;
+                    backdrop-filter: blur(16px) !important;
+                    -webkit-backdrop-filter: blur(16px) !important;
                 }
 
                 .chat-message.chat-message-from-bot:not(.chat-message-transparent) {
-                    background: #161B22 !important; color: #FFFFFF !important;
+                    background: rgba(22, 27, 34, 0.88) !important; color: #FFFFFF !important;
                     border: 1px solid rgba(31, 182, 174, 0.25) !important;
                     border-left: 3px solid #1FB6AE !important;
                     border-radius: 4px 12px 12px 12px !important;
                     line-height: 1.5 !important; font-size: 13px !important;
+                    backdrop-filter: blur(8px) !important;
                 }
                 .chat-message.chat-message-from-bot a { color: #1FB6AE !important; }
                 .chat-message.chat-message-from-bot a:hover { color: #25c9c1 !important; }
@@ -273,14 +276,20 @@
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                /* ─── HIGH-CONTRAST TEXTBOX INPUT & FOOTER ─── */
+                /* ─── CLEAN FOOTER & SIMPLE INPUT TEXTBOX ─── */
                 .chat-layout .chat-footer,
                 .chat-footer,
                 .chat-inputs,
                 .chat-input-wrapper {
-                    background: #0D1117 !important;
+                    background: rgba(13, 17, 23, 0.8) !important;
+                    backdrop-filter: blur(12px) !important;
+                    -webkit-backdrop-filter: blur(12px) !important;
                     border-top: 1px solid rgba(31, 182, 174, 0.25) !important;
+                    border-bottom: none !important;
+                    border-left: none !important;
+                    border-right: none !important;
                     padding: 10px 14px !important;
+                    box-shadow: none !important;
                 }
 
                 .chat-input,
@@ -288,43 +297,60 @@
                 input.chat-input,
                 .chat-inputs textarea,
                 .chat-inputs input {
-                    background: #161B22 !important;
+                    background: rgba(22, 27, 34, 0.85) !important;
                     color: #FFFFFF !important;
-                    border: 1px solid rgba(31, 182, 174, 0.4) !important;
+                    border: 1px solid rgba(31, 182, 174, 0.35) !important;
                     border-radius: 10px !important;
                     padding: 10px 12px !important;
                     font-size: 13px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                    box-shadow: none !important;
                 }
                 .chat-input:focus,
                 textarea.chat-input:focus,
                 input.chat-input:focus {
-                    background: #1C2333 !important;
+                    background: rgba(28, 35, 51, 0.95) !important;
                     color: #FFFFFF !important;
                     border-color: #1FB6AE !important;
-                    box-shadow: 0 0 0 3px rgba(31, 182, 174, 0.25) !important;
+                    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.25) !important;
                     outline: none !important;
                 }
                 .chat-input::placeholder,
                 textarea.chat-input::placeholder { color: #8B949E !important; }
 
-                /* ─── SEND BUTTON & OVERRIDE PINK ACCENTS ─── */
+                /* ─── ATTACHMENT BUTTON & SEND BUTTON ─── */
+                .chat-footer button:not(.chat-input-send-button),
+                .chat-file-upload-button {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: #1FB6AE !important;
+                    border: 1px solid rgba(31, 182, 174, 0.25) !important;
+                    border-radius: 10px !important;
+                    transition: all 0.2s ease !important;
+                }
+                .chat-footer button:not(.chat-input-send-button):hover,
+                .chat-file-upload-button:hover {
+                    background: rgba(31, 182, 174, 0.2) !important;
+                    color: #FFFFFF !important;
+                    border-color: #1FB6AE !important;
+                }
+
                 .chat-input-send-button,
                 button.chat-input-send-button {
-                    background: #1FB6AE !important;
+                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important; border: none !important; border-radius: 8px !important;
+                    box-shadow: 0 2px 8px rgba(31, 182, 174, 0.3) !important;
                 }
                 .chat-input-send-button:hover,
                 button.chat-input-send-button:hover,
                 .chat-input-send-button:focus,
                 .chat-input-send-button:active {
-                    background: #19a095 !important;
+                    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
                     color: #FFFFFF !important;
                     transform: scale(1.04) !important;
-                    box-shadow: 0 0 10px rgba(31, 182, 174, 0.4) !important;
+                    box-shadow: 0 4px 14px rgba(31, 182, 174, 0.45) !important;
                 }
 
-                /* ─── OVERRIDE ALL PINK HOVER ACCENTS FROM N8N CHAT ─── */
+                /* ─── OVERRIDE ALL PINK HOVER ACCENTS ─── */
                 a:hover,
                 button:hover,
                 .chat-action-button:hover,
