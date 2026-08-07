@@ -20,6 +20,7 @@ def after_migrate():
         setup_custom_fields()
         setup_property_setters()
         update_existing_records()
+        setup_user_telegram_field()
         print("EthioBiz: Multi-company isolation setup complete.")
     except Exception as e:
         print(f"EthioBiz: Error in multi-company setup: {e}")
@@ -169,3 +170,27 @@ def fix_bad_defaults():
         print(f"  Fixed {len(ps_list)} property setters + {len(cf_list)} custom fields")
     else:
         print("  No bad defaults found.")
+
+
+def setup_user_telegram_field():
+    """Create the telegram_username custom field on the User doctype if missing."""
+    if frappe.db.exists("Custom Field", {"dt": "User", "fieldname": "telegram_username"}):
+        print("  telegram_username field already exists.")
+        return
+
+    create_custom_field(
+        "User",
+        {
+            "fieldname": "telegram_username",
+            "label": "Telegram Username",
+            "fieldtype": "Data",
+            "insert_after": "mobile_no",
+            "no_copy": 1,
+            "in_list_view": 0,
+            "in_standard_filter": 0,
+        },
+        ignore_validate=True,
+    )
+    frappe.db.updatedb("User")
+    frappe.db.commit()
+    print("  Created telegram_username field on User.")
