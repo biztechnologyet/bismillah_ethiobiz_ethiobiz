@@ -15,6 +15,63 @@ def _get_user_api_credentials(user):
     return api_key or "", api_secret or ""
 
 
+def _clean_text(value):
+    """Strip HTML tags and collapse whitespace for readable AI context."""
+    if not value:
+        return ""
+    try:
+        from frappe.utils import strip_html
+        text = strip_html(str(value))
+    except Exception:
+        text = str(value)
+    return " ".join(text.split())
+
+
+def _get_document_context(context):
+    """Resolve the inline AI field context (doctype/docname/field) into the
+    actual document content so the n8n workflow can act on the right record."""
+    if not context:
+        return ""
+    try:
+        ctx = json.loads(context) if isinstance(context, str) else (context or {})
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return ""
+    doctype = ctx.get("doctype") or ""
+    docname = ctx.get("docname") or ""
+    fieldname = ctx.get("field") or ""
+    if not doctype or not docname:
+        return ""
+
+    try:
+        if fieldname and frappe.db.get_value(doctype, docname, fieldname) is not None:
+            value = frappe.db.get_value(doctype, docname, fieldname)
+            if value:
+                return "[%s %s | %s]\n%s" % (doctype, docname, fieldname, _clean_text(value))
+
+        doc = frappe.get_doc(doctype, docname)
+        parts = []
+        for f in doc.meta.fields:
+            if not f.get("fieldname"):
+                continue
+            if f.get("fieldtype") not in (
+                "Text", "Small Text", "Long Text", "Text Editor", "Markdown Editor",
+                "Data", "Select", "Link", "Currency", "Int", "Float", "Percent", "Date",
+            ):
+                continue
+            val = doc.get(f.fieldname)
+            if val is None or val == "":
+                continue
+            if f.fieldtype in ("Currency", "Int", "Float", "Percent") and not val:
+                continue
+            parts.append("%s: %s" % (f.fieldname, _clean_text(val)))
+        if parts:
+            return "[%s %s]\n%s" % (doctype, docname, "\n".join(parts))
+        return "[%s %s]\n%s" % (doctype, docname, json.dumps(doc.as_dict(), default=str)[:2000])
+    except Exception as e:
+        frappe.logger("ethiobiz").error("_get_document_context error: %s" % e)
+        return ""
+
+
 @frappe.whitelist()
 def get_chat_config():
     user = frappe.session.user
@@ -114,6 +171,27 @@ def chat_webhook_proxy():
     except Exception:
         payload = dict(frappe.form_dict)
 
+    # Inject the user's API credentials server-side so the n8n workflow always
+    # receives the unmasked api_key/api_secret (same as chat_inline), regardless
+    # of what the @n8n/chat widget forwards in its client-side metadata.
+    if frappe.session.user and frappe.session.user != "Guest":
+        try:
+            user = frappe.session.user
+            api_key, api_secret = _get_user_api_credentials(user)
+            company = frappe.defaults.get_user_default("company") or ""
+            full_name = frappe.db.get_value("User", user, "full_name") or user
+
+            metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+            metadata["username"] = user
+            metadata["full_name"] = full_name
+            metadata["company"] = company
+            metadata["source"] = "widget"
+            metadata["api_key"] = api_key or ""
+            metadata["api_secret"] = api_secret or ""
+            payload["metadata"] = metadata
+        except Exception as e:
+            frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
+
     webhook_url = settings.chat_webhook_url
     if not webhook_url:
         return WerkzeugResponse(
@@ -190,11 +268,19 @@ def chat_inline(prompt, context=None):
     api_key, api_secret = _get_user_api_credentials(user)
     company = frappe.defaults.get_user_default("company") or ""
     full_name = frappe.db.get_value("User", user, "full_name") or user
+    document_content = _get_document_context(context)
+
+    # Embed the actual document content directly into the message so the
+    # n8n AI agent can act on the specific record the user is viewing,
+    # even if it does not read the metadata object.
+    chat_input = prompt
+    if document_content:
+        chat_input = "%s\n\n[DOCUMENT CONTEXT]\n%s" % (prompt, document_content)
 
     payload = {
         "action": "sendMessage",
         "sessionId": f"{user}::{company}" if company else user,
-        "chatInput": prompt,
+        "chatInput": chat_input,
         "metadata": {
             "source": "widget",
             "username": user,
@@ -203,6 +289,7 @@ def chat_inline(prompt, context=None):
             "api_key": api_key or "",
             "api_secret": api_secret or "",
             "field_context": context or "",
+            "document_content": document_content,
         }
     }
 
@@ -265,7 +352,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.3",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.4",
         "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
     ]
     for js in js_files:
