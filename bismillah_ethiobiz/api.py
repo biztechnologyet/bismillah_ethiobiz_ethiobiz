@@ -15,6 +15,59 @@ def _get_user_api_credentials(user):
     return api_key or "", api_secret or ""
 
 
+def _get_user_department_designation(user):
+    """Resolve a user's Department + Designation from the Employee doctype,
+    linked via Employee.user_id. A user may map to multiple Employee records;
+    deterministic resolution rule:
+      1. Prefer an Active employee.
+      2. Prefer one with a non-empty department/designation.
+      3. Otherwise first match.
+    Returns (department, designation); empty strings if no link found."""
+    if not user:
+        return "", ""
+    try:
+        rows = frappe.db.sql(
+            "SELECT name, status, department, designation FROM `tabEmployee` "
+            "WHERE user_id = %s",
+            user,
+            as_dict=True,
+        )
+    except Exception as e:
+        frappe.logger("ethiobiz").error("_get_user_department_designation error: %s" % e)
+        return "", ""
+
+    if not rows:
+        return "", ""
+
+    active = [r for r in rows if (r.get("status") or "").lower() == "active"]
+    pool = active if active else rows
+
+    def has_both(r):
+        return bool(r.get("department") and r.get("designation"))
+
+    for r in pool:
+        if has_both(r):
+            return r.get("department") or "", r.get("designation") or ""
+    for r in pool:
+        if r.get("department") or r.get("designation"):
+            return r.get("department") or "", r.get("designation") or ""
+    return "", ""
+
+
+def _get_user_language(user):
+    """User's language preference, falling back to the site default."""
+    try:
+        lang = frappe.db.get_value("User", user, "language")
+        if lang:
+            return lang
+    except Exception:
+        pass
+    try:
+        return _get_hadeeda_settings().default_language or "en"
+    except Exception:
+        return "en"
+
+
 def _clean_text(value):
     """Strip HTML tags and collapse whitespace for readable AI context."""
     if not value:
@@ -81,6 +134,7 @@ def get_chat_config():
     settings = _get_hadeeda_settings()
     api_key, api_secret = _get_user_api_credentials(user)
     company = frappe.defaults.get_user_default("company") or ""
+    department, designation = _get_user_department_designation(user)
 
     return {
         "webhook_url": settings.chat_webhook_url,
@@ -90,6 +144,9 @@ def get_chat_config():
         "email": frappe.db.get_value("User", user, "email") or "",
         "username": user,
         "company": company,
+        "department": department,
+        "designation": designation,
+        "language": _get_user_language(user),
         "api_key": api_key or "",
         "api_secret": api_secret or "",
         "bot_name": settings.bot_name or "HADEEDA",
@@ -180,11 +237,16 @@ def chat_webhook_proxy():
             api_key, api_secret = _get_user_api_credentials(user)
             company = frappe.defaults.get_user_default("company") or ""
             full_name = frappe.db.get_value("User", user, "full_name") or user
+            department, designation = _get_user_department_designation(user)
 
             metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
             metadata["username"] = user
+            metadata["user_id"] = user
             metadata["full_name"] = full_name
             metadata["company"] = company
+            metadata["department"] = department
+            metadata["designation"] = designation
+            metadata["language"] = _get_user_language(user)
             metadata["source"] = "widget"
             metadata["api_key"] = api_key or ""
             metadata["api_secret"] = api_secret or ""
@@ -255,6 +317,52 @@ def chat_webhook_proxy():
         return WerkzeugResponse(body, status=200, content_type="application/json")
 
 
+@frappe.whitelist(methods=["POST"])
+def get_user_credentials(username=None, telegram_username=None):
+    """Return a user's API key + DECRYPTED API secret and profile as raw JSON.
+
+    Replaces the n8n erpNext 'Get user' node which reads the api_secret Password
+    field and gets the encrypted blob. This endpoint decrypts server-side via
+    get_decrypted_password so CIO can authenticate. Authenticated callers only.
+    """
+    frappe.flags.ignore_csrf = True
+    from werkzeug.wrappers import Response as WerkzeugResponse
+
+    caller = frappe.session.user
+    if not caller or caller == "Guest":
+        return WerkzeugResponse(
+            json.dumps({"error": "Authentication required"}),
+            status=401, content_type="application/json"
+        )
+
+    target = username or ""
+    if not target and telegram_username:
+        target = frappe.db.get_value("User", {"telegram_username": telegram_username}, "name") or ""
+    if not target:
+        return WerkzeugResponse(
+            json.dumps({"error": "User not found"}),
+            status=404, content_type="application/json"
+        )
+
+    api_key, api_secret = _get_user_api_credentials(target)
+    company = frappe.defaults.get_user_default("company", target) or ""
+    department, designation = _get_user_department_designation(target)
+
+    data = {
+        "name": target,
+        "full_name": frappe.db.get_value("User", target, "full_name") or target,
+        "first_name": frappe.db.get_value("User", target, "first_name") or "",
+        "company": company,
+        "department": department,
+        "designation": designation,
+        "enabled": 1 if frappe.db.get_value("User", target, "enabled") else 0,
+        "language": frappe.db.get_value("User", target, "language") or "",
+        "api_key": api_key or "",
+        "api_secret": api_secret or "",
+    }
+    return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
+
+
 @frappe.whitelist()
 def chat_inline(prompt, context=None):
     user = frappe.session.user
@@ -268,6 +376,7 @@ def chat_inline(prompt, context=None):
     api_key, api_secret = _get_user_api_credentials(user)
     company = frappe.defaults.get_user_default("company") or ""
     full_name = frappe.db.get_value("User", user, "full_name") or user
+    department, designation = _get_user_department_designation(user)
     document_content = _get_document_context(context)
 
     # Embed the actual document content directly into the message so the
@@ -284,8 +393,12 @@ def chat_inline(prompt, context=None):
         "metadata": {
             "source": "widget",
             "username": user,
+            "user_id": user,
             "full_name": full_name,
             "company": company,
+            "department": department,
+            "designation": designation,
+            "language": _get_user_language(user),
             "api_key": api_key or "",
             "api_secret": api_secret or "",
             "field_context": context or "",

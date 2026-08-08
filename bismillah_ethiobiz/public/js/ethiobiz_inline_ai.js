@@ -591,6 +591,13 @@
         }
     });
 
+    // 3. Double-click trigger: open the inline AI popup on an editable field
+    document.addEventListener('dblclick', function (e) {
+        const el = e.target;
+        if (popup || !isEditable(el) || isExcluded(el)) return;
+        showPopup(el);
+    });
+
     document.addEventListener('click', function (e) {
         if (popup && !popup.contains(e.target) && targetState && e.target !== targetState.el) {
             closePopup();

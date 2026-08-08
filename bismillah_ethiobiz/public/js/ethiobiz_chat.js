@@ -510,9 +510,13 @@
                 allowedFilesMimeTypes: config.allowed_mime_types || '',
                 metadata: {
                     username: config.username,
+                    user_id: config.username,
                     full_name: config.full_name,
                     email: config.email,
                     company: config.company,
+                    department: config.department || '',
+                    designation: config.designation || '',
+                    language: config.language || config.default_language || 'en',
                     source: 'widget',
                     api_key: config.api_key,
                     api_secret: config.api_secret,

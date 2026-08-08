@@ -55,6 +55,7 @@ def boot_session(bootinfo):
             "excluded_doctypes": settings.excluded_doctypes or "",
             "excluded_fields": settings.excluded_fields or "",
             "default_language": settings.default_language or "en",
+            "user_language": frappe.db.get_value("User", frappe.session.user, "language") or "",
             "allow_file_uploads": bool(settings.allow_file_uploads),
             "allowed_mime_types": settings.allowed_mime_types or "",
         }
@@ -74,6 +75,7 @@ def boot_session(bootinfo):
             "excluded_doctypes": "",
             "excluded_fields": "",
             "default_language": "en",
+            "user_language": "",
             "allow_file_uploads": False,
             "allowed_mime_types": "",
         }
