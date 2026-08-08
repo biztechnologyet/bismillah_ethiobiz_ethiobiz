@@ -2,6 +2,7 @@ import frappe
 import requests
 import json
 import re
+from frappe.utils.password import get_decrypted_password
 
 
 def _get_hadeeda_settings():
@@ -10,8 +11,8 @@ def _get_hadeeda_settings():
 
 def _get_user_api_credentials(user):
     api_key = frappe.db.get_value("User", user, "api_key")
-    api_secret = frappe.db.get_value("User", user, "api_secret")
-    return api_key, api_secret
+    api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
+    return api_key or "", api_secret or ""
 
 
 @frappe.whitelist()
@@ -264,7 +265,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.2",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.3",
         "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
     ]
     for js in js_files:

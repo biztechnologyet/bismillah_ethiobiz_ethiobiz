@@ -467,6 +467,8 @@
                     email: config.email,
                     company: config.company,
                     source: 'widget',
+                    api_key: config.api_key,
+                    api_secret: config.api_secret,
                 },
                 i18n: {
                     en: {
