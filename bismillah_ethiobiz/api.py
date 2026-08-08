@@ -466,7 +466,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.4.0"
+        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0"
     ]
     for js in js_files:
         if js not in context.web_include_js:
