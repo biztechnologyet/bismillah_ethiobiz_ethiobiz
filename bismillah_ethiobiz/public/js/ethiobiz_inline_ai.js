@@ -237,7 +237,7 @@
         }
     }
 
-    function showPopup(el) {
+    function showPopup(el, x, y) {
         if (popup) closePopup();
 
         targetState = captureTargetState(el);
@@ -310,15 +310,29 @@
 
         const rect = el.getBoundingClientRect();
         const popupWidth = 440;
-        let left = rect.left;
+        let left;
+        if (typeof x === 'number' && typeof y === 'number') {
+            left = x + 12;
+        } else {
+            left = rect.left;
+        }
         if (left + popupWidth > window.innerWidth - 16) {
             left = window.innerWidth - popupWidth - 16;
         }
         if (left < 16) left = 16;
 
-        let top = rect.bottom + 8;
+        let top;
+        if (typeof x === 'number' && typeof y === 'number') {
+            top = y + 12;
+        } else {
+            top = rect.bottom + 8;
+        }
         if (top + 320 > window.innerHeight) {
-            top = Math.max(16, rect.top - 320);
+            if (typeof y === 'number') {
+                top = Math.max(16, y - 320);
+            } else {
+                top = Math.max(16, rect.top - 320);
+            }
         }
 
         popup.style.left = left + 'px';
@@ -591,11 +605,12 @@
         }
     });
 
-    // 3. Double-click trigger: open the inline AI popup on an editable field
+    // 3. Double-click trigger: open the inline AI popup anywhere, at the cursor position
     document.addEventListener('dblclick', function (e) {
+        if (popup) return;
         const el = e.target;
-        if (popup || !isEditable(el) || isExcluded(el)) return;
-        showPopup(el);
+        if (isExcluded(el)) return;
+        showPopup(el, e.clientX, e.clientY);
     });
 
     document.addEventListener('click', function (e) {
