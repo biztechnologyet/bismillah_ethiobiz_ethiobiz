@@ -21,6 +21,51 @@ DEFAULTS = {
     "cache_version": "1",
 }
 
+
+def _doctype_json():
+    import os
+
+    base = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, "doctype", "dobiz_pwa_settings", "dobiz_pwa_settings.json")
+    with open(path, "r", encoding="utf-8") as fh:
+        return frappe._dict(__import__("json").load(fh))
+
+
+def create_doctype():
+    """Create the DOBiz PWA Settings doctype + seed defaults (idempotent, no migrate)."""
+    if frappe.db.exists("DocType", "DOBiz PWA Settings"):
+        if not frappe.db.exists("DOBiz PWA Settings", "DOBiz PWA Settings"):
+            _seed_defaults()
+        return {"created": 0}
+
+    dt_def = _doctype_json()
+    doc = frappe.get_doc({
+        "doctype": "DocType",
+        "name": dt_def["name"],
+        "module": "EthioBiz Theme",
+        "custom": 1,
+        "issingle": 1,
+        "fields": dt_def["fields"],
+        "permissions": dt_def.get("permissions", [{"role": "System Manager", "read": 1, "write": 1}]),
+    })
+    doc.insert(ignore_permissions=True)
+    _seed_defaults()
+    frappe.db.commit()
+    frappe.clear_cache()
+    return {"created": 1}
+
+
+def _seed_defaults():
+    doc = frappe.new_doc("DOBiz PWA Settings")
+    for k, v in DEFAULTS.items():
+        doc.set(k, v)
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+
+def _doc():
+    return frappe.get_doc("DOBiz PWA Settings")
+
 FALLBACK_ICONS = {
     "icon_192": "/assets/bismillah_ethiobiz/pwa/icons/icon-192.png",
     "icon_512": "/assets/bismillah_ethiobiz/pwa/icons/icon-512.png",

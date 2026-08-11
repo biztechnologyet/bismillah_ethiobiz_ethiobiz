@@ -44,39 +44,8 @@ def after_install():
             doc.insert(ignore_permissions=True)
 
     # Create DOBiz PWA Settings doctype if not exists (custom=1, not auto-created by migrate)
-    if not frappe.db.exists("DocType", "DOBiz PWA Settings"):
-        json_path = os.path.join(os.path.dirname(__file__), "doctype", "dobiz_pwa_settings", "dobiz_pwa_settings.json")
-        if os.path.exists(json_path):
-            with open(json_path) as f:
-                dt_def = json.load(f)
-            doc = frappe.get_doc({
-                "doctype": "DocType",
-                "name": dt_def["name"],
-                "module": "EthioBiz Theme",
-                "custom": 1,
-                "issingle": 1,
-                "fields": dt_def["fields"],
-                "permissions": dt_def.get("permissions", [{"role": "System Manager", "read": 1, "write": 1}]),
-            })
-            doc.insert(ignore_permissions=True)
-            # Seed the single record with defaults
-            frappe.get_doc({
-                "doctype": "DOBiz PWA Settings",
-                "name": "DOBiz PWA Settings",
-                "enabled": 1,
-                "app_name": "DOBiz Smart ERP - EthioBiz",
-                "short_name": "DOBiz",
-                "description": "Rooted in Ethiopia. Built for Humanity.",
-                "theme_color": "#1FB6AE",
-                "background_color": "#0E1A1A",
-                "start_url": "/app/dobiz",
-                "display": "standalone",
-                "offline_title": "You are offline",
-                "offline_message": "Reconnect to continue using DOBiz",
-                "install_prompt_enabled": 1,
-                "cache_version": "1",
-            }).insert(ignore_permissions=True)
-            frappe.db.commit()
+    from bismillah_ethiobiz.pwa_settings import create_doctype as _create_pwa_doctype
+    _create_pwa_doctype()
 
     frappe.db.commit()
     print("EthioBiz Theme installed successfully!")
