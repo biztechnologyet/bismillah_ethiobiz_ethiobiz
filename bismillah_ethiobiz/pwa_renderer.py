@@ -15,7 +15,7 @@ import frappe
 from frappe import _
 from frappe.website.page_renderers.base_renderer import BaseRenderer
 
-_SW_ROUTES = ("sw.js", "manifest.webmanifest")
+_SW_ROUTES = ("sw.js", "manifest.webmanifest", "offline.html", "offline")
 
 
 def _settings():
@@ -49,7 +49,22 @@ class PWAStaticFile(BaseRenderer):
 
         if self.path == "manifest.webmanifest":
             return self._render_manifest(cfg)
+        if self.path in ("offline.html", "offline"):
+            return self._render_offline()
         return self._render_sw(cfg)
+
+    # ------------------------------------------------------------------
+    def _render_offline(self):
+        content = _bundled_file("offline.html")
+        if not content:
+            return self.build_response("", http_status_code=404)
+        return self.build_response(
+            content,
+            headers={
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+            },
+        )
 
     # ------------------------------------------------------------------
     def _icon(self, cfg, field, fallback):
@@ -94,7 +109,7 @@ class PWAStaticFile(BaseRenderer):
 
         values = {
             "CACHE_VERSION": str(cfg.cache_version or "1"),
-            "OFFLINE_URL": "/offline.html",
+            "OFFLINE_URL": "/offline",
             "OFFLINE_TITLE": (cfg.offline_title or "You are offline").replace("\\", "\\\\").replace("'", "\\'"),
             "OFFLINE_MESSAGE": (cfg.offline_message or "Reconnect to continue using DOBiz").replace("\\", "\\\\").replace("'", "\\'"),
             "APP_SHORT_NAME": (cfg.short_name or "DOBiz").replace("\\", "\\\\").replace("'", "\\'"),

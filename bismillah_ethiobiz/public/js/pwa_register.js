@@ -25,6 +25,23 @@
 
     var config = Object.assign({}, DEFAULTS);
 
+    var LS_INSTALLED = "dobiz_pwa_installed";
+
+    function isAlreadyInstalled() {
+        try {
+            if (localStorage.getItem(LS_INSTALLED)) return true;
+        } catch (e) {}
+        if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+        if (navigator.standalone) return true;
+        return false;
+    }
+
+    function markInstalled() {
+        try {
+            localStorage.setItem(LS_INSTALLED, "1");
+        } catch (e) {}
+    }
+
     function injectManifest() {
         if (document.querySelector('link[rel="manifest"]')) return;
         var link = document.createElement("link");
@@ -73,12 +90,13 @@
     function showPill() {
         if (!config.install_prompt_enabled || pill) return;
         if (!isAppRoute()) return;
+        if (isAlreadyInstalled()) return;
 
         pill = document.createElement("button");
-        pill.textContent = "Install " + (config.short_name || "DOBiz");
+        pill.textContent = "Install DOBiz SmartERP";
         pill.setAttribute("type", "button");
         pill.style.cssText = [
-            "position:fixed", "right:24px", "bottom:24px", "z-index:99999",
+            "position:fixed", "left:24px", "bottom:24px", "z-index:99999",
             "display:inline-flex", "align-items:center", "gap:8px",
             "padding:12px 22px", "border:0", "border-radius:999px",
             "background:linear-gradient(135deg,#1FB6AE,#149a93)", "color:#fff",
@@ -111,6 +129,7 @@
 
     window.addEventListener("appinstalled", function () {
         installPrompt = null;
+        markInstalled();
         hidePill();
     });
 

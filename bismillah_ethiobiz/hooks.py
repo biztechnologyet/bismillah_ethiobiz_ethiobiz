@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
@@ -52,7 +52,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
-    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.0"
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.2"
 ]
 
 # CSS for website (frontend/portal)
@@ -69,7 +69,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
-    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.0"
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.2"
 ]
 
 # ============================================
