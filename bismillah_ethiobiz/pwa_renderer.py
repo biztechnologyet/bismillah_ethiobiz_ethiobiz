@@ -116,6 +116,8 @@ class PWAStaticFile(BaseRenderer):
             "start_url": cfg.start_url or "/app/dobiz",
             "scope": "/",
             "display": cfg.display or "standalone",
+            "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+            "prefer_related_applications": False,
             "background_color": cfg.background_color or "#0E1A1A",
             "theme_color": cfg.theme_color or "#1FB6AE",
             "categories": ["business", "productivity", "finance"],
