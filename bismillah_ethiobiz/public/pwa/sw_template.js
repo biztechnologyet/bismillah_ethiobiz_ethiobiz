@@ -56,7 +56,7 @@ function offlinePage() {
         "font-size:15px;font-weight:600;cursor:pointer}",
         "button:hover{background:#18a49c}",
         "</style></head><body><div class=\"card\">",
-        '<img src="/assets/bismillah_ethiobiz/images/ethiobiz-glass-logo.png" alt="', APP_NAME, '">',
+        '<img src="/assets/bismillah_ethiobiz/pwa/icons/icon-192.png" alt="', APP_NAME, '">',
         "<h1>", OFFLINE_TITLE, "</h1><p>", OFFLINE_MESSAGE, "</p>",
         "<button onclick=\"location.reload()\">Retry</button>",
         "</div></body></html>"

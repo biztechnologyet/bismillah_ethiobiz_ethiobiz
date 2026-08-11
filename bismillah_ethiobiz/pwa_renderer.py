@@ -71,13 +71,45 @@ class PWAStaticFile(BaseRenderer):
         value = cfg.get(field)
         return value if value else fallback
 
-    def _render_manifest(self, cfg):
+    _ICON_SIZES = (16, 32, 48, 72, 96, 128, 144, 180, 192, 256, 384, 512)
+
+    def _manifest_icons(self, cfg):
         fallback = {
             "icon_192": "/assets/bismillah_ethiobiz/pwa/icons/icon-192.png",
             "icon_512": "/assets/bismillah_ethiobiz/pwa/icons/icon-512.png",
             "icon_maskable": "/assets/bismillah_ethiobiz/pwa/icons/icon-512-maskable.png",
         }
+        icons = []
+        for size in self._ICON_SIZES:
+            if size == 512:
+                src = self._icon(cfg, "icon_512", fallback["icon_512"])
+            elif size == 192:
+                src = self._icon(cfg, "icon_192", fallback["icon_192"])
+            else:
+                src = "/assets/bismillah_ethiobiz/pwa/icons/icon-%d.png" % size
+            icons.append({
+                "src": src,
+                "sizes": "%dx%d" % (size, size),
+                "type": "image/png",
+                "purpose": "any",
+            })
+        icons.append({
+            "src": self._icon(cfg, "icon_maskable", fallback["icon_maskable"]),
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable",
+        })
+        icons.append({
+            "src": "/assets/bismillah_ethiobiz/pwa/icons/icon-512-monochrome.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "monochrome",
+        })
+        return icons
+
+    def _render_manifest(self, cfg):
         manifest = {
+            "id": "/",
             "name": cfg.app_name or "DOBiz Smart ERP - EthioBiz",
             "short_name": cfg.short_name or "DOBiz",
             "description": cfg.description or "Rooted in Ethiopia. Built for Humanity.",
@@ -88,11 +120,7 @@ class PWAStaticFile(BaseRenderer):
             "theme_color": cfg.theme_color or "#1FB6AE",
             "categories": ["business", "productivity", "finance"],
             "lang": "en",
-            "icons": [
-                {"src": self._icon(cfg, "icon_192", fallback["icon_192"]), "sizes": "192x192", "type": "image/png", "purpose": "any"},
-                {"src": self._icon(cfg, "icon_512", fallback["icon_512"]), "sizes": "512x512", "type": "image/png", "purpose": "any"},
-                {"src": self._icon(cfg, "icon_maskable", fallback["icon_maskable"]), "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
-            ],
+            "icons": self._manifest_icons(cfg),
         }
         return self.build_response(
             json.dumps(manifest, indent=2),
