@@ -2,7 +2,7 @@
  "doctype": "DocType",
  "name": "HADEEDA Settings",
  "module": "EthioBiz Theme",
- "custom": 0,
+ "custom": 1,
  "issingle": 1,
  "fields": [
   {
@@ -65,6 +65,12 @@
    "fieldname": "chat_enabled",
    "fieldtype": "Check",
    "label": "Enable Chat Widget",
+   "default": "1"
+  },
+  {
+   "fieldname": "enable_streaming",
+   "fieldtype": "Check",
+   "label": "Enable Streaming Responses",
    "default": "1"
   },
   {

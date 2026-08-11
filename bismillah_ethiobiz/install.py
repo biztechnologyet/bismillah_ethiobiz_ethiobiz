@@ -3,7 +3,7 @@
 EthioBiz Theme - Installation Hooks
 """
 
-import frappe
+import frappe, json, os
 
 def after_install():
     """Run after app installation"""
@@ -26,8 +26,25 @@ def after_install():
             })
             doc.insert(ignore_permissions=True)
     
+    # Create HADEEDA Settings doctype if not exists (custom=1, not auto-created by migrate)
+    if not frappe.db.exists("DocType", "HADEEDA Settings"):
+        json_path = os.path.join(os.path.dirname(__file__), "doctype", "hadeeda_settings", "hadeeda_settings.json")
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                dt_def = json.load(f)
+            doc = frappe.get_doc({
+                "doctype": "DocType",
+                "name": dt_def["name"],
+                "module": "EthioBiz Theme",
+                "custom": 1,
+                "issingle": 1,
+                "fields": dt_def["fields"],
+                "permissions": dt_def.get("permissions", [{"role": "System Manager", "read": 1, "write": 1}]),
+            })
+            doc.insert(ignore_permissions=True)
+    
     frappe.db.commit()
-    print("✅ EthioBiz Theme installed successfully!")
+    print("EthioBiz Theme installed successfully!")
 
 def before_uninstall():
     """Run before app uninstallation"""
