@@ -51,7 +51,8 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.0"
 ]
 
 # CSS for website (frontend/portal)
@@ -67,12 +68,18 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.0"
 ]
 
 # ============================================
 # WEBSITE SETTINGS
 # ============================================
+
+# Custom page renderers (PWA: /sw.js + /manifest.webmanifest)
+page_renderer = [
+    "bismillah_ethiobiz.pwa_renderer.PWAStaticFile"
+]
 
 # Website route rules
 website_route_rules = [
