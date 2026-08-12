@@ -10,10 +10,22 @@ def _get_hadeeda_settings():
 
 
 def _get_user_api_credentials(user):
-    api_key = frappe.db.get_value("User", user, "api_key")
-    api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
-    return api_key or "", api_secret or ""
+    if not user or user == "Guest":
+        return "", ""
+    try:
+        api_key = frappe.db.get_value("User", user, "api_key")
+        api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
 
+        if not api_key or not api_secret:
+            from frappe.core.doctype.user.user import generate_keys
+            keys = generate_keys(user)
+            api_key = keys.get("api_key") or frappe.db.get_value("User", user, "api_key")
+            api_secret = keys.get("api_secret") or get_decrypted_password("User", user, "api_secret", raise_exception=False)
+
+        return api_key or "", api_secret or ""
+    except Exception as e:
+        frappe.logger("ethiobiz").error("_get_user_api_credentials error for %s: %s" % (user, e))
+        return "", ""
 
 def _get_user_department_designation(user):
     """Resolve a user's Department + Designation from the Employee doctype,
