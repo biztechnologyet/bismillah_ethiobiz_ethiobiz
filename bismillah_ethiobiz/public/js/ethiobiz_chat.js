@@ -281,7 +281,7 @@
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                /* ─── CLEAN BORDERLESS FOOTER & SIMPLE INPUT ─── */
+                /* ─── PREMIUM INPUT AREA (ChatGPT-inspired) ─── */
                 .chat-layout .chat-footer,
                 .chat-footer,
                 .chat-inputs,
@@ -289,144 +289,182 @@
                 [class*="chat-footer"],
                 [class*="chat-inputs"],
                 [class*="chat-input-wrapper"] {
-                    background: rgba(13, 17, 23, 0.85) !important;
-                    backdrop-filter: blur(12px) !important;
-                    -webkit-backdrop-filter: blur(12px) !important;
+                    background: rgba(13, 17, 23, 0.92) !important;
+                    backdrop-filter: blur(16px) saturate(1.4) !important;
+                    -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
                     border: none !important;
-                    border-top: none !important;
-                    border-bottom: none !important;
-                    border-left: none !important;
-                    border-right: none !important;
-                    padding: 10px 12px !important;
-                    box-shadow: none !important;
+                    border-top: 1px solid rgba(255,255,255,0.06) !important;
+                    padding: 10px 12px 12px 12px !important;
+                    box-shadow: 0 -4px 24px rgba(0,0,0,0.25) !important;
                     outline: none !important;
                     margin: 0 !important;
                     display: flex !important;
                     align-items: flex-end !important;
-                    gap: 8px !important;
+                    gap: 6px !important;
                 }
-                /* Kill ALL borders inside footer */
+
+                /* ─── UNIFIED INPUT CONTAINER (pill shape wrapping textarea + buttons) ─── */
+                .chat-inputs,
+                .chat-input-wrapper,
+                [class*="chat-inputs"],
+                [class*="chat-input-wrapper"] {
+                    background: rgba(255, 255, 255, 0.06) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+                    border-radius: 24px !important;
+                    padding: 6px 6px 6px 16px !important;
+                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.18), 0 0 0 0 transparent !important;
+                    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease !important;
+                    display: flex !important;
+                    align-items: flex-end !important;
+                    gap: 4px !important;
+                    flex: 1 1 auto !important;
+                    min-width: 0 !important;
+                }
+                .chat-inputs:focus-within,
+                .chat-input-wrapper:focus-within,
+                [class*="chat-inputs"]:focus-within,
+                [class*="chat-input-wrapper"]:focus-within {
+                    background: rgba(255, 255, 255, 0.09) !important;
+                    border-color: rgba(31, 182, 174, 0.5) !important;
+                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12), 0 0 0 3px rgba(31, 182, 174, 0.12) !important;
+                }
+
+                /* Kill stray borders inside the input wrapper */
                 .chat-footer *,
-                [class*="chat-footer"] *,
-                .chat-inputs *,
-                [class*="chat-inputs"] * {
-                    border: none !important;
-                    border-top: none !important;
-                    border-bottom: none !important;
+                [class*="chat-footer"] * {
                     border-left: none !important;
                     border-right: none !important;
                     outline: none !important;
-                    box-shadow: none !important;
                 }
 
+                /* ─── TEXTAREA ─── */
                 .chat-input,
                 textarea.chat-input,
                 input.chat-input,
                 .chat-inputs textarea,
                 .chat-inputs input,
-                [class*="chat-input"]:not(button):not([class*="send"]) {
+                [class*="chat-input"]:not(button):not([class*="send"]):not([class*="upload"]) {
                     flex: 1 1 auto !important;
                     min-width: 0 !important;
-                    background: rgba(255, 255, 255, 0.07) !important;
-                    color: #FFFFFF !important;
-                    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-                    border-radius: 18px !important;
-                    padding: 10px 16px !important;
-                    font-size: 13.5px !important;
-                    line-height: 1.4 !important;
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-                    box-shadow: inset 0 1px 2px rgba(0,0,0,0.15) !important;
-                    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
-                    transition-property: background, border-color, box-shadow !important;
+                    background: transparent !important;
+                    color: #F0F6FC !important;
+                    border: none !important;
+                    border-radius: 0 !important;
+                    padding: 8px 4px !important;
+                    font-size: 14px !important;
+                    line-height: 1.45 !important;
+                    letter-spacing: 0.01em !important;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+                    box-shadow: none !important;
                     resize: none !important;
                     overflow-y: auto !important;
-                    max-height: 96px !important;
+                    max-height: 120px !important;
                 }
-                /* Override textarea height transition to be instant */
                 .chat-inputs textarea,
                 textarea.chat-input,
                 [class*="chat-input"] textarea {
-                    transition: background 0.2s ease !important;
-                    transition-property: background-color, background, border-color, box-shadow !important;
+                    transition: none !important;
                 }
                 .chat-input:focus,
                 textarea.chat-input:focus,
                 input.chat-input:focus,
                 [class*="chat-input"]:not(button):focus {
-                    background: rgba(255, 255, 255, 0.1) !important;
-                    color: #FFFFFF !important;
-                    border: 1px solid #1FB6AE !important;
-                    box-shadow: 0 0 0 3px rgba(31, 182, 174, 0.18), inset 0 1px 2px rgba(0,0,0,0.15) !important;
+                    background: transparent !important;
+                    color: #F0F6FC !important;
+                    border: none !important;
+                    box-shadow: none !important;
                     outline: none !important;
                 }
                 .chat-input::placeholder,
                 textarea.chat-input::placeholder,
-                [class*="chat-input"]::placeholder { color: rgba(255,255,255,0.4) !important; }
+                [class*="chat-input"]::placeholder {
+                    color: rgba(255,255,255,0.35) !important;
+                    font-style: italic !important;
+                    font-weight: 300 !important;
+                }
 
-                /* ─── ATTACHMENT & SEND BUTTONS ─── */
+                /* ─── ATTACHMENT BUTTON (inside pill, subtle) ─── */
                 .chat-footer button:not(.chat-input-send-button),
                 .chat-file-upload-button {
                     background: transparent !important;
-                    color: rgba(255,255,255,0.55) !important;
+                    color: rgba(255,255,255,0.4) !important;
                     border: none !important;
-                    border-radius: 50% !important;
-                    width: 36px !important;
-                    height: 36px !important;
-                    min-width: 36px !important;
+                    border-radius: 12px !important;
+                    width: 34px !important;
+                    height: 34px !important;
+                    min-width: 34px !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     padding: 0 !important;
                     cursor: pointer !important;
-                    transition: all 0.2s ease !important;
+                    transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease !important;
+                    flex-shrink: 0 !important;
                 }
                 .chat-footer button:not(.chat-input-send-button):hover,
                 .chat-file-upload-button:hover {
-                    background: rgba(255,255,255,0.1) !important;
+                    background: rgba(31,182,174,0.12) !important;
                     color: #1FB6AE !important;
                     border: none !important;
-                    transform: scale(1.06) !important;
+                    transform: scale(1.1) !important;
                 }
                 .chat-footer button:not(.chat-input-send-button):active,
                 .chat-file-upload-button:active {
-                    transform: scale(0.94) !important;
+                    transform: scale(0.92) !important;
+                }
+                .chat-footer button:not(.chat-input-send-button) svg,
+                .chat-file-upload-button svg {
+                    width: 18px !important;
+                    height: 18px !important;
                 }
 
-                /* ─── SEND BUTTON: circular gradient with soft shadow ─── */
+                /* ─── SEND BUTTON (inside pill, prominent gradient) ─── */
+                @keyframes hadeeda-send-pulse {
+                    0%, 100% { box-shadow: 0 2px 8px rgba(31,182,174,0.3); }
+                    50% { box-shadow: 0 2px 14px rgba(31,182,174,0.5); }
+                }
                 .chat-input-send-button,
                 button.chat-input-send-button {
-                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+                    background: linear-gradient(145deg, #1FB6AE 0%, #17918a 50%, #147974 100%) !important;
                     color: #FFFFFF !important;
                     border: none !important;
-                    border-radius: 50% !important;
-                    width: 40px !important;
-                    height: 40px !important;
-                    min-width: 40px !important;
+                    border-radius: 14px !important;
+                    width: 38px !important;
+                    height: 38px !important;
+                    min-width: 38px !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     padding: 0 !important;
                     cursor: pointer !important;
-                    box-shadow: 0 3px 10px rgba(31,182,174,0.35) !important;
-                    transition: all 0.2s ease !important;
+                    box-shadow: 0 2px 8px rgba(31,182,174,0.3) !important;
+                    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1) !important;
+                    flex-shrink: 0 !important;
                 }
                 .chat-input-send-button:hover,
-                button.chat-input-send-button:hover,
-                .chat-input-send-button:focus,
-                button.chat-input-send-button:focus,
-                .chat-input-send-button:active,
-                button.chat-input-send-button:active {
-                    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+                button.chat-input-send-button:hover {
+                    background: linear-gradient(145deg, #25c9c1 0%, #1FB6AE 50%, #19a095 100%) !important;
                     color: #FFFFFF !important;
-                    transform: scale(1.08) !important;
-                    box-shadow: 0 5px 16px rgba(31,182,174,0.5) !important;
+                    transform: scale(1.12) !important;
+                    box-shadow: 0 4px 18px rgba(31,182,174,0.5) !important;
                     border: none !important;
                     outline: none !important;
                 }
+                .chat-input-send-button:focus,
+                button.chat-input-send-button:focus {
+                    outline: none !important;
+                    border: none !important;
+                    box-shadow: 0 0 0 3px rgba(31,182,174,0.25), 0 2px 10px rgba(31,182,174,0.4) !important;
+                }
+                .chat-input-send-button:active,
+                button.chat-input-send-button:active {
+                    transform: scale(0.95) !important;
+                    box-shadow: 0 1px 4px rgba(31,182,174,0.3) !important;
+                }
                 .chat-input-send-button:disabled,
                 button.chat-input-send-button:disabled {
-                    background: rgba(255,255,255,0.12) !important;
-                    color: rgba(255,255,255,0.35) !important;
+                    background: rgba(255,255,255,0.06) !important;
+                    color: rgba(255,255,255,0.2) !important;
                     box-shadow: none !important;
                     cursor: not-allowed !important;
                     transform: none !important;
@@ -435,6 +473,11 @@
                 button.chat-input-send-button svg {
                     width: 18px !important;
                     height: 18px !important;
+                    transition: transform 0.15s ease !important;
+                }
+                .chat-input-send-button:hover svg,
+                button.chat-input-send-button:hover svg {
+                    transform: translateX(1px) translateY(-1px) !important;
                 }
 
                 /* ─── COPY BUTTON ON EACH MESSAGE ─── */
