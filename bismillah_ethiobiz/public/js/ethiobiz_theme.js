@@ -547,6 +547,21 @@ frappe.ready(function () {
             }
         });
 
+
+        // D. Hide Navbar Help Dropdown Third-Party Items (Frappe School, Support, Forum, Docs)
+        const helpDropdown = document.querySelector('.dropdown-help .dropdown-menu, #help-menu, .navbar-nav .dropdown-menu');
+        if (helpDropdown) {
+            const thirdPartyLabels = ['Frappe School', 'Frappe Support', 'User Forum', 'Documentation', 'Report an Issue'];
+            helpDropdown.querySelectorAll('.dropdown-item, a').forEach(function(item) {
+                var text = (item.textContent || '').trim();
+                if (thirdPartyLabels.indexOf(text) !== -1 || 
+                    (item.href && (item.href.indexOf('frappe') !== -1 || item.href.indexOf('erpnext') !== -1 || item.href.indexOf('discuss.') !== -1))) {
+                    item.style.display = 'none';
+                    item.classList.add('ethiobiz-hidden');
+                }
+            });
+        }
+
     }
 
     let sidebarObserver = null;
