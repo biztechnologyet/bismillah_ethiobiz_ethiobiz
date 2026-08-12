@@ -107,6 +107,7 @@
                 if (urlStr.includes('chat_webhook_proxy')) {
                     try {
                         const opts = options || {};
+                        opts.credentials = 'same-origin';
                         opts.headers = opts.headers || {};
                         if (frappe && frappe.csrf_token) {
                             if (opts.headers instanceof Headers) {

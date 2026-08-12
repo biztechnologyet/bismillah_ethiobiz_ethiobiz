@@ -243,11 +243,14 @@ def chat_webhook_proxy():
     # Inject the user's API credentials server-side so the n8n workflow always
     # receives the unmasked api_key/api_secret (same as chat_inline), regardless
     # of what the @n8n/chat widget forwards in its client-side metadata.
-    if frappe.session.user and frappe.session.user != "Guest":
+    user = frappe.session.user if (frappe.session.user and frappe.session.user != "Guest") else None
+    if not user and isinstance(payload.get("metadata"), dict):
+        user = payload["metadata"].get("username") or payload["metadata"].get("user_id")
+
+    if user and user != "Guest" and frappe.db.exists("User", user):
         try:
-            user = frappe.session.user
             api_key, api_secret = _get_user_api_credentials(user)
-            company = frappe.defaults.get_user_default("company") or ""
+            company = frappe.defaults.get_user_default("company", user) or ""
             full_name = frappe.db.get_value("User", user, "full_name") or user
             department, designation = _get_user_department_designation(user)
 
