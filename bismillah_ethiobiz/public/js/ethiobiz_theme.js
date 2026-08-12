@@ -11,6 +11,19 @@
 (function () {
     'use strict';
 
+    // BISMALLAH - Auto-clear stale PWA CacheStorage and force asset refresh
+    if (window.caches) {
+        try {
+            caches.keys().then(function(names) {
+                for (var i = 0; i < names.length; i++) {
+                    if (names[i].indexOf('ethiobiz') !== -1 || names[i].indexOf('frappe') !== -1) {
+                        caches.delete(names[i]);
+                    }
+                }
+            });
+        } catch (e) {}
+    }
+
     if (window.__ethiobizBrandInitialized) return;
     if (document.querySelector('.web-form') || window.location.pathname.match(/\/(trial|new|edit)\//)) {
         window.__ethiobizBrandInitialized = true;
@@ -546,7 +559,6 @@ frappe.ready(function () {
                 }
             }
         });
-
 
         // D. Hide Navbar Help Dropdown Third-Party Items (Frappe School, Support, Forum, Docs)
         const helpDropdown = document.querySelector('.dropdown-help .dropdown-menu, #help-menu, .navbar-nav .dropdown-menu');
