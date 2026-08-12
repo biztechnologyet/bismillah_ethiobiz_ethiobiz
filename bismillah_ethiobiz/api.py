@@ -91,6 +91,18 @@ def _get_user_language(user):
         return "en"
 
 
+
+def _get_user_industry_religion(user):
+    """Read the custom industry and religion fields from the User record."""
+    if not user:
+        return "", ""
+    try:
+        industry = frappe.db.get_value("User", user, "industry") or ""
+        religion = frappe.db.get_value("User", user, "religion") or ""
+        return industry, religion
+    except Exception:
+        return "", ""
+
 def _clean_text(value):
     """Strip HTML tags and collapse whitespace for readable AI context."""
     if not value:
@@ -169,6 +181,8 @@ def get_chat_config():
         "company": company,
         "department": department,
         "designation": designation,
+        "industry": _get_user_industry_religion(user)[0],
+        "religion": _get_user_industry_religion(user)[1],
         "language": _get_user_language(user),
         "api_key": api_key or "",
         "api_secret": api_secret or "",
@@ -273,6 +287,9 @@ def chat_webhook_proxy():
             metadata["department"] = department
             metadata["designation"] = designation
             metadata["language"] = _get_user_language(user)
+            industry, religion = _get_user_industry_religion(user)
+            metadata["industry"] = industry
+            metadata["religion"] = religion
             metadata["source"] = "widget"
             metadata["api_key"] = api_key or ""
             metadata["api_secret"] = api_secret or ""
@@ -385,6 +402,8 @@ def get_user_credentials(username=None, telegram_username=None):
         "language": frappe.db.get_value("User", target, "language") or "",
         "api_key": api_key or "",
         "api_secret": api_secret or "",
+        "industry": _get_user_industry_religion(target)[0],
+        "religion": _get_user_industry_religion(target)[1],
     }
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
@@ -424,6 +443,8 @@ def chat_inline(prompt, context=None):
             "company": company,
             "department": department,
             "designation": designation,
+            "industry": _get_user_industry_religion(user)[0],
+            "religion": _get_user_industry_religion(user)[1],
             "language": _get_user_language(user),
             "api_key": api_key or "",
             "api_secret": api_secret or "",

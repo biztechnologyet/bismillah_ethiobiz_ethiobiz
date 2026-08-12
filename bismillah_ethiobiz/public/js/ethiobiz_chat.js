@@ -538,6 +538,8 @@
                     source: 'widget',
                     api_key: config.api_key,
                     api_secret: config.api_secret,
+                    industry: config.industry || '',
+                    religion: config.religion || '',
                 },
                 i18n: {
                     en: {

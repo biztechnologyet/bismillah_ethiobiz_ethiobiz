@@ -22,6 +22,7 @@ def after_migrate():
         setup_property_setters()
         update_existing_records()
         setup_user_telegram_field()
+        setup_user_industry_religion_fields()
         clean_third_party_workspace_links()
         print("EthioBiz: Multi-company isolation & workspace link sanitization complete.")
     except Exception as e:
@@ -183,3 +184,43 @@ def setup_user_telegram_field():
     frappe.db.updatedb("User")
     frappe.db.commit()
     print("  Created telegram_username field on User.")
+
+
+def setup_user_industry_religion_fields():
+    """Create industry (Link) and religion (Select) custom fields on the User doctype if missing."""
+    from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+    fields_to_create = [
+        {
+            "fieldname": "industry",
+            "label": "Industry",
+            "fieldtype": "Link",
+            "options": "Industry Type",
+            "insert_after": "company",
+            "no_copy": 1,
+            "in_list_view": 0,
+            "in_standard_filter": 0,
+        },
+        {
+            "fieldname": "religion",
+            "label": "Religion",
+            "fieldtype": "Select",
+            "options": "\nMuslim\nChristian\nJew",
+            "insert_after": "industry",
+            "no_copy": 1,
+            "in_list_view": 0,
+            "in_standard_filter": 0,
+        },
+    ]
+
+    for field_def in fields_to_create:
+        if frappe.db.exists("Custom Field", {"dt": "User", "fieldname": field_def["fieldname"]}):
+            print(f"  {field_def['fieldname']} field already exists on User.")
+            continue
+
+        create_custom_field("User", field_def, ignore_validate=True)
+        print(f"  Created {field_def['fieldname']} field on User.")
+
+    frappe.db.updatedb("User")
+    frappe.db.commit()
+
