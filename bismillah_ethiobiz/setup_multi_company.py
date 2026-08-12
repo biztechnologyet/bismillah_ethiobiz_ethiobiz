@@ -197,7 +197,7 @@ def setup_user_industry_religion_fields():
             "label": "Industry",
             "fieldtype": "Link",
             "options": "Industry Type",
-            "insert_after": "company",
+            "insert_after": "user_type",
             "no_copy": 1,
             "in_list_view": 0,
             "in_standard_filter": 0,
