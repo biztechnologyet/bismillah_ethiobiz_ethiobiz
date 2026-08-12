@@ -17,12 +17,23 @@ def _get_user_api_credentials(user):
         api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
 
         if not api_key or not api_secret:
-            from frappe.core.doctype.user.user import generate_keys
-            keys = generate_keys(user)
-            api_key = keys.get("api_key") or frappe.db.get_value("User", user, "api_key")
-            api_secret = keys.get("api_secret") or get_decrypted_password("User", user, "api_secret", raise_exception=False)
+            user_doc = frappe.get_doc("User", user)
+            if not user_doc.api_key:
+                api_key = frappe.generate_hash(length=15)
+                user_doc.api_key = api_key
+                user_doc.save(ignore_permissions=True)
 
-        return api_key or "", api_secret or ""
+            if not api_secret:
+                api_secret = frappe.generate_hash(length=15)
+                from frappe.utils.password import set_encrypted_password
+                set_encrypted_password("User", user, api_secret, "api_secret")
+
+            frappe.db.commit()
+
+        api_key = api_key or frappe.db.get_value("User", user, "api_key") or ""
+        api_secret = api_secret or get_decrypted_password("User", user, "api_secret", raise_exception=False) or ""
+
+        return api_key, api_secret
     except Exception as e:
         frappe.logger("ethiobiz").error("_get_user_api_credentials error for %s: %s" % (user, e))
         return "", ""
