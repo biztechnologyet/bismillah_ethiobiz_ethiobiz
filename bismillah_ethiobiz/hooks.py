@@ -10,25 +10,25 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
-    "/assets/bismillah_ethiobiz/css/generated_theme.css"
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.7.1",
+    "/assets/bismillah_ethiobiz/css/generated_theme.css?v=2.7.1"
 ]
 app_include_js = [
-    "/assets/bismillah_ethiobiz/js/bismillah_ethiobiz.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js"
+    "/assets/bismillah_ethiobiz/js/bismillah_ethiobiz.js?v=2.7.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.7.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.7.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.1"
 ]
 
 # include js, css files in header of web template (login, etc)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
-    "/assets/bismillah_ethiobiz/css/generated_theme.css"
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.7.1",
+    "/assets/bismillah_ethiobiz/css/generated_theme.css?v=2.7.1"
 ]
 web_include_js = [
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.7.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.7.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.1"
 ]
 
 # Client-side bindings
