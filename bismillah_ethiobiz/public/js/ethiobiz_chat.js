@@ -540,6 +540,8 @@
                     api_secret: config.api_secret,
                     industry: config.industry || '',
                     religion: config.religion || '',
+                    user_behaviour: config.user_behaviour || '',
+                    company_industry: config.company_industry || '',
                 },
                 i18n: {
                     en: {

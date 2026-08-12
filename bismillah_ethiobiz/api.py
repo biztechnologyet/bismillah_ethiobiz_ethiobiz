@@ -103,6 +103,19 @@ def _get_user_industry_religion(user):
     except Exception:
         return "", ""
 
+
+def _get_user_behaviour_and_company_industry(user, company=None):
+    """Retrieve user_behaviour from User and industry from Company."""
+    if not user:
+        return "", ""
+    try:
+        user_behaviour = frappe.db.get_value("User", user, "user_behaviour") or ""
+        target_company = company or frappe.defaults.get_user_default("company", user) or ""
+        company_industry = frappe.db.get_value("Company", target_company, "industry") if target_company else ""
+        return user_behaviour or "", company_industry or ""
+    except Exception:
+        return "", ""
+
 def _clean_text(value):
     """Strip HTML tags and collapse whitespace for readable AI context."""
     if not value:
@@ -183,6 +196,8 @@ def get_chat_config():
         "designation": designation,
         "industry": _get_user_industry_religion(user)[0],
         "religion": _get_user_industry_religion(user)[1],
+        "user_behaviour": _get_user_behaviour_and_company_industry(user)[0],
+        "company_industry": _get_user_behaviour_and_company_industry(user)[1],
         "language": _get_user_language(user),
         "api_key": api_key or "",
         "api_secret": api_secret or "",
@@ -290,6 +305,9 @@ def chat_webhook_proxy():
             industry, religion = _get_user_industry_religion(user)
             metadata["industry"] = industry
             metadata["religion"] = religion
+            ub, ci = _get_user_behaviour_and_company_industry(user, company)
+            metadata["user_behaviour"] = ub
+            metadata["company_industry"] = ci
             metadata["source"] = "widget"
             metadata["api_key"] = api_key or ""
             metadata["api_secret"] = api_secret or ""
@@ -404,6 +422,8 @@ def get_user_credentials(username=None, telegram_username=None):
         "api_secret": api_secret or "",
         "industry": _get_user_industry_religion(target)[0],
         "religion": _get_user_industry_religion(target)[1],
+        "user_behaviour": _get_user_behaviour_and_company_industry(target, company)[0],
+        "company_industry": _get_user_behaviour_and_company_industry(target, company)[1],
     }
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
@@ -445,6 +465,8 @@ def chat_inline(prompt, context=None):
             "designation": designation,
             "industry": _get_user_industry_religion(user)[0],
             "religion": _get_user_industry_religion(user)[1],
+            "user_behaviour": _get_user_behaviour_and_company_industry(user, company)[0],
+            "company_industry": _get_user_behaviour_and_company_industry(user, company)[1],
             "language": _get_user_language(user),
             "api_key": api_key or "",
             "api_secret": api_secret or "",

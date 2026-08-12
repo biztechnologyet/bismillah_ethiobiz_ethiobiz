@@ -23,6 +23,7 @@ def after_migrate():
         update_existing_records()
         setup_user_telegram_field()
         setup_user_industry_religion_fields()
+        setup_user_behaviour_and_company_industry()
         clean_third_party_workspace_links()
         print("EthioBiz: Multi-company isolation & workspace link sanitization complete.")
     except Exception as e:
@@ -222,5 +223,44 @@ def setup_user_industry_religion_fields():
         print(f"  Created {field_def['fieldname']} field on User.")
 
     frappe.db.updatedb("User")
+    frappe.db.commit()
+
+def setup_user_behaviour_and_company_industry():
+    """Create user_behaviour (Text) on User and industry (Link to Industry Type) on Company if missing."""
+    from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+    # 1. User DocType: user_behaviour (Text)
+    if not frappe.db.exists("Custom Field", {"dt": "User", "fieldname": "user_behaviour"}):
+        create_custom_field("User", {
+            "fieldname": "user_behaviour",
+            "label": "User Behaviour",
+            "fieldtype": "Text",
+            "insert_after": "religion",
+            "no_copy": 1,
+            "in_list_view": 0,
+            "in_standard_filter": 0,
+        }, ignore_validate=True)
+        print("  Created user_behaviour field on User.")
+    else:
+        print("  user_behaviour field already exists on User.")
+
+    # 2. Company DocType: industry (Link to Industry Type)
+    if not frappe.db.exists("Custom Field", {"dt": "Company", "fieldname": "industry"}):
+        create_custom_field("Company", {
+            "fieldname": "industry",
+            "label": "Industry",
+            "fieldtype": "Link",
+            "options": "Industry Type",
+            "insert_after": "company_name",
+            "no_copy": 1,
+            "in_list_view": 0,
+            "in_standard_filter": 0,
+        }, ignore_validate=True)
+        print("  Created industry field on Company.")
+    else:
+        print("  industry field already exists on Company.")
+
+    frappe.db.updatedb("User")
+    frappe.db.updatedb("Company")
     frappe.db.commit()
 
