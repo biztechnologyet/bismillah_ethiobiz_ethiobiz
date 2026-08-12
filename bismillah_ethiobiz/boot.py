@@ -1,10 +1,11 @@
 import frappe
 from bismillah_ethiobiz.auto_company import ensure_company_default
 from bismillah_ethiobiz.workspace_cleaner import sanitize_boot_workspaces
+from bismillah_ethiobiz.api import _get_hadeeda_settings
 
 def boot_session(bootinfo):
     """
-    Inject Dynamic Theme branding directly into the boot session and sanitize workspaces.
+    Inject Dynamic Theme branding & Hadeeda Settings directly into boot session.
     """
     company_info = ensure_company_default()
     if company_info:
@@ -13,6 +14,14 @@ def boot_session(bootinfo):
             bootinfo["ethiobiz_company_needs_setup"] = True
 
     sanitize_boot_workspaces(bootinfo)
+
+    # Inject Hadeeda Settings into boot payload for chat widget & inline AI
+    try:
+        settings = _get_hadeeda_settings()
+        if settings and getattr(settings, "enabled", 0):
+            bootinfo["hadeeda_settings"] = settings.as_dict()
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"Hadeeda boot injection error: {e}")
 
     primary_color = "#1FB6AE" 
     
