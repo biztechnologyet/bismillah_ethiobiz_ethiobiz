@@ -281,203 +281,177 @@
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                /* ─── PREMIUM INPUT AREA (ChatGPT-inspired) ─── */
-                .chat-layout .chat-footer,
+                                /* ─── HADEEDA CHAT FOOTER & INPUT AREA ─── */
                 .chat-footer,
-                .chat-inputs,
-                .chat-input-wrapper,
-                [class*="chat-footer"],
-                [class*="chat-inputs"],
-                [class*="chat-input-wrapper"] {
-                    background: rgba(13, 17, 23, 0.92) !important;
-                    backdrop-filter: blur(16px) saturate(1.4) !important;
-                    -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
+                [class*="chat-footer"] {
+                    background: rgba(13, 17, 23, 0.95) !important;
+                    backdrop-filter: blur(16px) !important;
+                    -webkit-backdrop-filter: blur(16px) !important;
                     border: none !important;
-                    border-top: 1px solid rgba(255,255,255,0.06) !important;
-                    padding: 10px 12px 12px 12px !important;
-                    box-shadow: 0 -4px 24px rgba(0,0,0,0.25) !important;
-                    outline: none !important;
+                    border-top: 1px solid rgba(255,255,255,0.08) !important;
+                    padding: 8px 10px !important;
                     margin: 0 !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
                     display: flex !important;
-                    align-items: flex-end !important;
-                    gap: 6px !important;
+                    align-items: center !important;
                 }
 
-                /* ─── UNIFIED INPUT CONTAINER (pill shape wrapping textarea + buttons) ─── */
+                /* Container pill wrapping file upload, text input, send button */
                 .chat-inputs,
                 .chat-input-wrapper,
                 [class*="chat-inputs"],
                 [class*="chat-input-wrapper"] {
-                    background: rgba(255, 255, 255, 0.06) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-                    border-radius: 24px !important;
-                    padding: 6px 6px 6px 16px !important;
-                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.18), 0 0 0 0 transparent !important;
-                    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease !important;
+                    background: rgba(255, 255, 255, 0.07) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                    border-radius: 22px !important;
+                    padding: 4px 6px 4px 10px !important;
+                    margin: 0 !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
                     display: flex !important;
-                    align-items: flex-end !important;
-                    gap: 4px !important;
-                    flex: 1 1 auto !important;
-                    min-width: 0 !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    overflow: hidden !important;
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
                 }
+
                 .chat-inputs:focus-within,
                 .chat-input-wrapper:focus-within,
                 [class*="chat-inputs"]:focus-within,
                 [class*="chat-input-wrapper"]:focus-within {
-                    background: rgba(255, 255, 255, 0.09) !important;
-                    border-color: rgba(31, 182, 174, 0.5) !important;
-                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12), 0 0 0 3px rgba(31, 182, 174, 0.12) !important;
+                    background: rgba(255, 255, 255, 0.10) !important;
+                    border-color: #1FB6AE !important;
+                    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.25) !important;
                 }
 
-                /* Kill stray borders inside the input wrapper */
-                .chat-footer *,
-                [class*="chat-footer"] * {
-                    border-left: none !important;
-                    border-right: none !important;
-                    outline: none !important;
-                }
-
-                /* ─── TEXTAREA ─── */
+                /* Textarea input field */
                 .chat-input,
                 textarea.chat-input,
                 input.chat-input,
                 .chat-inputs textarea,
                 .chat-inputs input,
                 [class*="chat-input"]:not(button):not([class*="send"]):not([class*="upload"]) {
-                    flex: 1 1 auto !important;
+                    flex: 1 1 0% !important;
+                    width: 0 !important;
                     min-width: 0 !important;
+                    max-width: 100% !important;
                     background: transparent !important;
-                    color: #F0F6FC !important;
+                    color: #FFFFFF !important;
                     border: none !important;
-                    border-radius: 0 !important;
-                    padding: 8px 4px !important;
-                    font-size: 14px !important;
-                    line-height: 1.45 !important;
-                    letter-spacing: 0.01em !important;
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+                    outline: none !important;
+                    padding: 6px 4px !important;
+                    font-size: 13.5px !important;
+                    line-height: 1.4 !important;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     box-shadow: none !important;
                     resize: none !important;
                     overflow-y: auto !important;
-                    max-height: 120px !important;
+                    max-height: 80px !important;
+                    margin: 0 !important;
                 }
-                .chat-inputs textarea,
-                textarea.chat-input,
-                [class*="chat-input"] textarea {
-                    transition: none !important;
-                }
+
                 .chat-input:focus,
                 textarea.chat-input:focus,
-                input.chat-input:focus,
-                [class*="chat-input"]:not(button):focus {
+                input.chat-input:focus {
                     background: transparent !important;
-                    color: #F0F6FC !important;
+                    color: #FFFFFF !important;
                     border: none !important;
-                    box-shadow: none !important;
                     outline: none !important;
+                    box-shadow: none !important;
                 }
+
                 .chat-input::placeholder,
                 textarea.chat-input::placeholder,
                 [class*="chat-input"]::placeholder {
-                    color: rgba(255,255,255,0.35) !important;
+                    color: rgba(255,255,255,0.45) !important;
                     font-style: italic !important;
-                    font-weight: 300 !important;
                 }
 
-                /* ─── ATTACHMENT BUTTON (inside pill, subtle) ─── */
+                /* File Upload / Attachment Button */
                 .chat-footer button:not(.chat-input-send-button),
-                .chat-file-upload-button {
+                .chat-file-upload-button,
+                button[class*="file-upload"] {
+                    flex: 0 0 32px !important;
+                    flex-shrink: 0 !important;
+                    width: 32px !important;
+                    height: 32px !important;
+                    min-width: 32px !important;
                     background: transparent !important;
-                    color: rgba(255,255,255,0.4) !important;
+                    color: rgba(255,255,255,0.6) !important;
                     border: none !important;
-                    border-radius: 12px !important;
+                    border-radius: 50% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    cursor: pointer !important;
+                    transition: all 0.2s ease !important;
+                }
+
+                .chat-footer button:not(.chat-input-send-button):hover,
+                .chat-file-upload-button:hover,
+                button[class*="file-upload"]:hover {
+                    background: rgba(31,182,174,0.2) !important;
+                    color: #1FB6AE !important;
+                    transform: scale(1.1) !important;
+                }
+
+                .chat-footer button:not(.chat-input-send-button) svg,
+                .chat-file-upload-button svg,
+                button[class*="file-upload"] svg {
+                    width: 17px !important;
+                    height: 17px !important;
+                }
+
+                /* Send Button */
+                .chat-input-send-button,
+                button.chat-input-send-button,
+                button[class*="send-button"] {
+                    flex: 0 0 34px !important;
+                    flex-shrink: 0 !important;
                     width: 34px !important;
                     height: 34px !important;
                     min-width: 34px !important;
+                    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+                    color: #FFFFFF !important;
+                    border: none !important;
+                    border-radius: 50% !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     padding: 0 !important;
+                    margin: 0 !important;
                     cursor: pointer !important;
-                    transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease !important;
-                    flex-shrink: 0 !important;
-                }
-                .chat-footer button:not(.chat-input-send-button):hover,
-                .chat-file-upload-button:hover {
-                    background: rgba(31,182,174,0.12) !important;
-                    color: #1FB6AE !important;
-                    border: none !important;
-                    transform: scale(1.1) !important;
-                }
-                .chat-footer button:not(.chat-input-send-button):active,
-                .chat-file-upload-button:active {
-                    transform: scale(0.92) !important;
-                }
-                .chat-footer button:not(.chat-input-send-button) svg,
-                .chat-file-upload-button svg {
-                    width: 18px !important;
-                    height: 18px !important;
+                    box-shadow: 0 2px 8px rgba(31,182,174,0.4) !important;
+                    transition: all 0.2s ease !important;
                 }
 
-                /* ─── SEND BUTTON (inside pill, prominent gradient) ─── */
-                @keyframes hadeeda-send-pulse {
-                    0%, 100% { box-shadow: 0 2px 8px rgba(31,182,174,0.3); }
-                    50% { box-shadow: 0 2px 14px rgba(31,182,174,0.5); }
-                }
-                .chat-input-send-button,
-                button.chat-input-send-button {
-                    background: linear-gradient(145deg, #1FB6AE 0%, #17918a 50%, #147974 100%) !important;
-                    color: #FFFFFF !important;
-                    border: none !important;
-                    border-radius: 14px !important;
-                    width: 38px !important;
-                    height: 38px !important;
-                    min-width: 38px !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    padding: 0 !important;
-                    cursor: pointer !important;
-                    box-shadow: 0 2px 8px rgba(31,182,174,0.3) !important;
-                    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1) !important;
-                    flex-shrink: 0 !important;
-                }
                 .chat-input-send-button:hover,
                 button.chat-input-send-button:hover {
-                    background: linear-gradient(145deg, #25c9c1 0%, #1FB6AE 50%, #19a095 100%) !important;
+                    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
                     color: #FFFFFF !important;
-                    transform: scale(1.12) !important;
-                    box-shadow: 0 4px 18px rgba(31,182,174,0.5) !important;
-                    border: none !important;
-                    outline: none !important;
+                    transform: scale(1.08) !important;
+                    box-shadow: 0 3px 12px rgba(31,182,174,0.6) !important;
                 }
-                .chat-input-send-button:focus,
-                button.chat-input-send-button:focus {
-                    outline: none !important;
-                    border: none !important;
-                    box-shadow: 0 0 0 3px rgba(31,182,174,0.25), 0 2px 10px rgba(31,182,174,0.4) !important;
-                }
-                .chat-input-send-button:active,
-                button.chat-input-send-button:active {
-                    transform: scale(0.95) !important;
-                    box-shadow: 0 1px 4px rgba(31,182,174,0.3) !important;
-                }
+
                 .chat-input-send-button:disabled,
                 button.chat-input-send-button:disabled {
-                    background: rgba(255,255,255,0.06) !important;
-                    color: rgba(255,255,255,0.2) !important;
+                    background: rgba(255,255,255,0.15) !important;
+                    color: rgba(255,255,255,0.3) !important;
                     box-shadow: none !important;
                     cursor: not-allowed !important;
                     transform: none !important;
                 }
+
                 .chat-input-send-button svg,
-                button.chat-input-send-button svg {
-                    width: 18px !important;
-                    height: 18px !important;
-                    transition: transform 0.15s ease !important;
-                }
-                .chat-input-send-button:hover svg,
-                button.chat-input-send-button:hover svg {
-                    transform: translateX(1px) translateY(-1px) !important;
+                button.chat-input-send-button svg,
+                button[class*="send-button"] svg {
+                    width: 16px !important;
+                    height: 16px !important;
                 }
 
                 /* ─── COPY BUTTON ON EACH MESSAGE ─── */
