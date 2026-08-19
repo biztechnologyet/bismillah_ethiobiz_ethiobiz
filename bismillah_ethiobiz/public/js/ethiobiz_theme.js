@@ -118,13 +118,15 @@
             }
             $(document).on('page-change', () => this.detectAndApply());
 
-            setInterval(() => {
+            this._routeCheckInterval = setInterval(() => {
                 const route = this.getCurrentRoute();
                 if (this.lastRoute !== route) {
                     this.lastRoute = route;
                     this.detectAndApply();
                 }
-            }, 1000);
+            }, 3000);
+            window.addEventListener('hashchange', () => this.detectAndApply());
+            window.addEventListener('popstate', () => this.detectAndApply());
 
             this.initialized = true;
 
@@ -211,8 +213,11 @@
             if (this.contentObserver) this.contentObserver.disconnect();
             if (this.textObserver) this.textObserver.disconnect();
 
+            let _contentDebounce = false;
             this.contentObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
+                if (_contentDebounce) return;
+                _contentDebounce = true;
+                requestAnimationFrame(() => {
                     if (window.location.href.includes('walta') || window.location.href.includes('helpdesk')) {
                         document.querySelectorAll('h1, h2, .onboarding-step-title, .desk-sidebar-item-label, .onboarding-step-description').forEach(el => {
                             if (el.innerText.includes('Frappe Helpdesk')) {
@@ -220,6 +225,7 @@
                             }
                         });
                     }
+                    _contentDebounce = false;
                 });
             });
 
@@ -250,7 +256,12 @@
                     });
                 };
 
-                this.textObserver = new MutationObserver(() => globalScrub());
+                let _textDebounce = false;
+                this.textObserver = new MutationObserver(() => {
+                    if (_textDebounce) return;
+                    _textDebounce = true;
+                    requestAnimationFrame(() => { globalScrub(); _textDebounce = false; });
+                });
                 if (document.body) {
                     this.textObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
                 }
@@ -258,8 +269,8 @@
                 let scrubCount = 0;
                 const scrubInt = setInterval(() => {
                     globalScrub();
-                    if (++scrubCount > 120) clearInterval(scrubInt);
-                }, 500);
+                    if (++scrubCount > 30) clearInterval(scrubInt);
+                }, 2000);
             }
 
             // E. Dagu Specifics
@@ -545,9 +556,8 @@ frappe.ready(function () {
             }
         });
 
-        // Sidebar Widget
-        const sidebarWidgets = document.querySelectorAll('div');
-        sidebarWidgets.forEach(el => {
+        const gettingStartedDivs = document.querySelectorAll('.bg-surface-white div, .rounded-lg div, .onboarding-step-title');
+        gettingStartedDivs.forEach(el => {
             if (el.innerText === 'Getting started' && el.nextElementSibling && el.nextElementSibling.innerText.includes('Continue')) {
                 let parent = el.parentElement;
                 while (parent && parent !== document.body) {
@@ -577,26 +587,32 @@ frappe.ready(function () {
     }
 
     let sidebarObserver = null;
+    let _forceUIPending = false;
 
     function init() {
         forceUI();
 
-        // Force Collapse (3s grace) - Desk only
         if (document.querySelector('.desk-container')) {
+            let collapseCount = 0;
             let collapseInterval = setInterval(() => {
                 if (!document.body.classList.contains('sidebar-collapsed')) {
                     document.body.classList.add('sidebar-collapsed');
                     console.log('[EthioBiz] Forced collapse');
                 }
-            }, 100);
-            setTimeout(() => clearInterval(collapseInterval), 3000);
+                if (++collapseCount > 15) clearInterval(collapseInterval);
+            }, 200);
         }
     }
 
-    // Observer (with disconnect to avoid accumulation)
     if (sidebarObserver) sidebarObserver.disconnect();
     sidebarObserver = new MutationObserver(() => {
-        forceUI();
+        if (!_forceUIPending) {
+            _forceUIPending = true;
+            requestAnimationFrame(() => {
+                forceUI();
+                _forceUIPending = false;
+            });
+        }
     });
 
     init();
@@ -604,7 +620,5 @@ frappe.ready(function () {
         sidebarObserver.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Fallback
-    setInterval(forceUI, 500);
 });
 // END BISMALLAH ETHIOBIZ FLOATING SIDEBAR V6
