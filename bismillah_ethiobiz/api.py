@@ -10,10 +10,33 @@ def _get_hadeeda_settings():
 
 
 def _get_user_api_credentials(user):
-    api_key = frappe.db.get_value("User", user, "api_key")
-    api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
-    return api_key or "", api_secret or ""
+    if not user or user == "Guest":
+        return "", ""
+    try:
+        api_key = frappe.db.get_value("User", user, "api_key")
+        api_secret = get_decrypted_password("User", user, "api_secret", raise_exception=False)
 
+        if not api_key or not api_secret:
+            user_doc = frappe.get_doc("User", user)
+            if not user_doc.api_key:
+                api_key = frappe.generate_hash(length=15)
+                user_doc.api_key = api_key
+                user_doc.save(ignore_permissions=True)
+
+            if not api_secret:
+                api_secret = frappe.generate_hash(length=15)
+                from frappe.utils.password import set_encrypted_password
+                set_encrypted_password("User", user, api_secret, "api_secret")
+
+            frappe.db.commit()
+
+        api_key = api_key or frappe.db.get_value("User", user, "api_key") or ""
+        api_secret = api_secret or get_decrypted_password("User", user, "api_secret", raise_exception=False) or ""
+
+        return api_key, api_secret
+    except Exception as e:
+        frappe.logger("ethiobiz").error("_get_user_api_credentials error for %s: %s" % (user, e))
+        return "", ""
 
 def _get_user_department_designation(user):
     """Resolve a user's Department + Designation from the Employee doctype,
@@ -68,6 +91,8 @@ def _get_user_language(user):
         return "en"
 
 
+
+
 def _get_user_industry_religion(user):
     """Read the custom industry and religion fields from the User record."""
     if not user:
@@ -91,6 +116,7 @@ def _get_user_behaviour_and_company_industry(user, company=None):
         return user_behaviour or "", company_industry or ""
     except Exception:
         return "", ""
+
 
 
 def _clean_text(value):
@@ -260,11 +286,14 @@ def chat_webhook_proxy():
     # Inject the user's API credentials server-side so the n8n workflow always
     # receives the unmasked api_key/api_secret (same as chat_inline), regardless
     # of what the @n8n/chat widget forwards in its client-side metadata.
-    if frappe.session.user and frappe.session.user != "Guest":
+    user = frappe.session.user if (frappe.session.user and frappe.session.user != "Guest") else None
+    if not user and isinstance(payload.get("metadata"), dict):
+        user = payload["metadata"].get("username") or payload["metadata"].get("user_id")
+
+    if user and user != "Guest" and frappe.db.exists("User", user):
         try:
-            user = frappe.session.user
             api_key, api_secret = _get_user_api_credentials(user)
-            company = frappe.defaults.get_user_default("company") or ""
+            company = frappe.defaults.get_user_default("company", user) or ""
             full_name = frappe.db.get_value("User", user, "full_name") or user
             department, designation = _get_user_department_designation(user)
 

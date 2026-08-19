@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
@@ -50,9 +50,9 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
-    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.3"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4"
 ]
 
 # CSS for website (frontend/portal)
@@ -67,9 +67,9 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
-    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.3"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4"
 ]
 
 # ============================================
@@ -91,11 +91,7 @@ website_route_rules = [
     {"from_route": "/helpdesk/<path:app_path>", "to_route": "helpdesk"},
     {"from_route": "/lms", "to_route": "lms"},
     {"from_route": "/lms/<path:app_path>", "to_route": "lms"},
-
 ]
-
-# Home page (optional override)
-# home_page = "ethiobiz-home"
 
 # ============================================
 # BOOT SESSION
@@ -139,18 +135,7 @@ override_whitelisted_methods = {
 }
 
 # ============================================
-# SCHEDULED TASKS
-# ============================================
-
-# Scheduler events (if needed)
-# scheduler_events = {
-#     "daily": [
-#         "bismillah_ethiobiz.tasks.daily"
-#     ]
-# }
-
-# ============================================
-# TRANSLATIONS
+# FIXTURES
 # ============================================
 
 # Default fixtures (Translations + HADEEDA Settings)

@@ -1,81 +1,56 @@
-# -*- coding: utf-8 -*-
-"""
-EthioBiz Theme - Boot Session
-Inject theme configuration into frappe.boot
-"""
-
 import frappe
-import json
-
 from bismillah_ethiobiz.auto_company import ensure_company_default
+from bismillah_ethiobiz.workspace_cleaner import sanitize_boot_workspaces
+from bismillah_ethiobiz.api import _get_hadeeda_settings
 
 def boot_session(bootinfo):
-    """Inject EthioBiz theme + HADEEDA configuration into boot"""
-
-    # LAYER 2: Ensure user has a company default (safety net for new device/cache clear)
+    """
+    Inject Dynamic Theme branding & Hadeeda Settings directly into boot session.
+    """
     company_info = ensure_company_default()
     if company_info:
         bootinfo["ethiobiz_active_company"] = company_info.get("company")
         if company_info.get("needs_setup"):
             bootinfo["ethiobiz_company_needs_setup"] = True
 
-    bootinfo["ethiobiz_theme"] = {
-        "app_name": "EthioBiz",
-        "app_tagline": "Uniting Humanity Through Shared Progress",
-        "app_logo": "/assets/bismillah_ethiobiz/images/ethiobiz_logo.png",
-        "primary_color": "#1FB6AE",
-        "pillars": [
-            {"id": "tibeb", "name": "Tibeb", "color": "#C9A24D", "domain": "Soul & Belief"},
-            {"id": "dagu", "name": "Dagu", "color": "#2E3A8C", "domain": "Mind & Knowledge"},
-            {"id": "magala", "name": "Magala", "color": "#2F6B4F", "domain": "Work & Economy"},
-            {"id": "walta", "name": "Walta", "color": "#0F3557", "domain": "Security & Self"},
-            {"id": "afocha", "name": "Afocha", "color": "#B83A3A", "domain": "Community"}
-        ]
-    }
+    sanitize_boot_workspaces(bootinfo)
 
-    bootinfo["app_name"] = "EthioBiz"
-
-    # ============================================
-    # HADEEDA AI SETTINGS BOOT INJECTION
-    # ============================================
+    # Inject Hadeeda Settings into boot payload for chat widget & inline AI
     try:
-        settings = frappe.get_single("HADEEDA Settings")
-        bootinfo["hadeeda_settings"] = {
-            "enabled": bool(settings.enabled),
-            "chat_enabled": bool(settings.chat_enabled),
-            "inline_ai_enabled": bool(settings.inline_ai_enabled),
-            "bot_name": settings.bot_name or "HADEEDA",
-            "widget_title": settings.widget_title or "HADEEDA AI Assistant",
-            "widget_subtitle": settings.widget_subtitle or "",
-            "widget_position": settings.widget_position or "Right",
-            "widget_primary_color": settings.widget_primary_color or "#1FB6AE",
-            "widget_mode": settings.widget_mode or "window",
-            "trigger_character": settings.trigger_character or "/",
-            "show_trigger_hint": bool(settings.show_trigger_hint),
-            "excluded_doctypes": settings.excluded_doctypes or "",
-            "excluded_fields": settings.excluded_fields or "",
-            "default_language": settings.default_language or "en",
-            "user_language": frappe.db.get_value("User", frappe.session.user, "language") or "",
-            "allow_file_uploads": bool(settings.allow_file_uploads),
-            "allowed_mime_types": settings.allowed_mime_types or "",
-        }
-    except Exception:
-        bootinfo["hadeeda_settings"] = {
-            "enabled": True,
-            "chat_enabled": True,
-            "inline_ai_enabled": True,
-            "bot_name": "HADEEDA",
-            "widget_title": "HADEEDA AI Assistant",
-            "widget_subtitle": "",
-            "widget_position": "Right",
-            "widget_primary_color": "#1FB6AE",
-            "widget_mode": "window",
-            "trigger_character": "/",
-            "show_trigger_hint": True,
-            "excluded_doctypes": "",
-            "excluded_fields": "",
-            "default_language": "en",
-            "user_language": "",
-            "allow_file_uploads": False,
-            "allowed_mime_types": "",
-        }
+        settings = _get_hadeeda_settings()
+        if settings and getattr(settings, "enabled", 0):
+            bootinfo["hadeeda_settings"] = settings.as_dict()
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"Hadeeda boot injection error: {e}")
+
+    primary_color = "#1FB6AE" 
+    
+    bootinfo.ethiobiz_theme_css = f"""
+    <style id="ethiobiz-boot-css">
+        :root {{
+            --primary-color: {primary_color} !important;
+            --primary: {primary_color} !important;
+            --blue-500: {primary_color} !important;
+            --text-color: #0E1A1A !important;
+            --btn-primary-bg: {primary_color} !important;
+            --btn-primary-color: #ffffff !important;
+        }}
+        .btn-primary, 
+        .primary-action, 
+        button[data-label="Save"], 
+        button[data-label="Create"],
+        button[data-label="Submit"],
+        button[data-label="Update"],
+        button.btn-primary {{
+            background-color: {primary_color} !important;
+            border-color: {primary_color} !important;
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            background-image: none !important;
+        }}
+        .btn-primary:hover,
+        button[data-label="Save"]:hover {{
+            filter: brightness(0.9);
+        }}
+    </style>
+    """

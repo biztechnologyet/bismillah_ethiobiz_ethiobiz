@@ -11,6 +11,19 @@
 (function () {
     'use strict';
 
+    // BISMALLAH - Auto-clear stale PWA CacheStorage and force asset refresh
+    if (window.caches) {
+        try {
+            caches.keys().then(function(names) {
+                for (var i = 0; i < names.length; i++) {
+                    if (names[i].indexOf('ethiobiz') !== -1 || names[i].indexOf('frappe') !== -1) {
+                        caches.delete(names[i]);
+                    }
+                }
+            });
+        } catch (e) {}
+    }
+
     if (window.__ethiobizBrandInitialized) return;
     if (document.querySelector('.web-form') || window.location.pathname.match(/\/(trial|new|edit)\//)) {
         window.__ethiobizBrandInitialized = true;
@@ -546,6 +559,20 @@ frappe.ready(function () {
                 }
             }
         });
+
+        // D. Hide Navbar Help Dropdown Third-Party Items (Frappe School, Support, Forum, Docs)
+        const helpDropdown = document.querySelector('.dropdown-help .dropdown-menu, #help-menu, .navbar-nav .dropdown-menu');
+        if (helpDropdown) {
+            const thirdPartyLabels = ['Frappe School', 'Frappe Support', 'User Forum', 'Documentation', 'Report an Issue'];
+            helpDropdown.querySelectorAll('.dropdown-item, a').forEach(function(item) {
+                var text = (item.textContent || '').trim();
+                if (thirdPartyLabels.indexOf(text) !== -1 || 
+                    (item.href && (item.href.indexOf('frappe') !== -1 || item.href.indexOf('erpnext') !== -1 || item.href.indexOf('discuss.') !== -1))) {
+                    item.style.display = 'none';
+                    item.classList.add('ethiobiz-hidden');
+                }
+            });
+        }
 
     }
 
