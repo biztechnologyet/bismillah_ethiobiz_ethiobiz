@@ -6,7 +6,15 @@ set -e
 BENCH=/home/frappe/frappe-bench
 echo "[$(date)] === ETHIOBIZ STARTUP FIX ==="
 
-# 1. Fix healthcare app structure if broken
+# 1. Remove stale healthcare.broken directory (causes ModuleNotFoundError)
+BROKEN_HC="$BENCH/apps/healthcare.broken"
+if [ -d "$BROKEN_HC" ]; then
+    echo "[$(date)] Removing stale healthcare.broken directory..."
+    rm -rf "$BROKEN_HC"
+    echo "[$(date)] Removed healthcare.broken"
+fi
+
+# 2. Fix healthcare app structure if broken
 echo "[$(date)] Checking healthcare app..."
 if [ ! -f "$BENCH/apps/healthcare/healthcare/__init__.py" ] || [ ! -d "$BENCH/apps/healthcare/healthcare/doctype" ]; then
     echo "[$(date)] Healthcare structure broken - rebuilding..."
