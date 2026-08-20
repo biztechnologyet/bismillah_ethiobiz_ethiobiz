@@ -10,9 +10,9 @@ def get_logged_user_info():
         return {
             "is_logged_in": False,
             "user": "Guest",
-            "full_name": "EthioBiz Community Member",
-            "company": "EthioBiz Enterprise",
-            "handle": "@community",
+            "full_name": "Guest Visitor",
+            "company": "",
+            "handle": "",
             "user_image": "/assets/frappe/images/default-avatar.png",
             "is_verified": False
         }
@@ -166,31 +166,28 @@ def _format_poll_data(post_doc):
         "options": formatted_opts
     }
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def create_social_post(
     author_name=None, author_handle=None, category_tag="Business & Trade",
     content=None, post_image=None, video_url=None, is_poll=0,
     poll_question=None, poll_options=None
 ):
     """Creates a post enforcing logged-in user profile, company, and avatar."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Authentication required. Please log in to publish posts on Afocha Social."), frappe.PermissionError)
+
     content = content or frappe.form_dict.get("content")
     if not content:
         frappe.throw(_("Post content is required."))
 
     # Resolve logged-in user identity
     user_info = get_logged_user_info()
-    if user_info.get("is_logged_in"):
-        author_name = user_info["full_name"]
-        author_handle = user_info["handle"]
-        author_image = user_info["user_image"]
-        company = user_info["company"]
-        is_verified = 1
-    else:
-        author_name = author_name or frappe.form_dict.get("author_name") or "Community Member"
-        author_handle = author_handle or frappe.form_dict.get("author_handle") or "@community"
-        author_image = "/assets/frappe/images/default-avatar.png"
-        company = "EthioBiz Community"
-        is_verified = 0
+    author_name = user_info["full_name"]
+    author_handle = user_info["handle"]
+    author_image = user_info["user_image"]
+    company = user_info["company"]
+    is_verified = 1
 
     category_tag = category_tag or frappe.form_dict.get("category_tag") or "Business & Trade"
     post_image = post_image or frappe.form_dict.get("post_image")
@@ -222,9 +219,13 @@ def create_social_post(
 
     return {"status": "success", "name": post_doc.name}
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def add_post_comment(post_id=None, author_name=None, author_handle=None, comment_text=None):
-    """Adds a comment capturing user profile."""
+    """Adds a comment capturing logged-in user profile."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Authentication required. Please log in to post comments."), frappe.PermissionError)
+
     post_id = post_id or frappe.form_dict.get("post_id")
     comment_text = comment_text or frappe.form_dict.get("comment_text")
 
@@ -232,14 +233,9 @@ def add_post_comment(post_id=None, author_name=None, author_handle=None, comment
         frappe.throw(_("Post ID and comment text are required."))
 
     user_info = get_logged_user_info()
-    if user_info.get("is_logged_in"):
-        author_name = user_info["full_name"]
-        author_handle = user_info["handle"]
-        author_image = user_info["user_image"]
-    else:
-        author_name = author_name or frappe.form_dict.get("author_name") or "Community Member"
-        author_handle = author_handle or frappe.form_dict.get("author_handle") or "@community"
-        author_image = "/assets/frappe/images/default-avatar.png"
+    author_name = user_info["full_name"]
+    author_handle = user_info["handle"]
+    author_image = user_info["user_image"]
 
     cmt = frappe.get_doc({
         "doctype": "Afocha Comment",
