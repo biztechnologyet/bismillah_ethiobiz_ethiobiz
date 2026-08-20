@@ -26,9 +26,9 @@ def after_install():
             })
             doc.insert(ignore_permissions=True)
     
-    # Create HADEEDA Settings doctype if not exists (custom=1, not auto-created by migrate)
+    # Create HADEEDA Settings doctype if not exists
     if not frappe.db.exists("DocType", "HADEEDA Settings"):
-        json_path = os.path.join(os.path.dirname(__file__), "doctype", "hadeeda_settings", "hadeeda_settings.json")
+        json_path = os.path.join(os.path.dirname(__file__), "ethiobiz_theme", "doctype", "hadeeda_settings", "hadeeda_settings.json")
         if os.path.exists(json_path):
             with open(json_path) as f:
                 dt_def = json.load(f)
@@ -42,6 +42,33 @@ def after_install():
                 "permissions": dt_def.get("permissions", [{"role": "System Manager", "read": 1, "write": 1}]),
             })
             doc.insert(ignore_permissions=True)
+
+    # Seed HADEEDA Settings defaults
+    ensure_hadeeda_settings_installed()
+
+
+def ensure_hadeeda_settings_installed():
+    """Seed HADEEDA Settings with defaults if not already configured."""
+    try:
+        existing = frappe.db.get_value("HADEEDA Settings", "HADEEDA Settings", "name")
+        if existing:
+            return
+        frappe.get_doc({
+            "doctype": "HADEEDA Settings",
+            "name": "HADEEDA Settings",
+            "enabled": 1,
+            "chat_enabled": 1,
+            "webhook_url": "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat",
+            "widget_title": "Hadeeda BizAi",
+            "widget_primary_color": "#1FB6AE",
+            "widget_mode": "window",
+            "initial_messages": '["Selam!", "I am HADEEDA, your AI Executive Assistant. How can I help you today?"]',
+            "allow_file_uploads": 1,
+            "default_language": "en",
+            "bot_name": "HADEEDA",
+        }).insert(ignore_permissions=True)
+    except Exception as e:
+        print(f"EthioBiz: Error seeding HADEEDA Settings: {e}")
 
     # Create DOBiz PWA Settings doctype if not exists (custom=1, not auto-created by migrate)
     from bismillah_ethiobiz.pwa_settings import create_doctype as _create_pwa_doctype

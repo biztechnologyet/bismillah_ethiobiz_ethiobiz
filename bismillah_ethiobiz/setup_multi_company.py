@@ -25,9 +25,51 @@ def after_migrate():
         setup_user_industry_religion_fields()
         setup_user_behaviour_and_company_industry()
         clean_third_party_workspace_links()
+        ensure_hadeeda_settings()
         print("EthioBiz: Multi-company isolation & workspace link sanitization complete.")
     except Exception as e:
         print(f"EthioBiz: Error in multi-company setup: {e}")
+
+
+def ensure_hadeeda_settings():
+    """Create HADEEDA Settings single doctype table if missing, and seed defaults."""
+    try:
+        table_exists = frappe.db.sql(
+            "SHOW TABLES LIKE 'tabHADEEDA Settings'"
+        )
+        if not table_exists:
+            print("EthioBiz: HADEEDA Settings table missing, creating via DocType sync...")
+            frappe.reload_doc("ethiobiz_theme", "doctype", "hadeeda_settings", force=True)
+            frappe.db.commit()
+
+        table_exists = frappe.db.sql("SHOW TABLES LIKE 'tabHADEEDA Settings'")
+        if not table_exists:
+            print("EthioBiz: WARNING - HADEEDA Settings table still missing after sync")
+            return
+
+        existing = frappe.db.get_value("HADEEDA Settings", "HADEEDA Settings", "name")
+        if existing:
+            return
+
+        print("EthioBiz: Seeding HADEEDA Settings defaults...")
+        frappe.get_doc({
+            "doctype": "HADEEDA Settings",
+            "name": "HADEEDA Settings",
+            "enabled": 1,
+            "chat_enabled": 1,
+            "webhook_url": "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat",
+            "widget_title": "Hadeeda BizAi",
+            "widget_primary_color": "#1FB6AE",
+            "widget_mode": "window",
+            "initial_messages": '["Selam!", "I am HADEEDA, your AI Executive Assistant. How can I help you today?"]',
+            "allow_file_uploads": 1,
+            "default_language": "en",
+            "bot_name": "HADEEDA",
+        }).insert(ignore_permissions=True)
+        frappe.db.commit()
+        print("EthioBiz: HADEEDA Settings seeded successfully")
+    except Exception as e:
+        print(f"EthioBiz: Error ensuring HADEEDA Settings: {e}")
         frappe.log_error(f"Multi-company setup error: {e}", "EthioBiz Multi-Company")
 
 
