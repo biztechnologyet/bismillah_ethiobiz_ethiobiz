@@ -132,10 +132,26 @@
         margin-bottom: 30px;
         box-shadow: 0 6px 25px rgba(0,0,0,0.04);
     }
+    .composer-user-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 12px 18px;
+        margin-bottom: 16px;
+    }
+    .composer-user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
     .composer-tabs-row {
         display: flex;
         gap: 8px;
-        margin-bottom: 18px;
         border-bottom: 1px solid #f1f5f9;
         padding-bottom: 12px;
     }
@@ -171,17 +187,11 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.07);
         border-color: #cbd5e1;
     }
-    .af-avatar {
+    .af-avatar-img {
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #008080 0%, #0284c7 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: 20px;
+        object-fit: cover;
         box-shadow: 0 4px 12px rgba(0,128,128,0.2);
     }
     .af-author-name {
@@ -353,17 +363,33 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 10px; margin-bottom: 12px;">
-                <input type="text" id="post-author-name" class="af-input" placeholder="Your Name or Business Name *">
-                <input type="text" id="post-author-handle" class="af-input" placeholder="@handle" value="@ethiobiz">
-                <select id="post-category" class="af-input" style="font-weight: 600;">
-                    <option value="Business & Trade">💼 Business & Trade</option>
-                    <option value="Tech & Innovation">🚀 Tech & Innovation</option>
-                    <option value="Food & Dining">☕ Food & Dining</option>
-                    <option value="Real Estate & Living">🏠 Real Estate</option>
-                    <option value="Jobs & Career">🎯 Jobs & Career</option>
-                    <option value="Community & Events">🌟 Community</option>
-                </select>
+            <!-- LOGGED IN USER IDENTITY BANNER (AUTOMATICALLY SET & LOCKED) -->
+            <div class="composer-user-banner" id="composer-user-banner">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="composer-user-avatar-img" src="/assets/frappe/images/default-avatar.png" class="composer-user-avatar" alt="Avatar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="composer-user-fullname" style="font-weight: 800; font-size: 15px; color: #0f172a;">Loading...</span>
+                            <span id="composer-user-verified-badge" style="color: #008080; font-weight: 800;">✓</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            <span id="composer-user-company" style="font-weight: 700; color: #0284c7;">EthioBiz Enterprise</span> • <span id="composer-user-handle">@ethiobiz</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY SELECTION (EDITABLE BY USER) -->
+                <div style="min-width: 190px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 2px;">Topic / Category:</label>
+                    <select id="post-category" class="af-input" style="font-weight: 700; padding: 6px 12px; font-size: 13px;">
+                        <option value="Business & Trade">💼 Business & Trade</option>
+                        <option value="Tech & Innovation">🚀 Tech & Innovation</option>
+                        <option value="Food & Dining">☕ Food & Dining</option>
+                        <option value="Real Estate & Living">🏠 Real Estate</option>
+                        <option value="Jobs & Career">🎯 Jobs & Career</option>
+                        <option value="Community & Events">🌟 Community</option>
+                    </select>
+                </div>
             </div>
 
             <textarea id="post-content" class="af-textarea mb-3" rows="3" placeholder="What's happening in your business or community today?..."></textarea>
@@ -403,6 +429,21 @@
 <script>
 (function() {
     let activeComposerTab = "text";
+    let loggedUser = null;
+
+    // Load logged-in user profile
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_logged_user_info')
+        .then(r => r.json())
+        .then(res => {
+            if (res.message) {
+                loggedUser = res.message;
+                document.getElementById('composer-user-avatar-img').src = loggedUser.user_image || '/assets/frappe/images/default-avatar.png';
+                document.getElementById('composer-user-fullname').innerText = loggedUser.full_name;
+                document.getElementById('composer-user-company').innerText = loggedUser.company;
+                document.getElementById('composer-user-handle').innerText = loggedUser.handle;
+                document.getElementById('composer-user-verified-badge').style.display = loggedUser.is_verified ? 'inline' : 'none';
+            }
+        });
 
     // Tab switching
     document.querySelectorAll('.composer-tab').forEach(btn => {
@@ -434,15 +475,13 @@
 
     // Submit post
     document.getElementById('btn-submit-post').addEventListener('click', function() {
-        const author = document.getElementById('post-author-name').value.trim();
-        const handle = document.getElementById('post-author-handle').value.trim() || '@ethiobiz';
         const category = document.getElementById('post-category').value;
         const content = document.getElementById('post-content').value.trim();
         const image = document.getElementById('post-image-url').value.trim();
         const video = document.getElementById('post-video-url').value.trim();
 
-        if (!author || !content) {
-            alert('Please enter your name and post story.');
+        if (!content) {
+            alert('Please write your post story.');
             return;
         }
 
@@ -469,8 +508,6 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
-                author_name: author,
-                author_handle: handle,
                 category_tag: category,
                 content: content,
                 post_image: image,
@@ -541,13 +578,13 @@
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div class="af-avatar">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
+                                <img src="${p.author_image || '/assets/frappe/images/default-avatar.png'}" class="af-avatar-img" alt="Avatar" onerror="this.src='/assets/frappe/images/default-avatar.png'">
                                 <div>
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <h4 class="af-author-name">${p.author_name}</h4>
                                         ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
                                     </div>
-                                    <p class="af-author-meta">${p.author_handle} • ${p.post_date.split(' ')[0]}</p>
+                                    <p class="af-author-meta">${p.company ? p.company + ' • ' : ''}${p.author_handle} • ${p.post_date.split(' ')[0]}</p>
                                 </div>
                             </div>
                             <span class="af-tag-badge">${p.category_tag}</span>
@@ -682,7 +719,10 @@
                     commentsListHtml += `
                         <div class="af-comment-card">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span class="af-comment-author">${c.author_name}</span>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="${c.author_image || '/assets/frappe/images/default-avatar.png'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                    <span class="af-comment-author">${c.author_name}</span>
+                                </div>
                                 <span class="af-comment-time">${c.comment_date.split(' ')[0]}</span>
                             </div>
                             <div class="af-comment-body">${c.comment_text}</div>
@@ -701,13 +741,13 @@
                         <div class="af-left-post-col">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
                                 <div style="display: flex; align-items: center; gap: 14px;">
-                                    <div class="af-avatar" style="width: 60px; height: 60px; font-size: 22px;">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
+                                    <img src="${p.author_image || '/assets/frappe/images/default-avatar.png'}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 12px rgba(0,128,128,0.2);" alt="Avatar">
                                     <div>
                                         <div style="display: flex; align-items: center; gap: 6px;">
                                             <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0;">${p.author_name}</h3>
                                             ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
                                         </div>
-                                        <p class="af-author-meta">${p.author_handle} • ${p.post_date}</p>
+                                        <p class="af-author-meta">${p.company ? p.company + ' • ' : ''}${p.author_handle} • ${p.post_date}</p>
                                     </div>
                                 </div>
                                 <span class="af-tag-badge" style="font-size: 12px; padding: 5px 14px;">${p.category_tag}</span>
@@ -749,7 +789,6 @@
 
                             <!-- Comment Input Form (Docked at Bottom of Right Column) -->
                             <div style="border-top: 1px solid #f1f5f9; padding-top: 14px;">
-                                <input type="text" id="cmt-author-name" class="af-input mb-2" placeholder="Your Name *">
                                 <textarea id="cmt-text" class="af-textarea mb-2" rows="2" placeholder="Write a comment..." style="font-size: 13px;"></textarea>
                                 <button id="btn-submit-comment" class="af-btn-primary" style="width: 100%; padding: 10px; font-size: 13px;">
                                     Post Comment &rarr;
@@ -764,11 +803,10 @@
                 const btnCmt = document.getElementById('btn-submit-comment');
                 if (btnCmt) {
                     btnCmt.addEventListener('click', function() {
-                        const name = document.getElementById('cmt-author-name').value.trim();
                         const text = document.getElementById('cmt-text').value.trim();
 
-                        if (!name || !text) {
-                            alert('Please enter your name and comment.');
+                        if (!text) {
+                            alert('Please write your comment.');
                             return;
                         }
 
@@ -780,8 +818,6 @@
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams({
                                 post_id: p.name,
-                                author_name: name,
-                                author_handle: '@community',
                                 comment_text: text
                             })
                         })

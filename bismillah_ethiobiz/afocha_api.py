@@ -3,297 +3,298 @@ import frappe
 from frappe import _
 
 @frappe.whitelist(allow_guest=True)
-def get_social_feed(category=None, limit=50, start=0, post_id=None):
-    """Returns the latest public AFOCHA social posts or a single post with comments."""
-    category = category or frappe.form_dict.get("category")
-    post_id = post_id or frappe.form_dict.get("post_id") or frappe.form_dict.get("post")
-
-    # If single post requested
-    if post_id:
-        if not frappe.db.exists("Afocha Post", post_id):
-            frappe.throw(_("Post not found."))
-        
-        p = frappe.get_doc("Afocha Post", post_id)
-        comments = []
-        if frappe.db.exists("DocType", "Afocha Comment"):
-            comments = frappe.get_all(
-                "Afocha Comment",
-                filters={"parent_post": post_id},
-                fields=["name", "author_name", "author_handle", "comment_text", "comment_date", "likes_count"],
-                order_by="comment_date asc"
-            )
-
-        poll_data = parse_poll_data(p)
-
+def get_logged_user_info():
+    """Returns the logged-in user profile with company, avatar image, and verified status."""
+    user = frappe.session.user
+    if not user or user == "Guest":
         return {
-            "status": "success",
-            "is_single": True,
-            "post": {
-                "name": p.name,
-                "author_name": p.author_name,
-                "author_handle": p.author_handle,
-                "is_verified": p.is_verified,
-                "post_date": str(p.post_date),
-                "category_tag": p.category_tag,
-                "content": p.content,
-                "post_image": p.post_image,
-                "video_url": p.video_url,
-                "is_poll": p.is_poll,
-                "poll_question": p.poll_question,
-                "poll_data": poll_data,
-                "likes_count": p.likes_count or 0,
-                "comments_count": p.comments_count or len(comments),
-                "shares_count": p.shares_count or 0
-            },
-            "comments": comments
+            "is_logged_in": False,
+            "user": "Guest",
+            "full_name": "EthioBiz Community Member",
+            "company": "EthioBiz Enterprise",
+            "handle": "@community",
+            "user_image": "/assets/frappe/images/default-avatar.png",
+            "is_verified": False
         }
 
-    # Feed listing
+    user_doc = frappe.get_doc("User", user)
+    full_name = user_doc.full_name or user_doc.name
+    if user == "Administrator":
+        full_name = "EthioBiz Official"
+
+    # Resolve company & employee image if any
+    company = "EthioBiz Enterprise"
+    user_image = user_doc.user_image
+
+    emp = frappe.db.get_value("Employee", {"user_id": user}, ["name", "company", "image"], as_dict=True)
+    if emp:
+        if emp.company:
+            company = emp.company
+        if not user_image and emp.image:
+            user_image = emp.image
+
+    if not user_image:
+        user_image = "/assets/frappe/images/default-avatar.png"
+
+    handle = f"@{user.split('@')[0]}"
+
+    return {
+        "is_logged_in": True,
+        "user": user,
+        "full_name": full_name,
+        "company": company,
+        "handle": handle,
+        "user_image": user_image,
+        "is_verified": True
+    }
+
+@frappe.whitelist(allow_guest=True)
+def get_social_feed(category=None, limit=20, start=0, post_id=None):
+    """Retrieves Afocha posts with comments, poll results, and user profile images."""
+    if post_id:
+        if not frappe.db.exists("Afocha Post", post_id):
+            return {"post": None, "comments": []}
+        
+        post = frappe.get_doc("Afocha Post", post_id)
+        post_data = {
+            "name": post.name,
+            "author_name": post.author_name,
+            "author_handle": post.author_handle or "@ethiobiz",
+            "author_image": post.author_image or "/assets/frappe/images/default-avatar.png",
+            "company": post.company or "EthioBiz Enterprise",
+            "category_tag": post.category_tag,
+            "post_date": str(post.post_date or post.creation),
+            "is_verified": post.is_verified,
+            "likes_count": post.likes_count or 0,
+            "comments_count": post.comments_count or 0,
+            "content": post.content,
+            "post_image": post.post_image,
+            "video_url": post.video_url,
+            "is_poll": post.is_poll,
+            "poll_data": _format_poll_data(post)
+        }
+
+        comments = []
+        if frappe.db.exists("DocType", "Afocha Comment"):
+            cmts = frappe.get_all(
+                "Afocha Comment",
+                filters={"parent_post": post.name},
+                fields=["name", "author_name", "author_handle", "author_image", "comment_text", "comment_date"],
+                order_by="creation asc"
+            )
+            for c in cmts:
+                comments.append({
+                    "name": c.name,
+                    "author_name": c.author_name,
+                    "author_handle": c.author_handle,
+                    "author_image": c.author_image or "/assets/frappe/images/default-avatar.png",
+                    "comment_text": c.comment_text,
+                    "comment_date": str(c.comment_date or "")
+                })
+
+        return {"post": post_data, "comments": comments}
+
+    # Fetch feed list
     filters = {}
-    if category and category.strip() and category.strip() != "All":
-        filters["category_tag"] = category.strip()
+    if category and category != "all":
+        filters["category_tag"] = category
 
     posts = frappe.get_all(
         "Afocha Post",
         filters=filters,
         fields=[
-            "name", "author_name", "author_handle", "is_verified",
-            "post_date", "category_tag", "content", "post_image",
-            "video_url", "is_poll", "poll_question", "poll_options_json", "poll_votes_json",
-            "likes_count", "comments_count", "shares_count", "pinned"
+            "name", "author_name", "author_handle", "author_image", "company",
+            "category_tag", "post_date", "is_verified", "likes_count", "comments_count",
+            "content", "post_image", "video_url", "is_poll", "creation"
         ],
-        order_by="pinned desc, post_date desc",
-        limit_start=int(start or 0),
-        limit_page_length=int(limit or 50)
+        order_by="creation desc",
+        limit_page_length=int(limit),
+        limit_start=int(start)
     )
 
-    enriched_posts = []
+    feed = []
     for p in posts:
-        poll_info = None
-        if p.get("is_poll"):
-            poll_info = parse_poll_data(p)
-        
-        enriched_posts.append({
+        poll_data = None
+        if p.is_poll:
+            doc = frappe.get_doc("Afocha Post", p.name)
+            poll_data = _format_poll_data(doc)
+
+        feed.append({
             "name": p.name,
             "author_name": p.author_name,
-            "author_handle": p.author_handle,
-            "is_verified": p.is_verified,
-            "post_date": str(p.post_date),
+            "author_handle": p.author_handle or "@ethiobiz",
+            "author_image": p.author_image or "/assets/frappe/images/default-avatar.png",
+            "company": p.company or "EthioBiz Enterprise",
             "category_tag": p.category_tag,
+            "post_date": str(p.post_date or p.creation),
+            "is_verified": p.is_verified,
+            "likes_count": p.likes_count or 0,
+            "comments_count": p.comments_count or 0,
             "content": p.content,
             "post_image": p.post_image,
             "video_url": p.video_url,
             "is_poll": p.is_poll,
-            "poll_question": p.poll_question,
-            "poll_data": poll_info,
-            "likes_count": p.likes_count or 0,
-            "comments_count": p.comments_count or 0,
-            "shares_count": p.shares_count or 0,
-            "permalink": f"/social?post={p.name}"
+            "poll_data": poll_data
         })
 
-    return {
-        "status": "success",
-        "total": len(enriched_posts),
-        "posts": enriched_posts
-    }
+    return {"posts": feed}
 
-def parse_poll_data(post_doc):
-    """Helper to parse poll options and calculate vote percentages."""
-    options_raw = getattr(post_doc, "poll_options_json", None) or post_doc.get("poll_options_json")
-    votes_raw = getattr(post_doc, "poll_votes_json", None) or post_doc.get("poll_votes_json")
-
+def _format_poll_data(post_doc):
+    if not post_doc.is_poll or not post_doc.poll_options_json:
+        return None
     try:
-        options = json.loads(options_raw) if options_raw else []
+        options = json.loads(post_doc.poll_options_json)
+        votes = json.loads(post_doc.poll_votes_json) if post_doc.poll_votes_json else [0] * len(options)
     except Exception:
-        options = []
+        return None
 
-    try:
-        votes = json.loads(votes_raw) if votes_raw else {}
-    except Exception:
-        votes = {}
-
-    total_votes = sum(votes.values()) if votes else 0
-    poll_results = []
-
+    total_votes = sum(votes)
+    formatted_opts = []
     for idx, opt in enumerate(options):
-        count = votes.get(str(idx), 0)
-        pct = round((count / total_votes * 100), 1) if total_votes > 0 else 0
-        poll_results.append({
+        v = votes[idx] if idx < len(votes) else 0
+        pct = round((v / total_votes * 100), 1) if total_votes > 0 else 0
+        formatted_opts.append({
             "index": idx,
             "text": opt,
-            "votes": count,
+            "votes": v,
             "percentage": pct
         })
 
     return {
-        "question": getattr(post_doc, "poll_question", None) or post_doc.get("poll_question"),
+        "question": post_doc.poll_question,
         "total_votes": total_votes,
-        "options": poll_results
+        "options": formatted_opts
     }
 
 @frappe.whitelist(allow_guest=True)
-def create_social_post(author_name=None, author_handle=None, content=None, category_tag="Business & Trade", post_image=None, video_url=None, is_poll=0, poll_question=None, poll_options=None):
-    """Creates a new post on AFOCHA with rich media & poll support."""
-    author_name = author_name or frappe.form_dict.get("author_name")
-    author_handle = author_handle or frappe.form_dict.get("author_handle")
+def create_social_post(
+    author_name=None, author_handle=None, category_tag="Business & Trade",
+    content=None, post_image=None, video_url=None, is_poll=0,
+    poll_question=None, poll_options=None
+):
+    """Creates a post enforcing logged-in user profile, company, and avatar."""
     content = content or frappe.form_dict.get("content")
-    category_tag = category_tag or frappe.form_dict.get("category_tag", "Business & Trade")
+    if not content:
+        frappe.throw(_("Post content is required."))
+
+    # Resolve logged-in user identity
+    user_info = get_logged_user_info()
+    if user_info.get("is_logged_in"):
+        author_name = user_info["full_name"]
+        author_handle = user_info["handle"]
+        author_image = user_info["user_image"]
+        company = user_info["company"]
+        is_verified = 1
+    else:
+        author_name = author_name or frappe.form_dict.get("author_name") or "Community Member"
+        author_handle = author_handle or frappe.form_dict.get("author_handle") or "@community"
+        author_image = "/assets/frappe/images/default-avatar.png"
+        company = "EthioBiz Community"
+        is_verified = 0
+
+    category_tag = category_tag or frappe.form_dict.get("category_tag") or "Business & Trade"
     post_image = post_image or frappe.form_dict.get("post_image")
     video_url = video_url or frappe.form_dict.get("video_url")
-    is_poll = cint(is_poll or frappe.form_dict.get("is_poll", 0))
+    is_poll = int(is_poll or frappe.form_dict.get("is_poll") or 0)
     poll_question = poll_question or frappe.form_dict.get("poll_question")
     poll_options = poll_options or frappe.form_dict.get("poll_options")
 
-    if not author_name or not content:
-        frappe.throw(_("Author Name and Post Content are required."))
-
-    poll_options_json = None
-    poll_votes_json = None
-    if is_poll and poll_options:
-        if isinstance(poll_options, str):
-            try:
-                opts = json.loads(poll_options)
-            except Exception:
-                opts = [o.strip() for o in poll_options.split("\n") if o.strip()]
-        else:
-            opts = poll_options
-        
-        poll_options_json = json.dumps(opts)
-        poll_votes_json = json.dumps({str(i): 0 for i in range(len(opts))})
-
-    doc = frappe.get_doc({
+    post_doc = frappe.get_doc({
         "doctype": "Afocha Post",
-        "author_name": str(author_name).strip(),
-        "author_handle": str(author_handle).strip() if author_handle else "@ethiobiz",
-        "content": str(content).strip(),
-        "category_tag": str(category_tag).strip() if category_tag else "Business & Trade",
+        "author_name": author_name,
+        "author_handle": author_handle,
+        "author_image": author_image,
+        "company": company,
+        "category_tag": category_tag,
+        "post_date": frappe.utils.now(),
+        "is_verified": is_verified,
+        "content": content,
         "post_image": post_image,
         "video_url": video_url,
         "is_poll": is_poll,
-        "poll_question": poll_question if is_poll else None,
-        "poll_options_json": poll_options_json,
-        "poll_votes_json": poll_votes_json,
-        "post_date": frappe.utils.now_datetime(),
-        "is_verified": 1 if any(k in (author_handle or "").lower() for k in ["@biz", "@ethio", "official"]) else 0,
-        "likes_count": 0,
-        "comments_count": 0,
-        "shares_count": 0
+        "poll_question": poll_question,
+        "poll_options_json": poll_options if is_poll else None,
+        "poll_votes_json": json.dumps([0]*len(json.loads(poll_options))) if (is_poll and poll_options) else None
     })
-    doc.flags.ignore_permissions = True
-    doc.flags.ignore_mandatory = True
-    doc.insert(ignore_permissions=True)
+    post_doc.flags.ignore_permissions = True
+    post_doc.insert(ignore_permissions=True)
     frappe.db.commit()
 
-    return {
-        "status": "success",
-        "message": "Post published successfully!",
-        "post_name": doc.name,
-        "permalink": f"/social?post={doc.name}"
-    }
+    return {"status": "success", "name": post_doc.name}
 
 @frappe.whitelist(allow_guest=True)
 def add_post_comment(post_id=None, author_name=None, author_handle=None, comment_text=None):
-    """Adds a new comment to an Afocha Post."""
+    """Adds a comment capturing user profile."""
     post_id = post_id or frappe.form_dict.get("post_id")
-    author_name = author_name or frappe.form_dict.get("author_name") or "Community Member"
-    author_handle = author_handle or frappe.form_dict.get("author_handle") or "@community"
     comment_text = comment_text or frappe.form_dict.get("comment_text")
 
     if not post_id or not comment_text:
-        frappe.throw(_("Post ID and Comment Text are required."))
+        frappe.throw(_("Post ID and comment text are required."))
 
-    if not frappe.db.exists("Afocha Post", post_id):
-        frappe.throw(_("Post does not exist."))
+    user_info = get_logged_user_info()
+    if user_info.get("is_logged_in"):
+        author_name = user_info["full_name"]
+        author_handle = user_info["handle"]
+        author_image = user_info["user_image"]
+    else:
+        author_name = author_name or frappe.form_dict.get("author_name") or "Community Member"
+        author_handle = author_handle or frappe.form_dict.get("author_handle") or "@community"
+        author_image = "/assets/frappe/images/default-avatar.png"
 
-    # Insert comment doc
-    comment_doc = frappe.get_doc({
+    cmt = frappe.get_doc({
         "doctype": "Afocha Comment",
         "parent_post": post_id,
-        "author_name": str(author_name).strip(),
-        "author_handle": str(author_handle).strip(),
-        "comment_text": str(comment_text).strip(),
-        "comment_date": frappe.utils.now_datetime(),
-        "likes_count": 0
+        "author_name": author_name,
+        "author_handle": author_handle,
+        "author_image": author_image,
+        "comment_text": comment_text,
+        "comment_date": frappe.utils.now()
     })
-    comment_doc.flags.ignore_permissions = True
-    comment_doc.insert(ignore_permissions=True)
+    cmt.flags.ignore_permissions = True
+    cmt.insert(ignore_permissions=True)
 
-    # Increment comments_count on parent post
-    current_count = frappe.db.get_value("Afocha Post", post_id, "comments_count") or 0
-    new_count = current_count + 1
-    frappe.db.set_value("Afocha Post", post_id, "comments_count", new_count)
-    frappe.db.commit()
-
-    return {
-        "status": "success",
-        "message": "Comment added successfully!",
-        "comments_count": new_count,
-        "comment": {
-            "name": comment_doc.name,
-            "author_name": comment_doc.author_name,
-            "author_handle": comment_doc.author_handle,
-            "comment_text": comment_doc.comment_text,
-            "comment_date": str(comment_doc.comment_date)
-        }
-    }
-
-@frappe.whitelist(allow_guest=True)
-def vote_poll(post_id=None, option_index=None):
-    """Casts a vote on an interactive Afocha poll and returns updated percentages."""
-    post_id = post_id or frappe.form_dict.get("post_id")
-    option_index = option_index if option_index is not None else frappe.form_dict.get("option_index")
-
-    if not post_id or option_index is None:
-        frappe.throw(_("Post ID and Option Index are required."))
-
-    if not frappe.db.exists("Afocha Post", post_id):
-        frappe.throw(_("Post not found."))
-
+    # Increment comment count
     post = frappe.get_doc("Afocha Post", post_id)
-    if not post.is_poll or not post.poll_options_json:
-        frappe.throw(_("This post is not an active poll."))
-
-    try:
-        votes = json.loads(post.poll_votes_json) if post.poll_votes_json else {}
-    except Exception:
-        votes = {}
-
-    opt_key = str(option_index)
-    votes[opt_key] = votes.get(opt_key, 0) + 1
-
-    post.poll_votes_json = json.dumps(votes)
+    post.comments_count = (post.comments_count or 0) + 1
     post.flags.ignore_permissions = True
-    post.save()
+    post.save(ignore_permissions=True)
     frappe.db.commit()
 
-    updated_poll = parse_poll_data(post)
-
-    return {
-        "status": "success",
-        "message": "Vote recorded!",
-        "poll_data": updated_poll
-    }
+    return {"status": "success", "comments_count": post.comments_count}
 
 @frappe.whitelist(allow_guest=True)
 def like_social_post(post_id=None):
-    """Increments the likes counter for an Afocha post."""
     post_id = post_id or frappe.form_dict.get("post_id")
     if not post_id or not frappe.db.exists("Afocha Post", post_id):
-        frappe.throw(_("Post not found."))
-
-    current_likes = frappe.db.get_value("Afocha Post", post_id, "likes_count") or 0
-    new_likes = current_likes + 1
-    frappe.db.set_value("Afocha Post", post_id, "likes_count", new_likes)
+        return {"likes_count": 0}
+    
+    post = frappe.get_doc("Afocha Post", post_id)
+    post.likes_count = (post.likes_count or 0) + 1
+    post.flags.ignore_permissions = True
+    post.save(ignore_permissions=True)
     frappe.db.commit()
+    return {"status": "success", "likes_count": post.likes_count}
 
-    return {
-        "status": "success",
-        "likes_count": new_likes
-    }
+@frappe.whitelist(allow_guest=True)
+def vote_poll(post_id=None, option_index=0):
+    post_id = post_id or frappe.form_dict.get("post_id")
+    option_index = int(option_index or frappe.form_dict.get("option_index") or 0)
 
-def cint(val):
-    try:
-        return int(val)
-    except Exception:
-        return 0
+    if not post_id or not frappe.db.exists("Afocha Post", post_id):
+        return {"status": "error"}
+
+    post = frappe.get_doc("Afocha Post", post_id)
+    if not post.is_poll or not post.poll_options_json:
+        return {"status": "error"}
+
+    options = json.loads(post.poll_options_json)
+    votes = json.loads(post.poll_votes_json) if post.poll_votes_json else [0] * len(options)
+
+    if option_index < len(votes):
+        votes[option_index] += 1
+        post.poll_votes_json = json.dumps(votes)
+        post.flags.ignore_permissions = True
+        post.save(ignore_permissions=True)
+        frappe.db.commit()
+
+    return {"status": "success", "poll_data": _format_poll_data(post)}
