@@ -38,13 +38,38 @@ def ensure_hadeeda_settings():
             "SHOW TABLES LIKE 'tabHADEEDA Settings'"
         )
         if not table_exists:
-            print("EthioBiz: HADEEDA Settings table missing, creating via DocType sync...")
-            frappe.reload_doc("ethiobiz_theme", "doctype", "hadeeda_settings", force=True)
+            print("EthioBiz: HADEEDA Settings table missing, creating via SQL...")
+            frappe.db.sql("""
+                CREATE TABLE IF NOT EXISTS `tabHADEEDA Settings` (
+                    `name` VARCHAR(140) PRIMARY KEY,
+                    `creation` DATETIME,
+                    `modified` DATETIME,
+                    `modified_by` VARCHAR(140),
+                    `owner` VARCHAR(140),
+                    `docstatus` INT(1) DEFAULT 0,
+                    `idx` INT(8) DEFAULT 0,
+                    `_user_tags` TEXT,
+                    `_comments` TEXT,
+                    `_assign` TEXT,
+                    `_liked_by` TEXT,
+                    `enabled` INT(1) DEFAULT 0,
+                    `chat_enabled` INT(1) DEFAULT 0,
+                    `webhook_url` VARCHAR(140),
+                    `widget_title` VARCHAR(140),
+                    `widget_primary_color` VARCHAR(140),
+                    `widget_mode` VARCHAR(140),
+                    `initial_messages` LONGTEXT,
+                    `allow_file_uploads` INT(1) DEFAULT 0,
+                    `default_language` VARCHAR(140),
+                    `bot_name` VARCHAR(140)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """)
             frappe.db.commit()
+            print("EthioBiz: HADEEDA Settings table created via SQL")
 
         table_exists = frappe.db.sql("SHOW TABLES LIKE 'tabHADEEDA Settings'")
         if not table_exists:
-            print("EthioBiz: WARNING - HADEEDA Settings table still missing after sync")
+            print("EthioBiz: CRITICAL - HADEEDA Settings table still missing after SQL create")
             return
 
         existing = frappe.db.get_value("HADEEDA Settings", "HADEEDA Settings", "name")
@@ -52,25 +77,23 @@ def ensure_hadeeda_settings():
             return
 
         print("EthioBiz: Seeding HADEEDA Settings defaults...")
-        frappe.get_doc({
-            "doctype": "HADEEDA Settings",
-            "name": "HADEEDA Settings",
-            "enabled": 1,
-            "chat_enabled": 1,
-            "webhook_url": "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat",
-            "widget_title": "Hadeeda BizAi",
-            "widget_primary_color": "#1FB6AE",
-            "widget_mode": "window",
-            "initial_messages": '["Selam!", "I am HADEEDA, your AI Executive Assistant. How can I help you today?"]',
-            "allow_file_uploads": 1,
-            "default_language": "en",
-            "bot_name": "HADEEDA",
-        }).insert(ignore_permissions=True)
+        frappe.db.sql("""
+            INSERT INTO `tabHADEEDA Settings` 
+            (name, creation, modified, modified_by, owner, docstatus, idx,
+             enabled, chat_enabled, webhook_url, widget_title, widget_primary_color,
+             widget_mode, initial_messages, allow_file_uploads, default_language, bot_name)
+            VALUES 
+            ('HADEEDA Settings', NOW(), NOW(), 'Administrator', 'Administrator', 0, 0,
+             1, 1, 'https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat',
+             'Hadeeda BizAi', '#1FB6AE', 'window',
+             '["Selam!", "I am HADEEDA, your AI Executive Assistant. How can I help you today?"]',
+             1, 'en', 'HADEEDA')
+        """)
         frappe.db.commit()
         print("EthioBiz: HADEEDA Settings seeded successfully")
     except Exception as e:
         print(f"EthioBiz: Error ensuring HADEEDA Settings: {e}")
-        frappe.log_error(f"Multi-company setup error: {e}", "EthioBiz Multi-Company")
+        frappe.log_error(f"HADEEDA Settings setup error: {e}", "EthioBiz HADEEDA")
 
 
 def setup_custom_fields():
