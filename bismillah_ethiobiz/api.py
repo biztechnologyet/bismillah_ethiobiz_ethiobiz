@@ -176,13 +176,44 @@ def _get_document_context(context):
         return ""
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_chat_config():
     user = frappe.session.user
-    if user == "Guest":
-        frappe.throw("Authentication required", frappe.PermissionError)
-
     settings = _get_hadeeda_settings()
+
+    is_guest = user == "Guest"
+
+    if is_guest:
+        return {
+            "webhook_url": settings.chat_webhook_url,
+            "enabled": bool(settings.enabled and settings.chat_enabled),
+            "session_id": f"guest::{frappe.utils.nowdate()}",
+            "full_name": "Guest",
+            "email": "",
+            "username": "Guest",
+            "company": "",
+            "department": "",
+            "designation": "",
+            "industry": "",
+            "religion": "",
+            "user_behaviour": "",
+            "company_industry": "",
+            "language": settings.default_language or "en",
+            "api_key": "",
+            "api_secret": "",
+            "bot_name": settings.bot_name or "HADEEDA",
+            "widget_title": settings.widget_title or "HADEEDA AI Assistant",
+            "widget_subtitle": settings.widget_subtitle or "",
+            "widget_position": settings.widget_position or "Right",
+            "widget_primary_color": settings.widget_primary_color or "#1FB6AE",
+            "widget_mode": settings.widget_mode or "window",
+            "initial_messages": json.loads(settings.initial_messages or "[]"),
+            "allow_file_uploads": bool(settings.allow_file_uploads),
+            "allowed_mime_types": settings.allowed_mime_types or "",
+            "default_language": settings.default_language or "en",
+            "enable_streaming": bool(getattr(settings, "enable_streaming", 1)),
+        }
+
     api_key, api_secret = _get_user_api_credentials(user)
     company = frappe.defaults.get_user_default("company") or ""
     department, designation = _get_user_department_designation(user)

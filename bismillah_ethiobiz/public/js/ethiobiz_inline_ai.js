@@ -2,17 +2,15 @@
     'use strict';
 
     if (window.__ethiobizInlineAIInitialized) return;
-    if (frappe.session.user === 'Guest') return;
-
-    const settings = frappe.boot.hadeeda_settings;
-    if (!settings || !settings.enabled || !settings.inline_ai_enabled) return;
+    if (frappe.session && frappe.session.user === 'Guest') return;
 
     window.__ethiobizInlineAIInitialized = true;
 
-    const TRIGGER = settings.trigger_character || '/';
-    const excludedDoctypes = (settings.excluded_doctypes || '')
+    let settings = (typeof frappe !== 'undefined' && frappe.boot && frappe.boot.hadeeda_settings) || null;
+    const TRIGGER = (settings && settings.trigger_character) || '/';
+    const excludedDoctypes = ((settings && settings.excluded_doctypes) || '')
         .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-    const excludedFields = (settings.excluded_fields || '')
+    const excludedFields = ((settings && settings.excluded_fields) || '')
         .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
     let popup = null;

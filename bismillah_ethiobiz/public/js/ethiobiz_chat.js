@@ -2,10 +2,6 @@
     'use strict';
 
     if (window.__ethiobizChatInitialized) return;
-    if (frappe.session.user === 'Guest') return;
-
-    const settings = frappe.boot.hadeeda_settings;
-    if (!settings || !settings.enabled || !settings.chat_enabled) return;
 
     window.__ethiobizChatInitialized = true;
 
