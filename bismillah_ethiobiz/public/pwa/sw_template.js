@@ -104,7 +104,9 @@ function networkFirst(request) {
         .then(function (response) {
             if (response && response.ok) {
                 var copy = response.clone();
-                caches.open(CACHE).then(function (cache) { cache.put(request, copy); });
+                caches.open(CACHE).then(function (cache) {
+                    cache.put(request, copy).catch(function () {});
+                }).catch(function () {});
             }
             return response;
         })
@@ -122,7 +124,9 @@ function cacheFirst(request) {
                 .then(function (response) {
                     if (response && response.ok) {
                         var copy = response.clone();
-                        caches.open(CACHE).then(function (cache) { cache.put(request, copy); });
+                        caches.open(CACHE).then(function (cache) {
+                            cache.put(request, copy).catch(function () {});
+                        }).catch(function () {});
                     }
                 })
                 .catch(function () {});
@@ -131,7 +135,9 @@ function cacheFirst(request) {
         return fetch(request).then(function (response) {
             if (response && response.ok) {
                 var copy = response.clone();
-                caches.open(CACHE).then(function (cache) { cache.put(request, copy); });
+                caches.open(CACHE).then(function (cache) {
+                    cache.put(request, copy).catch(function () {});
+                }).catch(function () {});
             }
             return response;
         });
