@@ -5,59 +5,62 @@
 {% block header %}
 <style>
     .afocha-hero {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        background: linear-gradient(135deg, #093a3e 0%, #008080 50%, #0284c7 100%);
         color: white;
-        padding: 30px 20px;
+        padding: 35px 20px;
         border-radius: 16px;
         margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0,128,128,0.2);
     }
     .post-composer-box {
         background: #ffffff;
-        border-radius: 14px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         border: 1px solid #e2e8f0;
         margin-bottom: 25px;
     }
     .post-card {
         background: #ffffff;
-        border-radius: 14px;
+        border-radius: 16px;
         padding: 22px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         border: 1px solid #e2e8f0;
         margin-bottom: 20px;
-        transition: transform 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .post-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         border-color: #cbd5e1;
     }
     .post-author-avatar {
-        width: 44px;
-        height: 44px;
+        width: 46px;
+        height: 46px;
         border-radius: 50%;
-        background: #008080;
+        background: linear-gradient(135deg, #008080 0%, #0f766e 100%);
         color: white;
         font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 18px;
+        box-shadow: 0 2px 8px rgba(0,128,128,0.3);
     }
     .verified-badge {
         color: #0284c7;
-        font-size: 14px;
+        font-size: 15px;
         margin-left: 4px;
     }
     .post-action-btn {
         background: transparent;
-        border: none;
+        border: 1px solid transparent;
         color: #64748b;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13px;
         display: flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -65,17 +68,37 @@
     .post-action-btn:hover {
         background: #f1f5f9;
         color: #0f172a;
+        border-color: #e2e8f0;
     }
     .post-action-btn.liked {
         color: #ef4444;
+        background: #fef2f2;
+        border-color: #fee2e2;
     }
     .category-pill {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 3px 10px;
-        border-radius: 12px;
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #ccfbf1;
+        padding: 4px 12px;
+        border-radius: 20px;
         font-size: 12px;
         font-weight: 600;
+    }
+    .filter-chip {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .filter-chip.active, .filter-chip:hover {
+        background: #008080;
+        color: #ffffff;
+        border-color: #008080;
     }
 </style>
 {% endblock %}
@@ -83,30 +106,44 @@
 {% block page_content %}
 <div class="container my-4">
     <div class="afocha-hero text-center">
-        <h2 class="font-weight-bold mb-1">🌟 AFOCHA Social</h2>
-        <p class="lead mb-0" style="font-size: 16px;">The community pulse of EthioBiz: Share updates, connect with verified businesses, and discover what is trending in Ethiopia.</p>
+        <h1 class="font-weight-bold mb-2">🌟 AFOCHA Social</h1>
+        <p class="lead mb-0" style="font-size: 16px; opacity: 0.95;">The pulse of Ethiopian Business: Share stories, promote services, and engage with verified businesses.</p>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4" id="afocha-filter-bar">
+        <button class="filter-chip active" data-cat="">All Stories</button>
+        <button class="filter-chip" data-cat="Business & Trade">💼 Business</button>
+        <button class="filter-chip" data-cat="Tech & Innovation">🚀 Tech</button>
+        <button class="filter-chip" data-cat="Food & Dining">🍽️ Dining</button>
+        <button class="filter-chip" data-cat="Real Estate & Living">🏢 Real Estate</button>
+        <button class="filter-chip" data-cat="Jobs & Career">💼 Jobs</button>
+        <button class="filter-chip" data-cat="Community & Events">🎉 Community</button>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Composer Box -->
             <div class="post-composer-box">
-                <h5 class="font-weight-bold mb-3">✍️ Share an Update with the Community</h5>
+                <h5 class="font-weight-bold mb-3 text-dark">✍️ Share an Update with the Community</h5>
                 <form id="composer-form">
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="comp-author-name" placeholder="Your Name / Business" required>
+                            <label class="form-label small font-weight-bold text-muted">Your Name or Business</label>
+                            <input type="text" class="form-control" id="comp-author-name" placeholder="e.g. Dawit Bekele / Addis Tech" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="comp-author-handle" placeholder="@yourhandle" required>
+                            <label class="form-label small font-weight-bold text-muted">Handle</label>
+                            <input type="text" class="form-control" id="comp-author-handle" placeholder="@dawit / @company" value="@" required>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <textarea class="form-control" id="comp-content" rows="3" placeholder="What's happening in your business or market today?" required></textarea>
+                        <label class="form-label small font-weight-bold text-muted">What's on your mind?</label>
+                        <textarea class="form-control" id="comp-content" rows="3" placeholder="Share news, announce product offers, or ask the community..." required></textarea>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
-                            <select class="form-select form-select-sm" id="comp-category">
+                            <select class="form-select form-select-sm" id="comp-category" style="width: auto;">
                                 <option value="Business & Trade">💼 Business & Trade</option>
                                 <option value="Tech & Innovation">🚀 Tech & Innovation</option>
                                 <option value="Food & Dining">🍽️ Food & Dining</option>
@@ -116,12 +153,13 @@
                             </select>
                         </div>
                         <div>
-                            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill font-weight-bold" style="background: #008080; border: none;">
-                                🚀 Publish Post
+                            <button type="submit" id="btn-submit-post" class="btn btn-primary px-4 rounded-pill font-weight-bold" style="background: #008080; border: none;">
+                                🚀 Publish Story
                             </button>
                         </div>
                     </div>
                 </form>
+                <div id="post-alert-box" class="alert mt-3 d-none"></div>
             </div>
 
             <!-- Feed Container -->
@@ -137,8 +175,19 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    function loadFeed() {
-        fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed')
+    let currentCategory = "";
+
+    function getCsrfToken() {
+        return window.csrf_token || (window.frappe && window.frappe.csrf_token) || "";
+    }
+
+    function loadFeed(cat) {
+        let url = '/api/method/bismillah_ethiobiz.afocha_api.get_social_feed';
+        if (cat) {
+            url += '?category=' + encodeURIComponent(cat);
+        }
+
+        fetch(url)
             .then(res => res.json())
             .then(res => {
                 const data = res.message;
@@ -146,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 container.innerHTML = '';
 
                 if (!data || !data.posts || data.posts.length === 0) {
-                    container.innerHTML = '<div class="text-center py-5 text-muted">No posts yet. Be the first to share an update!</div>';
+                    container.innerHTML = '<div class="text-center py-5 text-muted bg-white rounded-4 border p-4">No stories found in this topic. Be the first to publish!</div>';
                     return;
                 }
 
@@ -160,12 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="post-author-avatar">${initial}</div>
                                 <div>
                                     <div class="font-weight-bold text-dark mb-0">
-                                        ${post.author_name} ${post.is_verified ? '<span class="verified-badge">✓</span>' : ''}
+                                        ${post.author_name} ${post.is_verified ? '<span class="verified-badge" title="Verified Ethiopian Business">✓</span>' : ''}
                                     </div>
-                                    <small class="text-muted">${post.author_handle} • ${post.post_date ? post.post_date.split(' ')[0] : ''}</small>
+                                    <small class="text-muted">${post.author_handle} • ${post.post_date ? post.post_date.split(' ')[0] : 'Just now'}</small>
                                 </div>
                             </div>
-                            <span class="category-pill">${post.category_tag}</span>
+                            <span class="category-pill">${post.category_tag || 'Community'}</span>
                         </div>
                         <p class="mb-3 text-dark" style="font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${post.content}</p>
                         <div class="d-flex gap-3 pt-2 border-top">
@@ -175,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button class="post-action-btn">
                                 <span>💬</span> <span>${post.comments_count || 0}</span> Comments
                             </button>
-                            <button class="post-action-btn">
-                                <span>🔁</span> Share
+                            <button class="post-action-btn" onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!');">
+                                <span>🔗</span> Share
                             </button>
                         </div>
                     `;
@@ -188,23 +237,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.addEventListener('click', function() {
                         const pid = this.getAttribute('data-id');
                         const countSpan = this.querySelector('.like-num');
-                        fetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post?post_id=' + encodeURIComponent(pid))
-                            .then(r => r.json())
-                            .then(d => {
-                                if (d.message && d.message.likes_count !== undefined) {
-                                    countSpan.innerText = d.message.likes_count;
-                                    this.classList.add('liked');
-                                }
-                            });
+                        fetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Frappe-CSRF-Token': getCsrfToken()
+                            },
+                            body: JSON.stringify({ post_id: pid })
+                        })
+                        .then(r => r.json())
+                        .then(d => {
+                            if (d.message && d.message.likes_count !== undefined) {
+                                countSpan.innerText = d.message.likes_count;
+                                this.classList.add('liked');
+                            }
+                        })
+                        .catch(e => console.error(e));
                     });
                 });
             })
             .catch(err => console.error('Error loading feed:', err));
     }
 
-    // Handle new post submit
+    // Filter chip handlers
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.getAttribute('data-cat');
+            loadFeed(currentCategory);
+        });
+    });
+
+    // Form submit with FormData fallback
     document.getElementById('composer-form').addEventListener('submit', function(e) {
         e.preventDefault();
+        const submitBtn = document.getElementById('btn-submit-post');
+        const alertBox = document.getElementById('post-alert-box');
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Publishing...';
+        alertBox.className = 'alert mt-3 d-none';
+
         const payload = {
             author_name: document.getElementById('comp-author-name').value,
             author_handle: document.getElementById('comp-author-handle').value,
@@ -216,19 +290,35 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'X-Frappe-CSRF-Token': getCsrfToken()
             },
             body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(data => {
-            document.getElementById('comp-content').value = '';
-            loadFeed();
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🚀 Publish Story';
+
+            if (data.message && data.message.status === 'success') {
+                alertBox.className = 'alert alert-success mt-3';
+                alertBox.innerText = '🎉 Story published successfully to Afocha Social!';
+                document.getElementById('comp-content').value = '';
+                loadFeed(currentCategory);
+                setTimeout(() => { alertBox.className = 'alert mt-3 d-none'; }, 4000);
+            } else {
+                alertBox.className = 'alert alert-danger mt-3';
+                alertBox.innerText = (data.exc || data._server_messages || 'Failed to publish story.');
+            }
         })
-        .catch(err => alert('Error publishing post.'));
+        .catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🚀 Publish Story';
+            alertBox.className = 'alert alert-danger mt-3';
+            alertBox.innerText = 'Network error while publishing. Please try again.';
+        });
     });
 
-    loadFeed();
+    loadFeed("");
 });
 </script>
 {% endblock %}

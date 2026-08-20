@@ -181,3 +181,9 @@ before_uninstall = "bismillah_ethiobiz.install.before_uninstall"
 
 # Apply multi-company custom fields and property setters after every migrate
 after_migrate = "bismillah_ethiobiz.setup_multi_company.after_migrate"
+
+doc_events = {
+    "Company": {
+        "before_save": "bismillah_ethiobiz.company_hooks.before_save_company"
+    }
+}
