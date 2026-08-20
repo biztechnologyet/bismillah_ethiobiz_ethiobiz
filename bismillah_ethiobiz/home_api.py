@@ -28,7 +28,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
         products = frappe.get_all(
             "Website Item",
             filters=prod_filters,
-            fields=["name", "item_name", "web_item_name", "item_group", "website_image", "short_description", "route", "creation"],
+            fields=["name", "item_name", "web_item_name", "item_group", "website_image", "short_description", "route", "company", "creation"],
             order_by="creation desc",
             limit_page_length=limit,
             limit_start=start
@@ -38,6 +38,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             if img and ("default-avatar" in img or not img.strip()):
                 img = None
 
+            comp = p.get("company") or frappe.db.get_value("Item", p.name, "company") or "EthioBiz Merchant"
             prices = frappe.get_all("Item Price", filters={"item_code": p.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
             
@@ -46,17 +47,94 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "badge": f"🛍️ {p.item_group or 'Product'}",
                 "badge_class": "badge-product",
                 "title": p.web_item_name or p.item_name,
-                "subtitle": "Magala Marketplace • Verified Seller",
+                "subtitle": f"🏢 {comp} • Verified Merchant",
                 "content": p.short_description or "High-quality verified product available for instant ordering across Ethiopia.",
                 "price": price_str,
                 "image": img,
                 "icon": "🛍️",
                 "action_label": "Order Now →",
                 "action_url": f"/{p.route or 'shop'}",
+                "is_booking": False,
                 "created_at": str(p.creation)
             })
 
-    # 2. AFOCHA STORIES
+    # 2. SERVICE BOOKINGS & SALON
+    if filter_type in ("all", "bookings", "services", "salon", "hotels"):
+        # Fetch from BizBooking Resource
+        if frappe.db.exists("DocType", "BizBooking Resource"):
+            res_filters = {"is_active": 1}
+            if search:
+                res_filters["resource_name"] = ["like", f"%{search}%"]
+            
+            resources = frappe.get_all(
+                "BizBooking Resource",
+                filters=res_filters,
+                fields=["name", "resource_name", "category", "rate_per_slot", "slot_duration_minutes", "company", "image", "creation"],
+                order_by="creation desc",
+                limit=limit
+            )
+            for r in resources:
+                cat = r.category or "Service Booking"
+                icon = "🏨" if "Hotel" in cat else ("🩺" if "Doctor" in cat or "Medical" in cat else ("🏠" if "Property" in cat else "💇"))
+                rate_str = f"{r.rate_per_slot:,.2f} ETB" if r.rate_per_slot > 0 else "Free Tour"
+                comp = r.company or "Biz Technology Solutions"
+                
+                items.append({
+                    "type": "booking",
+                    "badge": f"{icon} {cat}",
+                    "badge_class": "badge-booking",
+                    "title": r.resource_name,
+                    "subtitle": f"🏢 {comp} • {r.slot_duration_minutes} Mins",
+                    "content": f"Reserve {r.resource_name} with confirmed instant time slot booking managed directly in {comp} Desk.",
+                    "price": rate_str,
+                    "price_num": r.rate_per_slot,
+                    "image": r.image,
+                    "icon": icon,
+                    "company": comp,
+                    "resource_name": r.resource_name,
+                    "category": cat,
+                    "action_label": "Reserve Now →",
+                    "action_url": "#",
+                    "is_booking": True,
+                    "created_at": str(r.creation)
+                })
+
+        # Fetch from Salon Service
+        if frappe.db.exists("DocType", "Salon Service"):
+            srv_filters = {"is_active": 1}
+            if search:
+                srv_filters["service_name"] = ["like", f"%{search}%"]
+            
+            srvs = frappe.get_all(
+                "Salon Service",
+                filters=srv_filters,
+                fields=["name", "service_name", "category", "price", "duration_minutes", "service_image", "company", "description", "creation"],
+                order_by="creation desc",
+                limit=limit
+            )
+            for s in srvs:
+                comp = s.company or "Salon & Spa Hub"
+                items.append({
+                    "type": "booking",
+                    "badge": f"💇 {s.category}",
+                    "badge_class": "badge-booking",
+                    "title": s.service_name,
+                    "subtitle": f"🏢 {comp} • {s.duration_minutes} Mins",
+                    "content": s.description or "Professional beauty and wellness treatment with certified master stylists.",
+                    "price": f"{s.price:,.2f} ETB",
+                    "price_num": s.price,
+                    "image": s.service_image,
+                    "icon": "💇",
+                    "company": comp,
+                    "resource_name": s.service_name,
+                    "category": s.category,
+                    "action_label": "Book Service →",
+                    "action_url": "#",
+                    "is_booking": True,
+                    "created_at": str(s.creation)
+                })
+
+    # 3. AFOCHA STORIES
     if filter_type in ("all", "social", "afocha"):
         soc_filters = {}
         if search:
@@ -78,40 +156,15 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge": f"🌟 {post.category_tag or 'Afocha Story'}",
                     "badge_class": "badge-social",
                     "title": post.author_name,
-                    "subtitle": f"{post.company or 'EthioBiz Network'} • {post.author_handle}",
+                    "subtitle": f"🏢 {post.company or 'EthioBiz Network'} • {post.author_handle}",
                     "content": post.content,
                     "stats": f"❤️ {post.likes_count or 0} likes • 💬 {post.comments_count or 0} comments",
                     "image": img,
                     "icon": "🌟",
                     "action_label": "Join Discussion →",
                     "action_url": f"/social?post={post.name}",
+                    "is_booking": False,
                     "created_at": str(post.creation)
-                })
-
-    # 3. SERVICE BOOKINGS & SALON
-    if filter_type in ("all", "bookings", "services", "salon"):
-        if frappe.db.exists("DocType", "Salon Service"):
-            srvs = frappe.get_all(
-                "Salon Service",
-                filters={"is_active": 1},
-                fields=["name", "service_name", "category", "price", "duration_minutes", "service_image", "description", "creation"],
-                order_by="creation desc",
-                limit=limit
-            )
-            for s in srvs:
-                items.append({
-                    "type": "booking",
-                    "badge": f"💇 {s.category}",
-                    "badge_class": "badge-booking",
-                    "title": s.service_name,
-                    "subtitle": f"Salon & Spa Hub • {s.duration_minutes} Mins",
-                    "content": s.description or "Professional beauty and wellness treatment with certified master stylists.",
-                    "price": f"{s.price:,.2f} ETB",
-                    "image": s.service_image,
-                    "icon": "💇",
-                    "action_label": "Book Service →",
-                    "action_url": "/book",
-                    "created_at": str(s.creation)
                 })
 
     # 4. TIBEB ARTICLES
@@ -134,12 +187,13 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "badge": f"📝 {b.blog_category or 'Tibeb Wisdom'}",
                 "badge_class": "badge-blog",
                 "title": b.title,
-                "subtitle": f"By {b.blogger or 'EthioBiz Editorial Team'}",
+                "subtitle": f"✍️ By {b.blogger or 'EthioBiz Editorial Team'}",
                 "content": b.blog_intro or "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
                 "image": b.meta_image,
                 "icon": "📝",
                 "action_label": "Read Article →",
                 "action_url": f"/{b.route or 'blog'}",
+                "is_booking": False,
                 "created_at": str(b.creation)
             })
 
@@ -170,6 +224,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "icon": "🎓",
                     "action_label": "Enroll Now →",
                     "action_url": f"/courses/{c.name}",
+                    "is_booking": False,
                     "created_at": str(c.creation)
                 })
 

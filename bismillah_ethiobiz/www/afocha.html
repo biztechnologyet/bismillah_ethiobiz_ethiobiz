@@ -427,10 +427,47 @@
 
             <textarea id="post-content" class="af-textarea mb-3" rows="3" placeholder="What's happening in your business or community today?..."></textarea>
 
-            <!-- Media Section -->
-            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 14px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
-                <input type="text" id="post-image-url" class="af-input mb-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)">
-                <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL">
+            <!-- RICH MEDIA UPLOAD SECTION -->
+            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 16px; border-radius: 18px; border: 1px solid #e2e8f0; margin-bottom: 14px;">
+                <div style="font-weight: 800; font-size: 14px; color: #0f172a; margin-bottom: 12px;">📸 Attach Image or Video</div>
+
+                <!-- Live Preview -->
+                <div id="media-preview-card" style="display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 14px; position: relative;">
+                    <button id="btn-remove-media" title="Remove media" style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.65); color: white; border: none; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;">✕</button>
+                    <img id="media-preview-img" src="" alt="Preview" style="max-height: 200px; width: 100%; object-fit: cover; border-radius: 12px;">
+                    <div style="margin-top: 8px; font-size: 12px; color: #64748b;" id="media-preview-filename"></div>
+                </div>
+
+                <!-- Upload Drop Zone -->
+                <div id="media-upload-zone" style="border: 2px dashed #94a3b8; border-radius: 18px; padding: 26px 20px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: #ffffff; margin-bottom: 14px; position: relative;">
+                    <div style="font-size: 36px; margin-bottom: 8px;">📁</div>
+                    <div style="font-weight: 800; font-size: 15px; color: #0f172a; margin-bottom: 4px;">Drop image here or click to upload</div>
+                    <div style="font-size: 12px; color: #64748b;">Supports JPG, PNG, GIF, WEBP, MP4 — Max 25MB</div>
+                    <input type="file" id="media-file-input" accept="image/*,video/mp4,video/webm" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                </div>
+
+                <!-- Upload Progress -->
+                <div id="media-progress-bar" style="height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 10px; display: none;">
+                    <div id="media-progress-fill" style="height: 100%; background: linear-gradient(90deg, #008080, #0284c7); width: 0%; transition: width 0.3s ease; border-radius: 4px;"></div>
+                </div>
+
+                <!-- Server File Search -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="media-server-search" class="af-input" placeholder="🔍 Search your uploaded files on server..." style="flex: 1; font-size: 13px; padding: 8px 14px;">
+                        <button id="btn-search-server-files" class="af-btn-outline" style="white-space: nowrap; font-size: 12px;">Search Files</button>
+                    </div>
+                    <div id="media-server-results" style="display: none; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; margin-top: 8px;"></div>
+                </div>
+
+                <!-- Fallback Manual URL -->
+                <details style="margin-top: 10px;">
+                    <summary style="font-size: 12px; color: #64748b; cursor: pointer; font-weight: 600;">⚙️ Or paste a direct URL manually</summary>
+                    <div style="margin-top: 8px;">
+                        <input type="text" id="post-image-url" class="af-input mb-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)" style="font-size: 13px;">
+                        <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL" style="font-size: 13px;">
+                    </div>
+                </details>
             </div>
 
             <!-- Poll Section -->
@@ -511,6 +548,180 @@
                 inp.placeholder = 'Option ' + (count + 1);
                 container.appendChild(inp);
             }
+        });
+    }
+
+    // ===== MEDIA UPLOAD SYSTEM =====
+    let uploadedMediaUrl = '';
+
+    // File Upload via Frappe API
+    function uploadFileToServer(file) {
+        const progressBar = document.getElementById('media-progress-bar');
+        const progressFill = document.getElementById('media-progress-fill');
+        const zone = document.getElementById('media-upload-zone');
+        
+        progressBar.style.display = 'block';
+        progressFill.style.width = '10%';
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('is_private', 0);
+        formData.append('folder', 'Home');
+        formData.append('doctype', 'Afocha Post');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/method/upload_file', true);
+        xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                progressFill.style.width = pct + '%';
+            }
+        });
+
+        xhr.onload = function() {
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+            
+            if (xhr.status === 200) {
+                try {
+                    const resp = JSON.parse(xhr.responseText);
+                    const fileUrl = resp.message && resp.message.file_url ? resp.message.file_url : null;
+                    const fileName = resp.message && resp.message.file_name ? resp.message.file_name : file.name;
+                    if (fileUrl) {
+                        uploadedMediaUrl = fileUrl;
+                        showMediaPreview(fileUrl, fileName);
+                        // Also set the URL input
+                        document.getElementById('post-image-url').value = fileUrl;
+                    }
+                } catch (e) {
+                    alert('Upload succeeded but could not parse response.');
+                }
+            } else {
+                alert('Upload failed. Please try again.');
+            }
+        };
+
+        xhr.onerror = function() {
+            progressBar.style.display = 'none';
+            alert('Upload error. Please check your connection.');
+        };
+
+        xhr.send(formData);
+    }
+
+    function showMediaPreview(url, name) {
+        const card = document.getElementById('media-preview-card');
+        const img = document.getElementById('media-preview-img');
+        const fname = document.getElementById('media-preview-filename');
+        const zone = document.getElementById('media-upload-zone');
+
+        img.src = url;
+        fname.innerText = '✅ ' + (name || 'Uploaded file');
+        card.style.display = 'block';
+        zone.style.display = 'none';
+    }
+
+    // File input change
+    const fileInput = document.getElementById('media-file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                uploadFileToServer(this.files[0]);
+            }
+        });
+    }
+
+    // Drag and drop
+    const dropZone = document.getElementById('media-upload-zone');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#008080';
+            this.style.background = '#f0fdfa';
+        });
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#94a3b8';
+            this.style.background = '#ffffff';
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#94a3b8';
+            this.style.background = '#ffffff';
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                uploadFileToServer(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // Remove media
+    const btnRemove = document.getElementById('btn-remove-media');
+    if (btnRemove) {
+        btnRemove.addEventListener('click', function() {
+            document.getElementById('media-preview-card').style.display = 'none';
+            document.getElementById('media-upload-zone').style.display = 'block';
+            document.getElementById('post-image-url').value = '';
+            uploadedMediaUrl = '';
+        });
+    }
+
+    // Server File Search
+    const btnSearchFiles = document.getElementById('btn-search-server-files');
+    if (btnSearchFiles) {
+        btnSearchFiles.addEventListener('click', function() {
+            const query = document.getElementById('media-server-search').value.trim();
+            const resultsDiv = document.getElementById('media-server-results');
+            
+            let apiUrl = '/api/resource/File?filters=[["is_private","=",0],["file_url","like","%.jpg%"]]&fields=["file_name","file_url"]&limit_page_length=24&order_by=creation desc';
+            if (query) {
+                apiUrl = '/api/resource/File?filters=[["is_private","=",0],["file_name","like","%' + encodeURIComponent(query) + '%"]]&fields=["file_name","file_url"]&limit_page_length=24&order_by=creation desc';
+            }
+
+            fetch(apiUrl)
+                .then(r => r.json())
+                .then(res => {
+                    const files = res.data || [];
+                    resultsDiv.style.display = 'grid';
+                    
+                    if (!files.length) {
+                        resultsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 12px; color: #64748b; padding: 16px;">No files found. Try a different search.</div>';
+                        return;
+                    }
+
+                    resultsDiv.innerHTML = '';
+                    files.forEach(f => {
+                        const ext = (f.file_url || '').split('.').pop().toLowerCase();
+                        if (['jpg','jpeg','png','gif','webp','svg'].includes(ext)) {
+                            const thumb = document.createElement('img');
+                            thumb.src = f.file_url;
+                            thumb.alt = f.file_name;
+                            thumb.title = f.file_name;
+                            thumb.style.cssText = 'width: 100%; height: 68px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease;';
+                            thumb.addEventListener('click', function() {
+                                resultsDiv.querySelectorAll('img').forEach(i => i.style.borderColor = 'transparent');
+                                this.style.borderColor = '#008080';
+                                this.style.boxShadow = '0 0 0 3px rgba(0,128,128,0.2)';
+                                uploadedMediaUrl = f.file_url;
+                                document.getElementById('post-image-url').value = f.file_url;
+                                showMediaPreview(f.file_url, f.file_name);
+                            });
+                            thumb.addEventListener('mouseenter', function() { this.style.transform = 'scale(1.04)'; });
+                            thumb.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
+                            resultsDiv.appendChild(thumb);
+                        }
+                    });
+                })
+                .catch(e => {
+                    resultsDiv.style.display = 'grid';
+                    resultsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 12px; color: #ef4444; padding: 16px;">Error searching files.</div>';
+                });
+        });
+
+        // Also search on Enter key
+        document.getElementById('media-server-search').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') btnSearchFiles.click();
         });
     }
 
