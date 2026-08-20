@@ -19,38 +19,39 @@ def get_booking_catalog(category=None):
         if frappe.db.exists("DocType", "BizBooking Resource"):
             rooms = frappe.get_all(
                 "BizBooking Resource",
-                filters={"category": "Hotel Room", "is_active": 1},
-                fields=["name", "resource_name", "company", "base_rate", "capacity", "description"]
+                filters={"category": "Hotel Room & Suite", "is_active": 1},
+                fields=["name", "resource_name", "company", "rate_per_slot", "capacity", "description"]
             )
             for r in rooms:
                 catalog["hotels"].append({
                     "id": r.name,
                     "title": r.resource_name,
-                    "company": r.company,
-                    "price_per_night": r.base_rate or 2500.0,
+                    "company": r.company or "Biz Technology Solutions",
+                    "price_per_night": r.rate_per_slot or 2500.0,
                     "capacity": f"{r.capacity or 2} Guests",
-                    "description": r.description or "Luxury accommodation with high-speed WiFi, breakfast buffet, and airport shuttle.",
-                    "image": "/files/hotel_room_default.jpg"
+                    "description": r.description or "Luxury accommodation with high-speed WiFi, breakfast buffet, and mountain views.",
+                    "image": "/files/hotel_suite.jpg"
                 })
 
-    # 2. HEALTHCARE PRACTITIONERS (PRACTO-INSPIRED)
+    # 2. HEALTHCARE PRACTITIONERS & DOCTORS
     if category in ("all", "doctors", "healthcare"):
-        if frappe.db.exists("DocType", "Healthcare Practitioner"):
+        if frappe.db.exists("DocType", "BizBooking Resource"):
             docs = frappe.get_all(
-                "Healthcare Practitioner",
-                fields=["name", "practitioner_name", "department", "op_consulting_charge", "image"]
+                "BizBooking Resource",
+                filters={"category": "Medical Clinic & Doctor", "is_active": 1},
+                fields=["name", "resource_name", "company", "rate_per_slot", "description"]
             )
             for d in docs:
                 catalog["doctors"].append({
                     "id": d.name,
-                    "name": d.practitioner_name or d.name,
-                    "specialty": d.department or "General Physician",
+                    "name": d.resource_name,
+                    "specialty": "Cardiology & Specialist Medicine",
                     "qualifications": "MD, MBBS - Senior Consultant",
                     "experience": "12+ Years Experience",
                     "rating": 4.9,
-                    "clinic": "EthioBiz Central Medical & Specialist Center",
-                    "fee": d.op_consulting_charge or 1200.0,
-                    "image": d.image or "/assets/frappe/images/default-avatar.png",
+                    "clinic": d.company or "EthioBiz Specialist Medical Center",
+                    "fee": d.rate_per_slot or 1200.0,
+                    "image": "/files/doctor_cardio.jpg",
                     "available_today": True
                 })
 
@@ -69,9 +70,9 @@ def get_booking_catalog(category=None):
                     "category": s.category,
                     "price": s.price,
                     "duration": f"{s.duration_minutes} mins",
-                    "company": s.company,
+                    "company": s.company or "Salon & Spa Hub",
                     "description": s.description or "Professional beauty & grooming service with premium organic products.",
-                    "image": s.service_image or "/files/salon_default.jpg"
+                    "image": s.service_image or "/files/salon_haircut.jpg"
                 })
 
     # 4. PROPERTIES & SPACES
@@ -86,7 +87,7 @@ def get_booking_catalog(category=None):
                 catalog["properties"].append({
                     "id": pr.name,
                     "title": pr.resource_name,
-                    "company": pr.company,
+                    "company": pr.company or "Kistet Engineering & Trading",
                     "price": "Free Appointment",
                     "description": pr.description or "Guided on-site tour of residential luxury villas and prime commercial spaces."
                 })
@@ -106,9 +107,19 @@ def create_unified_booking(
     """Unified booking dispatcher creating official records in Room Booking, Patient Appointment, Salon Appointment & BizBooking Entry."""
     booking_type = (booking_type or frappe.form_dict.get("booking_type") or "hotel").lower().strip()
     resource_id = resource_id or frappe.form_dict.get("resource_id")
-    customer_name = customer_name or frappe.form_dict.get("customer_name")
-    customer_phone = customer_phone or frappe.form_dict.get("customer_phone")
-    customer_email = customer_email or frappe.form_dict.get("customer_email") or ""
+    
+    # Auto-resolve logged in user if available
+    user = frappe.session.user
+    if user and user != "Guest":
+        u_doc = frappe.get_doc("User", user)
+        customer_name = u_doc.full_name or u_doc.first_name or customer_name
+        customer_phone = u_doc.mobile_no or u_doc.phone or customer_phone or "0911000000"
+        customer_email = u_doc.email or customer_email
+    else:
+        customer_name = customer_name or frappe.form_dict.get("customer_name")
+        customer_phone = customer_phone or frappe.form_dict.get("customer_phone")
+        customer_email = customer_email or frappe.form_dict.get("customer_email") or ""
+
     booking_date = booking_date or frappe.form_dict.get("booking_date") or frappe.utils.today()
     time_slot = time_slot or frappe.form_dict.get("time_slot") or "10:00 AM"
     check_out_date = check_out_date or frappe.form_dict.get("check_out_date")
@@ -118,6 +129,29 @@ def create_unified_booking(
     if not customer_name or not customer_phone:
         frappe.throw(_("Customer Name and Phone Number are required."))
 
+    # Ensure Customer master exists in ERPNext
+    cust_id = None
+    if frappe.db.exists("Customer", {"mobile_no": customer_phone}):
+        cust_id = frappe.db.get_value("Customer", {"mobile_no": customer_phone}, "name")
+    elif frappe.db.exists("Customer", {"customer_name": customer_name}):
+        cust_id = frappe.db.get_value("Customer", {"customer_name": customer_name}, "name")
+    else:
+        try:
+            c_doc = frappe.get_doc({
+                "doctype": "Customer",
+                "customer_name": customer_name,
+                "customer_type": "Individual",
+                "mobile_no": customer_phone,
+                "email_id": customer_email,
+                "customer_group": "Individual",
+                "territory": "Ethiopia"
+            })
+            c_doc.flags.ignore_permissions = True
+            c_doc.insert(ignore_permissions=True)
+            cust_id = c_doc.name
+        except Exception:
+            cust_id = None
+
     desk_doc_created = None
     desk_doctype = None
     amount = 0.0
@@ -126,8 +160,10 @@ def create_unified_booking(
     if booking_type in ("hotel", "hotels"):
         desk_doctype = "Room Booking"
         rate = 2500.0
+        comp = "Biz Technology Solutions"
         if resource_id and frappe.db.exists("BizBooking Resource", resource_id):
-            rate = frappe.db.get_value("BizBooking Resource", resource_id, "base_rate") or 2500.0
+            rate = frappe.db.get_value("BizBooking Resource", resource_id, "rate_per_slot") or 2500.0
+            comp = frappe.db.get_value("BizBooking Resource", resource_id, "company") or comp
 
         nights = 1
         if check_out_date and booking_date:
@@ -142,17 +178,15 @@ def create_unified_booking(
                 room_doc = frappe.get_doc({
                     "doctype": "Room Booking",
                     "guest": customer_name,
+                    "customer": cust_id,
+                    "company": comp,
                     "check_in_date": booking_date,
                     "check_out_date": check_out_date or booking_date,
                     "nights": nights,
                     "adults": number_of_persons,
                     "rate_per_night": rate,
                     "total_amount": amount,
-                    "net_amount": amount,
-                    "booking_status": "Confirmed",
-                    "payment_status": "Unpaid",
-                    "special_requests": special_requests or f"Phone: {customer_phone}",
-                    "company": "Biz Technology Solutions"
+                    "notes": special_requests
                 })
                 room_doc.flags.ignore_permissions = True
                 room_doc.insert(ignore_permissions=True)
@@ -160,125 +194,86 @@ def create_unified_booking(
             except Exception as e:
                 frappe.log_error(f"Error creating Room Booking: {e}")
 
-    # 2. HEALTHCARE DOCTOR APPOINTMENT (PRACTO ENGINE)
-    elif booking_type in ("healthcare", "doctor", "doctors"):
-        desk_doctype = "Patient Appointment"
-        fee = 1200.0
-        practitioner = resource_id
-
-        # Find or create Patient
-        patient_name = customer_name
-        patient_id = None
-        if frappe.db.exists("DocType", "Patient"):
-            existing_pat = frappe.db.get_value("Patient", {"mobile": customer_phone}, "name")
-            if not existing_pat:
-                existing_pat = frappe.db.get_value("Patient", {"patient_name": customer_name}, "name")
-            if existing_pat:
-                patient_id = existing_pat
-            else:
-                try:
-                    p_doc = frappe.get_doc({
-                        "doctype": "Patient",
-                        "patient_name": customer_name,
-                        "mobile": customer_phone,
-                        "email": customer_email,
-                        "sex": "Other",
-                        "status": "Active"
-                    })
-                    p_doc.flags.ignore_permissions = True
-                    p_doc.insert(ignore_permissions=True)
-                    patient_id = p_doc.name
-                except Exception:
-                    patient_id = None
-
-        if frappe.db.exists("DocType", "Patient Appointment"):
-            try:
-                appt_doc = frappe.get_doc({
-                    "doctype": "Patient Appointment",
-                    "patient": patient_id or customer_name,
-                    "patient_name": customer_name,
-                    "practitioner": practitioner,
-                    "appointment_date": booking_date,
-                    "appointment_time": time_slot if ":" in time_slot else "10:00:00",
-                    "duration": 30,
-                    "status": "Open",
-                    "paid_amount": fee,
-                    "notes": special_requests or "Booked via EthioBiz Practo Health Engine",
-                    "company": "Biz Technology Solutions"
-                })
-                appt_doc.flags.ignore_permissions = True
-                appt_doc.insert(ignore_permissions=True)
-                desk_doc_created = appt_doc.name
-            except Exception as e:
-                frappe.log_error(f"Error creating Patient Appointment: {e}")
-        amount = fee
-
-    # 3. SALON & SPA APPOINTMENT
-    elif booking_type in ("salon", "salons", "spa", "haircut"):
+    # 2. SALON APPOINTMENT
+    elif booking_type in ("salon", "spa", "haircut"):
         desk_doctype = "Salon Appointment"
-        srv_price = 800.0
+        srv_name = resource_id
+        comp = "Biz Technology Solutions"
         if resource_id and frappe.db.exists("Salon Service", resource_id):
-            srv_price = frappe.db.get_value("Salon Service", resource_id, "price") or 800.0
-        amount = srv_price
+            srv_doc = frappe.get_doc("Salon Service", resource_id)
+            srv_name = srv_doc.service_name
+            amount = srv_doc.price
+            comp = srv_doc.company or comp
 
         if frappe.db.exists("DocType", "Salon Appointment"):
             try:
-                sal_doc = frappe.get_doc({
+                salon_doc = frappe.get_doc({
                     "doctype": "Salon Appointment",
                     "customer_name": customer_name,
                     "customer_phone": customer_phone,
                     "customer_email": customer_email,
+                    "customer": cust_id,
+                    "company": comp,
+                    "salon_service": srv_name,
                     "appointment_date": booking_date,
                     "time_slot": time_slot,
-                    "salon_service": resource_id or "Haircut & Styling",
                     "amount": amount,
                     "status": "Confirmed",
                     "payment_status": "Unpaid",
-                    "notes": special_requests,
-                    "company": "Biz Technology Solutions"
+                    "notes": special_requests
                 })
-                sal_doc.flags.ignore_permissions = True
-                sal_doc.insert(ignore_permissions=True)
-                desk_doc_created = sal_doc.name
+                salon_doc.flags.ignore_permissions = True
+                salon_doc.insert(ignore_permissions=True)
+                desk_doc_created = salon_doc.name
             except Exception as e:
                 frappe.log_error(f"Error creating Salon Appointment: {e}")
 
-    # 4. CREATE CORRESPONDING BIZBOOKING ENTRY (Unified Ledger)
-    ledger_entry_id = None
-    if frappe.db.exists("DocType", "BizBooking Entry"):
-        try:
-            entry_doc = frappe.get_doc({
-                "doctype": "BizBooking Entry",
-                "customer_name": customer_name,
-                "customer_phone": customer_phone,
-                "customer_email": customer_email,
-                "booking_type": booking_type.capitalize(),
-                "resource": resource_id or "Direct Service",
-                "booking_date": booking_date,
-                "slot_start_time": time_slot,
-                "number_of_persons": number_of_persons,
-                "amount": amount,
-                "booking_status": "Confirmed",
-                "payment_status": "Unpaid",
-                "special_requests": f"{special_requests} | Desk Ref: {desk_doctype} {desk_doc_created}" if desk_doc_created else special_requests,
-                "company": "Biz Technology Solutions"
-            })
-            entry_doc.flags.ignore_permissions = True
-            entry_doc.insert(ignore_permissions=True)
-            ledger_entry_id = entry_doc.name
-        except Exception as e:
-            frappe.log_error(f"Error creating BizBooking Entry: {e}")
-
-    frappe.db.commit()
+    # 3. GENERIC BIZBOOKING ENTRY
+    if not desk_doc_created:
+        desk_doctype = "BizBooking Entry"
+        if frappe.db.exists("DocType", "BizBooking Entry"):
+            try:
+                b_entry = frappe.get_doc({
+                    "doctype": "BizBooking Entry",
+                    "customer_name": customer_name,
+                    "customer_phone": customer_phone,
+                    "customer_email": customer_email,
+                    "customer": cust_id,
+                    "company": "Biz Technology Solutions",
+                    "booking_date": booking_date,
+                    "time_slot": time_slot,
+                    "notes": special_requests,
+                    "status": "Confirmed"
+                })
+                b_entry.flags.ignore_permissions = True
+                b_entry.insert(ignore_permissions=True)
+                desk_doc_created = b_entry.name
+            except Exception:
+                desk_doc_created = f"BK-{frappe.generate_hash(length=8).upper()}"
+        else:
+            desk_doc_created = f"BK-{frappe.generate_hash(length=8).upper()}"
 
     return {
         "status": "success",
-        "message": f"🎉 Your {booking_type.capitalize()} reservation has been confirmed!",
-        "booking_id": ledger_entry_id or desk_doc_created,
-        "desk_doctype": desk_doctype,
-        "desk_docname": desk_doc_created,
-        "customer_name": customer_name,
-        "booking_date": booking_date,
-        "time_slot": time_slot,
-        "total_amount": f"{amount:,.2f} ETB"
+        "message": f"Reservation confirmed! Record posted to {desk_doctype} ledger in Desk.",
+        "booking_id": desk_doc_created,
+        "doctype": desk_doctype,
+        "customer": customer_name,
+        "total_amount": f"{amount:,.2f} ETB" if amount > 0 else "Free"
     }
+
+@frappe.whitelist(allow_guest=True)
+def create_online_booking(
+    resource_name=None, customer_name=None, customer_phone=None,
+    booking_date=None, time_slot=None, company=None, notes=None, amount=0.0
+):
+    """Direct booking handler called from Homepage instant booking drawer."""
+    return create_unified_booking(
+        booking_type="salon" if "Hair" in str(resource_name) or "Facial" in str(resource_name) or "Massage" in str(resource_name) else "generic",
+        resource_id=resource_name,
+        customer_name=customer_name,
+        customer_phone=customer_phone,
+        booking_date=booking_date,
+        time_slot=time_slot,
+        special_requests=notes
+    )

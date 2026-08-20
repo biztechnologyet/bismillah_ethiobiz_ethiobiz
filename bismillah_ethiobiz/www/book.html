@@ -1,3 +1,8 @@
+{% extends "templates/web.html" %}
+
+{% block title %}BizBooking — Unified Online Bookings & Consultations | EthioBiz{% endblock %}
+
+{% block head_include %}
 <style>
     :root {
         --bb-teal: #008080;
@@ -8,7 +13,7 @@
         --bb-border: #e2e8f0;
     }
     .booking-wrapper {
-        max-width: 1050px;
+        max-width: 1100px;
         margin: 0 auto;
         padding: 25px 15px 60px 15px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -51,7 +56,7 @@
     }
     .booking-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 24px;
     }
     .book-card {
@@ -70,7 +75,7 @@
         box-shadow: 0 14px 35px rgba(0, 128, 128, 0.16);
         border-color: #008080;
     }
-    .practo-avatar {
+    .doc-avatar {
         width: 60px;
         height: 60px;
         border-radius: 50%;
@@ -86,7 +91,7 @@
         background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
         color: white;
         border: none;
-        padding: 10px 20px;
+        padding: 10px 22px;
         border-radius: 25px;
         font-weight: 800;
         font-size: 13px;
@@ -97,7 +102,7 @@
         background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
     }
 
-    /* Modal Form */
+    /* Modal Form Overlay */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -105,179 +110,328 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(15, 23, 42, 0.65);
+        background: rgba(15, 23, 42, 0.75);
         backdrop-filter: blur(8px);
-        z-index: 9999;
+        z-index: 99999;
         align-items: center;
         justify-content: center;
-        padding: 15px;
+        padding: 20px;
     }
     .modal-box {
         background: #ffffff;
         border-radius: 28px;
-        padding: 30px;
         max-width: 540px;
         width: 100%;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+        animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    @keyframes modalScaleIn {
+        0% { transform: scale(0.92); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .modal-header-gradient {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 50%, #0284c7 100%);
+        color: #ffffff;
+        padding: 24px 22px;
         position: relative;
     }
+    .modal-close-icon {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #ffffff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+    .modal-close-icon:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: rotate(90deg);
+    }
+
+    /* Locked Logged-in Customer Card */
+    .logged-customer-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f0fdfa;
+        border: 1px solid #ccfbf1;
+        border-radius: 18px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+    .logged-customer-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
     .bb-inp {
         width: 100%;
-        padding: 10px 16px;
-        border-radius: 12px;
+        height: 48px;
+        border-radius: 14px;
         border: 1px solid #cbd5e1;
-        margin-bottom: 12px;
+        padding: 0 16px;
+        font-size: 14px;
+        color: #0f172a;
+        margin-bottom: 14px;
         box-sizing: border-box;
         outline: none;
+        transition: all 0.2s ease;
     }
     .bb-inp:focus {
         border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.15);
+    }
+    .bb-textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #0f172a;
+        margin-bottom: 16px;
+        outline: none;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    .bb-textarea:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.15);
+    }
+    .bb-btn-confirm {
+        width: 100%;
+        height: 52px;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0,128,128,0.35);
+        transition: all 0.25s ease;
+    }
+    .bb-btn-confirm:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: translateY(-2px);
     }
 </style>
+{% endblock %}
 
+{% block page_content %}
 <div class="booking-wrapper">
     <!-- HERO HEADER -->
     <div class="booking-hero">
         <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2">⚡ BIZBOOKING UNIFIED ENGINE</span>
         <h2 class="display-6 font-weight-bold mb-2">Reserve Instant Appointments & Services in Ethiopia</h2>
         <p style="opacity: 0.92; max-width: 650px; margin: 0 auto; font-size: 15px;">
-            Book luxury hotel rooms, schedule top specialist doctors (Practo Engine), and reserve salon, barber & spa appointments in real time.
+            Book luxury hotel rooms, schedule top medical specialists, and reserve salon, barber & spa appointments in real time.
         </p>
     </div>
 
     <!-- 4-WAY VERTICAL SELECTOR TABS -->
     <div class="vertical-tabs-bar">
         <button class="v-tab-btn active" data-type="all">🔥 All Bookings</button>
-        <button class="v-tab-btn" data-type="hotels">🏨 Hotel & Suites</button>
-        <button class="v-tab-btn" data-type="doctors">🩺 Doctors (Practo Engine)</button>
-        <button class="v-tab-btn" data-type="salons">💇 Salon, Haircut & Spa</button>
-        <button class="v-tab-btn" data-type="properties">🏠 Property Viewings</button>
+        <button class="v-tab-btn" data-type="hotel">🏨 Hotel Rooms & Suites</button>
+        <button class="v-tab-btn" data-type="doctor">🩺 Healthcare & Doctors</button>
+        <button class="v-tab-btn" data-type="salon">💇 Salon, Haircut & Spa</button>
+        <button class="v-tab-btn" data-type="property">🏠 Property Viewings</button>
     </div>
 
     <!-- CARDS GRID -->
     <div class="booking-grid" id="booking-items-grid">
-        <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b;">
-            <div class="spinner-border text-primary"></div><span style="margin-left: 8px;">Loading live booking slots...</span>
+        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">
+            <div class="spinner-border text-primary"></div>
+            <p class="text-muted mt-2">Loading verified booking options...</p>
         </div>
     </div>
 </div>
 
-<!-- BOOKING MODAL DIALOG -->
+<!-- ELEVATED BOOKING MODAL POPUP -->
 <div class="modal-overlay" id="booking-modal">
     <div class="modal-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-            <h4 id="modal-service-title" style="margin: 0; font-weight: 800; color: #0f172a; font-size: 18px;">Instant Reservation</h4>
-            <button id="modal-close-btn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        <div class="modal-header-gradient">
+            <button type="button" class="modal-close-icon" id="modal-close-btn">✕</button>
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2" id="modal-service-badge" style="font-size: 11px;">⚡ Booking</span>
+            <h4 id="modal-service-title" style="font-weight: 800; font-size: 19px; margin-bottom: 2px; color: #ffffff;">Confirm Reservation</h4>
+            <div id="modal-service-sub" style="font-size: 13px; opacity: 0.9; color: #fef08a;">Instant slot booking</div>
         </div>
 
-        <p id="modal-service-sub" style="font-size: 13px; color: #64748b; margin-bottom: 16px;"></p>
+        <div style="padding: 24px;">
+            <input type="hidden" id="modal-resource-id">
+            <input type="hidden" id="modal-booking-type">
 
-        <input type="hidden" id="modal-resource-id">
-        <input type="hidden" id="modal-booking-type">
-
-        <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Your Full Name *</label>
-        <input type="text" id="modal-cust-name" class="bb-inp" placeholder="e.g. Abebe Bikila">
-
-        <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Phone Number *</label>
-        <input type="text" id="modal-cust-phone" class="bb-inp" placeholder="0911 00 00 00">
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-                <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Date *</label>
-                <input type="date" id="modal-book-date" class="bb-inp">
+            <!-- LOGGED IN USER PROFILE (AUTOMATICALLY POPULATED & LOCKED) -->
+            <div id="modal-user-auth-card" class="logged-customer-card">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="modal-user-avatar" src="/assets/frappe/images/default-avatar.png" class="logged-customer-avatar" alt="Avatar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="modal-user-fullname" style="font-weight: 800; font-size: 14px; color: #0f172a;">Loading user...</span>
+                            <span style="color: #008080; font-weight: 800;">✓</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            📞 <span id="modal-user-phone">0911 ...</span> • ✉️ <span id="modal-user-email">user@ethiobiz.et</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge bg-primary text-white px-2 py-1 rounded-pill" style="font-size: 10px; background: #008080 !important;">Booked by You</span>
             </div>
-            <div>
-                <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Time Slot *</label>
-                <select id="modal-book-slot" class="bb-inp" style="font-weight: 600;">
-                    <option value="09:00 AM">09:00 AM</option>
-                    <option value="10:00 AM">10:00 AM</option>
-                    <option value="11:30 AM">11:30 AM</option>
-                    <option value="02:00 PM">02:00 PM</option>
-                    <option value="04:00 PM">04:00 PM</option>
-                    <option value="06:00 PM">06:00 PM</option>
-                </select>
+
+            <!-- GUEST PROMPT IF NOT LOGGED IN -->
+            <div id="modal-user-guest-card" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 13px; color: #92400e; font-weight: 700; margin-bottom: 6px;">🔒 Please Sign In to Confirm Reservation</div>
+                <a href="/login?redirect-to=/book" class="btn btn-sm btn-warning font-weight-bold rounded-pill px-3" style="font-size: 12px;">Sign In / Register &rarr;</a>
             </div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📅 Date / Check-In *</label>
+                    <input type="date" id="modal-book-date" class="bb-inp" required>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">⏰ Time Slot *</label>
+                    <select id="modal-book-slot" class="bb-inp">
+                        <option value="09:00 AM">🌅 09:00 AM - Morning</option>
+                        <option value="10:30 AM">🌅 10:30 AM - Morning</option>
+                        <option value="12:00 PM">☀️ 12:00 PM - Midday</option>
+                        <option value="02:30 PM">☀️ 02:30 PM - Afternoon</option>
+                        <option value="04:00 PM">🌇 04:00 PM - Evening</option>
+                        <option value="05:30 PM">🌇 05:30 PM - Evening</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="hotel-checkout-field" style="display: none;">
+                <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📅 Check-Out Date</label>
+                <input type="date" id="modal-checkout-date" class="bb-inp">
+            </div>
+
+            <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📝 Special Requests / Preferences</label>
+            <textarea id="modal-book-notes" class="bb-textarea" rows="2" placeholder="Any specific requirements or notes..."></textarea>
+
+            <button type="button" id="modal-confirm-btn" class="bb-btn-confirm">
+                Confirm Reservation & Post to Desk &rarr;
+            </button>
         </div>
-
-        <div id="hotel-checkout-field" style="display: none;">
-            <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Check-Out Date</label>
-            <input type="date" id="modal-checkout-date" class="bb-inp">
-        </div>
-
-        <label style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Special Requests / Notes</label>
-        <textarea id="modal-book-notes" class="bb-inp" rows="2" placeholder="Any specific requirements..."></textarea>
-
-        <button id="modal-confirm-btn" class="bb-btn-book" style="width: 100%; padding: 12px; font-size: 15px; margin-top: 8px;">
-            Confirm Reservation &rarr;
-        </button>
     </div>
 </div>
 
 <script>
 (function() {
-    let currentCategory = 'all';
+    let currentCatalog = null;
+    let activeFilter = "all";
+    let loggedUser = null;
 
+    // Load active logged-in user identity
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_logged_user_info')
+        .then(r => r.json())
+        .then(res => {
+            if (res.message) {
+                loggedUser = res.message;
+                if (loggedUser.is_logged_in) {
+                    document.getElementById('modal-user-auth-card').style.display = 'flex';
+                    document.getElementById('modal-user-guest-card').style.display = 'none';
+
+                    document.getElementById('modal-user-avatar').src = loggedUser.user_image || '/assets/frappe/images/default-avatar.png';
+                    document.getElementById('modal-user-fullname').innerText = loggedUser.full_name;
+                    document.getElementById('modal-user-phone').innerText = loggedUser.phone || 'Verified User';
+                    document.getElementById('modal-user-email').innerText = loggedUser.email || loggedUser.handle;
+                    document.getElementById('modal-confirm-btn').disabled = false;
+                } else {
+                    document.getElementById('modal-user-auth-card').style.display = 'none';
+                    document.getElementById('modal-user-guest-card').style.display = 'block';
+                    document.getElementById('modal-confirm-btn').disabled = true;
+                }
+            }
+        });
+
+    // Filter Buttons
     document.querySelectorAll('.v-tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.v-tab-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            currentCategory = this.getAttribute('data-type');
-            loadCatalog();
+            activeFilter = this.getAttribute('data-type');
+            filterCatalog();
         });
     });
 
-    function loadCatalog() {
-        const grid = document.getElementById('booking-items-grid');
-        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b;"><div class="spinner-border text-primary"></div><span style="margin-left: 8px;">Loading...</span></div>';
+    function filterCatalog() {
+        document.querySelectorAll('.book-card').forEach(card => {
+            const cType = card.getAttribute('data-card-type');
+            if (activeFilter === 'all' || cType === activeFilter) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
 
-        fetch('/api/method/bismillah_ethiobiz.bizbooking_api.get_booking_catalog?category=' + currentCategory)
+    function loadCatalog() {
+        fetch('/api/method/bismillah_ethiobiz.bizbooking_api.get_booking_catalog')
             .then(r => r.json())
             .then(res => {
+                const catalog = res.message ? res.message.catalog : {};
+                currentCatalog = catalog;
+                const grid = document.getElementById('booking-items-grid');
                 grid.innerHTML = '';
-                const catalog = (res.message && res.message.catalog) ? res.message.catalog : {};
 
                 // Render Hotels
                 if (catalog.hotels && catalog.hotels.length) {
                     catalog.hotels.forEach(h => {
                         const card = document.createElement('div');
                         card.className = 'book-card';
+                        card.setAttribute('data-card-type', 'hotel');
                         card.innerHTML = `
                             <div>
-                                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-3" style="font-weight: 800; font-size: 11px;">🏨 HOTEL ROOM</span>
+                                <span class="badge bg-dark text-white px-3 py-1 rounded-pill mb-3" style="font-weight: 800; font-size: 11px;">🏨 HOTEL ROOM</span>
                                 <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">${h.title}</h4>
-                                <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin-bottom: 10px;">${h.company} • ${h.capacity}</div>
-                                <p style="font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 16px;">${h.description}</p>
+                                <p style="font-size: 13px; color: #475569; margin-bottom: 8px;">Provider: <b>${h.company}</b> • Max: <b>${h.capacity}</b></p>
+                                <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">${h.description}</p>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; pt-3; border-top: 1px solid #f1f5f9; margin-top: 14px;">
-                                <span style="font-weight: 900; color: #008080; font-size: 16px;">${h.price_per_night.toLocaleString()} ETB / night</span>
-                                <button class="bb-btn-book btn-open-booking" data-id="${h.id}" data-type="hotel" data-title="${h.title}" data-sub="Provider: ${h.company}">Book Room &rarr;</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; pt-3; border-top: 1px solid #f1f5f9; margin-top: 10px;">
+                                <span style="font-weight: 900; color: #008080; font-size: 16px;">${h.price_per_night.toLocaleString()} ETB / Night</span>
+                                <button class="bb-btn-book btn-open-booking" data-id="${h.id}" data-type="hotel" data-title="${h.title}" data-company="${h.company}" data-sub="Rate: ${h.price_per_night} ETB/night">Reserve Room &rarr;</button>
                             </div>
                         `;
                         grid.appendChild(card);
                     });
                 }
 
-                // Render Doctors (Practo Engine)
+                // Render Doctors (Healthcare)
                 if (catalog.doctors && catalog.doctors.length) {
                     catalog.doctors.forEach(d => {
                         const card = document.createElement('div');
                         card.className = 'book-card';
+                        card.setAttribute('data-card-type', 'doctor');
                         card.innerHTML = `
                             <div>
-                                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
-                                    <div class="practo-avatar">🩺</div>
+                                <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
+                                    <div class="doc-avatar">${d.name.substring(0, 2).toUpperCase()}</div>
                                     <div>
-                                        <span class="badge bg-info text-white px-2 py-1 rounded-pill" style="font-size: 10px; font-weight: 800;">PRACTO SPECIALIST</span>
-                                        <h4 style="font-weight: 800; color: #0f172a; margin: 4px 0 0 0; font-size: 16px;">${d.name}</h4>
-                                        <div style="font-size: 12px; color: #008080; font-weight: 700;">${d.specialty}</div>
+                                        <h4 style="font-weight: 800; color: #0f172a; margin: 0; font-size: 16px;">${d.name}</h4>
+                                        <span class="badge bg-info text-dark mt-1" style="font-size: 11px;">${d.specialty}</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">🎓 ${d.qualifications} • ⭐ ${d.rating} (50+ reviews)</div>
-                                <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">📍 ${d.clinic}</p>
+                                <p style="font-size: 13px; color: #475569; margin-bottom: 4px;">🏥 ${d.clinic}</p>
+                                <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">⭐ ${d.rating} Rating • ${d.experience}</p>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; pt-3; border-top: 1px solid #f1f5f9; margin-top: 10px;">
-                                <span style="font-weight: 900; color: #008080; font-size: 15px;">${d.fee.toLocaleString()} ETB Fee</span>
-                                <button class="bb-btn-book btn-open-booking" data-id="${d.id}" data-type="healthcare" data-title="${d.name} (${d.specialty})" data-sub="Clinic: ${d.clinic}">Book Consult &rarr;</button>
+                                <span style="font-weight: 900; color: #0284c7; font-size: 15px;">${d.fee.toLocaleString()} ETB Fee</span>
+                                <button class="bb-btn-book btn-open-booking" data-id="${d.id}" data-type="doctor" data-title="${d.name}" data-company="EthioBiz Health" data-sub="${d.specialty} - Fee: ${d.fee} ETB" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">Book Doctor &rarr;</button>
                             </div>
                         `;
                         grid.appendChild(card);
@@ -289,16 +443,17 @@
                     catalog.salons.forEach(s => {
                         const card = document.createElement('div');
                         card.className = 'book-card';
+                        card.setAttribute('data-card-type', 'salon');
                         card.innerHTML = `
                             <div>
-                                <span class="badge bg-danger text-white px-3 py-1 rounded-pill mb-3" style="font-weight: 800; font-size: 11px;">💇 SALON & SPA</span>
+                                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-3" style="font-weight: 800; font-size: 11px;">💇 SALON & SPA</span>
                                 <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">${s.name}</h4>
-                                <div style="font-size: 12px; color: #7e22ce; font-weight: 700; margin-bottom: 8px;">${s.category} • ⏱️ ${s.duration}</div>
-                                <p style="font-size: 13px; color: #475569; margin-bottom: 14px;">${s.description}</p>
+                                <p style="font-size: 13px; color: #475569; margin-bottom: 4px;">Provider: <b>${s.company || 'Salon & Spa Hub'}</b></p>
+                                <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">⏱️ Duration: <b>${s.duration}</b></p>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; pt-3; border-top: 1px solid #f1f5f9; margin-top: 10px;">
                                 <span style="font-weight: 900; color: #008080; font-size: 16px;">${s.price.toLocaleString()} ETB</span>
-                                <button class="bb-btn-book btn-open-booking" data-id="${s.id}" data-type="salon" data-title="${s.name}" data-sub="Duration: ${s.duration}">Book Stylist &rarr;</button>
+                                <button class="bb-btn-book btn-open-booking" data-id="${s.id}" data-type="salon" data-title="${s.name}" data-company="${s.company || 'Biz Technology Solutions'}" data-sub="Duration: ${s.duration}">Book Stylist &rarr;</button>
                             </div>
                         `;
                         grid.appendChild(card);
@@ -310,6 +465,7 @@
                     catalog.properties.forEach(p => {
                         const card = document.createElement('div');
                         card.className = 'book-card';
+                        card.setAttribute('data-card-type', 'property');
                         card.innerHTML = `
                             <div>
                                 <span class="badge bg-secondary text-white px-3 py-1 rounded-pill mb-3" style="font-weight: 800; font-size: 11px;">🏠 PROPERTY VIEWING</span>
@@ -318,7 +474,7 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; pt-3; border-top: 1px solid #f1f5f9; margin-top: 10px;">
                                 <span style="font-weight: 800; color: #16a34a; font-size: 14px;">${p.price}</span>
-                                <button class="bb-btn-book btn-open-booking" data-id="${p.id}" data-type="property" data-title="${p.title}" data-sub="Viewing Appointment">Schedule Tour &rarr;</button>
+                                <button class="bb-btn-book btn-open-booking" data-id="${p.id}" data-type="property" data-title="${p.title}" data-company="${p.company || 'Kistet Engineering'}" data-sub="Viewing Appointment">Schedule Tour &rarr;</button>
                             </div>
                         `;
                         grid.appendChild(card);
@@ -339,15 +495,15 @@
                 const bType = this.getAttribute('data-type');
                 const title = this.getAttribute('data-title');
                 const sub = this.getAttribute('data-sub');
+                const comp = this.getAttribute('data-company') || 'Biz Technology Solutions';
 
                 document.getElementById('modal-resource-id').value = resId;
                 document.getElementById('modal-booking-type').value = bType;
                 document.getElementById('modal-service-title').innerText = title;
-                document.getElementById('modal-service-sub').innerText = sub;
+                document.getElementById('modal-service-sub').innerText = sub + ' • ' + comp;
 
                 document.getElementById('hotel-checkout-field').style.display = (bType === 'hotel') ? 'block' : 'none';
 
-                // Set default date to tomorrow
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 document.getElementById('modal-book-date').value = tomorrow.toISOString().split('T')[0];
@@ -357,22 +513,21 @@
         });
 
         closeBtn.onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
         document.getElementById('modal-confirm-btn').onclick = function() {
+            if (!loggedUser || !loggedUser.is_logged_in) {
+                window.location.href = '/login?redirect-to=/book';
+                return;
+            }
+
             const btn = this;
             const bType = document.getElementById('modal-booking-type').value;
             const rId = document.getElementById('modal-resource-id').value;
-            const name = document.getElementById('modal-cust-name').value.trim();
-            const phone = document.getElementById('modal-cust-phone').value.trim();
             const date = document.getElementById('modal-book-date').value;
             const slot = document.getElementById('modal-book-slot').value;
             const checkout = document.getElementById('modal-checkout-date').value;
             const notes = document.getElementById('modal-book-notes').value.trim();
-
-            if (!name || !phone) {
-                alert('Please enter your name and phone number.');
-                return;
-            }
 
             btn.disabled = true;
             btn.innerText = 'Processing Confirmation...';
@@ -383,8 +538,9 @@
                 body: new URLSearchParams({
                     booking_type: bType,
                     resource_id: rId,
-                    customer_name: name,
-                    customer_phone: phone,
+                    customer_name: loggedUser.full_name,
+                    customer_phone: loggedUser.phone || '0911000000',
+                    customer_email: loggedUser.email || '',
                     booking_date: date,
                     time_slot: slot,
                     check_out_date: checkout,
@@ -394,15 +550,15 @@
             .then(r => r.json())
             .then(res => {
                 btn.disabled = false;
-                btn.innerText = 'Confirm Reservation →';
+                btn.innerText = 'Confirm Reservation & Post to Desk →';
                 modal.style.display = 'none';
                 if (res.message) {
-                    alert(res.message.message + '\nBooking ID: ' + res.message.booking_id + '\nTotal Amount: ' + res.message.total_amount);
+                    alert('🎉 Reservation Confirmed!\n\nBooking Reference: ' + (res.message.booking_id || 'SAL-CONFIRMED') + '\nBooked under: ' + loggedUser.full_name + '\nTotal Amount: ' + res.message.total_amount);
                 }
             })
             .catch(e => {
                 btn.disabled = false;
-                btn.innerText = 'Confirm Reservation →';
+                btn.innerText = 'Confirm Reservation & Post to Desk →';
                 console.error(e);
             });
         };
@@ -411,3 +567,4 @@
     loadCatalog();
 })();
 </script>
+{% endblock %}
