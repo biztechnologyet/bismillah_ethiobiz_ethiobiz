@@ -1,101 +1,244 @@
 <style>
     :root {
-        --afocha-teal: #008080;
-        --afocha-teal-dark: #093a3e;
-        --afocha-gold: #f59e0b;
-        --afocha-blue: #0284c7;
-        --afocha-border: #e2e8f0;
+        --af-teal: #008080;
+        --af-teal-dark: #072a2e;
+        --af-teal-light: #0d9488;
+        --af-gold: #f59e0b;
+        --af-blue: #0284c7;
+        --af-bg: #f8fafc;
+        --af-card-bg: #ffffff;
+        --af-border: #e2e8f0;
+        --af-text: #0f172a;
+        --af-text-muted: #64748b;
     }
-    .afocha-feed-container {
-        max-width: 820px;
+
+    .afocha-container {
+        max-width: 1050px;
         margin: 0 auto;
-        padding: 20px 15px 50px 15px;
+        padding: 25px 15px 60px 15px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
+
+    /* Hero Banner */
     .afocha-hero {
-        background: linear-gradient(135deg, #093a3e 0%, #008080 50%, #0284c7 100%);
-        color: white;
-        padding: 35px 24px;
-        border-radius: 24px;
+        background: linear-gradient(135deg, #072a2e 0%, #008080 45%, #0284c7 100%);
+        color: #ffffff;
+        padding: 40px 24px;
+        border-radius: 28px;
         margin-bottom: 28px;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0,128,128,0.22);
+        box-shadow: 0 14px 40px rgba(0,128,128,0.25);
+        position: relative;
+        overflow: hidden;
     }
-    .afocha-composer-card {
-        background: #ffffff;
-        border: 1px solid var(--afocha-border);
+    .afocha-hero-badge {
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 18px;
         border-radius: 20px;
-        padding: 22px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        display: inline-block;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
     }
-    .composer-tab-btn {
-        padding: 6px 14px;
+    .afocha-hero h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    /* Custom Form Controls */
+    .af-input {
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        font-size: 14px;
+        color: #0f172a;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+    .af-input:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+    }
+    .af-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        font-size: 15px;
+        color: #0f172a;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        resize: vertical;
+        outline: none;
+        font-family: inherit;
+    }
+    .af-textarea:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+    }
+    .af-btn-primary {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: #ffffff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px rgba(0,128,128,0.3);
+    }
+    .af-btn-primary:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: translateY(-1px);
+    }
+    .af-btn-outline {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .af-btn-outline:hover {
+        border-color: #008080;
+        color: #008080;
+        background: #f0fdfa;
+    }
+
+    /* Composer Card */
+    .afocha-composer {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.04);
+    }
+    .composer-tabs-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 12px;
+    }
+    .composer-tab {
+        padding: 7px 16px;
         border-radius: 20px;
         border: 1px solid #e2e8f0;
         background: #f8fafc;
         color: #475569;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.2s;
     }
-    .composer-tab-btn.active {
+    .composer-tab.active {
         background: #008080;
-        color: white;
+        color: #ffffff;
         border-color: #008080;
     }
-    .post-card {
+
+    /* Feed Post Card */
+    .af-post-card {
         background: #ffffff;
-        border: 1px solid var(--afocha-border);
-        border-radius: 20px;
-        padding: 22px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-        transition: all 0.2s ease;
+        border: 1px solid var(--af-border);
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        transition: all 0.25s ease;
     }
-    .post-card:hover {
+    .af-post-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.07);
         border-color: #cbd5e1;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
     }
-    .post-avatar {
-        width: 48px;
-        height: 48px;
+    .af-avatar {
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         background: linear-gradient(135deg, #008080 0%, #0284c7 100%);
-        color: white;
+        color: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 18px;
+        font-weight: 800;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(0,128,128,0.2);
     }
-    .poll-box {
+    .af-author-name {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .af-author-meta {
+        font-size: 12px;
+        color: #64748b;
+        margin: 2px 0 0 0;
+    }
+    .af-tag-badge {
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #ccfbf1;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .af-post-text {
+        font-size: 15px;
+        color: #334155;
+        line-height: 1.65;
+        margin: 16px 0;
+    }
+
+    /* Poll Widget */
+    .af-poll-box {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 16px;
-        margin: 14px 0;
+        border-radius: 18px;
+        padding: 18px;
+        margin: 16px 0;
     }
-    .poll-opt-btn {
+    .af-poll-option {
         width: 100%;
         text-align: left;
         position: relative;
         overflow: hidden;
         border: 1px solid #cbd5e1;
         background: #ffffff;
-        border-radius: 12px;
-        padding: 10px 16px;
-        margin-bottom: 8px;
-        font-weight: 600;
-        font-size: 13px;
+        border-radius: 14px;
+        padding: 12px 18px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.2s ease;
     }
-    .poll-opt-btn:hover {
+    .af-poll-option:hover {
         border-color: #008080;
         background: #f0fdfa;
     }
-    .poll-progress-fill {
+    .af-poll-fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -104,104 +247,155 @@
         z-index: 1;
         transition: width 0.4s ease;
     }
-    .poll-opt-content {
+    .af-poll-text-row {
         position: relative;
         z-index: 2;
         display: flex;
         justify-content: space-between;
     }
-    .comment-item {
-        background: #f8fafc;
-        border-radius: 14px;
-        padding: 12px 16px;
-        margin-bottom: 10px;
-        font-size: 13px;
+
+    /* 2-COLUMN SPLIT FULL-PAGE POST VIEW */
+    .af-split-wrapper {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 26px;
+        align-items: start;
+        margin-top: 15px;
     }
-    .fullpage-post-wrapper {
+    .af-left-post-col {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 24px;
+        border: 1px solid var(--af-border);
+        border-radius: 26px;
         padding: 30px;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.06);
-        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+    }
+    .af-right-comments-col {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 26px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .af-comments-scrollable {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 6px;
+        margin-bottom: 16px;
+        max-height: 52vh;
+    }
+    .af-comment-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+    .af-comment-author {
+        font-weight: 800;
+        font-size: 13px;
+        color: #0f172a;
+    }
+    .af-comment-time {
+        font-size: 11px;
+        color: #64748b;
+    }
+    .af-comment-body {
+        font-size: 13px;
+        color: #334155;
+        margin-top: 4px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 860px) {
+        .af-split-wrapper {
+            grid-template-columns: 1fr;
+        }
+        .af-right-comments-col {
+            position: static;
+            max-height: none;
+        }
+        .af-comments-scrollable {
+            max-height: 400px;
+        }
     }
 </style>
 
-<div class="afocha-feed-container">
-    <!-- Single Post View Container (Loaded via ?post=AFO-...) -->
+<div class="afocha-container">
+    <!-- SINGLE POST 2-COLUMN FULL-PAGE VIEW -->
     <div id="afocha-single-post-view" style="display: none;">
-        <!-- Dynamically injected -->
+        <!-- Injected via JS -->
     </div>
 
-    <!-- Main Feed View -->
+    <!-- MAIN FEED & COMPOSER VIEW -->
     <div id="afocha-main-feed-view">
         <!-- HERO BANNER -->
         <div class="afocha-hero">
-            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2">🌟 AFOCHA SOCIAL PULSE</span>
-            <h2 class="font-weight-bold mb-1">Ethiopia's Verified Business & Community Network</h2>
-            <p class="mb-0 text-white-50 small">Share insights, launch polls, discover verified enterprises, and engage in real time.</p>
+            <div class="afocha-hero-badge">🌟 አፎቻ • LOVE OF THE HEART & COMMUNITY</div>
+            <h2>Ethiopia's Verified Business & Social Network</h2>
+            <p style="opacity: 0.9; max-width: 680px; margin: 0 auto; font-size: 15px;">
+                Share company updates, launch interactive community polls, discover verified enterprises, and engage in real time.
+            </p>
         </div>
 
-        <!-- RICH MEDIA COMPOSER -->
-        <div class="afocha-composer-card">
+        <!-- POST COMPOSER -->
+        <div class="afocha-composer">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="font-weight-bold text-dark font-size-14">✨ Create Story or Poll</span>
-                <div class="d-flex gap-2">
-                    <button class="composer-tab-btn active" data-tab="text">✍️ Story</button>
-                    <button class="composer-tab-btn" data-tab="media">🖼️ Media</button>
-                    <button class="composer-tab-btn" data-tab="poll">📊 Poll</button>
+                <span style="font-weight: 800; font-size: 16px; color: #0f172a;">✨ Share a Story or Launch a Poll</span>
+                <div class="composer-tabs-row mb-0">
+                    <button class="composer-tab active" data-tab="text">✍️ Story</button>
+                    <button class="composer-tab" data-tab="media">🖼️ Media</button>
+                    <button class="composer-tab" data-tab="poll">📊 Poll</button>
                 </div>
             </div>
 
-            <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                    <input type="text" id="post-author-name" class="form-control form-control-sm rounded-pill px-3" placeholder="Your Name or Business Name *">
-                </div>
-                <div class="col-md-3">
-                    <input type="text" id="post-author-handle" class="form-control form-control-sm rounded-pill px-3" placeholder="@username" value="@ethiobiz">
-                </div>
-                <div class="col-md-3">
-                    <select id="post-category" class="form-select form-select-sm rounded-pill px-3">
-                        <option value="Business & Trade">💼 Business & Trade</option>
-                        <option value="Tech & Innovation">🚀 Tech & Innovation</option>
-                        <option value="Food & Dining">☕ Food & Dining</option>
-                        <option value="Real Estate & Living">🏠 Real Estate</option>
-                        <option value="Jobs & Career">🎯 Jobs & Career</option>
-                        <option value="Community & Events">🌟 Community</option>
-                    </select>
-                </div>
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 10px; margin-bottom: 12px;">
+                <input type="text" id="post-author-name" class="af-input" placeholder="Your Name or Business Name *">
+                <input type="text" id="post-author-handle" class="af-input" placeholder="@handle" value="@ethiobiz">
+                <select id="post-category" class="af-input" style="font-weight: 600;">
+                    <option value="Business & Trade">💼 Business & Trade</option>
+                    <option value="Tech & Innovation">🚀 Tech & Innovation</option>
+                    <option value="Food & Dining">☕ Food & Dining</option>
+                    <option value="Real Estate & Living">🏠 Real Estate</option>
+                    <option value="Jobs & Career">🎯 Jobs & Career</option>
+                    <option value="Community & Events">🌟 Community</option>
+                </select>
             </div>
 
-            <textarea id="post-content" class="form-control mb-3" rows="3" placeholder="What's happening in your business or community today?..." style="border-radius: 14px;"></textarea>
+            <textarea id="post-content" class="af-textarea mb-3" rows="3" placeholder="What's happening in your business or community today?..."></textarea>
 
-            <!-- Media Inputs (Hidden by default) -->
-            <div id="composer-media-section" class="mb-3" style="display: none; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px dashed #cbd5e1;">
-                <input type="text" id="post-image-url" class="form-control form-control-sm rounded-pill mb-2" placeholder="Image URL (e.g. https://... or /files/image.jpg)">
-                <input type="text" id="post-video-url" class="form-control form-control-sm rounded-pill" placeholder="YouTube or MP4 Video URL">
+            <!-- Media Section -->
+            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 14px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
+                <input type="text" id="post-image-url" class="af-input mb-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)">
+                <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL">
             </div>
 
-            <!-- Poll Inputs (Hidden by default) -->
-            <div id="composer-poll-section" class="mb-3" style="display: none; background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px dashed #cbd5e1;">
-                <label class="font-weight-bold text-dark small mb-1">📊 Community Poll Question:</label>
-                <input type="text" id="poll-question-input" class="form-control form-control-sm rounded-pill mb-2" placeholder="Ask a question (e.g. Which Ethiopian coffee roast is your favorite?)">
+            <!-- Poll Section -->
+            <div id="composer-poll-section" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
+                <label style="font-weight: 800; font-size: 13px; color: #0f172a; margin-bottom: 6px; display: block;">📊 Community Poll Question:</label>
+                <input type="text" id="poll-question-input" class="af-input mb-2" placeholder="Ask a question (e.g. Which Ethiopian coffee roast is your favorite?)">
                 <div id="poll-options-container">
-                    <input type="text" class="form-control form-control-sm rounded-pill mb-1 poll-opt-val" placeholder="Option 1">
-                    <input type="text" class="form-control form-control-sm rounded-pill mb-1 poll-opt-val" placeholder="Option 2">
+                    <input type="text" class="af-input mb-2 poll-opt-val" placeholder="Option 1">
+                    <input type="text" class="af-input mb-2 poll-opt-val" placeholder="Option 2">
                 </div>
-                <button type="button" id="btn-add-poll-opt" class="btn btn-xs btn-outline-secondary rounded-pill mt-1" style="font-size: 11px;">+ Add Option</button>
+                <button type="button" id="btn-add-poll-opt" class="af-btn-outline" style="font-size: 11px; padding: 4px 12px;">+ Add Option</button>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted">Instant publishing across EthioBiz network</small>
-                <button id="btn-submit-post" class="btn btn-sm btn-primary px-4 rounded-pill font-weight-bold" style="background: #008080; border: none;">
-                    Publish Post &rarr;
-                </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; pt-2;">
+                <small style="color: #64748b; font-size: 12px;">Instant publishing across EthioBiz community network</small>
+                <button id="btn-submit-post" class="af-btn-primary">Publish Post &rarr;</button>
             </div>
         </div>
 
-        <!-- POSTS FEED STREAM -->
+        <!-- STREAM CONTAINER -->
         <div id="afocha-feed-stream">
-            <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div><span class="ms-2">Loading stories...</span></div>
+            <div style="text-align: center; padding: 40px; color: #64748b;">
+                <div class="spinner-border spinner-border-sm text-primary"></div><span style="margin-left: 8px;">Loading stories...</span>
+            </div>
         </div>
     </div>
 </div>
@@ -211,9 +405,9 @@
     let activeComposerTab = "text";
 
     // Tab switching
-    document.querySelectorAll('.composer-tab-btn').forEach(btn => {
+    document.querySelectorAll('.composer-tab').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.composer-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.composer-tab').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             activeComposerTab = this.getAttribute('data-tab');
 
@@ -222,7 +416,7 @@
         });
     });
 
-    // Add poll option button
+    // Add poll option
     const btnAddPollOpt = document.getElementById('btn-add-poll-opt');
     if (btnAddPollOpt) {
         btnAddPollOpt.addEventListener('click', function() {
@@ -231,7 +425,7 @@
             if (count < 4) {
                 const inp = document.createElement('input');
                 inp.type = 'text';
-                inp.className = 'form-control form-control-sm rounded-pill mb-1 poll-opt-val';
+                inp.className = 'af-input mb-2 poll-opt-val';
                 inp.placeholder = 'Option ' + (count + 1);
                 container.appendChild(inp);
             }
@@ -322,21 +516,21 @@
                 const posts = (res.message && res.message.posts) ? res.message.posts : [];
 
                 if (!posts.length) {
-                    stream.innerHTML = '<div class="text-center py-5 text-muted bg-white rounded-4 border p-4">No stories yet. Be the first to publish!</div>';
+                    stream.innerHTML = '<div style="text-align: center; padding: 50px; background: white; border-radius: 20px; border: 1px solid #e2e8f0; color: #64748b;">No stories yet. Be the first to publish!</div>';
                     return;
                 }
 
                 posts.forEach(p => {
                     const card = document.createElement('div');
-                    card.className = 'post-card';
+                    card.className = 'af-post-card';
                     card.id = 'post-node-' + p.name;
 
                     let mediaHtml = '';
                     if (p.post_image) {
-                        mediaHtml += `<div class="mb-3"><img src="${p.post_image}" style="max-height: 400px; width: 100%; object-fit: cover; border-radius: 14px;"></div>`;
+                        mediaHtml += `<div style="margin: 14px 0; border-radius: 18px; overflow: hidden;"><img src="${p.post_image}" style="max-height: 420px; width: 100%; object-fit: cover;"></div>`;
                     }
                     if (p.video_url) {
-                        mediaHtml += `<div class="mb-3"><iframe src="${p.video_url}" style="width: 100%; height: 320px; border-radius: 14px; border: none;"></iframe></div>`;
+                        mediaHtml += `<div style="margin: 14px 0; border-radius: 18px; overflow: hidden;"><iframe src="${p.video_url}" style="width: 100%; height: 320px; border: none;"></iframe></div>`;
                     }
 
                     let pollHtml = '';
@@ -345,35 +539,35 @@
                     }
 
                     card.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="post-avatar">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="af-avatar">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
                                 <div>
-                                    <div class="d-flex align-items-center gap-1">
-                                        <h6 class="mb-0 font-weight-bold text-dark">${p.author_name}</h6>
-                                        ${p.is_verified ? '<span title="Verified" style="color: #008080;">✓</span>' : ''}
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <h4 class="af-author-name">${p.author_name}</h4>
+                                        ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
                                     </div>
-                                    <small class="text-muted">${p.author_handle} • ${p.post_date.split(' ')[0]}</small>
+                                    <p class="af-author-meta">${p.author_handle} • ${p.post_date.split(' ')[0]}</p>
                                 </div>
                             </div>
-                            <span class="badge bg-light text-dark px-2 py-1 rounded-pill" style="border: 1px solid #e2e8f0; font-size: 11px;">${p.category_tag}</span>
+                            <span class="af-tag-badge">${p.category_tag}</span>
                         </div>
 
-                        <p style="color: #334155; line-height: 1.6; font-size: 15px; margin-bottom: 14px;">${p.content}</p>
+                        <div class="af-post-text">${p.content}</div>
 
                         ${mediaHtml}
                         ${pollHtml}
 
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                            <div class="d-flex gap-3">
-                                <button class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 btn-like-post" data-id="${p.name}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+                            <div style="display: flex; gap: 10px;">
+                                <button class="af-btn-outline btn-like-post" data-id="${p.name}">
                                     ❤️ <span class="like-cnt">${p.likes_count}</span>
                                 </button>
-                                <a href="/social?post=${p.name}" class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1">
+                                <a href="/social?post=${p.name}" class="af-btn-outline">
                                     💬 <span>${p.comments_count} Comments</span>
                                 </a>
                             </div>
-                            <button class="btn btn-xs btn-outline-dark rounded-pill px-3 py-1 btn-share-post" data-id="${p.name}" data-url="https://ethiobiz.et/social?post=${p.name}">
+                            <button class="af-btn-outline btn-share-post" data-url="https://ethiobiz.et/social?post=${p.name}">
                                 🔗 Share
                             </button>
                         </div>
@@ -389,9 +583,9 @@
         let optsHtml = '';
         pollData.options.forEach(opt => {
             optsHtml += `
-                <div class="poll-opt-btn" data-post="${postId}" data-opt="${opt.index}">
-                    <div class="poll-progress-fill" style="width: ${opt.percentage}%;"></div>
-                    <div class="poll-opt-content">
+                <div class="af-poll-option" data-post="${postId}" data-opt="${opt.index}">
+                    <div class="af-poll-fill" style="width: ${opt.percentage}%;"></div>
+                    <div class="af-poll-text-row">
                         <span>${opt.text}</span>
                         <span><b>${opt.percentage}%</b> (${opt.votes})</span>
                     </div>
@@ -400,16 +594,15 @@
         });
 
         return `
-            <div class="poll-box" id="poll-box-${postId}">
-                <div class="font-weight-bold text-dark mb-2" style="font-size: 14px;">📊 ${pollData.question || 'Community Poll'}</div>
+            <div class="af-poll-box" id="poll-box-${postId}">
+                <div style="font-weight: 800; font-size: 15px; color: #0f172a; margin-bottom: 10px;">📊 ${pollData.question || 'Community Poll'}</div>
                 ${optsHtml}
-                <div class="text-muted small mt-1">Total votes: ${pollData.total_votes}</div>
+                <div style="color: #64748b; font-size: 12px; margin-top: 6px;">Total votes: ${pollData.total_votes}</div>
             </div>
         `;
     }
 
     function bindFeedEvents() {
-        // Like buttons
         document.querySelectorAll('.btn-like-post').forEach(b => {
             b.addEventListener('click', function() {
                 const pid = this.getAttribute('data-id');
@@ -422,8 +615,7 @@
             });
         });
 
-        // Poll voting
-        document.querySelectorAll('.poll-opt-btn').forEach(b => {
+        document.querySelectorAll('.af-poll-option').forEach(b => {
             b.addEventListener('click', function() {
                 const pid = this.getAttribute('data-post');
                 const optIdx = this.getAttribute('data-opt');
@@ -441,7 +633,6 @@
             });
         });
 
-        // Share buttons
         document.querySelectorAll('.btn-share-post').forEach(b => {
             b.addEventListener('click', function() {
                 const url = this.getAttribute('data-url');
@@ -449,23 +640,24 @@
                     navigator.share({ title: 'EthioBiz AFOCHA Story', url: url });
                 } else {
                     navigator.clipboard.writeText(url);
-                    alert('Post permalink copied to clipboard: ' + url);
+                    alert('Post link copied to clipboard: ' + url);
                 }
             });
         });
     }
 
+    // 2-COLUMN SPLIT VIEW FOR FULL POST & RIGHT-SIDE COMMENTING
     function loadSinglePost(postId) {
         document.getElementById('afocha-main-feed-view').style.display = 'none';
         const singleView = document.getElementById('afocha-single-post-view');
         singleView.style.display = 'block';
-        singleView.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><span class="ms-2">Loading full story...</span></div>';
+        singleView.innerHTML = '<div style="text-align: center; padding: 60px;"><div class="spinner-border text-primary"></div><div style="margin-top: 10px; color: #64748b;">Loading full story...</div></div>';
 
         fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed?post_id=' + encodeURIComponent(postId))
             .then(r => r.json())
             .then(res => {
                 if (!res.message || !res.message.post) {
-                    singleView.innerHTML = '<div class="text-center py-5">Post not found. <a href="/social">Return to feed</a></div>';
+                    singleView.innerHTML = '<div style="text-align: center; padding: 50px;">Post not found. <a href="/social" class="af-btn-outline">Return to feed</a></div>';
                     return;
                 }
 
@@ -474,10 +666,10 @@
 
                 let mediaHtml = '';
                 if (p.post_image) {
-                    mediaHtml += `<div class="mb-3"><img src="${p.post_image}" style="max-height: 480px; width: 100%; object-fit: cover; border-radius: 16px;"></div>`;
+                    mediaHtml += `<div style="margin: 18px 0; border-radius: 20px; overflow: hidden;"><img src="${p.post_image}" style="max-height: 500px; width: 100%; object-fit: cover;"></div>`;
                 }
                 if (p.video_url) {
-                    mediaHtml += `<div class="mb-3"><iframe src="${p.video_url}" style="width: 100%; height: 380px; border-radius: 16px; border: none;"></iframe></div>`;
+                    mediaHtml += `<div style="margin: 18px 0; border-radius: 20px; overflow: hidden;"><iframe src="${p.video_url}" style="width: 100%; height: 360px; border: none;"></iframe></div>`;
                 }
 
                 let pollHtml = '';
@@ -488,80 +680,80 @@
                 let commentsListHtml = '';
                 comments.forEach(c => {
                     commentsListHtml += `
-                        <div class="comment-item">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="font-weight-bold text-dark">${c.author_name}</span>
-                                <small class="text-muted">${c.comment_date.split(' ')[0]}</small>
+                        <div class="af-comment-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span class="af-comment-author">${c.author_name}</span>
+                                <span class="af-comment-time">${c.comment_date.split(' ')[0]}</span>
                             </div>
-                            <div style="color: #334155;">${c.comment_text}</div>
+                            <div class="af-comment-body">${c.comment_text}</div>
                         </div>
                     `;
                 });
 
                 singleView.innerHTML = `
-                    <div class="mb-3">
-                        <a href="/social" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 font-weight-bold">&larr; Back to Community Feed</a>
+                    <div style="margin-bottom: 20px;">
+                        <a href="/social" class="af-btn-outline" style="font-weight: 700;">&larr; Back to Community Feed</a>
                     </div>
-                    <div class="fullpage-post-wrapper">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="post-avatar" style="width: 56px; height: 56px; font-size: 22px;">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
-                                <div>
-                                    <div class="d-flex align-items-center gap-1">
-                                        <h5 class="mb-0 font-weight-bold text-dark">${p.author_name}</h5>
-                                        ${p.is_verified ? '<span title="Verified" style="color: #008080;">✓</span>' : ''}
-                                    </div>
-                                    <small class="text-muted">${p.author_handle} • ${p.post_date}</small>
-                                </div>
-                            </div>
-                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill font-size-13" style="border: 1px solid #e2e8f0;">${p.category_tag}</span>
-                        </div>
 
-                        <div style="font-size: 17px; color: #1e293b; line-height: 1.7; margin-bottom: 20px;">
-                            ${p.content}
-                        </div>
-
-                        ${mediaHtml}
-                        ${pollHtml}
-
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mb-4">
-                            <div class="d-flex gap-3">
-                                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 btn-like-post" data-id="${p.name}">
-                                    ❤️ <span class="like-cnt">${p.likes_count}</span>
-                                </button>
-                                <span class="btn btn-sm btn-light rounded-pill px-3 py-1">
-                                    💬 <span>${p.comments_count} Comments</span>
-                                </span>
-                            </div>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 btn-share-post" data-url="https://ethiobiz.et/social?post=${p.name}">
-                                🔗 Share Post
-                            </button>
-                        </div>
-
-                        <!-- COMMENTS SECTION -->
-                        <div class="comments-section mt-4 pt-3 border-top">
-                            <h6 class="font-weight-bold text-dark mb-3">💬 Comments & Discussion (${comments.length})</h6>
-                            
-                            <!-- Comment Input Form -->
-                            <div class="bg-light p-3 rounded-4 mb-4 border">
-                                <div class="row g-2 mb-2">
-                                    <div class="col-md-6">
-                                        <input type="text" id="cmt-author-name" class="form-control form-control-sm rounded-pill" placeholder="Your Name *">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" id="cmt-author-handle" class="form-control form-control-sm rounded-pill" placeholder="@handle" value="@community">
+                    <!-- 2-COLUMN SPLIT VIEW -->
+                    <div class="af-split-wrapper">
+                        <!-- LEFT COLUMN: POST STORY & MEDIA -->
+                        <div class="af-left-post-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <div class="af-avatar" style="width: 60px; height: 60px; font-size: 22px;">${p.author_name ? p.author_name.charAt(0) : 'E'}</div>
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0;">${p.author_name}</h3>
+                                            ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
+                                        </div>
+                                        <p class="af-author-meta">${p.author_handle} • ${p.post_date}</p>
                                     </div>
                                 </div>
-                                <textarea id="cmt-text" class="form-control mb-2" rows="2" placeholder="Write your comment..." style="border-radius: 12px;"></textarea>
-                                <div class="text-end">
-                                    <button id="btn-submit-comment" class="btn btn-sm btn-primary rounded-pill px-4" style="background: #008080; border: none;">
-                                        Post Comment
+                                <span class="af-tag-badge" style="font-size: 12px; padding: 5px 14px;">${p.category_tag}</span>
+                            </div>
+
+                            <div style="font-size: 17px; color: #1e293b; line-height: 1.7; margin-bottom: 20px;">
+                                ${p.content}
+                            </div>
+
+                            ${mediaHtml}
+                            ${pollHtml}
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 18px; border-top: 1px solid #f1f5f9; margin-top: 20px;">
+                                <div style="display: flex; gap: 12px;">
+                                    <button class="af-btn-outline btn-like-post" data-id="${p.name}">
+                                        ❤️ <span class="like-cnt">${p.likes_count}</span>
                                     </button>
+                                    <span class="af-btn-outline" style="background: #f8fafc; cursor: default;">
+                                        💬 <span>${p.comments_count} Comments</span>
+                                    </span>
                                 </div>
+                                <button class="af-btn-outline btn-share-post" data-url="https://ethiobiz.et/social?post=${p.name}">
+                                    🔗 Share Post
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: COMMENTS & LIVE COMMENTING -->
+                        <div class="af-right-comments-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                                <h4 style="font-weight: 800; font-size: 16px; color: #0f172a; margin: 0;">💬 Discussion (${comments.length})</h4>
+                                <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">Live Feed</span>
                             </div>
 
-                            <div id="comments-list-stream">
-                                ${commentsListHtml || '<div class="text-muted small py-3">No comments yet. Share your thoughts!</div>'}
+                            <!-- Scrollable Comments -->
+                            <div class="af-comments-scrollable" id="comments-list-stream">
+                                ${commentsListHtml || '<div style="text-align: center; padding: 30px; color: #64748b; font-size: 13px;">No comments yet. Share your thoughts!</div>'}
+                            </div>
+
+                            <!-- Comment Input Form (Docked at Bottom of Right Column) -->
+                            <div style="border-top: 1px solid #f1f5f9; padding-top: 14px;">
+                                <input type="text" id="cmt-author-name" class="af-input mb-2" placeholder="Your Name *">
+                                <textarea id="cmt-text" class="af-textarea mb-2" rows="2" placeholder="Write a comment..." style="font-size: 13px;"></textarea>
+                                <button id="btn-submit-comment" class="af-btn-primary" style="width: 100%; padding: 10px; font-size: 13px;">
+                                    Post Comment &rarr;
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -569,27 +761,27 @@
 
                 bindFeedEvents();
 
-                // Submit comment action
                 const btnCmt = document.getElementById('btn-submit-comment');
                 if (btnCmt) {
                     btnCmt.addEventListener('click', function() {
                         const name = document.getElementById('cmt-author-name').value.trim();
-                        const handle = document.getElementById('cmt-author-handle').value.trim();
                         const text = document.getElementById('cmt-text').value.trim();
 
                         if (!name || !text) {
-                            alert('Please enter your name and comment text.');
+                            alert('Please enter your name and comment.');
                             return;
                         }
 
                         btnCmt.disabled = true;
+                        btnCmt.innerText = 'Posting...';
+
                         fetch('/api/method/bismillah_ethiobiz.afocha_api.add_post_comment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams({
                                 post_id: p.name,
                                 author_name: name,
-                                author_handle: handle,
+                                author_handle: '@community',
                                 comment_text: text
                             })
                         })
