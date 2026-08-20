@@ -1,0 +1,230 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Business Map — Discover Companies Near You{% endblock %}
+
+{% block header %}
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+    #map-container {
+        height: 75vh;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+    .map-filter-bar {
+        background: #ffffff;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .category-btn {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .category-btn.active, .category-btn:hover {
+        background: #008080;
+        color: #ffffff;
+        border-color: #008080;
+    }
+    .near-me-btn {
+        background: #0f766e;
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .company-popup-card {
+        max-width: 260px;
+        padding: 8px;
+        font-family: inherit;
+    }
+    .company-popup-card h5 {
+        margin: 0 0 4px 0;
+        font-size: 15px;
+        color: #0f172a;
+        font-weight: 700;
+    }
+    .company-popup-badge {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    .company-popup-address {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+    .company-popup-btn {
+        display: block;
+        background: #008080;
+        color: #ffffff !important;
+        text-align: center;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-1" style="font-weight: 800; color: #0f172a;">🗺️ EthioBiz Business Map</h2>
+            <p class="text-muted mb-0">Discover and navigate verified businesses, hotels, restaurants, and services across Ethiopia.</p>
+        </div>
+        <div>
+            <a href="/shop" class="btn btn-outline-secondary btn-sm rounded-pill">🛍️ Back to Store</a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="map-filter-bar">
+        <div class="d-flex flex-wrap gap-2" id="category-filters">
+            <button class="category-btn active" data-cat="">All Categories</button>
+            <button class="category-btn" data-cat="Hotel & Lodging">🏨 Hotels</button>
+            <button class="category-btn" data-cat="Restaurant & Cafe">🍽️ Restaurants</button>
+            <button class="category-btn" data-cat="Retail & Supermarket">🛒 Retail</button>
+            <button class="category-btn" data-cat="Salon & Beauty">✂️ Salons</button>
+            <button class="category-btn" data-cat="Clinic & Healthcare">🏥 Healthcare</button>
+            <button class="category-btn" data-cat="Real Estate & Property">🏢 Real Estate</button>
+        </div>
+        <div>
+            <button class="near-me-btn" id="btn-near-me">
+                <span>📍</span> Near Me
+            </button>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map-container"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Default Addis Ababa coordinates
+    const defaultCenter = [9.0108, 38.7617];
+    const defaultZoom = 12;
+
+    const map = L.map('map-container').setView(defaultCenter, defaultZoom);
+
+    // OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | EthioBiz.et',
+        maxZoom: 19
+    }).addTo(map);
+
+    let markers = [];
+    let currentCategory = "";
+
+    function loadCompanies(category) {
+        // Clear existing markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        let url = '/api/method/bismillah_ethiobiz.company_map_api.get_company_locations';
+        if (category) {
+            url += '?category=' + encodeURIComponent(category);
+        }
+
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+                const data = res.message;
+                if (!data || !data.companies || data.companies.length === 0) {
+                    console.log('No companies found for category:', category);
+                    return;
+                }
+
+                data.companies.forEach(comp => {
+                    const marker = L.marker([comp.lat, comp.lng]).addTo(map);
+                    
+                    const popupContent = `
+                        <div class="company-popup-card">
+                            <h5>${comp.name}</h5>
+                            <span class="company-popup-badge">${comp.category}</span>
+                            ${comp.address ? `<div class="company-popup-address">📍 ${comp.address}</div>` : ''}
+                            ${comp.phone ? `<div class="company-popup-address">📞 ${comp.phone}</div>` : ''}
+                            <a href="${comp.shop_url}" class="company-popup-btn">View Shop & Services &rarr;</a>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                });
+            })
+            .catch(err => console.error('Error fetching companies for map:', err));
+    }
+
+    // Category button click handlers
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.getAttribute('data-cat');
+            loadCompanies(currentCategory);
+        });
+    });
+
+    // "Near Me" GPS Geolocation button
+    document.getElementById('btn-near-me').addEventListener('click', function() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            const userLat = pos.coords.latitude;
+            const userLng = pos.coords.longitude;
+            
+            map.flyTo([userLat, userLng], 15, { animate: true, duration: 1.5 });
+            
+            // Add custom pulse marker for user position
+            const userMarker = L.circleMarker([userLat, userLng], {
+                radius: 9,
+                fillColor: '#2563eb',
+                color: '#ffffff',
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.9
+            }).addTo(map);
+            userMarker.bindPopup('<b>📍 Your Current Location</b>').openPopup();
+        }, function(err) {
+            alert('Unable to retrieve your location. Please check browser permissions.');
+        });
+    });
+
+    // Initial load
+    loadCompanies("");
+});
+</script>
+{% endblock %}

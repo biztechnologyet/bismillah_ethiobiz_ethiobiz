@@ -1,0 +1,234 @@
+{% extends "templates/web.html" %}
+
+{% block title %}AFOCHA Social — Ethiopia's Business & Community Network{% endblock %}
+
+{% block header %}
+<style>
+    .afocha-hero {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 30px 20px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+    }
+    .post-composer-box {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+    }
+    .post-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+        transition: transform 0.2s ease;
+    }
+    .post-card:hover {
+        border-color: #cbd5e1;
+    }
+    .post-author-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #008080;
+        color: white;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    .verified-badge {
+        color: #0284c7;
+        font-size: 14px;
+        margin-left: 4px;
+    }
+    .post-action-btn {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .post-action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .post-action-btn.liked {
+        color: #ef4444;
+    }
+    .category-pill {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container my-4">
+    <div class="afocha-hero text-center">
+        <h2 class="font-weight-bold mb-1">🌟 AFOCHA Social</h2>
+        <p class="lead mb-0" style="font-size: 16px;">The community pulse of EthioBiz: Share updates, connect with verified businesses, and discover what is trending in Ethiopia.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Composer Box -->
+            <div class="post-composer-box">
+                <h5 class="font-weight-bold mb-3">✍️ Share an Update with the Community</h5>
+                <form id="composer-form">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="comp-author-name" placeholder="Your Name / Business" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="comp-author-handle" placeholder="@yourhandle" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" id="comp-content" rows="3" placeholder="What's happening in your business or market today?" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <select class="form-select form-select-sm" id="comp-category">
+                                <option value="Business & Trade">💼 Business & Trade</option>
+                                <option value="Tech & Innovation">🚀 Tech & Innovation</option>
+                                <option value="Food & Dining">🍽️ Food & Dining</option>
+                                <option value="Real Estate & Living">🏢 Real Estate</option>
+                                <option value="Jobs & Career">💼 Jobs & Career</option>
+                                <option value="Community & Events">🎉 Community</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill font-weight-bold" style="background: #008080; border: none;">
+                                🚀 Publish Post
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Feed Container -->
+            <div id="social-feed-container">
+                <div class="text-center py-5 text-muted">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Loading live community feed...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function loadFeed() {
+        fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed')
+            .then(res => res.json())
+            .then(res => {
+                const data = res.message;
+                const container = document.getElementById('social-feed-container');
+                container.innerHTML = '';
+
+                if (!data || !data.posts || data.posts.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted">No posts yet. Be the first to share an update!</div>';
+                    return;
+                }
+
+                data.posts.forEach(post => {
+                    const initial = (post.author_name || 'U').charAt(0).toUpperCase();
+                    const postCard = document.createElement('div');
+                    postCard.className = 'post-card';
+                    postCard.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="post-author-avatar">${initial}</div>
+                                <div>
+                                    <div class="font-weight-bold text-dark mb-0">
+                                        ${post.author_name} ${post.is_verified ? '<span class="verified-badge">✓</span>' : ''}
+                                    </div>
+                                    <small class="text-muted">${post.author_handle} • ${post.post_date ? post.post_date.split(' ')[0] : ''}</small>
+                                </div>
+                            </div>
+                            <span class="category-pill">${post.category_tag}</span>
+                        </div>
+                        <p class="mb-3 text-dark" style="font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${post.content}</p>
+                        <div class="d-flex gap-3 pt-2 border-top">
+                            <button class="post-action-btn like-btn" data-id="${post.name}">
+                                <span>❤️</span> <span class="like-num">${post.likes_count || 0}</span> Likes
+                            </button>
+                            <button class="post-action-btn">
+                                <span>💬</span> <span>${post.comments_count || 0}</span> Comments
+                            </button>
+                            <button class="post-action-btn">
+                                <span>🔁</span> Share
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(postCard);
+                });
+
+                // Attach like handlers
+                document.querySelectorAll('.like-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const pid = this.getAttribute('data-id');
+                        const countSpan = this.querySelector('.like-num');
+                        fetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post?post_id=' + encodeURIComponent(pid))
+                            .then(r => r.json())
+                            .then(d => {
+                                if (d.message && d.message.likes_count !== undefined) {
+                                    countSpan.innerText = d.message.likes_count;
+                                    this.classList.add('liked');
+                                }
+                            });
+                    });
+                });
+            })
+            .catch(err => console.error('Error loading feed:', err));
+    }
+
+    // Handle new post submit
+    document.getElementById('composer-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const payload = {
+            author_name: document.getElementById('comp-author-name').value,
+            author_handle: document.getElementById('comp-author-handle').value,
+            content: document.getElementById('comp-content').value,
+            category_tag: document.getElementById('comp-category').value
+        };
+
+        fetch('/api/method/bismillah_ethiobiz.afocha_api.create_social_post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('comp-content').value = '';
+            loadFeed();
+        })
+        .catch(err => alert('Error publishing post.'));
+    });
+
+    loadFeed();
+});
+</script>
+{% endblock %}
