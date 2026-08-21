@@ -592,10 +592,13 @@
 
     // Load topics list
     function loadTopics() {
-        document.getElementById('forum-main-browse-view').style.display = 'block';
-        document.getElementById('forum-topic-thread-view').style.display = 'none';
+        const browseView = document.getElementById('forum-main-browse-view');
+        const threadView = document.getElementById('forum-topic-thread-view');
+        if (browseView) browseView.style.display = 'block';
+        if (threadView) threadView.style.display = 'none';
 
-        const searchVal = searchInput ? searchInput.value.trim() : '';
+        const searchInputEl = document.getElementById('forum-search-input');
+        const searchVal = searchInputEl ? searchInputEl.value.trim() : '';
         const params = new URLSearchParams({
             category: currentCategory,
             search: searchVal,

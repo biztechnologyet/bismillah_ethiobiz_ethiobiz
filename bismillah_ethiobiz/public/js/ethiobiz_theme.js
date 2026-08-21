@@ -116,7 +116,11 @@
             if (typeof frappe !== 'undefined' && frappe.router) {
                 frappe.router.on('change', () => this.detectAndApply());
             }
-            $(document).on('page-change', () => this.detectAndApply());
+            if (typeof $ !== 'undefined') {
+                $(document).on('page-change', () => this.detectAndApply());
+            } else {
+                document.addEventListener('page-change', () => this.detectAndApply());
+            }
 
             this._routeCheckInterval = setInterval(() => {
                 const route = this.getCurrentRoute();
@@ -130,11 +134,13 @@
 
             this.initialized = true;
 
-            // F. Global Sidebar Toggle (One-time registration)
-            $(document).on('click.ethiobiz', '.sidebar-toggle-btn, .toggle-sidebar', () => {
-                document.body.classList.toggle('sidebar-collapsed');
-                const isNowCollapsed = document.body.classList.contains('sidebar-collapsed');
-                console.log('[EthioBiz] Sidebar Toggled. Collapsed:', isNowCollapsed);
+            // F. Global Sidebar Toggle (One-time registration via native delegation)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.sidebar-toggle-btn, .toggle-sidebar')) {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    const isNowCollapsed = document.body.classList.contains('sidebar-collapsed');
+                    console.log('[EthioBiz] Sidebar Toggled. Collapsed:', isNowCollapsed);
+                }
             });
         }
 
@@ -246,14 +252,16 @@
                             node.nodeValue = node.nodeValue.replace(new RegExp(targetText, 'g'), replaceText);
                         }
                     }
-                    $(`div:contains("${targetText}"), span:contains("${targetText}"), h1:contains("${targetText}"), h2:contains("${targetText}")`).each(function () {
-                        const contents = $(this).contents();
-                        contents.each(function () {
-                            if (this.nodeType === 3 && this.nodeValue.includes(targetText)) {
-                                this.nodeValue = this.nodeValue.replace(new RegExp(targetText, 'g'), replaceText);
-                            }
+                    if (typeof $ !== 'undefined') {
+                        $(`div:contains("${targetText}"), span:contains("${targetText}"), h1:contains("${targetText}"), h2:contains("${targetText}")`).each(function () {
+                            const contents = $(this).contents();
+                            contents.each(function () {
+                                if (this.nodeType === 3 && this.nodeValue.includes(targetText)) {
+                                    this.nodeValue = this.nodeValue.replace(new RegExp(targetText, 'g'), replaceText);
+                                }
+                            });
                         });
-                    });
+                    }
                 };
 
                 let _textDebounce = false;
@@ -280,7 +288,7 @@
                     link.href = '/walta/documentations';
                     link.innerText = 'Walta > Documentations';
                 });
-                $('.help-sidebar').hide();
+                document.querySelectorAll('.help-sidebar').forEach(el => el.style.display = 'none');
             }
         }
 

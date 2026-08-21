@@ -142,17 +142,22 @@ class EthioBizTheme(Document):
 
 /* Dynamic Atmosphere Layer */
 #ethiobiz-atmosphere {{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
     background: var(--ethiobiz-atmosphere-dark) !important;
     background-size: cover !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
+    transform: translateZ(0) !important;
+    will-change: transform;
     transition: background 0.8s ease-in-out;
 }}
 
@@ -176,6 +181,13 @@ body.website-page,
     background-position: center center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
+}}
+
+html, body {{
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
 }}
 
 /* Glass panels & Card styling with configured blur */
