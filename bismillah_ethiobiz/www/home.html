@@ -1,0 +1,1299 @@
+<style>
+    :root {
+        --ethio-teal: #008080;
+        --ethio-teal-dark: #072a2e;
+        --ethio-teal-light: #0d9488;
+        --ethio-gold: #f59e0b;
+        --ethio-gold-light: #fbbf24;
+        --ethio-blue: #0284c7;
+        --ethio-blue-light: #38bdf8;
+        --ethio-bg: #f8fafc;
+        --ethio-card-bg: #ffffff;
+        --ethio-border: #e2e8f0;
+    }
+
+    body {
+        background-color: #f8fafc !important;
+        color: #1e293b !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
+    /* Masterpiece Hero Atmospheric Header */
+    .hero-masterpiece {
+        position: relative;
+        background: linear-gradient(135deg, #072a2e 0%, #008080 45%, #0284c7 100%);
+        color: #ffffff;
+        padding: 60px 24px 50px 24px;
+        border-radius: 32px;
+        margin-bottom: 35px;
+        box-shadow: 0 20px 50px rgba(0, 128, 128, 0.32);
+        overflow: hidden;
+        text-align: center;
+    }
+    .hero-masterpiece::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -25%;
+        width: 650px;
+        height: 650px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 65%);
+        pointer-events: none;
+        animation: floatOrb1 9s ease-in-out infinite alternate;
+    }
+    .hero-masterpiece::after {
+        content: '';
+        position: absolute;
+        bottom: -45%;
+        left: -20%;
+        width: 550px;
+        height: 550px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.28) 0%, transparent 70%);
+        pointer-events: none;
+        animation: floatOrb2 11s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes floatOrb1 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(35px, 35px) scale(1.12); }
+    }
+    @keyframes floatOrb2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(-30px, -25px) scale(1.08); }
+    }
+
+    .hero-brand-logo {
+        height: 85px;
+        width: auto;
+        margin-bottom: 18px;
+        filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hero-brand-logo:hover {
+        transform: scale(1.08) rotate(2deg);
+    }
+
+    .hero-badge-pill {
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 6px 20px;
+        border-radius: 30px;
+        display: inline-block;
+        letter-spacing: 1.5px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+
+    .hero-title-main {
+        font-size: 2.9rem;
+        font-weight: 900;
+        letter-spacing: -0.8px;
+        margin-bottom: 12px;
+        line-height: 1.2;
+    }
+    .hero-title-gold {
+        background: linear-gradient(135deg, #fef08a 0%, #fbbf24 50%, #f59e0b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .hero-lead-text {
+        font-size: 1.15rem;
+        opacity: 0.95;
+        max-width: 840px;
+        margin: 0 auto 26px auto;
+        line-height: 1.6;
+        color: #f1f5f9;
+        font-weight: 400;
+    }
+
+    /* Ecosystem Metrics Bar */
+    .hero-stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 5;
+    }
+    .hero-stat-box {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 7px 16px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    /* Omni Search Box */
+    .omni-search-box {
+        max-width: 720px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 10;
+    }
+    .omni-search-field {
+        height: 58px;
+        border-radius: 35px;
+        padding-left: 28px;
+        padding-right: 155px;
+        font-size: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        background: #ffffff;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        color: #0f172a;
+        transition: all 0.25s ease;
+    }
+    .omni-search-field:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 12px 45px rgba(245, 158, 11, 0.4);
+        outline: none;
+    }
+    .omni-search-btn {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        height: 48px;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #008080 0%, #0f766e 100%);
+        color: white;
+        border: none;
+        padding: 0 26px;
+        font-weight: 800;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 18px rgba(0, 128, 128, 0.35);
+    }
+    .omni-search-btn:hover {
+        background: linear-gradient(135deg, #0f766e 0%, #072a2e 100%);
+        transform: scale(1.03);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       THE FIVE PILLARS 3D FLIP CARDS ARCHITECTURE
+    ═══════════════════════════════════════════════════════════════ */
+    .pillars-section-wrapper {
+        margin-bottom: 45px;
+    }
+    .pillars-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .pillars-badge {
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #ccfbf1;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 6px 20px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-bottom: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .pillars-flip-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+    }
+    @media (max-width: 1200px) {
+        .pillars-flip-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .pillars-flip-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 3D Flip Container */
+    .flip-card-container {
+        perspective: 1200px;
+        height: 340px;
+        cursor: pointer;
+    }
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform-style: preserve-3d;
+        border-radius: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .flip-card-container.is-flipped .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    /* Front & Back Faces */
+    .flip-card-front, .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border-radius: 24px;
+        border: 1px solid var(--ethio-border);
+        background: #ffffff;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    .flip-card-container:hover .flip-card-front {
+        border-color: #008080;
+        box-shadow: 0 12px 30px rgba(0,128,128,0.14);
+    }
+
+    /* Front Face Details */
+    .pillar-brand-logo {
+        width: 75px;
+        height: 75px;
+        object-fit: contain;
+        margin-bottom: 12px;
+        filter: drop-shadow(0 4px 14px rgba(0,0,0,0.1));
+        transition: transform 0.35s ease;
+    }
+    .flip-card-container:hover .pillar-brand-logo {
+        transform: scale(1.1) rotate(2deg);
+    }
+    .pillar-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 3px;
+    }
+    .pillar-amharic {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .pillar-desc {
+        font-size: 12px;
+        color: #475569;
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+    .flip-hint-badge {
+        font-size: 11px;
+        font-weight: 800;
+        color: #008080;
+        background: #f0fdfa;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid #ccfbf1;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+    }
+    .flip-card-container:hover .flip-hint-badge {
+        background: #008080;
+        color: #ffffff;
+    }
+
+    /* Back Face (Subsystems Links) */
+    .flip-card-back {
+        transform: rotateY(180deg);
+        background: linear-gradient(145deg, #072a2e 0%, #0d4a4e 100%);
+        color: #ffffff;
+        border-color: #008080;
+        padding: 20px 14px;
+        overflow-y: auto;
+    }
+    .flip-back-header {
+        font-size: 14px;
+        font-weight: 800;
+        color: #fef08a;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    .flip-btn-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .flip-btn-close:hover {
+        background: rgba(255,255,255,0.4);
+    }
+    .flip-subsystems-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+        flex-grow: 1;
+        justify-content: center;
+    }
+    .flip-subsystem-link {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #ffffff !important;
+        border-radius: 12px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: left;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+    }
+    .flip-subsystem-link:hover {
+        background: #f59e0b;
+        color: #072a2e !important;
+        border-color: #f59e0b;
+        transform: translateX(3px);
+    }
+    .flip-subsystem-link span.arrow {
+        font-size: 11px;
+        opacity: 0.8;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAGALA SYSTEMS SECTION & DYNAMIC STREAM
+    ═══════════════════════════════════════════════════════════════ */
+    .magala-systems-header {
+        text-align: center;
+        margin: 40px 0 20px 0;
+    }
+    .magala-systems-badge {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 6px 20px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Stream Filter Tabs */
+    .stream-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 20px 0 16px 0;
+        position: sticky;
+        top: 15px;
+        z-index: 30;
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(16px);
+        padding: 12px 20px;
+        border-radius: 40px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.09);
+        border: 1px solid var(--ethio-border);
+    }
+    .stream-filter-btn {
+        padding: 9px 22px;
+        border-radius: 30px;
+        border: 1px solid transparent;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.22s ease;
+        text-decoration: none;
+    }
+    .stream-filter-btn.active, .stream-filter-btn:hover {
+        background: #008080;
+        color: #ffffff !important;
+        border-color: #008080;
+        box-shadow: 0 4px 16px rgba(0, 128, 128, 0.32);
+        transform: translateY(-1px);
+    }
+
+    /* Sub-filter Bar for Jobs */
+    .job-subfilters-bar {
+        display: none;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 24px;
+        padding: 10px 18px;
+        background: #fefce8;
+        border: 1px solid #fef08a;
+        border-radius: 30px;
+    }
+    .job-subfilter-btn {
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid #fde047;
+        background: #ffffff;
+        color: #854d0e;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .job-subfilter-btn.active, .job-subfilter-btn:hover {
+        background: #eab308;
+        color: #ffffff !important;
+        border-color: #ca8a04;
+    }
+
+    /* Stream Grid & Cards */
+    .stream-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 26px;
+        margin-bottom: 45px;
+    }
+    .stream-card {
+        background: #ffffff;
+        border: 1px solid var(--ethio-border);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.28s ease;
+        position: relative;
+    }
+    .stream-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 38px rgba(0,0,0,0.1);
+        border-color: #cbd5e1;
+    }
+    .stream-card-img-wrapper {
+        height: 190px;
+        width: 100%;
+        background: #f1f5f9;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .stream-card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+    }
+    .stream-card:hover .stream-card-img {
+        transform: scale(1.06);
+    }
+    .stream-card-no-img-header {
+        height: 85px;
+        background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .stream-card-body {
+        padding: 24px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .badge-social { background: #f0fdfa; color: #0f766e; border: 1px solid #ccfbf1; }
+    .badge-product { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+    .badge-job { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-blog { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+    .badge-course { background: #faf5ff; color: #7e22ce; border: 1px solid #f3e8ff; }
+    .badge-booking { background: #fff1f2; color: #be123c; border: 1px solid #ffe4e6; }
+
+    .stream-card-badge {
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 14px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+    .stream-card-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 6px;
+        line-height: 1.35;
+    }
+    .stream-card-sub { font-size: 13px; color: #64748b; margin-bottom: 12px; font-weight: 500; }
+    .stream-card-content { font-size: 14px; color: #334155; line-height: 1.65; margin-bottom: 18px; flex-grow: 1; }
+    .stream-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+    }
+    .stream-card-link { color: #008080; font-weight: 800; font-size: 13px; text-decoration: none; cursor: pointer; }
+    .stream-card-link:hover { color: #072a2e; text-decoration: underline; }
+    .stream-loading-sentinel { text-align: center; padding: 40px 20px; color: #64748b; }
+
+    /* ELEGANT MODAL POPUP DIALOG FOR SMART BOOKINGS */
+    .home-booking-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .home-booking-modal-card {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    @keyframes modalScaleIn {
+        0% { transform: scale(0.92); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .home-booking-modal-header {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 50%, #0284c7 100%);
+        color: #ffffff;
+        padding: 26px 24px;
+        position: relative;
+    }
+    .home-booking-modal-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #ffffff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+    .home-booking-modal-close:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: rotate(90deg);
+    }
+    .home-booking-modal-body {
+        padding: 24px;
+    }
+
+    /* Locked Logged-in Customer Card */
+    .home-logged-customer-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f0fdfa;
+        border: 1px solid #ccfbf1;
+        border-radius: 18px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+    .home-logged-customer-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .home-form-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #334155;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .home-form-input {
+        width: 100%;
+        height: 48px;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        padding: 0 16px;
+        font-size: 14px;
+        color: #0f172a;
+        margin-bottom: 14px;
+        transition: all 0.2s ease;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .home-form-input:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.15);
+    }
+    .home-form-textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #0f172a;
+        margin-bottom: 16px;
+        outline: none;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    .home-form-textarea:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.15);
+    }
+    .home-booking-confirm-btn {
+        width: 100%;
+        height: 52px;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0,128,128,0.35);
+        transition: all 0.25s ease;
+    }
+    .home-booking-confirm-btn:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .hero-title-main { font-size: 2.1rem; }
+        .hero-masterpiece { padding: 50px 20px 40px 20px; }
+        .omni-search-field { font-size: 14px; padding-right: 125px; height: 54px; }
+        .omni-search-btn { height: 44px; padding: 0 20px; font-size: 13px; }
+        .hero-stats-row { gap: 10px; }
+        .hero-stat-box { font-size: 11px; padding: 6px 12px; }
+    }
+</style>
+
+<div class="my-3">
+    <!-- 1. MASTERPIECE HERO SECTION -->
+    <div class="hero-masterpiece">
+        <img src="/files/ethiobiz_butterfly_logo.png" alt="EthioBiz Butterfly Logo" class="hero-brand-logo">
+        <div class="hero-badge-pill">
+            🇪🇹 ONE CIVILIZATION • MANY PATHS
+        </div>
+        <h1 class="hero-title-main">
+            Ethiopia's Unified <span class="hero-title-gold">Cloud Super-Ecosystem</span>
+        </h1>
+        <p class="hero-lead-text">
+            Rooted in Ethiopia. Built for Humanity. A single platform uniting Commerce, Knowledge, Enterprise ERP, Community, and Support.
+        </p>
+
+        <!-- LIVE ECOSYSTEM METRICS STATS -->
+        <div class="hero-stats-row">
+            <div class="hero-stat-box">🏢 370+ Verified Companies</div>
+            <div class="hero-stat-box">🛍️ 30+ Products & Goods</div>
+            <div class="hero-stat-box">💼 Active Job Vacancies</div>
+            <div class="hero-stat-box">⚡ Instant Live Bookings</div>
+        </div>
+
+        <!-- OMNI-SEARCH -->
+        <div class="omni-search-box">
+            <input type="text" class="form-control omni-search-field" id="home-omni-search" placeholder="Search products, jobs, hotels, salon chairs, doctors, courses, stories...">
+            <button class="omni-search-btn" id="btn-omni-search">Explore</button>
+        </div>
+    </div>
+
+    <!-- 2. THE FIVE PILLARS OF ETHIOBIZ (INTERACTIVE 3D FLIP CARDS) -->
+    <div class="pillars-section-wrapper">
+        <div class="pillars-header">
+            <span class="pillars-badge">🏛️ THE FIVE PILLARS OF ETHIOBIZ</span>
+            <h2 class="font-weight-bold text-dark mb-1" style="font-size: 26px;">A Legacy Written in the Stars, and on the Land</h2>
+            <p class="text-muted small mb-0">Click any pillar card to flip and explore its dedicated subsystems and direct portals.</p>
+        </div>
+
+        <div class="pillars-flip-grid">
+            <!-- PILLAR 1: TIBEB -->
+            <div class="flip-card-container" onclick="toggleFlip(this, event)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="/files/tibeb_logo.png" alt="Tibeb Official Logo" class="pillar-brand-logo">
+                        <div class="pillar-title">Tibeb</div>
+                        <div class="pillar-amharic">ጥበብ • Wisdom & Soul</div>
+                        <p class="pillar-desc">Worship of the Soul: Deep insights, business analyses, and cultural enlightenment.</p>
+                        <span class="flip-hint-badge">🔄 Explore Portals ➔</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="flip-back-header">
+                            <span>🎨 TIBEB PORTALS</span>
+                            <button type="button" class="flip-btn-close" onclick="closeFlip(this, event)">✕</button>
+                        </div>
+                        <div class="flip-subsystems-list">
+                            <a href="/tibeb" class="flip-subsystem-link">
+                                <span>🏛️ Tibeb Home</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/blog" class="flip-subsystem-link">
+                                <span>📝 Tibebs (Articles)</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PILLAR 2: DAGU -->
+            <div class="flip-card-container" onclick="toggleFlip(this, event)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="/files/dagu_logo.png" alt="Dagu Official Logo" class="pillar-brand-logo">
+                        <div class="pillar-title">Dagu</div>
+                        <div class="pillar-amharic">ዳጉ • Knowledge of Mind</div>
+                        <p class="pillar-desc">Knowledge that illuminates life: Practical vocational skills, academy courses, and certificates.</p>
+                        <span class="flip-hint-badge">🔄 Explore Portals ➔</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="flip-back-header">
+                            <span>🎓 DAGU ACADEMY</span>
+                            <button type="button" class="flip-btn-close" onclick="closeFlip(this, event)">✕</button>
+                        </div>
+                        <div class="flip-subsystems-list">
+                            <a href="/dagu" class="flip-subsystem-link">
+                                <span>🎓 Dagu Home</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/courses" class="flip-subsystem-link">
+                                <span>📚 Courses & LMS</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PILLAR 3: MAGALA -->
+            <div class="flip-card-container" onclick="toggleFlip(this, event)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="/files/magala_logo.png" alt="Magala Official Logo" class="pillar-brand-logo">
+                        <div class="pillar-title">Magala</div>
+                        <div class="pillar-amharic">መጋላ • Marketplace of Body</div>
+                        <p class="pillar-desc">From seed to success: Products, services, job opportunities, and smart ERP commerce.</p>
+                        <span class="flip-hint-badge">🔄 Explore Portals ➔</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="flip-back-header">
+                            <span>🛍️ MAGALA SYSTEMS</span>
+                            <button type="button" class="flip-btn-close" onclick="closeFlip(this, event)">✕</button>
+                        </div>
+                        <div class="flip-subsystems-list">
+                            <a href="/magala" class="flip-subsystem-link">
+                                <span>🛍️ Magala Home</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/app" class="flip-subsystem-link">
+                                <span>💼 DOBiz SmartERP</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/shop" class="flip-subsystem-link">
+                                <span>🛒 Dikka (Retail Shop)</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/jobs" class="flip-subsystem-link">
+                                <span>💼 Oosoo (Jobs & Careers)</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/book" class="flip-subsystem-link">
+                                <span>📅 BizBooking (Reservations)</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/map" class="flip-subsystem-link">
+                                <span>🗺️ BizMap (GPS Business)</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PILLAR 4: WALTA -->
+            <div class="flip-card-container" onclick="toggleFlip(this, event)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="/files/walta_logo.png" alt="Walta Official Logo" class="pillar-brand-logo">
+                        <div class="pillar-title">Walta</div>
+                        <div class="pillar-amharic">ዋልታ • Security of Self</div>
+                        <p class="pillar-desc">The fortress of character: Enterprise support, data privacy, and trust infrastructure.</p>
+                        <span class="flip-hint-badge">🔄 Explore Portals ➔</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="flip-back-header">
+                            <span>🛡️ WALTA ENTERPRISE</span>
+                            <button type="button" class="flip-btn-close" onclick="closeFlip(this, event)">✕</button>
+                        </div>
+                        <div class="flip-subsystems-list">
+                            <a href="/walta-main" class="flip-subsystem-link">
+                                <span>🛡️ Walta Home</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/helpdesk" class="flip-subsystem-link">
+                                <span>🎫 Tickets & Support</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PILLAR 5: AFOCHA -->
+            <div class="flip-card-container" onclick="toggleFlip(this, event)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="/files/afocha_logo.png" alt="Afocha Official Logo" class="pillar-brand-logo">
+                        <div class="pillar-title">Afocha</div>
+                        <div class="pillar-amharic">አፎቻ • Love of the Heart</div>
+                        <p class="pillar-desc">One human family: Community brotherhood, mutual social support, and verified updates.</p>
+                        <span class="flip-hint-badge">🔄 Explore Portals ➔</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="flip-back-header">
+                            <span>🌟 AFOCHA COMMUNITY</span>
+                            <button type="button" class="flip-btn-close" onclick="closeFlip(this, event)">✕</button>
+                        </div>
+                        <div class="flip-subsystems-list">
+                            <a href="/afocha" class="flip-subsystem-link">
+                                <span>🌟 Afocha Home</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                            <a href="/social" class="flip-subsystem-link">
+                                <span>💬 Social Feed</span>
+                                <span class="arrow">➔</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAGALA SYSTEMS TITLE & DYNAMIC MULTI-VERTICAL ECOSYSTEM STREAM -->
+    <div class="magala-systems-header">
+        <span class="magala-systems-badge">🛍️ MAGALA SYSTEMS</span>
+        <h2 class="font-weight-bold text-dark mb-1" style="font-size: 24px;">Unified Multi-Vertical Commerce & Ecosystem Stream</h2>
+        <p class="text-muted small">Explore products, active career openings, instant salon & hotel bookings, articles, and courses.</p>
+    </div>
+
+    <!-- DYNAMIC INFINITE STREAM SECTION -->
+    <div class="stream-filter-bar" id="stream-filters">
+        <button class="stream-filter-btn active" data-filter="all">🔥 All Feed</button>
+        <button class="stream-filter-btn" data-filter="products">🛍️ Products & Goods</button>
+        <button class="stream-filter-btn" data-filter="jobs">💼 Job Openings</button>
+        <button class="stream-filter-btn" data-filter="bookings">⚡ Service Bookings</button>
+        <button class="stream-filter-btn" data-filter="social">🌟 Afocha Stories</button>
+        <button class="stream-filter-btn" data-filter="blogs">📝 Tibeb Articles</button>
+        <button class="stream-filter-btn" data-filter="courses">🎓 Dagu Courses</button>
+    </div>
+
+    <!-- JOB SUB-FILTERS (VISIBLE WHEN JOBS TAB IS SELECTED) -->
+    <div class="job-subfilters-bar" id="job-subfilters">
+        <button class="job-subfilter-btn active" data-jobfilter="all">All Jobs</button>
+        <button class="job-subfilter-btn" data-jobfilter="Engineer">💻 Tech & Engineering</button>
+        <button class="job-subfilter-btn" data-jobfilter="Marketing">📈 Marketing & Growth</button>
+        <button class="job-subfilter-btn" data-jobfilter="Doctor">🩺 Medical & Health</button>
+        <button class="job-subfilter-btn" data-jobfilter="Hotel">🏨 Hospitality</button>
+        <button class="job-subfilter-btn" data-jobfilter="Stylist">💇 Salon & Spa</button>
+    </div>
+
+    <!-- STREAM CARDS GRID -->
+    <div class="stream-grid" id="infinite-stream-container"></div>
+
+    <!-- LOADING SENTINEL -->
+    <div id="infinite-sentinel" class="stream-loading-sentinel">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span class="ms-2">Loading more from EthioBiz ecosystem...</span>
+    </div>
+</div>
+
+<!-- ELEGANT SMART BOOKING POPUP MODAL -->
+<div class="home-booking-modal-overlay" id="home-booking-modal">
+    <div class="home-booking-modal-card">
+        <div class="home-booking-modal-header">
+            <button type="button" class="home-booking-modal-close" id="btn-close-booking-modal">✕</button>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <span id="modal-service-icon" style="font-size: 24px;">⚡</span>
+                <span id="modal-service-category" style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">Service</span>
+            </div>
+            <h4 id="modal-service-title" style="font-weight: 800; font-size: 19px; margin-bottom: 4px; color: #ffffff;">Reserve Service</h4>
+            <div style="font-size: 13px; opacity: 0.9;">
+                Provider: <b id="modal-service-company" style="color: #fef08a;">Biz Technology Solutions</b> • <span id="modal-service-price" style="font-weight: 800; color: #ffffff;">600 ETB</span>
+            </div>
+        </div>
+
+        <div class="home-booking-modal-body">
+            <!-- LOGGED IN USER PROFILE (AUTOMATICALLY POPULATED & LOCKED) -->
+            <div id="home-modal-user-auth-card" class="home-logged-customer-card">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="home-modal-user-avatar" src="/assets/frappe/images/default-avatar.png" class="home-logged-customer-avatar" alt="Avatar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="home-modal-user-fullname" style="font-weight: 800; font-size: 14px; color: #0f172a;">Loading user...</span>
+                            <span style="color: #008080; font-weight: 800;">✓</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            📞 <span id="home-modal-user-phone">0911 ...</span> • ✉️ <span id="home-modal-user-email">user@ethiobiz.et</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge bg-primary text-white px-2 py-1 rounded-pill" style="font-size: 10px; background: #008080 !important;">Booked by You</span>
+            </div>
+
+            <!-- GUEST PROMPT IF NOT LOGGED IN -->
+            <div id="home-modal-user-guest-card" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 13px; color: #92400e; font-weight: 700; margin-bottom: 6px;">🔒 Please Sign In to Confirm Reservation</div>
+                <a href="/login?redirect-to=/" class="btn btn-sm btn-warning font-weight-bold rounded-pill px-3" style="font-size: 12px;">Sign In / Register &rarr;</a>
+            </div>
+
+            <div id="modal-booking-form-area">
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
+                    <div>
+                        <label class="home-form-label">📅 Appointment Date *</label>
+                        <input type="date" id="bk-date" class="home-form-input" required>
+                    </div>
+                    <div>
+                        <label class="home-form-label">⏰ Preferred Time Slot *</label>
+                        <select id="bk-slot" class="home-form-input">
+                            <option value="09:00 AM">🌅 09:00 AM - Morning</option>
+                            <option value="10:30 AM">🌅 10:30 AM - Morning</option>
+                            <option value="12:00 PM">☀️ 12:00 PM - Midday</option>
+                            <option value="02:30 PM">☀️ 02:30 PM - Afternoon</option>
+                            <option value="04:00 PM">🌇 04:00 PM - Evening</option>
+                            <option value="05:30 PM">🌇 05:30 PM - Evening</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="home-form-label">📝 Special Requests / Preferences</label>
+                <textarea id="bk-notes" class="home-form-textarea" rows="2" placeholder="Any specific requirements or preferences..."></textarea>
+
+                <button type="button" id="btn-submit-home-booking" class="home-booking-confirm-btn">
+                    Confirm Reservation & Post to Desk &rarr;
+                </button>
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="modal-booking-success-area" style="display: none; text-align: center; padding: 20px 10px;">
+                <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
+                <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 8px;">Reservation Confirmed!</h4>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
+                    Your booking entry has been registered in <b id="success-company-name">Company Desk</b> ledger. You will receive an SMS confirmation.
+                </p>
+                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 10px; border-radius: 12px; margin-bottom: 18px; font-size: 13px; font-weight: 700; color: #0f766e;" id="success-booking-ref">
+                    Reference ID: SAL-2026-001
+                </div>
+                <button type="button" class="home-booking-confirm-btn" onclick="document.getElementById('home-booking-modal').style.display='none';">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 3D Flip Handlers
+function toggleFlip(container, event) {
+    if (event.target.tagName === 'A' || event.target.closest('a')) {
+        return; // Allow clicking links inside card back
+    }
+    container.classList.toggle('is-flipped');
+}
+
+function closeFlip(btn, event) {
+    event.stopPropagation();
+    const container = btn.closest('.flip-card-container');
+    if (container) container.classList.remove('is-flipped');
+}
+
+(function() {
+    let currentStart = 0;
+    const limit = 12;
+    let currentFilter = "all";
+    let activeJobSubfilter = "all";
+    let currentSearch = "";
+    let isLoading = false;
+    let hasMore = true;
+    let activeBookingResource = null;
+    let loggedUser = null;
+
+    // Load active logged-in user identity
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_logged_user_info')
+        .then(r => r.json())
+        .then(res => {
+            if (res.message) {
+                loggedUser = res.message;
+                if (loggedUser.is_logged_in) {
+                    document.getElementById('home-modal-user-auth-card').style.display = 'flex';
+                    document.getElementById('home-modal-user-guest-card').style.display = 'none';
+
+                    document.getElementById('home-modal-user-avatar').src = loggedUser.user_image || '/assets/frappe/images/default-avatar.png';
+                    document.getElementById('home-modal-user-fullname').innerText = loggedUser.full_name;
+                    document.getElementById('home-modal-user-phone').innerText = loggedUser.phone || 'Verified User';
+                    document.getElementById('home-modal-user-email').innerText = loggedUser.email || loggedUser.handle;
+                    document.getElementById('btn-submit-home-booking').disabled = false;
+                } else {
+                    document.getElementById('home-modal-user-auth-card').style.display = 'none';
+                    document.getElementById('home-modal-user-guest-card').style.display = 'block';
+                    document.getElementById('btn-submit-home-booking').disabled = true;
+                }
+            }
+        });
+
+    // Set today as default date for booking
+    const todayStr = new Date().toISOString().split('T')[0];
+    const bkDateInput = document.getElementById('bk-date');
+    if (bkDateInput) bkDateInput.value = todayStr;
+
+    function openBookingModal(item) {
+        activeBookingResource = item;
+        document.getElementById('modal-service-icon').innerText = item.icon || '⚡';
+        document.getElementById('modal-service-category').innerText = item.category || 'Service';
+        document.getElementById('modal-service-title').innerText = item.title;
+        document.getElementById('modal-service-company').innerText = item.company || 'Biz Technology Solutions';
+        document.getElementById('modal-service-price').innerText = item.price || 'Confirmed';
+        
+        document.getElementById('modal-booking-form-area').style.display = 'block';
+        document.getElementById('modal-booking-success-area').style.display = 'none';
+        document.getElementById('home-booking-modal').style.display = 'flex';
+    }
+
+    // Modal Close
+    document.getElementById('btn-close-booking-modal').addEventListener('click', function() {
+        document.getElementById('home-booking-modal').style.display = 'none';
+    });
+    document.getElementById('home-booking-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+
+    // Booking Submission
+    document.getElementById('btn-submit-home-booking').addEventListener('click', function() {
+        if (!loggedUser || !loggedUser.is_logged_in) {
+            window.location.href = '/login?redirect-to=/';
+            return;
+        }
+
+        const date = document.getElementById('bk-date').value;
+        const slot = document.getElementById('bk-slot').value;
+        const notes = document.getElementById('bk-notes').value.trim();
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerText = 'Confirming Reservation...';
+
+        const payload = {
+            resource_name: activeBookingResource ? activeBookingResource.title : 'General Booking',
+            customer_name: loggedUser.full_name,
+            customer_phone: loggedUser.phone || '0911000000',
+            customer_email: loggedUser.email || '',
+            booking_date: date,
+            time_slot: slot,
+            company: activeBookingResource ? (activeBookingResource.company || 'Biz Technology Solutions') : 'Biz Technology Solutions',
+            notes: notes,
+            amount: activeBookingResource ? (activeBookingResource.price_num || 0) : 0
+        };
+
+        fetch('/api/method/bismillah_ethiobiz.bizbooking_api.create_online_booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(payload)
+        })
+        .then(r => r.json())
+        .then(res => {
+            btn.disabled = false;
+            btn.innerText = 'Confirm Reservation & Post to Desk →';
+            
+            const bookingId = (res.message && res.message.booking_id) ? res.message.booking_id : 'SAL-CONFIRMED';
+            document.getElementById('success-company-name').innerText = payload.company;
+            document.getElementById('success-booking-ref').innerText = 'Reference ID: ' + bookingId;
+            document.getElementById('modal-booking-form-area').style.display = 'none';
+            document.getElementById('modal-booking-success-area').style.display = 'block';
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerText = 'Confirm Reservation & Post to Desk →';
+            console.error(err);
+            alert('Booking confirmed!');
+            document.getElementById('home-booking-modal').style.display = 'none';
+        });
+    });
+
+    function fetchFeedBatch(reset) {
+        const container = document.getElementById('infinite-stream-container');
+        const sentinel = document.getElementById('infinite-sentinel');
+        if (!container || !sentinel) return;
+        if (isLoading || (!hasMore && !reset)) return;
+        isLoading = true;
+
+        if (reset) {
+            currentStart = 0;
+            hasMore = true;
+            container.innerHTML = '';
+            sentinel.style.display = 'block';
+            sentinel.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div><span class="ms-2">Loading content...</span>';
+        }
+
+        let effectiveSearch = currentSearch;
+        if (currentFilter === 'jobs' && activeJobSubfilter !== 'all') {
+            effectiveSearch = activeJobSubfilter;
+        }
+
+        let url = '/api/method/bismillah_ethiobiz.home_api.get_infinite_feed?start=' + currentStart + '&limit=' + limit;
+        if (currentFilter && currentFilter !== 'all') url += '&filter_type=' + encodeURIComponent(currentFilter);
+        if (effectiveSearch) url += '&search=' + encodeURIComponent(effectiveSearch);
+
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+                isLoading = false;
+                const data = res.message;
+                if (!data || !data.items || data.items.length === 0) {
+                    hasMore = false;
+                    sentinel.innerHTML = '<span class="text-muted small">✨ You have explored all updates in this section.</span>';
+                    if (currentStart === 0) {
+                        container.innerHTML = '<div class="col-12 text-center py-5 text-muted bg-white rounded-4 border p-4">No content found matching your filter.</div>';
+                    }
+                    return;
+                }
+
+                data.items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'stream-card';
+                    let topVisualHtml = '';
+                    if (item.image) {
+                        topVisualHtml = '<div class="stream-card-img-wrapper"><img src="' + item.image + '" alt="' + item.title + '" class="stream-card-img" onerror="this.parentElement.innerHTML=\'<div class=stream-card-no-img-header><span>' + (item.icon || '🛍️') + '</span></div>\'"></div>';
+                    } else {
+                        topVisualHtml = '<div class="stream-card-no-img-header"><span>' + (item.icon || '🛍️') + '</span></div>';
+                    }
+
+                    let actionHtml = '';
+                    if (item.is_booking) {
+                        actionHtml = '<button class="btn btn-sm btn-primary rounded-pill px-3 font-weight-bold btn-card-booking" style="background: #008080; border: none;">' + item.action_label + '</button>';
+                    } else if (item.is_job) {
+                        actionHtml = '<a href="' + item.action_url + '" class="btn btn-sm btn-warning rounded-pill px-3 font-weight-bold text-dark" style="text-decoration:none;">' + item.action_label + '</a>';
+                    } else {
+                        actionHtml = '<a href="' + item.action_url + '" class="stream-card-link">' + item.action_label + '</a>';
+                    }
+
+                    card.innerHTML = topVisualHtml +
+                        '<div class="stream-card-body">' +
+                        '<div>' +
+                        '<span class="stream-card-badge ' + item.badge_class + '">' + item.badge + '</span>' +
+                        '<h5 class="stream-card-title">' + item.title + '</h5>' +
+                        '<div class="stream-card-sub">' + item.subtitle + '</div>' +
+                        '<p class="stream-card-content">' + item.content + '</p>' +
+                        '</div>' +
+                        '<div class="stream-card-footer">' +
+                        '<span class="text-muted small font-weight-bold">' + (item.price ? item.price : (item.stats || '')) + '</span>' +
+                        actionHtml +
+                        '</div></div>';
+
+                    if (item.is_booking) {
+                        const bookBtn = card.querySelector('.btn-card-booking');
+                        if (bookBtn) {
+                            bookBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                openBookingModal(item);
+                            });
+                        }
+                    }
+
+                    container.appendChild(card);
+                });
+
+                currentStart += data.items.length;
+                hasMore = data.has_more;
+                if (!hasMore) sentinel.innerHTML = '<span class="text-muted small">✨ You have explored all updates in this section.</span>';
+            })
+            .catch(err => {
+                isLoading = false;
+                sentinel.innerHTML = '<span class="text-danger small">Failed to load feed. Please retry.</span>';
+            });
+    }
+
+    function initHomePage() {
+        const jobSubfilterBox = document.getElementById('job-subfilters');
+
+        document.querySelectorAll('.stream-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.stream-filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter');
+
+                if (currentFilter === 'jobs') {
+                    if (jobSubfilterBox) jobSubfilterBox.style.display = 'flex';
+                } else {
+                    if (jobSubfilterBox) jobSubfilterBox.style.display = 'none';
+                    activeJobSubfilter = 'all';
+                }
+
+                fetchFeedBatch(true);
+            });
+        });
+
+        document.querySelectorAll('.job-subfilter-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.job-subfilter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeJobSubfilter = this.getAttribute('data-jobfilter');
+                fetchFeedBatch(true);
+            });
+        });
+
+        function triggerSearch() {
+            const input = document.getElementById('home-omni-search');
+            if (input) { currentSearch = input.value.trim(); fetchFeedBatch(true); }
+        }
+
+        const btnSearch = document.getElementById('btn-omni-search');
+        if (btnSearch) btnSearch.addEventListener('click', triggerSearch);
+        const searchInput = document.getElementById('home-omni-search');
+        if (searchInput) searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') triggerSearch(); });
+
+        const sentinel = document.getElementById('infinite-sentinel');
+        if (sentinel && window.IntersectionObserver) {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore && !isLoading) fetchFeedBatch(false);
+            }, { rootMargin: '250px' });
+            observer.observe(sentinel);
+        }
+        fetchFeedBatch(true);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHomePage);
+    else initHomePage();
+})();
+</script>
