@@ -178,6 +178,119 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
+       ABOUT ETHIOBIZ SHOWCASE SECTION (CREATIVE HERO SUB-CARD)
+    ═══════════════════════════════════════════════════════════════ */
+    .about-ethiobiz-wrapper {
+        background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 60%, #e0f2fe 100%);
+        border: 1px solid #ccfbf1;
+        border-radius: 26px;
+        padding: 36px 32px;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 35px rgba(0, 128, 128, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .about-ethiobiz-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(0, 128, 128, 0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .about-ethiobiz-badge {
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #99f6e4;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 5px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 12px;
+        letter-spacing: 0.8px;
+    }
+    .about-ethiobiz-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 12px;
+        line-height: 1.35;
+    }
+    .about-ethiobiz-lead {
+        font-size: 15px;
+        color: #334155;
+        line-height: 1.7;
+        margin-bottom: 22px;
+        max-width: 900px;
+    }
+    .about-ethiobiz-features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 26px;
+    }
+    .about-ethiobiz-feature-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px 16px;
+        transition: all 0.25s ease;
+    }
+    .about-ethiobiz-feature-card:hover {
+        border-color: #008080;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 128, 128, 0.1);
+    }
+    .about-ethiobiz-feature-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+    .about-ethiobiz-feature-title {
+        font-weight: 800;
+        font-size: 13px;
+        color: #0f172a;
+        margin-bottom: 2px;
+    }
+    .about-ethiobiz-feature-desc {
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+    }
+    .about-ethiobiz-cta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        padding-top: 14px;
+        border-top: 1px solid #e2e8f0;
+    }
+    .about-ethiobiz-cta-btn {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 14px;
+        padding: 10px 26px;
+        border-radius: 25px;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(0, 128, 128, 0.3);
+        transition: all 0.25s ease;
+    }
+    .about-ethiobiz-cta-btn:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 128, 128, 0.4);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
        THE FIVE PILLARS 3D FLIP CARDS ARCHITECTURE
     ═══════════════════════════════════════════════════════════════ */
     .pillars-section-wrapper {
@@ -725,6 +838,52 @@
         <div class="omni-search-box">
             <input type="text" class="form-control omni-search-field" id="home-omni-search" placeholder="Search products, jobs, hotels, salon chairs, doctors, courses, stories...">
             <button class="omni-search-btn" id="btn-omni-search">Explore</button>
+        </div>
+    </div>
+
+    <!-- 1.5 ABOUT ETHIOBIZ (CREATIVE SHOWCASE & VALUE PROPOSITION) -->
+    <div class="about-ethiobiz-wrapper">
+        <div class="about-ethiobiz-badge">🇪🇹 ABOUT ETHIOBIZ • ETHIOPIA'S SOVEREIGN CLOUD</div>
+        <h2 class="about-ethiobiz-title">Empowering 120M+ Ethiopians with Sovereign Digital Infrastructure</h2>
+        <p class="about-ethiobiz-lead">
+            EthioBiz is Ethiopia's premier enterprise cloud ecosystem uniting high-performance ERP, multi-vendor marketplace commerce, verified jobs and careers, AI-powered LMS academy, interactive community forums, and 24/7 sovereign enterprise support — rooted in deep Ethiopian heritage, built for global enterprise scale.
+        </p>
+
+        <div class="about-ethiobiz-features-grid">
+            <div class="about-ethiobiz-feature-card">
+                <div class="about-ethiobiz-feature-icon">⚡</div>
+                <div class="about-ethiobiz-feature-title">DOBiz SmartERP</div>
+                <div class="about-ethiobiz-feature-desc">Real-time inventory, financial accounting, POS, HRMS & hotel property management.</div>
+            </div>
+            <div class="about-ethiobiz-feature-card">
+                <div class="about-ethiobiz-feature-icon">🛍️</div>
+                <div class="about-ethiobiz-feature-title">Magala Marketplace</div>
+                <div class="about-ethiobiz-feature-desc">E-commerce, authentic Ethiopian goods, and talent career openings.</div>
+            </div>
+            <div class="about-ethiobiz-feature-card">
+                <div class="about-ethiobiz-feature-icon">🎓</div>
+                <div class="about-ethiobiz-feature-title">Dagu Academy</div>
+                <div class="about-ethiobiz-feature-desc">Next-gen interactive LMS, video courses, and verified certifications.</div>
+            </div>
+            <div class="about-ethiobiz-feature-card">
+                <div class="about-ethiobiz-feature-icon">🛡️</div>
+                <div class="about-ethiobiz-feature-title">Walta Support & Forum</div>
+                <div class="about-ethiobiz-feature-desc">Sovereign enterprise security, live discussions, and ticket desk.</div>
+            </div>
+            <div class="about-ethiobiz-feature-card">
+                <div class="about-ethiobiz-feature-icon">🌟</div>
+                <div class="about-ethiobiz-feature-title">Afocha Social</div>
+                <div class="about-ethiobiz-feature-desc">Verified business feed, live polling, and community storytelling.</div>
+            </div>
+        </div>
+
+        <div class="about-ethiobiz-cta-row">
+            <div style="font-size: 13px; color: #475569; font-weight: 600;">
+                🚀 Discover our vision, architecture, and Ethiopian digital renaissance mission.
+            </div>
+            <a href="/about_ethiobiz" class="about-ethiobiz-cta-btn">
+                ✨ Know More About EthioBiz &rarr;
+            </a>
         </div>
     </div>
 

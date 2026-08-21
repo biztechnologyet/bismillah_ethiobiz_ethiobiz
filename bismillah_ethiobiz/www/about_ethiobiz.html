@@ -1,0 +1,268 @@
+{% extends "templates/web.html" %}
+
+{% block title %}About EthioBiz — Ethiopia's Sovereign Cloud Super-Ecosystem{% endblock %}
+
+{% block head_include %}
+<style>
+    :root {
+        --eb-teal: #008080;
+        --eb-teal-dark: #072a2e;
+        --eb-teal-light: #0d9488;
+        --eb-gold: #f59e0b;
+        --eb-blue: #0284c7;
+        --eb-bg: #f8fafc;
+        --eb-card-bg: #ffffff;
+        --eb-border: #e2e8f0;
+        --eb-text: #0f172a;
+    }
+
+    .about-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 30px 20px 80px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .about-hero {
+        background: radial-gradient(circle at top right, #0d9488 0%, #072a2e 70%, #021a1d 100%);
+        color: #ffffff;
+        border-radius: 32px;
+        padding: 60px 40px;
+        text-align: center;
+        margin-bottom: 40px;
+        box-shadow: 0 16px 45px rgba(0, 128, 128, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .about-hero-badge {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 6px 20px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-bottom: 16px;
+        letter-spacing: 1px;
+    }
+    .about-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 900;
+        margin-bottom: 16px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+    .about-hero p {
+        font-size: 1.15rem;
+        opacity: 0.92;
+        max-width: 780px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .about-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        margin-bottom: 40px;
+    }
+    @media (max-width: 768px) {
+        .about-grid-2 { grid-template-columns: 1fr; }
+        .about-hero { padding: 40px 20px; }
+        .about-hero h1 { font-size: 2rem; }
+    }
+
+    .about-card {
+        background: #ffffff;
+        border: 1px solid var(--eb-border);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.04);
+        transition: all 0.25s ease;
+    }
+    .about-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 128, 128, 0.1);
+        border-color: #99f6e4;
+    }
+    .about-card-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+    .about-card h3 {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 12px;
+    }
+    .about-card p {
+        font-size: 14.5px;
+        color: #475569;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .about-pillars-section {
+        background: #f0fdfa;
+        border: 1px solid #ccfbf1;
+        border-radius: 28px;
+        padding: 40px 32px;
+        margin-bottom: 40px;
+    }
+    .pillar-row-item {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+    .pillar-row-item:hover {
+        border-color: #008080;
+        transform: translateX(4px);
+    }
+    .pillar-row-logo {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        object-fit: contain;
+        background: #f8fafc;
+        padding: 6px;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .about-cta-box {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 100%);
+        color: #ffffff;
+        border-radius: 24px;
+        padding: 36px;
+        text-align: center;
+        box-shadow: 0 12px 35px rgba(0, 128, 128, 0.2);
+    }
+    .about-cta-box a {
+        background: #ffffff;
+        color: #072a2e !important;
+        font-weight: 800;
+        padding: 12px 30px;
+        border-radius: 30px;
+        display: inline-block;
+        margin-top: 16px;
+        text-decoration: none !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        transition: all 0.2s;
+    }
+    .about-cta-box a:hover {
+        background: #f0fdfa;
+        transform: scale(1.04);
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="about-page-container">
+    <!-- HERO -->
+    <div class="about-hero">
+        <div class="about-hero-badge">🇪🇹 ONE CIVILIZATION • MANY PATHS • ETHIOBIZ</div>
+        <h1>Ethiopia's Sovereign Cloud Super-Ecosystem</h1>
+        <p>
+            Rooted in 3,000 years of Ethiopian civilization and engineering wisdom, EthioBiz is the national digital backbone powering enterprise ERP, marketplace trade, vocational knowledge, verified social feeds, and sovereign support.
+        </p>
+    </div>
+
+    <!-- MISSION & VISION -->
+    <div class="about-grid-2">
+        <div class="about-card">
+            <div class="about-card-icon">🎯</div>
+            <h3>Our Sovereign Mission</h3>
+            <p>
+                To provide every Ethiopian entrepreneur, merchant, educational institution, and public enterprise with high-velocity, reliable, and culturally attuned digital infrastructure — enabling total business sovereignty, data security, and economic prosperity without foreign lock-in.
+            </p>
+        </div>
+        <div class="about-card">
+            <div class="about-card-icon">🌍</div>
+            <h3>Our Universal Vision</h3>
+            <p>
+                To bridge Ethiopia's ancient commerce traditions with 21st-century cloud technology. From Addis Ababa to Hawassa, Gondar to Dire Dawa, EthioBiz connects buyers, sellers, jobseekers, students, and businesses into one thriving, unified network.
+            </p>
+        </div>
+    </div>
+
+    <!-- THE FIVE PILLARS -->
+    <div class="about-pillars-section">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <span style="background: #ffffff; color: #0f766e; border: 1px solid #99f6e4; font-size: 11px; font-weight: 800; padding: 4px 16px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">🏛️ ARCHITECTURAL FOUNDATION</span>
+            <h2 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">The Five Pillars of EthioBiz</h2>
+        </div>
+
+        <!-- Pillar 1: Tibeb -->
+        <div class="pillar-row-item">
+            <img src="/files/tibeb_logo.png" class="pillar-row-logo" alt="Tibeb Logo">
+            <div>
+                <h4 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">ጥበብ • Tibeb (Wisdom & Soul)</h4>
+                <p style="font-size: 13.5px; color: #475569; margin: 0; line-height: 1.6;">
+                    Worship of the Soul: Deep analytical journalism, cultural enlightenment, executive blogs, and philosophical insights. <a href="/tibeb" style="color: #008080; font-weight: 700;">Explore Tibeb &rarr;</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Pillar 2: Dagu -->
+        <div class="pillar-row-item">
+            <img src="/files/dagu_logo.png" class="pillar-row-logo" alt="Dagu Logo">
+            <div>
+                <h4 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">ዳጉ • Dagu (Knowledge & Academy)</h4>
+                <p style="font-size: 13.5px; color: #475569; margin: 0; line-height: 1.6;">
+                    Worship of the Mind: Next-generation LMS academy offering verified vocational courses, tech certifications, and skills training. <a href="/dagu" style="color: #008080; font-weight: 700;">Explore Dagu &rarr;</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Pillar 3: Magala -->
+        <div class="pillar-row-item">
+            <img src="/files/magala_logo.png" class="pillar-row-logo" alt="Magala Logo">
+            <div>
+                <h4 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">መጋላ • Magala (Commerce & Enterprise)</h4>
+                <p style="font-size: 13.5px; color: #475569; margin: 0; line-height: 1.6;">
+                    Worship of the Market: Powering DOBiz SmartERP, Magala Marketplace (/shop), Oosoo Careers (/jobs), BizBooking (/book), and GPS discovery (/map). <a href="/magala" style="color: #008080; font-weight: 700;">Explore Magala &rarr;</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Pillar 4: Walta -->
+        <div class="pillar-row-item">
+            <img src="/files/walta_logo.png" class="pillar-row-logo" alt="Walta Logo">
+            <div>
+                <h4 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">ዋልታ • Walta (Shield & Sovereign Support)</h4>
+                <p style="font-size: 13.5px; color: #475569; margin: 0; line-height: 1.6;">
+                    Worship of the Shield: Enterprise cyber security, live public forum discussions, and 24/7 SLA ticket resolution desk. <a href="/walta-main" style="color: #008080; font-weight: 700;">Explore Walta &rarr;</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Pillar 5: Afocha -->
+        <div class="pillar-row-item">
+            <img src="/files/afocha_logo.png" class="pillar-row-logo" alt="Afocha Logo">
+            <div>
+                <h4 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">አፎቻ • Afocha (Community & Connection)</h4>
+                <p style="font-size: 13.5px; color: #475569; margin: 0; line-height: 1.6;">
+                    Worship of the Heart: Ethiopia's verified business social network with multimedia sharing, live community polling, and discussions. <a href="/social" style="color: #008080; font-weight: 700;">Explore Afocha Social &rarr;</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CALL TO ACTION -->
+    <div class="about-cta-box">
+        <h3 style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">Ready to Transform Your Enterprise?</h3>
+        <p style="opacity: 0.9; max-width: 600px; margin: 0 auto; font-size: 14px;">
+            Join hundreds of verified Ethiopian enterprises operating on EthioBiz Cloud Systems.
+        </p>
+        <a href="/">🚀 Explore the Ecosystem &rarr;</a>
+    </div>
+</div>
+{% endblock %}
