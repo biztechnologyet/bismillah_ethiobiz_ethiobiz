@@ -28,7 +28,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
         products = frappe.get_all(
             "Website Item",
             filters=prod_filters,
-            fields=["name", "item_name", "web_item_name", "item_group", "website_image", "short_description", "route", "company", "creation"],
+            fields=["name", "item_name", "web_item_name", "item_group", "website_image", "short_description", "route", "creation"],
             order_by="creation desc",
             limit_page_length=limit,
             limit_start=start
@@ -38,7 +38,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             if img and ("default-avatar" in img or not img.strip()):
                 img = None
 
-            comp = p.get("company") or frappe.db.get_value("Item", p.name, "company") or "EthioBiz Merchant"
+            comp = frappe.db.get_value("Item", p.name, "company") or "Biz Technology Solutions"
             prices = frappe.get_all("Item Price", filters={"item_code": p.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
             
@@ -69,14 +69,15 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             resources = frappe.get_all(
                 "BizBooking Resource",
                 filters=res_filters,
-                fields=["name", "resource_name", "category", "rate_per_slot", "slot_duration_minutes", "company", "image", "creation"],
+                fields=["name", "resource_name", "category", "base_rate", "company", "description", "creation"],
                 order_by="creation desc",
                 limit=limit
             )
             for r in resources:
                 cat = r.category or "Service Booking"
                 icon = "🏨" if "Hotel" in cat else ("🩺" if "Doctor" in cat or "Medical" in cat else ("🏠" if "Property" in cat else "💇"))
-                rate_str = f"{r.rate_per_slot:,.2f} ETB" if r.rate_per_slot > 0 else "Free Tour"
+                rate_val = r.base_rate or 0.0
+                rate_str = f"{rate_val:,.2f} ETB" if rate_val > 0 else "Free Appointment"
                 comp = r.company or "Biz Technology Solutions"
                 
                 items.append({
@@ -84,11 +85,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge": f"{icon} {cat}",
                     "badge_class": "badge-booking",
                     "title": r.resource_name,
-                    "subtitle": f"🏢 {comp} • {r.slot_duration_minutes} Mins",
-                    "content": f"Reserve {r.resource_name} with confirmed instant time slot booking managed directly in {comp} Desk.",
+                    "subtitle": f"🏢 {comp} • Instant Booking",
+                    "content": r.description or f"Reserve {r.resource_name} with confirmed instant time slot booking managed directly in {comp} Desk.",
                     "price": rate_str,
-                    "price_num": r.rate_per_slot,
-                    "image": r.image,
+                    "price_num": rate_val,
+                    "image": None,
                     "icon": icon,
                     "company": comp,
                     "resource_name": r.resource_name,
