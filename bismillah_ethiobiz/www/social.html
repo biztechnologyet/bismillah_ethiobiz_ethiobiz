@@ -340,6 +340,253 @@
         line-height: 1.5;
     }
 
+    /* ═══ IMAGE UPLOAD ZONE ═══ */
+    .af-upload-zone {
+        border: 2px dashed #94a3b8;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        background: #ffffff;
+        position: relative;
+    }
+    .af-upload-zone:hover, .af-upload-zone.drag-over {
+        border-color: #008080;
+        background: #f0fdfa;
+        transform: translateY(-1px);
+    }
+    .af-upload-zone .upload-icon {
+        font-size: 36px;
+        margin-bottom: 6px;
+    }
+    .af-upload-zone .upload-label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #0f172a;
+    }
+    .af-upload-zone .upload-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .af-upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .af-upload-progress {
+        margin-top: 10px;
+        height: 6px;
+        border-radius: 6px;
+        background: #e2e8f0;
+        overflow: hidden;
+        display: none;
+    }
+    .af-upload-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #008080, #0d9488);
+        border-radius: 6px;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* Image Preview */
+    .af-image-preview-box {
+        display: none;
+        margin-top: 12px;
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid #008080;
+        background: #f0fdfa;
+    }
+    .af-image-preview-box img {
+        width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    .af-image-preview-box .preview-remove-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .af-image-preview-box .preview-remove-btn:hover {
+        background: rgba(220, 38, 38, 0.85);
+    }
+    .af-image-preview-box .preview-url-badge {
+        background: rgba(0,128,128,0.85);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Browse Gallery Button */
+    .af-btn-browse-gallery {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff !important;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3);
+    }
+    .af-btn-browse-gallery:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(2, 132, 199, 0.4);
+    }
+
+    /* ═══ GALLERY MODAL ═══ */
+    .af-gallery-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .af-gallery-overlay.visible {
+        display: flex;
+    }
+    .af-gallery-modal {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 720px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        animation: gallerySlideUp 0.3s ease;
+    }
+    @keyframes gallerySlideUp {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .af-gallery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .af-gallery-header h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .af-gallery-close-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .af-gallery-close-btn:hover {
+        background: #fecaca;
+        border-color: #ef4444;
+        color: #dc2626;
+    }
+    .af-gallery-body {
+        padding: 18px 24px;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+    .af-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    @media (max-width: 520px) {
+        .af-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .af-gallery-thumb {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        aspect-ratio: 1;
+    }
+    .af-gallery-thumb:hover {
+        border-color: #008080;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.2);
+    }
+    .af-gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .af-gallery-thumb .thumb-name {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.65));
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 16px 8px 6px 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .af-gallery-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+    .af-gallery-empty .empty-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    .af-gallery-loading {
+        text-align: center;
+        padding: 40px;
+        color: #64748b;
+    }
+
     @media (max-width: 860px) {
         .af-split-wrapper {
             grid-template-columns: 1fr;
@@ -427,10 +674,37 @@
 
             <textarea id="post-content" class="af-textarea mb-3" rows="3" placeholder="What's happening in your business or community today?..."></textarea>
 
-            <!-- Media Section -->
-            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 14px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
-                <input type="text" id="post-image-url" class="af-input mb-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)">
-                <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL">
+            <!-- Media Section: Upload + Gallery + Preview -->
+            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
+                <!-- Upload Dropzone -->
+                <div class="af-upload-zone" id="upload-dropzone">
+                    <input type="file" id="upload-file-input" accept="image/*">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-label">Drag & Drop or Click to Upload Image</div>
+                    <div class="upload-hint">JPG, PNG, GIF, WEBP • Max 10 MB</div>
+                    <div class="af-upload-progress" id="upload-progress-bar">
+                        <div class="af-upload-progress-fill" id="upload-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Row -->
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap;">
+                    <button type="button" class="af-btn-browse-gallery" id="btn-open-gallery">🖼️ Browse My Uploads</button>
+                    <span style="color: #94a3b8; font-size: 12px; font-weight: 600;">— or paste URL below —</span>
+                </div>
+
+                <!-- Manual URL Fallback -->
+                <input type="text" id="post-image-url" class="af-input mt-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)" style="margin-top: 10px;">
+
+                <!-- Image Preview -->
+                <div class="af-image-preview-box" id="image-preview-box">
+                    <button type="button" class="preview-remove-btn" id="btn-remove-preview" title="Remove image">✕</button>
+                    <img id="image-preview-img" src="" alt="Preview">
+                    <div class="preview-url-badge" id="image-preview-url-badge"></div>
+                </div>
+
+                <!-- Video URL -->
+                <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL" style="margin-top: 10px;">
             </div>
 
             <!-- Poll Section -->
@@ -454,6 +728,22 @@
         <div id="afocha-feed-stream">
             <div style="text-align: center; padding: 40px; color: #64748b;">
                 <div class="spinner-border spinner-border-sm text-primary"></div><span style="margin-left: 8px;">Loading stories...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ IMAGE GALLERY MODAL ═══ -->
+<div class="af-gallery-overlay" id="gallery-overlay">
+    <div class="af-gallery-modal">
+        <div class="af-gallery-header">
+            <h3>🖼️ My Uploaded Images</h3>
+            <button type="button" class="af-gallery-close-btn" id="btn-close-gallery">✕</button>
+        </div>
+        <div class="af-gallery-body" id="gallery-body">
+            <div class="af-gallery-loading">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+                <span style="margin-left: 8px;">Loading your images...</span>
             </div>
         </div>
     </div>
@@ -514,6 +804,278 @@
         });
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  IMAGE UPLOAD, GALLERY BROWSER & PREVIEW SYSTEM
+    // ═══════════════════════════════════════════════════════════════
+
+    // Helper: Set image preview
+    function setImagePreview(url) {
+        const previewBox = document.getElementById('image-preview-box');
+        const previewImg = document.getElementById('image-preview-img');
+        const previewBadge = document.getElementById('image-preview-url-badge');
+        const urlInput = document.getElementById('post-image-url');
+
+        if (url) {
+            previewImg.src = url;
+            previewBadge.textContent = url;
+            previewBox.style.display = 'block';
+            urlInput.value = url;
+        } else {
+            previewImg.src = '';
+            previewBadge.textContent = '';
+            previewBox.style.display = 'none';
+            urlInput.value = '';
+        }
+    }
+
+    // Remove preview button
+    const btnRemovePreview = document.getElementById('btn-remove-preview');
+    if (btnRemovePreview) {
+        btnRemovePreview.addEventListener('click', function(e) {
+            e.stopPropagation();
+            setImagePreview('');
+        });
+    }
+
+    // URL input manual change → update preview
+    const postImageUrlInput = document.getElementById('post-image-url');
+    if (postImageUrlInput) {
+        postImageUrlInput.addEventListener('change', function() {
+            const val = this.value.trim();
+            if (val) {
+                setImagePreview(val);
+            }
+        });
+    }
+
+    // ── FILE UPLOAD via Frappe API ──
+    const uploadDropzone = document.getElementById('upload-dropzone');
+    const uploadFileInput = document.getElementById('upload-file-input');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const uploadProgressFill = document.getElementById('upload-progress-fill');
+
+    if (uploadDropzone) {
+        // Drag & Drop visual feedback
+        uploadDropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+        uploadDropzone.addEventListener('dragleave', function() {
+            this.classList.remove('drag-over');
+        });
+        uploadDropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+    }
+
+    if (uploadFileInput) {
+        uploadFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFileUpload(this.files[0]);
+            }
+        });
+    }
+
+    function handleFileUpload(file) {
+        // Validate
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select an image file (JPG, PNG, GIF, WEBP).');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Image must be under 10 MB.');
+            return;
+        }
+
+        // Show progress
+        uploadProgressBar.style.display = 'block';
+        uploadProgressFill.style.width = '10%';
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('is_private', '0');
+        formData.append('folder', 'Home/Attachments');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/method/upload_file', true);
+
+        // Get CSRF token
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfCookie = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
+        const csrfToken = csrfMeta ? csrfMeta.content : csrfCookie;
+        if (csrfToken) {
+            xhr.setRequestHeader('X-Frappe-CSRF-Token', csrfToken);
+        }
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                uploadProgressFill.style.width = pct + '%';
+            }
+        });
+
+        xhr.addEventListener('load', function() {
+            uploadProgressFill.style.width = '100%';
+            setTimeout(function() {
+                uploadProgressBar.style.display = 'none';
+                uploadProgressFill.style.width = '0%';
+            }, 600);
+
+            try {
+                const resp = JSON.parse(xhr.responseText);
+                if (resp.message && resp.message.file_url) {
+                    setImagePreview(resp.message.file_url);
+                } else {
+                    alert('Upload completed but no file URL returned. Please try again.');
+                }
+            } catch (err) {
+                console.error('Upload parse error:', err);
+                alert('Upload failed. Please try again.');
+            }
+
+            // Reset file input
+            if (uploadFileInput) uploadFileInput.value = '';
+        });
+
+        xhr.addEventListener('error', function() {
+            uploadProgressBar.style.display = 'none';
+            uploadProgressFill.style.width = '0%';
+            alert('Upload failed. Please check your connection and try again.');
+            if (uploadFileInput) uploadFileInput.value = '';
+        });
+
+        xhr.send(formData);
+    }
+
+    // ── GALLERY BROWSER ──
+    const galleryOverlay = document.getElementById('gallery-overlay');
+    const galleryBody = document.getElementById('gallery-body');
+    const btnOpenGallery = document.getElementById('btn-open-gallery');
+    const btnCloseGallery = document.getElementById('btn-close-gallery');
+
+    if (btnOpenGallery) {
+        btnOpenGallery.addEventListener('click', function() {
+            galleryOverlay.classList.add('visible');
+            loadGalleryImages();
+        });
+    }
+
+    if (btnCloseGallery) {
+        btnCloseGallery.addEventListener('click', function() {
+            galleryOverlay.classList.remove('visible');
+        });
+    }
+
+    // Close on overlay background click
+    if (galleryOverlay) {
+        galleryOverlay.addEventListener('click', function(e) {
+            if (e.target === galleryOverlay) {
+                galleryOverlay.classList.remove('visible');
+            }
+        });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && galleryOverlay && galleryOverlay.classList.contains('visible')) {
+            galleryOverlay.classList.remove('visible');
+        }
+    });
+
+    function loadGalleryImages() {
+        galleryBody.innerHTML = '<div class="af-gallery-loading"><div class="spinner-border spinner-border-sm text-primary"></div><span style="margin-left: 8px;">Loading your images...</span></div>';
+
+        // Fetch image files from Frappe File doctype (public images)
+        const params = new URLSearchParams({
+            doctype: 'File',
+            fields: JSON.stringify(['name', 'file_name', 'file_url', 'creation']),
+            filters: JSON.stringify([
+                ['is_private', '=', 0],
+                ['file_url', 'like', '%.jpg'],
+            ]),
+            or_filters: JSON.stringify([
+                ['file_url', 'like', '%.jpg'],
+                ['file_url', 'like', '%.jpeg'],
+                ['file_url', 'like', '%.png'],
+                ['file_url', 'like', '%.gif'],
+                ['file_url', 'like', '%.webp'],
+            ]),
+            order_by: 'creation desc',
+            limit_page_length: '60'
+        });
+
+        // Use a broader approach: fetch all public image files
+        fetch('/api/method/frappe.client.get_list?' + new URLSearchParams({
+            doctype: 'File',
+            fields: JSON.stringify(['name', 'file_name', 'file_url', 'creation']),
+            filters: JSON.stringify([['is_private', '=', 0]]),
+            order_by: 'creation desc',
+            limit_page_length: '100'
+        }))
+        .then(r => r.json())
+        .then(res => {
+            const allFiles = (res.message || []);
+            // Filter to image extensions on the client side
+            const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+            const images = allFiles.filter(f => {
+                if (!f.file_url) return false;
+                const url = f.file_url.toLowerCase();
+                return imageExts.some(ext => url.endsWith(ext));
+            });
+
+            if (!images.length) {
+                galleryBody.innerHTML = `
+                    <div class="af-gallery-empty">
+                        <div class="empty-icon">📭</div>
+                        <div style="font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 4px;">No Images Yet</div>
+                        <div style="font-size: 13px;">Upload your first image using the dropzone above!</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let gridHtml = '<div class="af-gallery-grid">';
+            images.forEach(img => {
+                const displayName = img.file_name || img.file_url.split('/').pop();
+                gridHtml += `
+                    <div class="af-gallery-thumb" data-url="${img.file_url}" title="${displayName}">
+                        <img src="${img.file_url}" alt="${displayName}" loading="lazy" onerror="this.parentElement.style.display='none'">
+                        <div class="thumb-name">${displayName}</div>
+                    </div>
+                `;
+            });
+            gridHtml += '</div>';
+            galleryBody.innerHTML = gridHtml;
+
+            // Bind click to select
+            galleryBody.querySelectorAll('.af-gallery-thumb').forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    const selectedUrl = this.getAttribute('data-url');
+                    setImagePreview(selectedUrl);
+                    galleryOverlay.classList.remove('visible');
+                });
+            });
+        })
+        .catch(err => {
+            console.error('Gallery load error:', err);
+            galleryBody.innerHTML = `
+                <div class="af-gallery-empty">
+                    <div class="empty-icon">⚠️</div>
+                    <div style="font-weight: 700; color: #0f172a;">Could not load gallery</div>
+                    <div style="font-size: 13px;">Please try again later.</div>
+                </div>
+            `;
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+
     // Submit post
     document.getElementById('btn-submit-post').addEventListener('click', function() {
         if (!loggedUser || !loggedUser.is_logged_in) {
@@ -572,6 +1134,8 @@
                 return;
             }
             document.getElementById('post-content').value = '';
+            document.getElementById('post-video-url').value = '';
+            setImagePreview('');
             loadFeed();
         })
         .catch(e => {
