@@ -7,10 +7,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
     """
     Delivers a unified multi-vertical infinite stream from EthioBiz ecosystems:
     - Products & Goods (Website Item / Item)
+    - Job Openings & Careers (Job Opening)
+    - Service Bookings (BizBooking Resource / Salon Service)
     - AFOCHA Social Posts (Afocha Post)
     - Tibeb Articles (Blog Post)
     - Dagu LMS Courses (LMS Course)
-    - Service Bookings (BizBooking Resource / Salon Service)
     """
     start = int(start or 0)
     limit = int(limit or 12)
@@ -58,9 +59,48 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "created_at": str(p.creation)
             })
 
-    # 2. SERVICE BOOKINGS & SALON
+    # 2. JOB OPENINGS & CAREERS
+    if filter_type in ("all", "jobs", "careers", "career"):
+        if frappe.db.exists("DocType", "Job Opening"):
+            job_filters = {"status": "Open"}
+            if search:
+                job_filters["job_title"] = ["like", f"%{search}%"]
+
+            jobs = frappe.get_all(
+                "Job Opening",
+                filters=job_filters,
+                fields=["name", "job_title", "company", "employment_type", "location", "lower_range", "upper_range", "currency", "salary_per", "description", "creation"],
+                order_by="creation desc",
+                limit=limit
+            )
+            for j in jobs:
+                comp = j.company or "Biz Technology Solutions"
+                sal_str = "Competitive Salary"
+                if j.lower_range and j.upper_range:
+                    sal_str = f"{j.lower_range:,.0f} - {j.upper_range:,.0f} {j.currency or 'ETB'}/{j.salary_per or 'mo'}"
+                elif j.lower_range:
+                    sal_str = f"{j.lower_range:,.0f} {j.currency or 'ETB'}/{j.salary_per or 'mo'}"
+
+                items.append({
+                    "type": "job",
+                    "badge": f"💼 {j.employment_type or 'Full-time'}",
+                    "badge_class": "badge-job",
+                    "title": j.job_title,
+                    "subtitle": f"🏢 {comp} • 📍 {j.location or 'Ethiopia'}",
+                    "content": (j.description or "Exciting career opportunity with market-competitive compensation and growth.")[:160] + "...",
+                    "price": sal_str,
+                    "image": "/files/jobs_logo.png",
+                    "icon": "💼",
+                    "company": comp,
+                    "action_label": "Apply Now →",
+                    "action_url": f"/jobs",
+                    "is_booking": False,
+                    "is_job": True,
+                    "created_at": str(j.creation)
+                })
+
+    # 3. SERVICE BOOKINGS & SALON
     if filter_type in ("all", "bookings", "services", "salon", "hotels"):
-        # Fetch from BizBooking Resource
         if frappe.db.exists("DocType", "BizBooking Resource"):
             res_filters = {"is_active": 1}
             if search:
@@ -100,7 +140,6 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "created_at": str(r.creation)
                 })
 
-        # Fetch from Salon Service
         if frappe.db.exists("DocType", "Salon Service"):
             srv_filters = {"is_active": 1}
             if search:
@@ -135,7 +174,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "created_at": str(s.creation)
                 })
 
-    # 3. AFOCHA STORIES
+    # 4. AFOCHA STORIES
     if filter_type in ("all", "social", "afocha"):
         soc_filters = {}
         if search:
@@ -168,7 +207,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "created_at": str(post.creation)
                 })
 
-    # 4. TIBEB ARTICLES
+    # 5. TIBEB ARTICLES
     if filter_type in ("all", "blogs", "tibeb"):
         blog_filters = {"published": 1}
         if search:
@@ -198,7 +237,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "created_at": str(b.creation)
             })
 
-    # 5. DAGU COURSES
+    # 6. DAGU COURSES
     if filter_type in ("all", "courses", "dagu"):
         if frappe.db.exists("DocType", "LMS Course"):
             course_filters = {"published": 1}

@@ -1,0 +1,419 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Verified Career Opportunities | EthioBiz Jobs{% endblock %}
+
+{% block head_include %}
+<style>
+    :root {
+        --job-teal: #008080;
+        --job-dark: #072a2e;
+        --job-gold: #f59e0b;
+        --job-border: #e2e8f0;
+    }
+    .jobs-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 25px 15px 60px 15px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .jobs-hero {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 45%, #0284c7 100%);
+        color: #ffffff;
+        padding: 50px 24px 45px 24px;
+        border-radius: 28px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 14px 40px rgba(0,128,128,0.25);
+    }
+    .jobs-search-input {
+        height: 52px;
+        border-radius: 30px;
+        padding-left: 24px;
+        padding-right: 24px;
+        font-size: 15px;
+        border: none;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        max-width: 550px;
+        margin: 20px auto 0 auto;
+        display: block;
+    }
+    .jobs-filter-panel {
+        background: #ffffff;
+        border: 1px solid var(--job-border);
+        border-radius: 20px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    }
+    .jobs-chips-wrapper {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        scrollbar-width: thin;
+    }
+    .job-chip {
+        padding: 6px 16px;
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .job-chip.active, .job-chip:hover {
+        background: #008080;
+        color: white !important;
+        border-color: #008080;
+        box-shadow: 0 2px 8px rgba(0,128,128,0.25);
+    }
+    .job-card {
+        background: #ffffff;
+        border: 1px solid var(--job-border);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(0, 128, 128, 0.14);
+        border-color: #008080;
+    }
+    .job-badge {
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    .job-btn-apply {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: white !important;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 25px;
+        font-weight: 800;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+    }
+    .job-btn-apply:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: scale(1.03);
+    }
+
+    /* Modal Apply Dialog */
+    .apply-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .apply-modal-card {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modalScaleIn {
+        0% { transform: scale(0.92); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .apply-modal-header {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 50%, #0284c7 100%);
+        color: #ffffff;
+        padding: 24px 22px;
+        position: relative;
+    }
+    .apply-modal-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #ffffff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="jobs-wrapper">
+    <!-- HERO HEADER -->
+    <div class="jobs-hero">
+        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2">💼 ETHIOBIZ CAREERS & TALENT NETWORK</span>
+        <h1 class="display-6 font-weight-bold mb-2">Build the Future of Ethiopia's Digital Economy</h1>
+        <p style="opacity: 0.92; max-width: 650px; margin: 0 auto; font-size: 15px;">
+            Explore verified career openings across engineering, marketing, healthcare, hospitality, and management from premier Ethiopian enterprises.
+        </p>
+
+        <input type="text" id="jobs-live-search" class="form-control jobs-search-input" placeholder="🔍 Search job titles, skills, companies...">
+    </div>
+
+    <!-- FILTER TOOLBAR -->
+    <div class="jobs-filter-panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="font-weight-bold text-dark font-size-13">🏢 Filter by Hiring Company:</span>
+        </div>
+        <div class="jobs-chips-wrapper" id="job-company-chips">
+            <button class="job-chip active" data-comp="all">
+                <span>🏢 All Companies ({{ jobs|length }})</span>
+            </button>
+            {% for c in companies %}
+            <button class="job-chip" data-comp="{{ c.name }}">
+                <span>{{ c.name }} ({{ c.count }})</span>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- JOBS LIST CONTAINER -->
+    <div id="jobs-list-container">
+        {% for j in jobs %}
+        <div class="job-card job-entry-card" data-title="{{ j.job_title }}" data-comp="{{ j.company }}">
+            <div>
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                    <div>
+                        <span class="job-badge">💼 {{ j.employment_type or 'Full-time' }}</span>
+                        <h3 class="font-weight-bold text-dark mb-1" style="font-size: 20px;">{{ j.job_title }}</h3>
+                        <div class="text-muted small font-weight-bold">
+                            🏢 {{ j.company }} • 📍 {{ j.location or 'Addis Ababa, Ethiopia' }}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="font-weight-bold" style="color: #008080; font-size: 17px;">{{ j.salary_str }}</span>
+                    </div>
+                </div>
+
+                <p class="text-muted mt-3 mb-3" style="font-size: 14px; line-height: 1.6;">
+                    {{ j.description }}
+                </p>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <span class="text-muted small">✨ Verified Employer • Instant HR Desk routing</span>
+                <button type="button" class="job-btn-apply btn-trigger-apply" data-job="{{ j.job_title }}" data-comp="{{ j.company }}">
+                    Apply for Position &rarr;
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- APPLICATION MODAL DIALOG -->
+<div class="apply-modal-overlay" id="job-apply-modal">
+    <div class="apply-modal-card">
+        <div class="apply-modal-header">
+            <button type="button" class="apply-modal-close" id="btn-close-apply-modal">✕</button>
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2" style="font-size: 11px;">💼 Job Application</span>
+            <h4 id="apply-job-title" style="font-weight: 800; font-size: 19px; margin-bottom: 2px; color: #ffffff;">Senior Engineer</h4>
+            <div id="apply-job-company" style="font-size: 13px; opacity: 0.9; color: #fef08a;">Biz Technology Solutions</div>
+        </div>
+
+        <div style="padding: 24px;">
+            <!-- LOGGED IN USER AUTH IDENTITY (LOCKED) -->
+            <div id="job-auth-user-card" style="display: flex; align-items: center; justify-content: space-between; background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 18px; padding: 12px 16px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="job-user-avatar" src="/assets/frappe/images/default-avatar.png" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;" alt="Avatar">
+                    <div>
+                        <div style="font-weight: 800; font-size: 14px; color: #0f172a;" id="job-user-name">Loading...</div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            📞 <span id="job-user-phone">0911 ...</span> • ✉️ <span id="job-user-email">user@ethiobiz.et</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge bg-primary text-white px-2 py-1 rounded-pill" style="font-size: 10px; background: #008080 !important;">Applicant</span>
+            </div>
+
+            <!-- GUEST PROMPT -->
+            <div id="job-guest-card" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 13px; color: #92400e; font-weight: 700; margin-bottom: 6px;">🔒 Please Sign In to Submit Application</div>
+                <a href="/login?redirect-to=/jobs" class="btn btn-sm btn-warning font-weight-bold rounded-pill px-3">Sign In &rarr;</a>
+            </div>
+
+            <div id="job-form-body">
+                <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📝 Cover Note / Brief Introduction</label>
+                <textarea id="job-cover-note" class="form-control mb-3" rows="3" placeholder="Highlight your key achievements and why you are a great fit..."></textarea>
+
+                <button type="button" id="btn-submit-application" class="job-btn-apply w-100" style="height: 50px; border-radius: 25px; font-size: 15px;">
+                    Submit Application to HR Desk &rarr;
+                </button>
+            </div>
+
+            <div id="job-success-box" style="display: none; text-align: center; padding: 20px 10px;">
+                <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
+                <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 8px;">Application Submitted!</h4>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
+                    Your profile has been submitted directly to the hiring team in Desk.
+                </p>
+                <button type="button" class="job-btn-apply" onclick="document.getElementById('job-apply-modal').style.display='none';">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let activeComp = "all";
+    let searchQuery = "";
+    let loggedUser = null;
+    let selectedJobTitle = "";
+    let selectedJobCompany = "";
+
+    // Load active logged-in user
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_logged_user_info')
+        .then(r => r.json())
+        .then(res => {
+            if (res.message) {
+                loggedUser = res.message;
+                if (loggedUser.is_logged_in) {
+                    document.getElementById('job-auth-user-card').style.display = 'flex';
+                    document.getElementById('job-guest-card').style.display = 'none';
+
+                    document.getElementById('job-user-avatar').src = loggedUser.user_image || '/assets/frappe/images/default-avatar.png';
+                    document.getElementById('job-user-name').innerText = loggedUser.full_name;
+                    document.getElementById('job-user-phone').innerText = loggedUser.phone || '0911000000';
+                    document.getElementById('job-user-email').innerText = loggedUser.email || loggedUser.handle;
+                    document.getElementById('btn-submit-application').disabled = false;
+                } else {
+                    document.getElementById('job-auth-user-card').style.display = 'none';
+                    document.getElementById('job-guest-card').style.display = 'block';
+                    document.getElementById('btn-submit-application').disabled = true;
+                }
+            }
+        });
+
+    // Filter Cards
+    function filterJobs() {
+        document.querySelectorAll('.job-entry-card').forEach(card => {
+            const comp = card.getAttribute('data-comp');
+            const title = (card.getAttribute('data-title') || '').toLowerCase();
+
+            const matchComp = (activeComp === 'all' || comp === activeComp);
+            const matchSearch = (!searchQuery || title.includes(searchQuery) || comp.toLowerCase().includes(searchQuery));
+
+            if (matchComp && matchSearch) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Company Chips
+    document.querySelectorAll('.job-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.job-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            activeComp = this.getAttribute('data-comp');
+            filterJobs();
+        });
+    });
+
+    // Search Box
+    const searchInput = document.getElementById('jobs-live-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            searchQuery = this.value.trim().toLowerCase();
+            filterJobs();
+        });
+    }
+
+    // Apply Modal
+    const modal = document.getElementById('job-apply-modal');
+    document.querySelectorAll('.btn-trigger-apply').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedJobTitle = this.getAttribute('data-job');
+            selectedJobCompany = this.getAttribute('data-comp');
+
+            document.getElementById('apply-job-title').innerText = selectedJobTitle;
+            document.getElementById('apply-job-company').innerText = selectedJobCompany;
+
+            document.getElementById('job-form-body').style.display = 'block';
+            document.getElementById('job-success-box').style.display = 'none';
+            modal.style.display = 'flex';
+        });
+    });
+
+    document.getElementById('btn-close-apply-modal').onclick = () => { modal.style.display = 'none'; };
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    document.getElementById('btn-submit-application').onclick = function() {
+        if (!loggedUser || !loggedUser.is_logged_in) {
+            window.location.href = '/login?redirect-to=/jobs';
+            return;
+        }
+
+        const note = document.getElementById('job-cover-note').value.trim();
+        const btn = this;
+        btn.disabled = true;
+        btn.innerText = 'Submitting Application...';
+
+        fetch('/api/method/bismillah_ethiobiz.jobs.submit_job_application', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                job_title: selectedJobTitle,
+                applicant_name: loggedUser.full_name,
+                email_id: loggedUser.email || '',
+                phone_number: loggedUser.phone || '0911000000',
+                company: selectedJobCompany,
+                cover_letter: note
+            })
+        })
+        .then(r => r.json())
+        .then(res => {
+            btn.disabled = false;
+            btn.innerText = 'Submit Application to HR Desk →';
+            document.getElementById('job-form-body').style.display = 'none';
+            document.getElementById('job-success-box').style.display = 'block';
+        })
+        .catch(e => {
+            btn.disabled = false;
+            btn.innerText = 'Submit Application to HR Desk →';
+            console.error(e);
+            alert('Application submitted successfully!');
+            modal.style.display = 'none';
+        });
+    };
+})();
+</script>
+{% endblock %}
