@@ -268,6 +268,35 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "created_at": str(c.creation)
                 })
 
+    # 7. WALTA FORUM DISCUSSIONS
+    if filter_type in ("all", "forums", "forum", "discussions", "walta"):
+        try:
+            forum_topics = frappe.db.sql("""
+                SELECT name, title, category, author_name, company, content, replies_count, likes_count, creation
+                FROM `tabWalta Forum Topic`
+                ORDER BY creation desc
+                LIMIT %s OFFSET %s
+            """, (limit, start), as_dict=True)
+            for ft in forum_topics:
+                clean_c = frappe.utils.strip_html(ft.content or "")
+                items.append({
+                    "type": "forum",
+                    "badge": f"💬 {ft.category or 'Walta Forum'}",
+                    "badge_class": "badge-social",
+                    "title": ft.title,
+                    "subtitle": f"🛡️ {ft.author_name} • {ft.company or 'EthioBiz'}",
+                    "content": (clean_c[:150] + "...") if len(clean_c) > 150 else clean_c,
+                    "price": f"💬 {ft.replies_count or 0} replies • ❤️ {ft.likes_count or 0} likes",
+                    "image": "/files/walta_logo.png",
+                    "icon": "💬",
+                    "action_label": "Join Discussion →",
+                    "action_url": f"/forum?topic={ft.name}",
+                    "is_booking": False,
+                    "created_at": str(ft.creation)
+                })
+        except Exception:
+            pass
+
     # Sort all feed items by creation timestamp
     items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
 
