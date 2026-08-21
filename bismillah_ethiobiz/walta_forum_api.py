@@ -274,9 +274,13 @@ def add_forum_reply(topic_id=None, reply_text=None):
 
     return {"status": "success", "name": name}
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def like_forum_topic(topic_id=None):
     ensure_tables_exist()
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Authentication required. Please log in to like forum topics."), frappe.PermissionError)
+
     topic_id = topic_id or frappe.form_dict.get("topic_id")
     if not topic_id:
         return {"error": "Topic ID missing"}

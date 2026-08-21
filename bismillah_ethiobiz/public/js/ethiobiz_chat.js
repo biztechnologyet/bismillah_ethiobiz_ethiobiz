@@ -146,7 +146,7 @@
                     --chat--color-disabled: #484F58 !important;
                     --chat--color-typing: #1FB6AE !important;
                     --chat--window--width: 420px !important;
-                    --chat--window--height: 620px !important;
+                    --chat--window--height: min(580px, calc(100vh - 100px)) !important;
                     --chat--window--border-radius: 18px !important;
                     --chat--message--border-radius: 12px !important;
                     --chat--toggle--size: 56px !important;
@@ -286,13 +286,15 @@
                     -webkit-backdrop-filter: blur(16px) !important;
                     border: none !important;
                     border-top: 1px solid rgba(255,255,255,0.08) !important;
-                    padding: 8px 10px !important;
+                    padding: 8px 12px !important;
                     margin: 0 !important;
                     width: 100% !important;
+                    min-height: 54px !important;
                     box-sizing: border-box !important;
-                    overflow: hidden !important;
+                    overflow: visible !important;
                     display: flex !important;
                     align-items: center !important;
+                    flex: 0 0 auto !important;
                 }
 
                 /* Container pill wrapping file upload, text input, send button */
@@ -300,10 +302,10 @@
                 .chat-input-wrapper,
                 [class*="chat-inputs"],
                 [class*="chat-input-wrapper"] {
-                    background: rgba(255, 255, 255, 0.07) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                    border-radius: 22px !important;
-                    padding: 4px 6px 4px 10px !important;
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+                    border-radius: 24px !important;
+                    padding: 3px 6px 3px 12px !important;
                     margin: 0 !important;
                     width: 100% !important;
                     max-width: 100% !important;
@@ -311,7 +313,7 @@
                     display: flex !important;
                     align-items: center !important;
                     gap: 6px !important;
-                    overflow: hidden !important;
+                    overflow: visible !important;
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
                 }
 
@@ -319,9 +321,9 @@
                 .chat-input-wrapper:focus-within,
                 [class*="chat-inputs"]:focus-within,
                 [class*="chat-input-wrapper"]:focus-within {
-                    background: rgba(255, 255, 255, 0.10) !important;
+                    background: rgba(255, 255, 255, 0.12) !important;
                     border-color: #1FB6AE !important;
-                    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.25) !important;
+                    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.3) !important;
                 }
 
                 /* Textarea input field */
@@ -346,7 +348,7 @@
                     box-shadow: none !important;
                     resize: none !important;
                     overflow-y: auto !important;
-                    max-height: 80px !important;
+                    max-height: 72px !important;
                     margin: 0 !important;
                 }
 
@@ -363,8 +365,18 @@
                 .chat-input::placeholder,
                 textarea.chat-input::placeholder,
                 [class*="chat-input"]::placeholder {
-                    color: rgba(255,255,255,0.45) !important;
+                    color: rgba(255,255,255,0.5) !important;
                     font-style: italic !important;
+                }
+
+                /* Controls wrapper */
+                .chat-inputs-controls {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                    flex-shrink: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
                 }
 
                 /* File Upload / Attachment Button */
@@ -376,9 +388,10 @@
                     width: 32px !important;
                     height: 32px !important;
                     min-width: 32px !important;
-                    background: transparent !important;
-                    color: rgba(255,255,255,0.6) !important;
-                    border: none !important;
+                    min-height: 32px !important;
+                    background: rgba(255,255,255,0.1) !important;
+                    color: rgba(255,255,255,0.7) !important;
+                    border: 1px solid rgba(255,255,255,0.15) !important;
                     border-radius: 50% !important;
                     display: flex !important;
                     align-items: center !important;
@@ -387,21 +400,23 @@
                     margin: 0 !important;
                     cursor: pointer !important;
                     transition: all 0.2s ease !important;
+                    box-sizing: border-box !important;
                 }
 
                 .chat-footer button:not(.chat-input-send-button):hover,
                 .chat-file-upload-button:hover,
                 button[class*="file-upload"]:hover {
-                    background: rgba(31,182,174,0.2) !important;
+                    background: rgba(31,182,174,0.25) !important;
                     color: #1FB6AE !important;
-                    transform: scale(1.1) !important;
+                    border-color: #1FB6AE !important;
+                    transform: scale(1.08) !important;
                 }
 
                 .chat-footer button:not(.chat-input-send-button) svg,
                 .chat-file-upload-button svg,
                 button[class*="file-upload"] svg {
-                    width: 17px !important;
-                    height: 17px !important;
+                    width: 16px !important;
+                    height: 16px !important;
                 }
 
                 /* Send Button */
@@ -413,6 +428,9 @@
                     width: 34px !important;
                     height: 34px !important;
                     min-width: 34px !important;
+                    min-height: 34px !important;
+                    max-width: 34px !important;
+                    max-height: 34px !important;
                     background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important;
                     border: none !important;
@@ -425,6 +443,10 @@
                     cursor: pointer !important;
                     box-shadow: 0 2px 8px rgba(31,182,174,0.4) !important;
                     transition: all 0.2s ease !important;
+                    box-sizing: border-box !important;
+                    overflow: visible !important;
+                    position: relative !important;
+                    z-index: 5 !important;
                 }
 
                 .chat-input-send-button:hover,
@@ -447,8 +469,8 @@
                 .chat-input-send-button svg,
                 button.chat-input-send-button svg,
                 button[class*="send-button"] svg {
-                    width: 16px !important;
-                    height: 16px !important;
+                    width: 15px !important;
+                    height: 15px !important;
                 }
 
                 /* ─── COPY BUTTON ON EACH MESSAGE ─── */

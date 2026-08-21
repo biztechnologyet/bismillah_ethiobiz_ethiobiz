@@ -1,8 +1,9 @@
 /**
- * EthioBiz Theme v2.0 - Copilot Glassmorphism
+ * EthioBiz Theme v2.2 - Copilot Glassmorphism & Sacred Atmosphere
+ * Bismillah Ar-Rahman Ar-Rahim
  */
 
-/* 1. ATMOSPHERE LAYER */
+/* 1. ATMOSPHERE LAYER (DESK BACKGROUND IMAGE) */
 #ethiobiz-atmosphere {
     position: fixed;
     top: 0;
@@ -10,28 +11,41 @@
     width: 100vw;
     height: 100vh;
     z-index: -1;
-    /* Default Gradient - updated dynamically by JS */
-    background: linear-gradient(135deg, #1A2C44 0%, #0E1A1A 100%);
+    background-image: linear-gradient(135deg, rgba(26, 44, 68, 0.72) 0%, rgba(14, 26, 26, 0.85) 100%), url("/assets/bismillah_ethiobiz/images/ethiobiz_desk_bg.png") !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
     transition: background 1s ease;
 }
 
-/* 2. CORE FRAPPE OVERRIDES */
-body {
-    background-color: transparent !important;
-    /* Let atmosphere show through */
-    color: #F8F6F2 !important;
-    /* Sacred Ivory Text */
-    font-family: 'Inter', sans-serif;
-}
-
-.layout-main-section {
+/* 2. CORE FRAPPE OVERRIDES - Glass Transparency */
+body,
+#app,
+.desk-page,
+.desk-body,
+.page-container,
+.layout-main-section,
+.layout-main-section-wrapper,
+.layout-main,
+.page-head,
+.page-body,
+.workspace-page,
+.form-page,
+.content,
+#page-container,
+.page-card-container,
+.widget-group,
+.standard-sidebar-section {
     background: transparent !important;
+    background-color: transparent !important;
+    color: #F8F6F2 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Navbar Glass */
 .navbar {
-    background: rgba(14, 26, 26, 0.7) !important;
-    /* Obsidian Semi-transparent */
+    background: rgba(14, 26, 26, 0.75) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -45,8 +59,9 @@ body {
 
 /* Sidebar Glass */
 .layout-side-section {
-    background: rgba(14, 26, 26, 0.4) !important;
-    backdrop-filter: blur(10px);
+    background: rgba(14, 26, 26, 0.45) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -58,20 +73,20 @@ body {
 .number-card-widget,
 .onboarding-widget-box {
     background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-panel:hover,
 .shortcut-widget-box:hover,
 .card:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    /* Lighten on hover */
+    background: rgba(255, 255, 255, 0.13) !important;
     transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 4. TYPOGRAPHY & TEXT */
@@ -87,17 +102,16 @@ h6,
 
 .text-muted,
 .widget-subtitle {
-    color: rgba(248, 246, 242, 0.6) !important;
+    color: rgba(248, 246, 242, 0.65) !important;
 }
 
 /* 5. INPUTS & CONTROLS (Round Copilot Style) */
 input.form-control,
 .frappe-control .control-input {
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: #fff !important;
     border-radius: 50px !important;
-    /* Pill Shape */
     padding-left: 20px !important;
 }
 
@@ -111,12 +125,12 @@ input.form-control:focus {
     border-radius: 50px !important;
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(31, 182, 174, 0.3);
-    /* Turquoise Glow */
 }
 
 /* 7. SCROLLBARS */
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -129,7 +143,7 @@ input.form-control:focus {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.35);
 }
 
 /* 8. WORKSPACE SPECIFICS */
@@ -137,26 +151,79 @@ input.form-control:focus {
     margin-bottom: 2rem;
 }
 
-/* ─── 9. BISMALLAH - HADEEDA CHAT WIDGET INPUT AREA OVERRIDES ─── */
-.chat-window-wrapper .chat-footer,
-.chat-window-wrapper [class*="chat-footer"],
+/* ─── 9. BISMALLAH - HADEEDA CHAT WIDGET COMPREHENSIVE UI FIX ─── */
+
+/* Chat wrapper container */
+.chat-window-wrapper {
+    z-index: 99999 !important;
+    position: fixed !important;
+    bottom: var(--chat--spacing, 1rem) !important;
+    right: var(--chat--spacing, 1rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+}
+
+/* Chat window - dynamic height so footer is never pushed out */
+.chat-window-wrapper .chat-window,
+.chat-window {
+    height: min(580px, calc(100vh - 100px)) !important;
+    max-height: calc(100vh - 90px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: rgba(13, 17, 23, 0.82) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(31, 182, 174, 0.35) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(31,182,174,0.18) !important;
+}
+
+/* Layout container inside window */
+.chat-layout,
+.chat-window .chat-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+/* Messages body - scrollable */
+.chat-layout .chat-body,
+.chat-body,
+.chat-messages-list {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    background: rgba(13, 17, 23, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Chat Footer - fixed height, flex shrink 0, fully visible */
+.chat-layout .chat-footer,
 .chat-footer,
+.chat-window-wrapper .chat-footer,
 [class*="chat-footer"] {
+    flex: 0 0 auto !important;
     background: rgba(13, 17, 23, 0.95) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     border: none !important;
     border-top: 1px solid rgba(255,255,255,0.08) !important;
-    padding: 8px 10px !important;
+    padding: 8px 12px !important;
     margin: 0 !important;
     width: 100% !important;
+    min-height: 54px !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     display: flex !important;
     align-items: center !important;
 }
 
-/* Container pill wrapping file upload, text input, send button */
+/* Container pill wrapping textarea and buttons */
 .chat-window-wrapper .chat-inputs,
 .chat-window-wrapper .chat-input-wrapper,
 .chat-inputs,
@@ -165,8 +232,8 @@ input.form-control:focus {
 [class*="chat-input-wrapper"] {
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 22px !important;
-    padding: 4px 6px 4px 12px !important;
+    border-radius: 24px !important;
+    padding: 3px 6px 3px 12px !important;
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -174,7 +241,7 @@ input.form-control:focus {
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
 
@@ -206,13 +273,13 @@ input.chat-input,
     border: none !important;
     outline: none !important;
     padding: 6px 4px !important;
-    font-size: 14px !important;
+    font-size: 13.5px !important;
     line-height: 1.4 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     box-shadow: none !important;
     resize: none !important;
     overflow-y: auto !important;
-    max-height: 80px !important;
+    max-height: 72px !important;
     margin: 0 !important;
 }
 
@@ -233,6 +300,16 @@ textarea.chat-input::placeholder,
     font-style: italic !important;
 }
 
+/* Controls wrapper */
+.chat-inputs-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 /* File Upload / Attachment Button */
 .chat-window-wrapper .chat-footer button:not(.chat-input-send-button),
 .chat-window-wrapper .chat-file-upload-button,
@@ -244,6 +321,7 @@ button[class*="file-upload"] {
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
+    min-height: 32px !important;
     background: rgba(255,255,255,0.1) !important;
     color: rgba(255,255,255,0.7) !important;
     border: 1px solid rgba(255,255,255,0.15) !important;
@@ -255,6 +333,7 @@ button[class*="file-upload"] {
     margin: 0 !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
 }
 
 .chat-footer button:not(.chat-input-send-button):hover,
@@ -263,17 +342,17 @@ button[class*="file-upload"]:hover {
     background: rgba(31,182,174,0.25) !important;
     color: #1FB6AE !important;
     border-color: #1FB6AE !important;
-    transform: scale(1.1) !important;
+    transform: scale(1.08) !important;
 }
 
 .chat-footer button:not(.chat-input-send-button) svg,
 .chat-file-upload-button svg,
 button[class*="file-upload"] svg {
-    width: 17px !important;
-    height: 17px !important;
+    width: 16px !important;
+    height: 16px !important;
 }
 
-/* Send Button */
+/* Send Button - Crisp, Round, Fully Visible */
 .chat-window-wrapper .chat-input-send-button,
 .chat-window-wrapper button.chat-input-send-button,
 .chat-input-send-button,
@@ -284,6 +363,9 @@ button[class*="send-button"] {
     width: 34px !important;
     height: 34px !important;
     min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
     background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
     color: #FFFFFF !important;
     border: none !important;
@@ -296,6 +378,10 @@ button[class*="send-button"] {
     cursor: pointer !important;
     box-shadow: 0 2px 8px rgba(31,182,174,0.4) !important;
     transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 5 !important;
 }
 
 .chat-input-send-button:hover,
@@ -318,6 +404,10 @@ button.chat-input-send-button:disabled {
 .chat-input-send-button svg,
 button.chat-input-send-button svg,
 button[class*="send-button"] svg {
-    width: 16px !important;
-    height: 16px !important;
+    width: 15px !important;
+    height: 15px !important;
+}
+
+.chat-powered-by {
+    display: none !important;
 }

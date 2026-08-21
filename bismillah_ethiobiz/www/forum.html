@@ -475,6 +475,10 @@
             }
         });
 
+    // Search input (must be declared before loadTopics is called)
+    const searchInput = document.getElementById('forum-search-input');
+    let searchTimeout = null;
+
     // Check if ?topic=TOPIC-... is present
     const urlParams = new URLSearchParams(window.location.search);
     const singleTopic = urlParams.get('topic');
@@ -515,9 +519,7 @@
         });
     });
 
-    // Search input
-    const searchInput = document.getElementById('forum-search-input');
-    let searchTimeout = null;
+    // Search input events
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
@@ -757,6 +759,10 @@
                 const btnLike = document.getElementById('btn-like-topic');
                 if (btnLike) {
                     btnLike.addEventListener('click', function() {
+                        if (!loggedUser || !loggedUser.is_logged_in) {
+                            window.location.href = '/login?redirect-to=/forum?topic=' + encodeURIComponent(t.name);
+                            return;
+                        }
                         fetch('/api/method/bismillah_ethiobiz.walta_forum_api.like_forum_topic?topic_id=' + encodeURIComponent(t.name))
                             .then(r => r.json())
                             .then(res => {
