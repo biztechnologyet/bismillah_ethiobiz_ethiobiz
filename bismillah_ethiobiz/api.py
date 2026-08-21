@@ -574,3 +574,47 @@ def update_website_context(context):
     for js in js_files:
         if js not in context.web_include_js:
             context.web_include_js.append(js)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_theme_settings():
+    """Return active EthioBiz theme settings including background and gradient configuration."""
+    try:
+        theme = frappe.get_single("EthioBiz Theme")
+        has_bg = bool(getattr(theme, "enable_background_images", 0))
+        return {
+            "app_name": getattr(theme, "app_name", "EthioBiz") or "EthioBiz",
+            "app_logo": getattr(theme, "app_logo", "") or "/assets/bismillah_ethiobiz/images/ethiobiz-glass-logo.png",
+            "primary_color": getattr(theme, "primary_color", "#1FB6AE") or "#1FB6AE",
+            "enable_background_images": has_bg,
+            "enable_desk_bg_image": has_bg and bool(getattr(theme, "enable_desk_bg_image", 0)),
+            "custom_desk_bg_image": getattr(theme, "custom_desk_bg_image", "") or "",
+            "enable_website_bg_image": has_bg and bool(getattr(theme, "enable_website_bg_image", 0)),
+            "custom_website_bg_image": getattr(theme, "custom_website_bg_image", "") or "",
+            "dark_gradient_style": getattr(theme, "dark_gradient_style", "Obsidian Teal & Emerald Aura (Default)"),
+            "bright_gradient_style": getattr(theme, "bright_gradient_style", "Sacred Ivory & Pearl Mist (Default)"),
+            "website_gradient_style": getattr(theme, "website_gradient_style", "Deep Cosmos & Emerald Glass (Default)"),
+            "glass_blur_intensity": getattr(theme, "glass_blur_intensity", "Balanced (16px)"),
+        }
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"get_theme_settings error: {e}")
+        return {
+            "app_name": "EthioBiz",
+            "primary_color": "#1FB6AE",
+            "enable_background_images": False,
+            "enable_desk_bg_image": False,
+            "enable_website_bg_image": False,
+        }
+
+
+def on_theme_update(doc, method=None):
+    """Triggered on save of EthioBiz Theme single doctype."""
+    try:
+        from bismillah_ethiobiz.ethiobiz_theme.doctype.ethiobiz_theme.ethiobiz_theme import EthioBizTheme
+        EthioBizTheme.generate_theme_css(doc)
+        frappe.clear_cache()
+        frappe.publish_realtime("ethiobiz_theme_updated", message={"status": "Theme Updated"})
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"on_theme_update error: {e}")
+
+
