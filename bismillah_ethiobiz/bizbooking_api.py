@@ -19,15 +19,15 @@ def get_booking_catalog(category=None):
         if frappe.db.exists("DocType", "BizBooking Resource"):
             rooms = frappe.get_all(
                 "BizBooking Resource",
-                filters={"category": "Hotel Room & Suite", "is_active": 1},
-                fields=["name", "resource_name", "company", "rate_per_slot", "capacity", "description"]
+                filters={"category": ["in", ["Hotel Room", "Hotel Room & Suite"]], "is_active": 1},
+                fields=["name", "resource_name", "company", "base_rate", "capacity", "description"]
             )
             for r in rooms:
                 catalog["hotels"].append({
                     "id": r.name,
                     "title": r.resource_name,
                     "company": r.company or "Biz Technology Solutions",
-                    "price_per_night": r.rate_per_slot or 2500.0,
+                    "price_per_night": r.base_rate or 2500.0,
                     "capacity": f"{r.capacity or 2} Guests",
                     "description": r.description or "Luxury accommodation with high-speed WiFi, breakfast buffet, and mountain views.",
                     "image": "/files/hotel_suite.jpg"
@@ -39,18 +39,23 @@ def get_booking_catalog(category=None):
             docs = frappe.get_all(
                 "BizBooking Resource",
                 filters={"category": "Medical Clinic & Doctor", "is_active": 1},
-                fields=["name", "resource_name", "company", "rate_per_slot", "description"]
+                fields=["name", "resource_name", "company", "base_rate", "description"]
             )
             for d in docs:
+                spec = "Cardiology & Specialist Medicine"
+                if "Dental" in d.resource_name: spec = "Dental Surgery & Orthodontics"
+                elif "Pediatric" in d.resource_name: spec = "Pediatrics & Child Wellness"
+                elif "Dermatology" in d.resource_name: spec = "Dermatology & Skin Health"
+
                 catalog["doctors"].append({
                     "id": d.name,
                     "name": d.resource_name,
-                    "specialty": "Cardiology & Specialist Medicine",
+                    "specialty": spec,
                     "qualifications": "MD, MBBS - Senior Consultant",
-                    "experience": "12+ Years Experience",
+                    "experience": "10+ Years Experience",
                     "rating": 4.9,
                     "clinic": d.company or "EthioBiz Specialist Medical Center",
-                    "fee": d.rate_per_slot or 1200.0,
+                    "fee": d.base_rate or 1200.0,
                     "image": "/files/doctor_cardio.jpg",
                     "available_today": True
                 })
@@ -75,6 +80,25 @@ def get_booking_catalog(category=None):
                     "image": s.service_image or "/files/salon_haircut.jpg"
                 })
 
+        # Also add Salon Chairs from BizBooking Resource
+        if frappe.db.exists("DocType", "BizBooking Resource"):
+            chairs = frappe.get_all(
+                "BizBooking Resource",
+                filters={"category": "Salon Chair & Stylist", "is_active": 1},
+                fields=["name", "resource_name", "company", "base_rate", "description"]
+            )
+            for c in chairs:
+                catalog["salons"].append({
+                    "id": c.name,
+                    "name": c.resource_name,
+                    "category": "Styling Chair & Barber",
+                    "price": c.base_rate or 600.0,
+                    "duration": "45 mins",
+                    "company": c.company or "Biz Technology Solutions",
+                    "description": c.description or "Executive styling chair reservation with master barbers.",
+                    "image": "/files/salon_haircut.jpg"
+                })
+
     # 4. PROPERTIES & SPACES
     if category in ("all", "properties", "property"):
         if frappe.db.exists("DocType", "BizBooking Resource"):
@@ -88,7 +112,7 @@ def get_booking_catalog(category=None):
                     "id": pr.name,
                     "title": pr.resource_name,
                     "company": pr.company or "Kistet Engineering & Trading",
-                    "price": "Free Appointment",
+                    "price": "Free Tour",
                     "description": pr.description or "Guided on-site tour of residential luxury villas and prime commercial spaces."
                 })
 
@@ -162,7 +186,7 @@ def create_unified_booking(
         rate = 2500.0
         comp = "Biz Technology Solutions"
         if resource_id and frappe.db.exists("BizBooking Resource", resource_id):
-            rate = frappe.db.get_value("BizBooking Resource", resource_id, "rate_per_slot") or 2500.0
+            rate = frappe.db.get_value("BizBooking Resource", resource_id, "base_rate") or 2500.0
             comp = frappe.db.get_value("BizBooking Resource", resource_id, "company") or comp
 
         nights = 1
@@ -204,6 +228,11 @@ def create_unified_booking(
             srv_name = srv_doc.service_name
             amount = srv_doc.price
             comp = srv_doc.company or comp
+        elif resource_id and frappe.db.exists("BizBooking Resource", resource_id):
+            r_doc = frappe.get_doc("BizBooking Resource", resource_id)
+            srv_name = r_doc.resource_name
+            amount = r_doc.base_rate or 600.0
+            comp = r_doc.company or comp
 
         if frappe.db.exists("DocType", "Salon Appointment"):
             try:
@@ -269,7 +298,7 @@ def create_online_booking(
 ):
     """Direct booking handler called from Homepage instant booking drawer."""
     return create_unified_booking(
-        booking_type="salon" if "Hair" in str(resource_name) or "Facial" in str(resource_name) or "Massage" in str(resource_name) else "generic",
+        booking_type="salon" if "Hair" in str(resource_name) or "Facial" in str(resource_name) or "Massage" in str(resource_name) or "Chair" in str(resource_name) else "generic",
         resource_id=resource_name,
         customer_name=customer_name,
         customer_phone=customer_phone,
