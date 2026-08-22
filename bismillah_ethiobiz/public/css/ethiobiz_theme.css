@@ -6,7 +6,7 @@
 /* 1. ATMOSPHERE ROOT VARIABLES & LAYER */
 :root {
     --ethiobiz-atmosphere-dark: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(31, 182, 174, 0.18) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 85% 105%, rgba(46, 58, 140, 0.22) 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, rgba(20, 121, 116, 0.08) 0%, transparent 50%), linear-gradient(135deg, #0A1118 0%, #0D1B1E 40%, #0E1A1A 70%, #081014 100%);
-    --ethiobiz-atmosphere-bright: radial-gradient(ellipse 80% 60% at 15% 0%, rgba(31, 182, 174, 0.09) 0%, transparent 50%), radial-gradient(ellipse 70% 50% at 85% 100%, rgba(46, 58, 140, 0.07) 0%, transparent 50%), linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 45%, #E9ECEF 100%);
+    --ethiobiz-atmosphere-bright: radial-gradient(ellipse 90% 70% at 15% 10%, rgba(31, 182, 174, 0.18) 0%, rgba(13, 148, 136, 0.08) 35%, transparent 70%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(99, 102, 241, 0.12) 0%, rgba(59, 130, 246, 0.06) 40%, transparent 70%), linear-gradient(145deg, #f8fafc 0%, #f0fdfa 30%, #f1f5f9 60%, #e2e8f0 100%);
     --ethiobiz-website-atmosphere: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(31, 182, 174, 0.16) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 90% 90%, rgba(46, 58, 140, 0.18) 0%, transparent 60%), linear-gradient(135deg, #090E14 0%, #0D161B 40%, #0A1215 100%);
     --ethiobiz-glass-blur: 16px;
     --ethiobiz-bg-images-enabled: 0;
@@ -34,7 +34,8 @@
 
 [data-theme="light"] #ethiobiz-atmosphere,
 html[data-theme="light"] #ethiobiz-atmosphere,
-body.light-theme #ethiobiz-atmosphere {
+body.light-theme #ethiobiz-atmosphere,
+[data-theme="light"] body {
     background: var(--ethiobiz-atmosphere-bright) !important;
     background-size: cover !important;
     background-position: center center !important;
@@ -80,39 +81,44 @@ body,
 .standard-sidebar-section {
     background: transparent !important;
     background-color: transparent !important;
-    color: #F8F6F2 !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Navbar Glass */
-.navbar {
+/* ─── DARK THEME DEFAULTS (When data-theme != light) ─── */
+:not([data-theme="light"]) .desk-page,
+:not([data-theme="light"]) .desk-body,
+:not([data-theme="light"]) .layout-main-section,
+:not([data-theme="light"]) .workspace-page,
+:not([data-theme="light"]) .widget-group {
+    color: #F8F6F2 !important;
+}
+
+:not([data-theme="light"]) .navbar {
     background: rgba(14, 26, 26, 0.75) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.navbar-brand .app-name {
+:not([data-theme="light"]) .navbar-brand .app-name {
     font-weight: 700;
     letter-spacing: 0.5px;
     color: #F8F6F2 !important;
 }
 
-/* Sidebar Glass */
-.layout-side-section {
+:not([data-theme="light"]) .layout-side-section {
     background: rgba(14, 26, 26, 0.45) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* 3. GLASSMORPHISM UTILITIES */
-.glass-panel,
-.card,
-.shortcut-widget-box,
-.widget,
-.number-card-widget,
-.onboarding-widget-box {
+:not([data-theme="light"]) .glass-panel,
+:not([data-theme="light"]) .card,
+:not([data-theme="light"]) .shortcut-widget-box,
+:not([data-theme="light"]) .widget,
+:not([data-theme="light"]) .number-card-widget,
+:not([data-theme="light"]) .onboarding-widget-box {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
@@ -122,33 +128,133 @@ body,
     transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.glass-panel:hover,
-.shortcut-widget-box:hover,
-.card:hover {
-    background: rgba(255, 255, 255, 0.13) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
-}
-
-/* 4. TYPOGRAPHY & TEXT */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.widget-title {
+:not([data-theme="light"]) body[data-route*="app"] h1,
+:not([data-theme="light"]) body[data-route*="app"] h2,
+:not([data-theme="light"]) body[data-route*="app"] h3,
+:not([data-theme="light"]) body[data-route*="app"] h4,
+:not([data-theme="light"]) body[data-route*="app"] h5,
+:not([data-theme="light"]) body[data-route*="app"] h6,
+:not([data-theme="light"]) body[data-route*="app"] .widget-title {
     color: #F8F6F2 !important;
 }
 
-.text-muted,
-.widget-subtitle {
+:not([data-theme="light"]) body[data-route*="app"] .text-muted,
+:not([data-theme="light"]) body[data-route*="app"] .widget-subtitle {
     color: rgba(248, 246, 242, 0.65) !important;
 }
 
-/* 5. INPUTS & CONTROLS (Round Copilot Style) */
-input.form-control,
-.frappe-control .control-input {
+/* ─── 3. LIGHT / WHITE THEME OVERRIDES (Full Contrast & Luminous Gradient) ─── */
+[data-theme="light"] .desk-page,
+[data-theme="light"] .desk-body,
+[data-theme="light"] .page-container,
+[data-theme="light"] .layout-main-section,
+[data-theme="light"] .workspace-page,
+[data-theme="light"] .widget-group,
+[data-theme="light"] .layout-main {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .glass-panel,
+[data-theme="light"] .card,
+[data-theme="light"] .widget,
+[data-theme="light"] .shortcut-widget-box,
+[data-theme="light"] .number-card-widget,
+[data-theme="light"] .quick-list-widget,
+[data-theme="light"] .onboarding-widget-box,
+[data-theme="light"] .dashboard-widget-box,
+[data-theme="light"] .custom-actions,
+[data-theme="light"] .widget.quick-list-widget-box {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(0, 128, 128, 0.07) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] .widget-title,
+[data-theme="light"] .title,
+[data-theme="light"] .page-head h1,
+[data-theme="light"] .page-head .title-text {
+    color: #072a2e !important;
+    font-weight: 800 !important;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] span:not(.badge):not(.indicator),
+[data-theme="light"] .list-item,
+[data-theme="light"] .list-row,
+[data-theme="light"] .list-row-col,
+[data-theme="light"] .grid-row,
+[data-theme="light"] a:not(.btn),
+[data-theme="light"] .item-title,
+[data-theme="light"] .field-value,
+[data-theme="light"] .ellipsis,
+[data-theme="light"] .list-item__content {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .text-muted,
+[data-theme="light"] .widget-subtitle,
+[data-theme="light"] .sub-heading,
+[data-theme="light"] .comment-header,
+[data-theme="light"] .text-extra-muted,
+[data-theme="light"] .time-ago {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .quick-list-widget .list-item-container,
+[data-theme="light"] .quick-list-widget .list-row,
+[data-theme="light"] .list-row-container {
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #0f172a !important;
+}
+[data-theme="light"] .quick-list-widget .list-item-container:hover,
+[data-theme="light"] .list-row:hover {
+    background: #f0fdfa !important;
+}
+
+[data-theme="light"] .layout-side-section,
+[data-theme="light"] .desk-sidebar {
+    background: rgba(248, 250, 252, 0.9) !important;
+    backdrop-filter: blur(14px) !important;
+    border-right: 1px solid #cbd5e1 !important;
+}
+[data-theme="light"] .sidebar-item-label,
+[data-theme="light"] .desk-sidebar a,
+[data-theme="light"] .standard-sidebar-item {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+[data-theme="light"] .standard-sidebar-item.selected,
+[data-theme="light"] .sidebar-item.selected {
+    background: #008080 !important;
+    color: #ffffff !important;
+}
+[data-theme="light"] .standard-sidebar-item.selected .sidebar-item-label,
+[data-theme="light"] .sidebar-item.selected .sidebar-item-label {
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(0, 128, 128, 0.15) !important;
+}
+[data-theme="light"] .navbar-brand .app-name,
+[data-theme="light"] .navbar .nav-link {
+    color: #072a2e !important;
+    font-weight: 700 !important;
+}
+
+/* 5. DESK INPUTS & CONTROLS (Round Copilot Style for Desk Only) */
+body[data-route*="app"] input.form-control,
+body[data-route*="app"] .frappe-control .control-input {
     background: rgba(0, 0, 0, 0.35) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: #fff !important;
@@ -156,16 +262,253 @@ input.form-control,
     padding-left: 20px !important;
 }
 
-input.form-control:focus {
+body[data-route*="app"] input.form-control:focus {
     box-shadow: 0 0 0 2px var(--primary-color) !important;
     border-color: var(--primary-color) !important;
 }
 
-/* 6. BUTTONS */
-.btn-primary {
-    border-radius: 50px !important;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(31, 182, 174, 0.3);
+/* 5.1 WEB FORMS & WEBSITE PORTAL CONTROLS (Crisp High-Contrast Typography & Inputs) */
+body.website-page,
+.website-wrapper,
+#page-container.website-view,
+.web-form-page,
+.page-dobiz-payment,
+[data-path*="dobiz-payment"],
+[data-path*="dobiz-signup"],
+[data-doctype="Web Form"] {
+    background: radial-gradient(circle at 15% 15%, rgba(13, 148, 136, 0.4) 0%, rgba(7, 42, 46, 0.95) 45%, #031c1f 100%), linear-gradient(180deg, #072a2e 0%, #031c1f 100%) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+    color: #0f172a;
+}
+
+/* Card Container for all Web Forms */
+.web-form-container,
+.web-form-wrapper,
+.web-form,
+.standard-web-form,
+.web-form-body,
+.form-page .card,
+.web-form-container .card,
+.web-form-wrapper .card,
+.standard-web-form .card,
+.dob-signup-card,
+.dob-pay-card,
+div[data-doctype="Web Form"] .card,
+div[data-path*="dobiz-payment"] .web-form-container,
+div[data-path*="dobiz-payment"] .card {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
+    padding: 36px 32px !important;
+    color: #0f172a !important;
+}
+
+/* Headings in Web Forms & Website Pages */
+.web-form-container h1,
+.web-form-container h2,
+.web-form-container h3,
+.web-form-container h4,
+.web-form-wrapper h1,
+.web-form-wrapper h2,
+.web-form-wrapper h3,
+.standard-web-form h1,
+.standard-web-form h2,
+.web-form-header h1,
+.web-form-title,
+.form-title,
+.page-title,
+.web-page-container h1,
+.web-page-container h2,
+.dob-signup-title,
+.dob-pay-title,
+div[data-path*="dobiz-payment"] h1,
+div[data-path*="dobiz-payment"] .form-title,
+div[data-path*="dobiz-payment"] .title {
+    color: #072a2e !important;
+    font-weight: 900 !important;
+    font-size: 24px !important;
+    margin-bottom: 18px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ALL Form Labels in Web Forms */
+.web-form-container label,
+.web-form-container .control-label,
+.web-form-wrapper label,
+.web-form-wrapper .control-label,
+.standard-web-form label,
+.standard-web-form .control-label,
+.web-form label,
+.web-form .control-label,
+.frappe-control .control-label,
+.form-group label,
+.form-group .control-label,
+.dob-signup-container label,
+.dob-pay-container label,
+div[data-path*="dobiz-payment"] label,
+div[data-path*="dobiz-payment"] .control-label {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    opacity: 1 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+    visibility: visible !important;
+}
+
+/* Required Indicator */
+.web-form-container .reqd,
+.standard-web-form .reqd,
+.control-label .reqd,
+label .reqd {
+    color: #dc2626 !important;
+    font-weight: 900 !important;
+}
+
+/* ALL Input Fields in Web Forms */
+.web-form-container input,
+.web-form-container select,
+.web-form-container textarea,
+.web-form-container input.form-control,
+.web-form-container select.form-control,
+.web-form-container textarea.form-control,
+.web-form-wrapper input,
+.web-form-wrapper select,
+.web-form-wrapper textarea,
+.standard-web-form input,
+.standard-web-form select,
+.standard-web-form textarea,
+.standard-web-form input.form-control,
+.standard-web-form select.form-control,
+.standard-web-form textarea.form-control,
+.web-form input,
+.web-form select,
+.web-form textarea,
+.web-form input.form-control,
+.web-form select.form-control,
+.web-form textarea.form-control,
+.web-form-container .control-input input,
+.web-form-container .control-input select,
+.web-form-container .control-input textarea,
+.dob-signup-container input,
+.dob-signup-container select,
+.dob-signup-container textarea,
+.dob-pay-container input,
+.dob-pay-container select,
+.dob-pay-container textarea,
+div[data-path*="dobiz-payment"] input,
+div[data-path*="dobiz-payment"] select,
+div[data-path*="dobiz-payment"] textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    font-size: 14.5px !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.web-form-container input:focus,
+.web-form-container select:focus,
+.web-form-container textarea:focus,
+.standard-web-form input:focus,
+.standard-web-form select:focus,
+.standard-web-form textarea:focus,
+.dob-signup-container input:focus,
+.dob-signup-container select:focus,
+.dob-pay-container input:focus,
+.dob-pay-container select:focus,
+div[data-path*="dobiz-payment"] input:focus,
+div[data-path*="dobiz-payment"] select:focus {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #008080 !important;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2) !important;
+}
+
+/* Readonly / Disabled inputs */
+.web-form-container input[readonly],
+.web-form-container input[disabled],
+.web-form-container .like-disabled-input,
+.standard-web-form input[readonly],
+.standard-web-form input[disabled],
+.standard-web-form .like-disabled-input,
+div[data-path*="dobiz-payment"] input[readonly],
+div[data-path*="dobiz-payment"] .like-disabled-input {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-weight: 600 !important;
+}
+
+/* Help Text / Text Muted in Web Forms */
+.web-form-container .help-box,
+.web-form-container .text-muted,
+.web-form-container .form-text,
+.standard-web-form .help-box,
+.standard-web-form .text-muted,
+.standard-web-form .form-text {
+    color: #475569 !important;
+    font-size: 12.5px !important;
+}
+
+/* Web Form Action Buttons */
+.web-form-container .btn-primary,
+.standard-web-form .btn-primary,
+.web-form-footer .btn-primary,
+.web-form-actions .btn-primary,
+div[data-path*="dobiz-payment"] .btn-primary {
+    background: linear-gradient(135deg, #008080 0%, #0d9488 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 24px !important;
+    font-weight: 800 !important;
+    padding: 12px 28px !important;
+    font-size: 15px !important;
+    box-shadow: 0 4px 16px rgba(0, 128, 128, 0.3) !important;
+    cursor: pointer !important;
+}
+
+/* Navbar on Website & Portal Pages */
+body.website-page .navbar,
+.website-wrapper .navbar,
+div[data-path*="dobiz-payment"] .navbar,
+div[data-path*="dobiz-signup"] .navbar {
+    background: rgba(7, 42, 46, 0.95) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(31, 182, 174, 0.3) !important;
+}
+body.website-page .navbar-brand .app-name,
+body.website-page .navbar .nav-link,
+.website-wrapper .navbar .nav-link {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.web-form-container .btn-primary:hover,
+.standard-web-form .btn-primary:hover,
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(0, 128, 128, 0.4) !important;
+}
+
+.web-form-container .btn-default,
+.standard-web-form .btn-default,
+.web-form-footer .btn-default {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 24px !important;
+    padding: 10px 20px !important;
 }
 
 /* 7. SCROLLBARS */

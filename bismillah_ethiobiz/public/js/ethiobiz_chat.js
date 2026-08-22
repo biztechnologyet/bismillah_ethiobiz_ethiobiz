@@ -185,15 +185,20 @@
                     color: #FFFFFF !important; padding: 0 1.1rem 0 0.6rem !important;
                     gap: 0.45rem !important; cursor: pointer !important; white-space: nowrap !important;
                     border: none !important; position: relative !important;
+                    display: inline-flex !important; align-items: center !important; justify-content: center !important;
                     animation: hadeeda-toggle-enter 0.7s cubic-bezier(0.34,1.56,0.64,1) both,
                                hadeeda-toggle-glow 3s ease-in-out 0.8s infinite !important;
                     box-shadow: 0 4px 20px rgba(31,182,174,0.35), 0 0 0 2px rgba(13,17,23,0.6) !important;
+                    transition: all 0.25s ease !important;
                 }
+
+                /* Collapsed text & logo */
                 .chat-window-wrapper .chat-window-toggle::before {
                     content: 'HADEEDA AI' !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     font-weight: 700 !important; font-size: 0.85rem !important;
                     color: #FFFFFF !important; order: 1 !important;
+                    pointer-events: none !important;
                     text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
                 }
                 .chat-window-wrapper .chat-window-toggle::after {
@@ -202,6 +207,7 @@
                     background-image: url('/assets/bismillah_ethiobiz/images/hadeeda_logo.png') !important;
                     background-size: cover !important; background-position: center !important;
                     background-repeat: no-repeat !important; flex-shrink: 0 !important; order: 0 !important;
+                    pointer-events: none !important;
                 }
                 .chat-window-wrapper .chat-window-toggle:hover {
                     background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
@@ -210,24 +216,97 @@
                     animation: none !important;
                 }
 
-                /* ─── TRANSLUCENT GLASS CHAT WINDOW ─── */
+                /* ─── EXPANDED / OPEN STATE FOR TOGGLE BUTTON (Shows '✕') ─── */
+                .chat-window-wrapper.chat-open .chat-window-toggle,
+                .chat-window-wrapper.chat-window-open .chat-window-toggle,
+                .chat-window-toggle.chat-open,
+                .chat-window-toggle.open,
+                .chat-window-toggle[aria-expanded="true"] {
+                    width: 52px !important; min-width: 52px !important; height: 52px !important;
+                    border-radius: 50% !important; padding: 0 !important;
+                    background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%) !important;
+                    box-shadow: 0 4px 20px rgba(225,29,72,0.45), 0 0 0 2px rgba(13,17,23,0.6) !important;
+                    animation: none !important;
+                }
+                .chat-window-wrapper.chat-open .chat-window-toggle::before,
+                .chat-window-wrapper.chat-window-open .chat-window-toggle::before,
+                .chat-window-toggle.chat-open::before,
+                .chat-window-toggle.open::before,
+                .chat-window-toggle[aria-expanded="true"]::before {
+                    content: '✕' !important;
+                    font-size: 1.35rem !important;
+                    font-weight: 900 !important;
+                    line-height: 1 !important;
+                    color: #FFFFFF !important;
+                    order: 0 !important;
+                    pointer-events: none !important;
+                }
+                .chat-window-wrapper.chat-open .chat-window-toggle::after,
+                .chat-window-wrapper.chat-window-open .chat-window-toggle::after,
+                .chat-window-toggle.chat-open::after,
+                .chat-window-toggle.open::after,
+                .chat-window-toggle[aria-expanded="true"]::after {
+                    display: none !important;
+                }
+
+                /* ─── TRANSLUCENT GLASS CHAT WINDOW (Collapsed by Default) ─── */
                 .chat-window-wrapper .chat-window,
+                .chat-window {
+                    display: none !important;
+                    background: rgba(13, 17, 23, 0.94) !important;
+                    backdrop-filter: blur(24px) saturate(180%) !important;
+                    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+                    border: 1.5px solid rgba(31, 182, 174, 0.4) !important;
+                    border-radius: 20px !important;
+                    overflow: hidden !important;
+                    box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 24px rgba(31,182,174,0.25) !important;
+                    height: min(520px, calc(100vh - 110px)) !important;
+                    max-height: calc(100vh - 110px) !important;
+                    width: min(390px, calc(100vw - 24px)) !important;
+                    position: fixed !important;
+                    bottom: 80px !important;
+                    right: 20px !important;
+                    z-index: 99999 !important;
+                }
+
+                /* Show window ONLY when expanded */
+                .chat-window-wrapper.chat-open .chat-window,
+                .chat-window-wrapper.chat-window-open .chat-window,
+                .chat-window.chat-window-open,
+                .chat-window[data-open="true"],
+                .chat-window-wrapper[data-open="true"] .chat-window {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    animation: hadeeda-window-open 0.25s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+                }
+
                 .chat-layout {
-                    background: rgba(13, 17, 23, 0.75) !important;
-                    backdrop-filter: blur(20px) saturate(180%) !important;
-                    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-                    border: 1px solid rgba(31, 182, 174, 0.35) !important;
-                    border-radius: 18px !important; overflow: hidden !important;
-                    animation: hadeeda-window-open 0.3s ease-out both !important;
-                    box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(31,182,174,0.18) !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    height: 100% !important;
+                    max-height: 100% !important;
+                    min-height: 100% !important;
+                    width: 100% !important;
+                    overflow: hidden !important;
+                    position: relative !important;
+                    background: transparent !important;
+                    flex: 1 1 100% !important;
                 }
 
                 /* ─── HEADER ─── */
                 .chat-layout .chat-header,
                 .chat-header {
+                    flex: 0 0 50px !important;
+                    height: 50px !important;
+                    min-height: 50px !important;
+                    max-height: 50px !important;
                     background: linear-gradient(135deg, rgba(31, 182, 174, 0.95) 0%, rgba(20, 121, 116, 0.95) 100%) !important;
                     color: #FFFFFF !important; position: relative !important; overflow: hidden !important;
-                    padding: 12px 16px !important;
+                    padding: 0 16px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    box-sizing: border-box !important;
                 }
                 .chat-layout .chat-header h1,
                 .chat-layout .chat-header .chat-title,
@@ -239,6 +318,7 @@
                 .chat-header button {
                     color: #FFFFFF !important; opacity: 0.85 !important;
                     background: transparent !important; border: none !important;
+                    cursor: pointer !important;
                 }
                 .chat-header-close:hover,
                 .chat-header button:hover {
@@ -250,9 +330,17 @@
                 .chat-layout .chat-body,
                 .chat-body,
                 .chat-messages-list {
+                    flex: 1 1 auto !important;
+                    min-height: 0 !important;
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow-y: auto !important;
                     background: rgba(13, 17, 23, 0.65) !important;
                     backdrop-filter: blur(16px) !important;
                     -webkit-backdrop-filter: blur(16px) !important;
+                    padding: 12px 14px !important;
+                    display: flex !important;
+                    flex-direction: column !important;
                 }
 
                 .chat-message.chat-message-from-bot:not(.chat-message-transparent) {
@@ -278,23 +366,26 @@
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                                /* ─── HADEEDA CHAT FOOTER & INPUT AREA ─── */
+                /* ─── HADEEDA CHAT FOOTER & INPUT AREA ─── */
+                .chat-layout .chat-footer,
                 .chat-footer,
                 [class*="chat-footer"] {
-                    background: rgba(13, 17, 23, 0.95) !important;
-                    backdrop-filter: blur(16px) !important;
-                    -webkit-backdrop-filter: blur(16px) !important;
+                    background: rgba(10, 14, 18, 0.98) !important;
+                    backdrop-filter: blur(20px) !important;
+                    -webkit-backdrop-filter: blur(20px) !important;
                     border: none !important;
-                    border-top: 1px solid rgba(255,255,255,0.08) !important;
-                    padding: 8px 12px !important;
+                    border-top: 1px solid rgba(31, 182, 174, 0.25) !important;
+                    padding: 10px 12px !important;
                     margin: 0 !important;
                     width: 100% !important;
-                    min-height: 54px !important;
+                    min-height: 60px !important;
                     box-sizing: border-box !important;
                     overflow: visible !important;
                     display: flex !important;
                     align-items: center !important;
                     flex: 0 0 auto !important;
+                    position: relative !important;
+                    z-index: 25 !important;
                 }
 
                 /* Container pill wrapping file upload, text input, send button */
@@ -599,6 +690,56 @@
                         }, 500);
                     }
                 });
+            }
+
+            // Toggle open / collapsed state tracker
+            function setupToggleHandler() {
+                const wrapper = document.querySelector('.chat-window-wrapper');
+                const toggle = document.querySelector('.chat-window-toggle');
+                if (!wrapper || !toggle) return false;
+
+                // Ensure collapsed by default on initial page load
+                wrapper.classList.remove('chat-open', 'chat-window-open');
+                toggle.classList.remove('chat-open', 'open');
+                toggle.setAttribute('aria-expanded', 'false');
+
+                function setOpen(isOpen) {
+                    const chatWin = wrapper.querySelector('.chat-window');
+                    if (isOpen) {
+                        wrapper.classList.add('chat-open', 'chat-window-open');
+                        toggle.classList.add('chat-open', 'open');
+                        toggle.setAttribute('aria-expanded', 'true');
+                        if (chatWin) chatWin.style.setProperty('display', 'flex', 'important');
+                    } else {
+                        wrapper.classList.remove('chat-open', 'chat-window-open');
+                        toggle.classList.remove('chat-open', 'open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        if (chatWin) chatWin.style.setProperty('display', 'none', 'important');
+                    }
+                }
+
+                // Explicit click toggle
+                toggle.addEventListener('click', function (e) {
+                    const isCurrentlyOpen = wrapper.classList.contains('chat-open');
+                    setOpen(!isCurrentlyOpen);
+                });
+
+                // Close button in header
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('.chat-header-close') || e.target.closest('[class*="header-close"]') || e.target.closest('.chat-close-button')) {
+                        setOpen(false);
+                    }
+                });
+
+                setOpen(false);
+                return true;
+            }
+
+            if (!setupToggleHandler()) {
+                const initObs = new MutationObserver(() => {
+                    if (setupToggleHandler()) initObs.disconnect();
+                });
+                initObs.observe(document.body, { childList: true, subtree: true });
             }
 
         } catch (e) {

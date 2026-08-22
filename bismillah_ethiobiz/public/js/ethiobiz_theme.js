@@ -395,8 +395,10 @@
 })();
 
 // BISMALLAH ETHIOBIZ FLOATING SIDEBAR V6
-frappe.ready(function () {
-    if (document.querySelector('.web-form')) return;
+(function() {
+    function initSidebar() {
+        if (typeof frappe === 'undefined') return;
+        if (document.querySelector('.web-form')) return;
 
     // Block "Try the new Print Designer" at source BEFORE it reaches DOM
     // Override frappe Page prototype add_inner_message
@@ -651,6 +653,14 @@ frappe.ready(function () {
     if (document.body) {
         sidebarObserver.observe(document.body, { childList: true, subtree: true });
     }
+}
 
-});
+if (typeof frappe !== 'undefined' && frappe.ready) {
+    frappe.ready(initSidebar);
+} else if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebar);
+} else {
+    initSidebar();
+}
+})();
 // END BISMALLAH ETHIOBIZ FLOATING SIDEBAR V6

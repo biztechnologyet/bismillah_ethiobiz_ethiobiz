@@ -1,0 +1,955 @@
+{% extends "templates/web.html" %}
+
+{% block title %}DOBiz Smart ERP Enterprise Signup | EthioBiz{% endblock %}
+
+{% block head_include %}
+<style>
+    :root {
+        --dob-teal: #008080;
+        --dob-teal-dark: #005a5a;
+        --dob-teal-light: #0d9488;
+        --dob-navy: #072a2e;
+        --dob-gold: #d97706;
+        --dob-bg: #072a2e;
+        --dob-card: #ffffff;
+        --dob-border: #cbd5e1;
+        --dob-heading: #072a2e;
+        --dob-text: #0f172a;
+        --dob-muted: #475569;
+    }
+
+    /* Entire Page Fixed Seamless Gradient */
+    html, body, #page-container, .page-content, main, .main-section, .web-page-container {
+        background: radial-gradient(circle at 15% 15%, rgba(13, 148, 136, 0.4) 0%, rgba(7, 42, 46, 0.95) 45%, #031c1f 100%), linear-gradient(180deg, #072a2e 0%, #031c1f 100%) !important;
+        background-attachment: fixed !important;
+        min-height: 100vh !important;
+        color: #0f172a;
+    }
+
+    .dob-signup-container {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 30px 16px 90px 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    /* Hero Banner */
+    .dob-hero {
+        background: rgba(13, 17, 23, 0.65) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid rgba(31, 182, 174, 0.35) !important;
+        color: #ffffff !important;
+        padding: 38px 24px;
+        border-radius: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 24px rgba(31,182,174,0.15);
+    }
+    .dob-hero-badge {
+        background: rgba(31, 182, 174, 0.25) !important;
+        border: 1px solid rgba(31, 182, 174, 0.5) !important;
+        color: #5eead4 !important;
+        font-size: 11.5px;
+        font-weight: 800;
+        padding: 6px 18px;
+        border-radius: 20px;
+        display: inline-block;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+    .dob-hero h1 {
+        font-size: 2.2rem !important;
+        font-weight: 900 !important;
+        margin: 0 0 10px 0 !important;
+        color: #ffffff !important;
+        letter-spacing: -0.5px;
+    }
+    .dob-hero p {
+        font-size: 15.5px !important;
+        color: rgba(255,255,255,0.92) !important;
+        max-width: 720px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Spam Notice Banner */
+    .dob-spam-notice {
+        background: #fffbeb !important;
+        border: 1.5px solid #fde68a !important;
+        border-radius: 16px;
+        padding: 14px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #92400e !important;
+        font-size: 13.5px !important;
+        line-height: 1.5;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .dob-spam-notice strong {
+        color: #78350f !important;
+    }
+
+    /* Resource Info Cards */
+    .dob-info-cards-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+        .dob-info-cards-row { grid-template-columns: 1fr; }
+    }
+    .dob-info-box {
+        background: #ffffff !important;
+        border: 1.5px solid #99f6e4 !important;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .dob-info-box.blue {
+        border-color: #bfdbfe !important;
+    }
+    .dob-info-text {
+        font-size: 13.5px !important;
+        color: #0f766e !important;
+        line-height: 1.5;
+    }
+    .dob-info-text strong {
+        color: #115e59 !important;
+    }
+    .dob-info-box.blue .dob-info-text {
+        color: #1e40af !important;
+    }
+    .dob-info-box.blue .dob-info-text strong {
+        color: #1e3a8a !important;
+    }
+    .dob-info-btn {
+        background: #008080 !important;
+        color: #ffffff !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        padding: 9px 18px;
+        border-radius: 20px;
+        text-decoration: none !important;
+        white-space: nowrap;
+        transition: all 0.2s;
+        box-shadow: 0 2px 6px rgba(0,128,128,0.25);
+    }
+    .dob-info-box.blue .dob-info-btn {
+        background: #1d4ed8 !important;
+        box-shadow: 0 2px 6px rgba(29,78,216,0.25);
+    }
+    .dob-info-btn:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+    }
+
+    /* Step Card */
+    .dob-step-card {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 20px;
+        padding: 28px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    .dob-step-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .dob-step-num {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #008080 !important;
+        color: #ffffff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+    .dob-step-title {
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        color: #072a2e !important;
+        margin: 0 !important;
+        letter-spacing: -0.2px;
+    }
+
+    /* Industry Grid */
+    .dob-industry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+    .dob-ind-btn {
+        background: #f8fafc !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 14px;
+        padding: 14px 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+    }
+    .dob-ind-btn:hover {
+        border-color: #008080 !important;
+        background: #f0fdfa !important;
+        color: #008080 !important;
+    }
+    .dob-ind-btn.active {
+        border-color: #008080 !important;
+        background: #008080 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(0,128,128,0.3) !important;
+    }
+    .dob-ind-icon {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    /* Packages Grid */
+    .dob-pkg-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    @media (max-width: 860px) {
+        .dob-pkg-grid { grid-template-columns: 1fr; }
+    }
+    .dob-pkg-card {
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 18px;
+        padding: 26px 20px 20px 20px;
+        background: #ffffff !important;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+    .dob-pkg-card:hover {
+        border-color: #008080 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,128,128,0.15) !important;
+    }
+    .dob-pkg-card.active {
+        border-color: #008080 !important;
+        background: #f0fdfa !important;
+        box-shadow: 0 8px 28px rgba(0,128,128,0.22) !important;
+    }
+    .dob-pkg-badge {
+        position: absolute;
+        top: -12px;
+        right: 16px;
+        background: #d97706 !important;
+        color: #ffffff !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        padding: 4px 12px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .dob-pkg-badge.best { background: #008080 !important; }
+    
+    .dob-pkg-name {
+        font-size: 20px !important;
+        font-weight: 900 !important;
+        color: #072a2e !important;
+        margin-bottom: 6px !important;
+        margin-top: 4px !important;
+    }
+    .dob-pkg-price {
+        font-size: 28px !important;
+        font-weight: 900 !important;
+        color: #008080 !important;
+        margin-bottom: 10px !important;
+    }
+    .dob-pkg-price span {
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+    }
+    .dob-pkg-desc {
+        font-size: 13px !important;
+        color: #475569 !important;
+        margin: 0 0 12px 0 !important;
+        line-height: 1.4;
+    }
+    .dob-pkg-features {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 14px 0 !important;
+        font-size: 13px !important;
+        color: #334155 !important;
+        line-height: 1.85 !important;
+        flex-grow: 1;
+    }
+    .dob-pkg-features li {
+        position: relative;
+        padding-left: 22px !important;
+        color: #334155 !important;
+    }
+    .dob-pkg-features li::before {
+        content: "✓";
+        color: #008080 !important;
+        position: absolute;
+        left: 0;
+        font-weight: 900;
+    }
+    .dob-pkg-features li strong {
+        color: #0f172a !important;
+    }
+
+    /* Billing Terms */
+    .dob-term-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 600px) {
+        .dob-term-grid { grid-template-columns: 1fr; }
+    }
+    .dob-term-btn {
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 16px;
+        padding: 16px 14px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8fafc !important;
+        color: #1e293b !important;
+        transition: all 0.2s;
+    }
+    .dob-term-btn:hover { 
+        border-color: #008080 !important; 
+        background: #f0fdfa !important;
+    }
+    .dob-term-btn.active {
+        border-color: #008080 !important;
+        background: #008080 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 16px rgba(0,128,128,0.3) !important;
+    }
+    .dob-term-name {
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        color: #1e293b !important;
+        display: block;
+        margin-bottom: 6px;
+    }
+    .dob-term-btn.active .dob-term-name {
+        color: #ffffff !important;
+    }
+    .dob-term-discount {
+        display: inline-block;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        padding: 3px 10px;
+        border-radius: 10px;
+        background: #fef3c7 !important;
+        color: #92400e !important;
+    }
+    .dob-term-btn.active .dob-term-discount {
+        background: rgba(255,255,255,0.25) !important;
+        color: #ffffff !important;
+    }
+
+    /* Total Price Display Bar */
+    .dob-total-banner {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 100%) !important;
+        color: #ffffff !important;
+        padding: 22px 26px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 10px;
+        box-shadow: 0 6px 20px rgba(0,128,128,0.25);
+    }
+    .dob-total-label {
+        font-size: 14.5px !important;
+        font-weight: 700 !important;
+        color: rgba(255,255,255,0.95) !important;
+    }
+    .dob-total-val {
+        font-size: 30px !important;
+        font-weight: 900 !important;
+        color: #fef08a !important;
+    }
+    .dob-total-savings {
+        font-size: 13.5px !important;
+        font-weight: 800 !important;
+        background: rgba(255,255,255,0.22) !important;
+        color: #ffffff !important;
+        padding: 6px 14px;
+        border-radius: 12px;
+    }
+
+    /* Form Fields */
+    .dob-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+        .dob-form-row { grid-template-columns: 1fr; }
+    }
+    .dob-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .dob-label {
+        font-size: 13.5px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+    }
+    .dob-input {
+        height: 46px;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 14.5px !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .dob-input:focus {
+        border-color: #008080 !important;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.18) !important;
+    }
+
+    /* Bank Account Cards */
+    .dob-bank-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+    .dob-bank-card {
+        background: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 16px;
+        padding: 16px 18px;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+    .dob-bank-card:hover {
+        border-color: #008080 !important;
+        background: #f0fdfa !important;
+    }
+    .dob-bank-name {
+        font-weight: 900 !important;
+        color: #072a2e !important;
+        margin-bottom: 4px;
+        font-size: 14px !important;
+    }
+    .dob-bank-holder {
+        font-size: 12.5px !important;
+        color: #475569 !important;
+        margin-bottom: 6px;
+    }
+    .dob-bank-holder strong {
+        color: #0f172a !important;
+    }
+    .dob-bank-acc {
+        font-family: monospace !important;
+        font-size: 16px !important;
+        font-weight: 900 !important;
+        color: #008080 !important;
+        letter-spacing: 0.5px;
+    }
+
+    /* Submit Button */
+    .dob-btn-submit {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%) !important;
+        color: #ffffff !important;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 24px;
+        font-size: 16.5px !important;
+        font-weight: 900 !important;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 6px 20px rgba(0,128,128,0.35) !important;
+        margin-top: 14px;
+    }
+    .dob-btn-submit:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(0,128,128,0.45) !important;
+    }
+
+    /* Success Card */
+    #dob-success-view {
+        display: none;
+        background: #ffffff !important;
+        border: 2.5px solid #008080 !important;
+        border-radius: 24px;
+        padding: 42px 24px;
+        text-align: center;
+        box-shadow: 0 16px 40px rgba(0,128,128,0.15);
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="dob-signup-container">
+
+    <!-- Hero Header -->
+    <div class="dob-hero">
+        <span class="dob-hero-badge">OFFICIAL ONBOARDING PORTAL</span>
+        <h1>DOBiz Smart ERP Self-Service Signup</h1>
+        <p>Select your industry vertical, choose your tier, and begin your digital journey with Ethiopia's sovereign cloud ERP managed exclusively by Biz Technology Solutions.</p>
+    </div>
+
+    <!-- Spam Folder Alert Banner -->
+    <div class="dob-spam-notice">
+        <span style="font-size: 20px;">📬</span>
+        <span><strong>Important Email Notice:</strong> Your enterprise credentials and login links are dispatched immediately upon submission. Please be sure to check your <strong>Spam / Junk</strong> folder if you do not find the confirmation email in your primary inbox.</span>
+    </div>
+
+    <!-- Info Links Row -->
+    <div class="dob-info-cards-row">
+        <div class="dob-info-box blue">
+            <div class="dob-info-text">
+                <span style="font-size: 18px; margin-right: 6px;">🌐</span>
+                <span><strong>Discover Features:</strong> To know more about DOBiz SmartERP, explore our full product overview:</span>
+            </div>
+            <a href="https://biztechnology.et/dobiz-erp" target="_blank" class="dob-info-btn">Explore DOBiz ERP &rarr;</a>
+        </div>
+
+        <div class="dob-info-box">
+            <div class="dob-info-text">
+                <span style="font-size: 18px; margin-right: 6px;">🎓</span>
+                <span><strong>Self-Help Tutorials:</strong> To learn DOBiz SmartERP, checkout our step-by-step video courses:</span>
+            </div>
+            <a href="https://ethiobiz.et/lms/courses/dobiz-smart-erp-system-user-guide" target="_blank" class="dob-info-btn">Open User Guide &rarr;</a>
+        </div>
+    </div>
+
+    <form id="dob-signup-form">
+
+        <!-- Step 1: Industry -->
+        <div class="dob-step-card">
+            <div class="dob-step-header">
+                <div class="dob-step-num">1</div>
+                <h3 class="dob-step-title">Select Your Industry Vertical</h3>
+            </div>
+            <div class="dob-industry-grid" id="dob-industry-container">
+                <div class="dob-ind-btn active" data-ind="Healthcare"><span class="dob-ind-icon">🏥</span>Healthcare & Clinic</div>
+                <div class="dob-ind-btn" data-ind="Hotel Management"><span class="dob-ind-icon">🏨</span>Hotel & Hospitality</div>
+                <div class="dob-ind-btn" data-ind="Restaurant"><span class="dob-ind-icon">🍽️</span>Restaurant & POS</div>
+                <div class="dob-ind-btn" data-ind="Property Management"><span class="dob-ind-icon">🏢</span>Property & Real Estate</div>
+                <div class="dob-ind-btn" data-ind="Manufacturing"><span class="dob-ind-icon">🏭</span>Manufacturing & Assembly</div>
+                <div class="dob-ind-btn" data-ind="Education"><span class="dob-ind-icon">🎓</span>Education & Schools</div>
+                <div class="dob-ind-btn" data-ind="Retail & Wholesale"><span class="dob-ind-icon">📦</span>Retail & Wholesale</div>
+                <div class="dob-ind-btn" data-ind="Non-Profit"><span class="dob-ind-icon">🏛️</span>Non-Profit & NGOs</div>
+                <div class="dob-ind-btn" data-ind="Professional Services"><span class="dob-ind-icon">💼</span>Professional Services</div>
+            </div>
+        </div>
+
+        <!-- Step 2: Package Tiers -->
+        <div class="dob-step-card">
+            <div class="dob-step-header">
+                <div class="dob-step-num">2</div>
+                <h3 class="dob-step-title">Choose Your Subscription Package</h3>
+            </div>
+            <div class="dob-pkg-grid">
+                
+                <!-- Starter Module -->
+                <div class="dob-pkg-card" data-pkg="Starter Module" data-base="5000">
+                    <div class="dob-pkg-name">Starter Module</div>
+                    <div class="dob-pkg-price">5,000 ETB <span>/ month</span></div>
+                    <p class="dob-pkg-desc">Single module tier ideal for micro-businesses starting their digital journey.</p>
+                    <ul class="dob-pkg-features">
+                        <li><strong>1 Selected Core Module</strong> (Finance OR Inventory OR HR)</li>
+                        <li><strong>Up to 3 Active Users</strong></li>
+                        <li>Amharic & English Interface</li>
+                        <li>Local Tax & Billing Compliance</li>
+                        <li>Standard Email & Phone Support</li>
+                        <li>EthioBiz Shop Product Publishing</li>
+                    </ul>
+                </div>
+
+                <!-- Business Growth -->
+                <div class="dob-pkg-card active" data-pkg="Business Growth" data-base="9500">
+                    <span class="dob-pkg-badge">MOST POPULAR</span>
+                    <div class="dob-pkg-name">Business Growth</div>
+                    <div class="dob-pkg-price">9,500 ETB <span>/ month</span></div>
+                    <p class="dob-pkg-desc">Multi-module operational suite for growing enterprises and multi-branch operations.</p>
+                    <ul class="dob-pkg-features">
+                        <li><strong>3 Selected DOBiz ERP Modules</strong></li>
+                        <li><strong>Up to 10 Active Users</strong></li>
+                        <li>Full Financials & Inventory Control</li>
+                        <li>EthioBiz Shop + Jobs Integration</li>
+                        <li>Offline-Capable Local Sync</li>
+                        <li>Priority Customer Support</li>
+                        <li>Hadeeda AI Assistant Compatible</li>
+                    </ul>
+                </div>
+
+                <!-- Full Industry ERP Package -->
+                <div class="dob-pkg-card" data-pkg="Full Industry ERP Package" data-base="15000">
+                    <span class="dob-pkg-badge best">BEST VALUE (15K FULL)</span>
+                    <div class="dob-pkg-name">Full Industry ERP</div>
+                    <div class="dob-pkg-price">15,000 ETB <span>/ month</span></div>
+                    <p class="dob-pkg-desc">Complete all-in-one DOBiz SmartERP suite with full dedicated industry modules.</p>
+                    <ul class="dob-pkg-features">
+                        <li><strong>ALL DOBiz Core & Industry Modules</strong></li>
+                        <li><strong>Unlimited Staff Users</strong></li>
+                        <li>Multi-Branch & Multi-Company Support</li>
+                        <li>EthioBiz Marketplace & Jobs Integration</li>
+                        <li>Custom Workflow Sync & API Access</li>
+                        <li>Dedicated Account Manager & Training</li>
+                        <li>99.9% Uptime Guarantee & Daily Backups</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Step 3: Billing Cycle & Discounts -->
+        <div class="dob-step-card">
+            <div class="dob-step-header">
+                <div class="dob-step-num">3</div>
+                <h3 class="dob-step-title">Select Billing Term & Receive Instant Discounts</h3>
+            </div>
+            <div class="dob-term-grid">
+                <div class="dob-term-btn" data-term="3" data-discount="0">
+                    <span class="dob-term-name">3 Months</span>
+                    <span class="dob-term-discount">Standard Term</span>
+                </div>
+                <div class="dob-term-btn active" data-term="6" data-discount="0.10">
+                    <span class="dob-term-name">6 Months</span>
+                    <span class="dob-term-discount">🔥 Save 10% Off</span>
+                </div>
+                <div class="dob-term-btn" data-term="12" data-discount="0.20">
+                    <span class="dob-term-name">1 Year (12 Mo)</span>
+                    <span class="dob-term-discount">⭐ Save 20% Off</span>
+                </div>
+            </div>
+
+            <!-- Live Calculation Banner -->
+            <div class="dob-total-banner">
+                <div>
+                    <div class="dob-total-label">Total Subscription Investment:</div>
+                    <div class="dob-total-val" id="dob-calc-total">51,300.00 ETB</div>
+                </div>
+                <div class="dob-total-savings" id="dob-calc-savings">You Save: 5,700.00 ETB (10% Discount)</div>
+            </div>
+        </div>
+
+        <!-- Step 4: Contact & Enterprise Info -->
+        <div class="dob-step-card">
+            <div class="dob-step-header">
+                <div class="dob-step-num">4</div>
+                <h3 class="dob-step-title">Enter Enterprise & Contact Information</h3>
+            </div>
+            <div class="dob-form-row">
+                <div class="dob-form-group">
+                    <label class="dob-label">Full Name *</label>
+                    <input type="text" class="dob-input" id="dob-full-name" placeholder="e.g. Dawit Haile" required>
+                </div>
+                <div class="dob-form-group">
+                    <label class="dob-label">Official Business Email *</label>
+                    <input type="email" class="dob-input" id="dob-email" placeholder="e.g. dawit@mycompany.et" required>
+                </div>
+            </div>
+            <div class="dob-form-row">
+                <div class="dob-form-group">
+                    <label class="dob-label">Phone Number *</label>
+                    <input type="tel" class="dob-input" id="dob-phone" placeholder="e.g. +251 91 123 4567" required>
+                </div>
+                <div class="dob-form-group">
+                    <label class="dob-label">Company / Organization Legal Name *</label>
+                    <input type="text" class="dob-input" id="dob-company" placeholder="e.g. Kistet Trading PLC" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Settlement & Payment Slip -->
+        <div class="dob-step-card">
+            <div class="dob-step-header">
+                <div class="dob-step-num">5</div>
+                <h3 class="dob-step-title">Bank Settlement & Proof Details</h3>
+            </div>
+            
+            <p style="font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600;">Please transfer the total subscription investment to the verified settlement accounts below:</p>
+
+            <div class="dob-bank-grid">
+                <div class="dob-bank-card">
+                    <div class="dob-bank-name">Commercial Bank of Ethiopia (CBE)</div>
+                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                    <div class="dob-bank-acc">1000236131606</div>
+                </div>
+                <div class="dob-bank-card">
+                    <div class="dob-bank-name">Telebirr SuperApp</div>
+                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                    <div class="dob-bank-acc">+251 98 676 7576</div>
+                </div>
+                <div class="dob-bank-card">
+                    <div class="dob-bank-name">Bank of Abyssinia (BoA)</div>
+                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                    <div class="dob-bank-acc">94784891</div>
+                </div>
+            </div>
+
+            <div class="dob-form-row">
+                <div class="dob-form-group">
+                    <label class="dob-label">Payment Reference / Transaction ID (Optional)</label>
+                    <input type="text" class="dob-input" id="dob-payment-ref" placeholder="e.g. FT2623490812">
+                </div>
+                <div class="dob-form-group">
+                    <label class="dob-label">Bank Channel Used</label>
+                    <select class="dob-input" id="dob-bank-name">
+                        <option value="Commercial Bank of Ethiopia">Commercial Bank of Ethiopia (CBE - 1000236131606)</option>
+                        <option value="Telebirr">Telebirr (+251986767576)</option>
+                        <option value="Bank of Abyssinia">Bank of Abyssinia (BoA - 94784891)</option>
+                        <option value="Other">Other Bank</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="dob-btn-submit" id="dob-btn-submit">Complete Registration & Provision Tenant &rarr;</button>
+        </div>
+
+    </form>
+
+    <!-- Success View -->
+    <div id="dob-success-view">
+        <div style="font-size: 54px; margin-bottom: 12px;">🎉</div>
+        <h2 style="color: #072a2e; font-size: 28px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 1px 0 rgba(255,255,255,.6); letter-spacing: .3px;">Registration Complete Alhamdulillah!</h2>
+        <p style="color: #334155; font-size: 15px; max-width: 600px; margin: 0 auto 16px auto;" id="dob-success-msg"></p>
+
+        <div class="dob-spam-notice" style="max-width: 520px; margin: 0 auto 20px auto; text-align: left;">
+            <span style="font-size: 20px;">📬</span>
+            <span><strong>Check Spam Folder:</strong> If your welcome email with password setup is not in your primary inbox, please check your <strong>Spam / Junk folder</strong>.</span>
+        </div>
+
+        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px; max-width: 560px; margin: 0 auto 24px auto; text-align: left;">
+            <div style="font-size: 13px; font-weight: 900; color: #072a2e; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #008080; padding-bottom: 8px; margin-bottom: 12px;">Your Account Confirmation Details</div>
+            <div style="font-size: 14px; line-height: 1.9; color: #0f172a;">
+                <div><strong>Registered Name:</strong> <span id="dob-res-name" style="font-weight: 700;"></span></div>
+                <div><strong>Login Email:</strong> <span id="dob-res-email" style="font-weight: 700; color: #072a2e;"></span></div>
+                <div id="dob-res-phone-row"><strong>Phone:</strong> <span id="dob-res-phone" style="font-weight: 700;"></span></div>
+                <div><strong>Signup Reference:</strong> <span id="dob-res-ref" style="font-family: monospace; color: #008080; font-weight: 900;"></span></div>
+                <div><strong>Company:</strong> <span id="dob-res-company" style="font-weight: 700;"></span></div>
+                <div><strong>Industry Edition:</strong> <span id="dob-res-industry" style="font-weight: 700;"></span></div>
+                <div><strong>Selected Package:</strong> <span id="dob-res-pkg" style="font-weight: 700;"></span></div>
+                <div><strong>Billing Term:</strong> <span id="dob-res-term" style="font-weight: 700;"></span></div>
+                <div><strong>Discount Applied:</strong> <span id="dob-res-disc" style="font-weight: 700;"></span></div>
+                <div><strong>Settlement Amount:</strong> <span id="dob-res-amt" style="font-weight: 900; color: #008080;"></span></div>
+                <div><strong>Account Status:</strong> <span id="dob-res-paystatus" style="font-weight: 900;"></span></div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="#" id="dob-login-link" class="dob-info-btn" style="padding: 12px 28px; font-size: 14px;">Set Password & Login &rarr;</a>
+            <a href="https://ethiobiz.et/lms/courses/dobiz-smart-erp-system-user-guide" target="_blank" class="dob-info-btn" style="background: #072a2e !important; padding: 12px 28px; font-size: 14px;">View User Guide & Tutorials</a>
+            <a href="https://biztechnology.et/dobiz-erp" target="_blank" class="dob-info-btn" style="background: #1d4ed8 !important; padding: 12px 28px; font-size: 14px;">Product Overview</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function() {
+    let selectedIndustry = "Healthcare";
+    let selectedPackage = "Business Growth";
+    let basePrice = 9500;
+    let selectedTerm = 6;
+    let discountRate = 0.10;
+
+    // Industry Selection
+    document.querySelectorAll('.dob-ind-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.dob-ind-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedIndustry = this.getAttribute('data-ind');
+        });
+    });
+
+    // Package Selection
+    document.querySelectorAll('.dob-pkg-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.dob-pkg-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            selectedPackage = this.getAttribute('data-pkg');
+            basePrice = parseFloat(this.getAttribute('data-base')) || 9500;
+            recalc();
+        });
+    });
+
+    // Billing Term Selection
+    document.querySelectorAll('.dob-term-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.dob-term-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedTerm = parseInt(this.getAttribute('data-term')) || 3;
+            discountRate = parseFloat(this.getAttribute('data-discount')) || 0.0;
+            recalc();
+        });
+    });
+
+    function recalc() {
+        const rawTotal = basePrice * selectedTerm;
+        const discountAmt = rawTotal * discountRate;
+        const finalTotal = rawTotal - discountAmt;
+
+        const totalEl = document.getElementById('dob-calc-total');
+        const saveEl = document.getElementById('dob-calc-savings');
+
+        if (totalEl) totalEl.textContent = finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ETB';
+        if (saveEl) {
+            if (discountRate > 0) {
+                saveEl.textContent = `You Save: ${discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB (${(discountRate*100).toFixed(0)}% Discount)`;
+                saveEl.style.display = 'inline-block';
+            } else {
+                saveEl.style.display = 'none';
+            }
+        }
+    }
+
+    // Form Submit
+    const form = document.getElementById('dob-signup-form');
+    const btnSubmit = document.getElementById('dob-btn-submit');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('dob-full-name').value.trim();
+            const email = document.getElementById('dob-email').value.trim();
+            const phone = document.getElementById('dob-phone').value.trim();
+            const company = document.getElementById('dob-company').value.trim();
+            const payRef = document.getElementById('dob-payment-ref').value.trim();
+            const bankName = document.getElementById('dob-bank-name').value;
+
+            if (!fullName || !email || !company) {
+                alert('Please fill in all mandatory fields.');
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Provisioning Sovereign Tenant...';
+
+            const csrfToken = (window.frappe && frappe.csrf_token) || 
+                              (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || 
+                              window.csrf_token || '';
+
+            const payload = {
+                full_name: fullName,
+                email: email,
+                phone: phone,
+                company_name: company,
+                industry: selectedIndustry,
+                package_tier: selectedPackage,
+                billing_term: selectedTerm.toString(),
+                payment_ref: payRef,
+                bank_name: bankName,
+                selected_module: 'Accounts'
+            };
+
+            const reqHeaders = { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            if (csrfToken) reqHeaders['X-Frappe-CSRF-Token'] = csrfToken;
+
+            fetch('/api/method/bizmarketing.api.dobiz_signup_api.submit_dobiz_signup', {
+                method: 'POST',
+                headers: reqHeaders,
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Complete Registration & Provision Tenant →';
+
+                if (res.message && res.message.success) {
+                    form.style.display = 'none';
+                    const successView = document.getElementById('dob-success-view');
+                    successView.style.display = 'block';
+
+                    document.getElementById('dob-success-msg').textContent = res.message.message;
+                    document.getElementById('dob-res-name').textContent = fullName;
+                    document.getElementById('dob-res-email').textContent = email;
+                    if (phone) {
+                        document.getElementById('dob-res-phone').textContent = phone;
+                        document.getElementById('dob-res-phone-row').style.display = '';
+                    } else {
+                        document.getElementById('dob-res-phone-row').style.display = 'none';
+                    }
+                    document.getElementById('dob-res-ref').textContent = res.message.signup_ref;
+                    document.getElementById('dob-res-company').textContent = `${res.message.company} (${res.message.abbr})`;
+                    document.getElementById('dob-res-industry').textContent = selectedIndustry;
+                    document.getElementById('dob-res-pkg').textContent = res.message.package_tier;
+                    document.getElementById('dob-res-term').textContent = `${selectedTerm} Months`;
+                    document.getElementById('dob-res-disc').textContent = res.message.discount_applied;
+                    document.getElementById('dob-res-amt').textContent = `${res.message.total_amount.toLocaleString('en-US', {minimumFractionDigits: 2})} ETB`;
+                    const payStatusEl = document.getElementById('dob-res-paystatus');
+                    if (payRef) {
+                        payStatusEl.textContent = '✅ Payment Verified — Account Active';
+                        payStatusEl.style.color = '#047857';
+                    } else {
+                        payStatusEl.textContent = '🆓 7-Day Free Trial Activated';
+                        payStatusEl.style.color = '#1d4ed8';
+                    }
+                    document.getElementById('dob-login-link').href = res.message.password_setup_link || '/login';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    let errMsg = 'Registration could not be completed. Please check details.';
+                    if (res._server_messages) {
+                        try {
+                            const msgs = JSON.parse(res._server_messages);
+                            errMsg = msgs.map(m => {
+                                const parsed = JSON.parse(m);
+                                return parsed.message;
+                            }).join('\n');
+                        } catch(e) {}
+                    } else if (res.message && res.message.message) {
+                        errMsg = res.message.message;
+                    } else if (res.exc) {
+                        errMsg = 'Server validation issue. Please ensure your email is unique and valid.';
+                    }
+                    alert(errMsg);
+                }
+            })
+            .catch(err => {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Complete Registration & Provision Tenant →';
+                console.error('DOBiz Signup Error:', err);
+                alert('An error occurred during submission. Please try again.');
+            });
+        });
+    }
+
+    recalc();
+})();
+</script>
+{% endblock %}
