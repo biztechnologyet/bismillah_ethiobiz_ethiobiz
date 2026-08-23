@@ -69,7 +69,8 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
-    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4"
+    "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0"
 ]
 
 # ============================================

@@ -623,9 +623,34 @@
     let sidebarObserver = null;
     let _forceUIPending = false;
 
-    function init() {
-        forceUI();
+    // --- EthioBiz Theme settings bridge (ANFRG-26-00063 Task B) ---
+    const CONF_URL = '/api/method/bizmarketing.api.theme_settings.public_theme_settings';
+    const CONF_KEY = 'ethiobizThemeConf';
 
+    function readConfCache() {
+        try {
+            const raw = sessionStorage.getItem(CONF_KEY);
+            if (!raw) return null;
+            const conf = JSON.parse(raw);
+            if (!conf || Date.now() - (conf._t || 0) > 600000) return null;
+            return conf;
+        } catch (e) { return null; }
+    }
+
+    function saveConfCache(conf) {
+        try {
+            conf._t = Date.now();
+            sessionStorage.setItem(CONF_KEY, JSON.stringify(conf));
+        } catch (e) { /* ignore */ }
+    }
+
+    function applySidebarPolicy(conf) {
+        forceUI();
+        if (conf && conf.hide_sidebar === false) {
+            document.body.classList.remove('sidebar-collapsed');
+            console.log('[EthioBiz] Sidebar ENABLED via EthioBiz Theme settings');
+            return;
+        }
         if (document.querySelector('.desk-container')) {
             let collapseCount = 0;
             let collapseInterval = setInterval(() => {
@@ -636,6 +661,19 @@
                 if (++collapseCount > 15) clearInterval(collapseInterval);
             }, 200);
         }
+    }
+
+    function init() {
+        const cached = readConfCache();
+        if (cached) { applySidebarPolicy(cached); return; }
+        fetch(CONF_URL)
+            .then(r => r.json())
+            .then(res => {
+                const conf = (res && res.message) || {};
+                saveConfCache(conf);
+                applySidebarPolicy(conf);
+            })
+            .catch(() => applySidebarPolicy({}));
     }
 
     if (sidebarObserver) sidebarObserver.disconnect();
