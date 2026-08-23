@@ -108,7 +108,10 @@ boot_session = "bismillah_ethiobiz.boot.boot_session"
 
 # Automatically set user's company default on login (new device fix)
 # Reads from DocType: User > company field with fallback chain
-on_session_creation = "bismillah_ethiobiz.auto_company.on_session_creation"
+on_session_creation = [
+	"bismillah_ethiobiz.auto_company.on_session_creation",
+	"bismillah_ethiobiz.api.ensure_csrf_token",
+]
 
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"

@@ -145,6 +145,7 @@ def _format_poll_data(post_doc):
     try:
         options = json.loads(post_doc.poll_options_json)
         votes = json.loads(post_doc.poll_votes_json) if post_doc.poll_votes_json else [0] * len(options)
+        votes = [int(v or 0) for v in votes]
     except Exception:
         return None
 
@@ -271,8 +272,14 @@ def like_social_post(post_id=None):
     frappe.db.commit()
     return {"status": "success", "likes_count": post.likes_count}
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def vote_poll(post_id=None, option_index=0):
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(
+            _("Authentication required. Please log in to vote in polls."),
+            frappe.PermissionError)
+
     post_id = post_id or frappe.form_dict.get("post_id")
     option_index = int(option_index or frappe.form_dict.get("option_index") or 0)
 

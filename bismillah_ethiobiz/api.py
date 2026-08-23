@@ -549,9 +549,63 @@ def chat_inline(prompt, context=None):
         return {"reply": "⚠️ Sorry, I encountered an error processing your request. Please try again."}
 
 
+def ensure_csrf_token():
+    """Mint a CSRF token for every non-guest session so website pages render
+    a real frappe.csrf_token (base_template_page reads session data directly)
+    and Frappe's CSRF validation is actually enforceable."""
+    try:
+        import traceback
+
+        import frappe.sessions
+
+        # Never mint mid-login: the fresh token would trip
+        # validate_csrf_token() later within the same login request.
+        req_path = ""
+        try:
+            req_path = frappe.local.request.path or ""
+        except Exception:
+            pass
+        if req_path.rstrip("/").endswith("/api/method/login") or (
+            frappe.form_dict.get("usr") and frappe.form_dict.get("pwd")
+        ):
+            return
+
+        if getattr(frappe.session, "user", "Guest") in (None, "Guest"):
+            return
+        if not frappe.local.session.data.get("csrf_token"):
+            frappe.sessions.generate_csrf_token()
+            try:
+                frappe.local.cookie_manager.set_cookie(
+                    "csrf_token", frappe.local.session.data.csrf_token)
+            except Exception:
+                pass
+    except Exception:
+        try:
+            with open("/tmp/uwc_debug.log", "a") as _f:
+                _f.write("CSRF_HOOK_ERR %s\n" % traceback.format_exc()[-250:])
+        except Exception:
+            pass
+
+
 def update_website_context(context):
+    import json as _json
+
+    # Mint CSRF token at render time so base_template_page's
+    # <!-- csrf_token --> replacement emits a REAL value and Frappe's
+    # validation is enforceable (session-creation hook proved unreliable
+    # under stale app_hooks caches).
+    ensure_csrf_token()
+
     if not context.get("web_include_css"):
         context.web_include_css = []
+
+    css_files = [
+        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
+        "/assets/bismillah_ethiobiz/css/walta.css"
+    ]
+    for css in css_files:
+        if css not in context.web_include_css:
+            context.web_include_css.append(css)
 
     css_files = [
         "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
@@ -564,15 +618,26 @@ def update_website_context(context):
     if not context.get("web_include_js"):
         context.web_include_js = []
 
+    try:
+        with open("/tmp/uwc_debug.log", "a") as _f:
+            _f.write("IN len=%d %s\n" % (
+                len(context.web_include_js), _json.dumps(list(context.web_include_js))))
+    except Exception:
+        pass
+
     js_files = [
+        "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
         "/assets/bismillah_ethiobiz/js/walta.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0"
+        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
+        "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0"
     ]
     for js in js_files:
-        if js not in context.web_include_js:
+        base = js.split("?")[0]
+        if not any((x.split("?")[0] == base) for x in context.web_include_js):
             context.web_include_js.append(js)
 
 
