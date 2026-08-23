@@ -1112,36 +1112,23 @@
         btn.disabled = true;
         btn.innerText = 'Publishing...';
 
-        fetch('/api/method/bismillah_ethiobiz.afocha_api.create_social_post', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                category_tag: category,
-                content: content,
-                post_image: image,
-                video_url: video,
-                is_poll: isPoll,
-                poll_question: pollQ || '',
-                poll_options: pollOpts || ''
-            })
+        ebPostForm('bismillah_ethiobiz.afocha_api.create_social_post', {
+            category_tag: category,
+            content: content,
+            post_image: image,
+            video_url: video,
+            is_poll: isPoll,
+            poll_question: pollQ || '',
+            poll_options: pollOpts || ''
         })
-        .then(r => r.json())
         .then(res => {
             btn.disabled = false;
             btn.innerText = 'Publish Post →';
-            if (res.exc) {
-                alert('Authentication required: Please log in to post.');
-                return;
-            }
+            if (!res || res.exc) return;
             document.getElementById('post-content').value = '';
             document.getElementById('post-video-url').value = '';
             setImagePreview('');
             loadFeed();
-        })
-        .catch(e => {
-            btn.disabled = false;
-            btn.innerText = 'Publish Post →';
-            console.error(e);
         });
     });
 
@@ -1258,11 +1245,13 @@
             b.addEventListener('click', function() {
                 const pid = this.getAttribute('data-id');
                 const cntSpan = this.querySelector('.like-cnt');
-                fetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post?post_id=' + pid)
+                ebFetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post?post_id=' + pid)
                     .then(r => r.json())
                     .then(res => {
                         if (res.message) cntSpan.innerText = res.message.likes_count;
-                    });
+                        else ebToast('Like failed — please log in first.');
+                    })
+                    .catch(() => {});
             });
         });
 
@@ -1270,7 +1259,7 @@
             b.addEventListener('click', function() {
                 const pid = this.getAttribute('data-post');
                 const optIdx = this.getAttribute('data-opt');
-                fetch('/api/method/bismillah_ethiobiz.afocha_api.vote_poll?post_id=' + pid + '&option_index=' + optIdx)
+                ebFetch('/api/method/bismillah_ethiobiz.afocha_api.vote_poll?post_id=' + pid + '&option_index=' + optIdx)
                     .then(r => r.json())
                     .then(res => {
                         if (res.message && res.message.poll_data) {
@@ -1441,22 +1430,17 @@
                         btnCmt.disabled = true;
                         btnCmt.innerText = 'Posting...';
 
-                        fetch('/api/method/bismillah_ethiobiz.afocha_api.add_post_comment', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({
-                                post_id: p.name,
-                                comment_text: text
-                            })
+                        ebPostForm('bismillah_ethiobiz.afocha_api.add_post_comment', {
+                            post_id: p.name,
+                            comment_text: text
                         })
-                        .then(r => r.json())
                         .then(res => {
                             btnCmt.disabled = false;
-                            loadSinglePost(p.name);
-                        })
-                        .catch(e => {
-                            btnCmt.disabled = false;
-                            console.error(e);
+                            btnCmt.innerText = 'Comment';
+                            if (res && !res.exc) {
+                                document.getElementById('cmt-text').value = '';
+                                loadSinglePost(p.name);
+                            }
                         });
                     });
                 }

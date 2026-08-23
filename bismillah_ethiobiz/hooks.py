@@ -64,6 +64,7 @@ web_include_css = [
 
 # JS for website (frontend/portal)
 web_include_js = [
+    "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
     "/assets/bismillah_ethiobiz/js/walta.js",

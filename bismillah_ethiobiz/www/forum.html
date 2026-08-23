@@ -766,13 +766,16 @@
                             window.location.href = '/login?redirect-to=/forum?topic=' + encodeURIComponent(t.name);
                             return;
                         }
-                        fetch('/api/method/bismillah_ethiobiz.walta_forum_api.like_forum_topic?topic_id=' + encodeURIComponent(t.name))
+                        ebFetch('/api/method/bismillah_ethiobiz.walta_forum_api.like_forum_topic?topic_id=' + encodeURIComponent(t.name))
                             .then(r => r.json())
                             .then(res => {
                                 if (res.message && res.message.likes_count !== undefined) {
                                     document.getElementById('thread-like-cnt').textContent = res.message.likes_count;
+                                } else {
+                                    ebToast('Could not register your like — please log in first.');
                                 }
-                            });
+                            })
+                            .catch(() => {});
                     });
                 }
 
@@ -789,22 +792,17 @@
                         btnReply.disabled = true;
                         btnReply.textContent = 'Posting...';
 
-                        fetch('/api/method/bismillah_ethiobiz.walta_forum_api.add_forum_reply', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({
-                                topic_id: t.name,
-                                reply_text: replyText
-                            })
+                        ebPostForm('bismillah_ethiobiz.walta_forum_api.add_forum_reply', {
+                            topic_id: t.name,
+                            reply_text: replyText
                         })
-                        .then(r => r.json())
                         .then(res => {
                             btnReply.disabled = false;
-                            loadSingleTopic(t.name);
-                        })
-                        .catch(err => {
-                            btnReply.disabled = false;
-                            console.error(err);
+                            btnReply.textContent = 'Post Reply';
+                            if (res && res.message && res.message.status === 'success') {
+                                document.getElementById('reply-text-input').value = '';
+                                loadSingleTopic(t.name);
+                            }
                         });
                     });
                 }
