@@ -795,3 +795,21 @@ button[class*="send-button"] svg {
 .chat-powered-by {
     display: none !important;
 }
+/* ===== GLOBAL FOOTER CORRECTNESS FIX (2026-08-24) =====
+   Neutralises bootstrap's html,body{height:100%} so the flex-column
+   body stretches to full content height and .web-footer{margin-top:auto}
+   lands at max(content_end, viewport_bottom) -- never mid-page,
+   never overlapping forms, flush with the true bottom. */
+html { height: auto !important; }
+body {
+    height: auto !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.web-footer {
+    position: static !important;
+    margin-top: auto !important;
+}
+body[data-path] { background-attachment: fixed !important; }
+/* ===== END GLOBAL FOOTER FIX ===== */

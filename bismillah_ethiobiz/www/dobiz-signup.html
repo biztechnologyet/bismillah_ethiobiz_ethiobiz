@@ -514,10 +514,81 @@
         text-align: center;
         box-shadow: 0 16px 40px rgba(0,128,128,0.15);
     }
+
+    /* ===== v2 additions: promo / coupon / breakdown ===== */
+    /* Footer behavior handled globally by ethiobiz_theme.css
+       GLOBAL FOOTER CORRECTNESS FIX (2026-08-24). */
+    #dob-promo-banner {
+        display: none;
+        background: linear-gradient(135deg, #065f46 0%, #008080 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin: 0 0 28px 0;
+        box-shadow: 0 10px 30px rgba(0,128,128,.25);
+        text-align: center;
+    }
+    #dob-promo-banner .dob-promo-title {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: .3px;
+        margin-bottom: 4px;
+    }
+    #dob-promo-banner .dob-promo-sub {
+        font-size: 14px;
+        opacity: .95;
+    }
+    #dob-promo-banner .dob-promo-slots {
+        display: inline-block;
+        margin-top: 8px;
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.35);
+        border-radius: 999px;
+        padding: 4px 14px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .dob-coupon-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .dob-coupon-row input {
+        flex: 1 1 200px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+    .dob-coupon-row button {
+        background: #0f766e;
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .dob-coupon-status {
+        font-size: 13px;
+        margin-top: 6px;
+        min-height: 18px;
+    }
+    .dob-breakdown-row {
+        display: none;
+        justify-content: space-between;
+        font-size: 13.5px;
+        color: #475569;
+        padding: 2px 4px;
+    }
+    .dob-breakdown-row.show { display: flex; }
 </style>
 {% endblock %}
 
 {% block page_content %}
+<!-- DOBIZ-LIVE-Pricing-v2 | dynamic pricing + coupons + launch promo | built 2026-08-24 -->
 <div class="dob-signup-container">
 
     <!-- Hero Header -->
@@ -531,6 +602,14 @@
     <div class="dob-spam-notice">
         <span style="font-size: 20px;">📬</span>
         <span><strong>Important Email Notice:</strong> Your enterprise credentials and login links are dispatched immediately upon submission. Please be sure to check your <strong>Spam / Junk</strong> folder if you do not find the confirmation email in your primary inbox.</span>
+    </div>
+
+    
+    <!-- DOBiz Launch Promo Banner (server-driven visibility via JS) -->
+    <div id="dob-promo-banner">
+        <div class="dob-promo-title" id="dob-promo-title">Launch Offer</div>
+        <div class="dob-promo-sub" id="dob-promo-sub"></div>
+        <span class="dob-promo-slots" id="dob-promo-slots"></span>
     </div>
 
     <!-- Info Links Row -->
@@ -579,7 +658,7 @@
                 <div class="dob-step-num">2</div>
                 <h3 class="dob-step-title">Choose Your Subscription Package</h3>
             </div>
-            <div class="dob-pkg-grid">
+            <div class="dob-pkg-grid" id="dob-pkg-grid">
                 
                 <!-- Starter Module -->
                 <div class="dob-pkg-card" data-pkg="Starter Module" data-base="5000">
@@ -639,7 +718,7 @@
                 <div class="dob-step-num">3</div>
                 <h3 class="dob-step-title">Select Billing Term & Receive Instant Discounts</h3>
             </div>
-            <div class="dob-term-grid">
+            <div class="dob-term-grid" id="dob-term-grid">
                 <div class="dob-term-btn" data-term="3" data-discount="0">
                     <span class="dob-term-name">3 Months</span>
                     <span class="dob-term-discount">Standard Term</span>
@@ -655,7 +734,16 @@
             </div>
 
             <!-- Live Calculation Banner -->
-            <div class="dob-total-banner">
+                                <div class="dob-form-group" id="dob-coupon-group">
+                        <label>Coupon Code (Optional)</label>
+                        <div class="dob-coupon-row">
+                            <input type="text" id="dob-coupon-input" placeholder="Enter coupon code" autocomplete="off">
+                            <button type="button" id="dob-coupon-apply">Apply</button>
+                        </div>
+                        <div class="dob-coupon-status" id="dob-coupon-status"></div>
+                    </div>
+                    <div class="dob-total-banner">
+
                 <div>
                     <div class="dob-total-label">Total Subscription Investment:</div>
                     <div class="dob-total-val" id="dob-calc-total">51,300.00 ETB</div>
@@ -687,7 +775,7 @@
                 </div>
                 <div class="dob-form-group">
                     <label class="dob-label">Company / Organization Legal Name *</label>
-                    <input type="text" class="dob-input" id="dob-company" placeholder="e.g. Kistet Trading PLC" required>
+                    <input type="text" class="dob-input" id="dob-company" placeholder="e.g. Berdusa Trading PLC" required>
                 </div>
             </div>
         </div>
@@ -701,7 +789,7 @@
             
             <p style="font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600;">Please transfer the total subscription investment to the verified settlement accounts below:</p>
 
-            <div class="dob-bank-grid">
+            <div class="dob-bank-grid" id="dob-bank-grid">
                 <div class="dob-bank-card">
                     <div class="dob-bank-name">Commercial Bank of Ethiopia (CBE)</div>
                     <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
@@ -763,7 +851,9 @@
                 <div><strong>Selected Package:</strong> <span id="dob-res-pkg" style="font-weight: 700;"></span></div>
                 <div><strong>Billing Term:</strong> <span id="dob-res-term" style="font-weight: 700;"></span></div>
                 <div><strong>Discount Applied:</strong> <span id="dob-res-disc" style="font-weight: 700;"></span></div>
-                <div><strong>Settlement Amount:</strong> <span id="dob-res-amt" style="font-weight: 900; color: #008080;"></span></div>
+                                    <div class="dob-breakdown-row" id="dob-res-coupon-row"><strong>Coupon Discount:</strong> <span id="dob-res-coupon">—</span></div>
+                    <div class="dob-breakdown-row" id="dob-res-promo-row"><strong>Launch Offer:</strong> <span id="dob-res-promo">—</span></div>
+                    <div><strong>Settlement Amount:</strong> <span id="dob-res-amt" style="font-weight: 900; color: #008080;"></span></div>
                 <div><strong>Account Status:</strong> <span id="dob-res-paystatus" style="font-weight: 900;"></span></div>
             </div>
         </div>
@@ -779,76 +869,216 @@
 
 <script>
 (function() {
-    let selectedIndustry = "Healthcare";
-    let selectedPackage = "Business Growth";
-    let basePrice = 9500;
-    let selectedTerm = 6;
-    let discountRate = 0.10;
+    // ===== DOBiz Signup v2 — server-driven pricing, coupons, launch promo =====
+    const state = {
+        industry: "Healthcare",
+        pkgTier: "Business Growth",
+        basePrice: 9500,
+        termMonths: 6,
+        termPct: 0.10,
+        coupon: { code: null, valid: false, amount: 0 },
+        promoActive: false,
+        promoFreeMonths: 3,
+        cfg: null
+    };
 
-    // Industry Selection
+    const fmt = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const $ = id => document.getElementById(id);
+
+    // ---------- Industry selection ----------
     document.querySelectorAll('.dob-ind-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.dob-ind-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            selectedIndustry = this.getAttribute('data-ind');
+            state.industry = this.getAttribute('data-ind');
         });
     });
 
-    // Package Selection
-    document.querySelectorAll('.dob-pkg-card').forEach(card => {
-        card.addEventListener('click', function() {
-            document.querySelectorAll('.dob-pkg-card').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            selectedPackage = this.getAttribute('data-pkg');
-            basePrice = parseFloat(this.getAttribute('data-base')) || 9500;
+    function bindPackageCards() {
+        document.querySelectorAll('.dob-pkg-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.dob-pkg-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                state.pkgTier = this.getAttribute('data-pkg');
+                state.basePrice = parseFloat(this.getAttribute('data-base')) || 0;
+                resetCoupon();
+                recalc();
+            });
+        });
+    }
+
+    function bindTermButtons() {
+        document.querySelectorAll('.dob-term-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.dob-term-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                state.termMonths = parseInt(this.getAttribute('data-term')) || 3;
+                state.termPct = (parseFloat(this.getAttribute('data-discount')) || 0) / 100;
+                resetCoupon();
+                recalc();
+            });
+        });
+    }
+
+    // ---------- Live config from server (Item Price source of truth) ----------
+    function loadConfig() {
+        fetch('/api/method/bizmarketing.api.dobiz_signup_api.get_dobiz_packages')
+            .then(r => r.json())
+            .then(res => { if (res.message) applyConfig(res.message); })
+            .catch(() => { /* static fallback markup stays */ })
+            .finally(recalc);
+    }
+
+    function applyConfig(cfg) {
+        state.cfg = cfg;
+
+        // Packages
+        const grid = $('dob-pkg-grid');
+        if (grid && Array.isArray(cfg.packages_list) && cfg.packages_list.length) {
+            grid.innerHTML = cfg.packages_list.map(p => `
+                <div class="dob-pkg-card${p.package_tier === state.pkgTier ? ' active' : ''}"
+                     data-pkg="${p.package_tier}" data-base="${p.price_per_month}">
+                    ${p.badge ? `<span class="dob-pkg-badge">${p.badge}</span>` : ''}
+                    <h3>${p.display_label}</h3>
+                    <div class="dob-price"><span class="dob-amt">${fmt(p.price_per_month)} ${p.currency || cfg.currency}/mo</span></div>
+                    <p>${p.description || ''}</p>
+                </div>`).join('');
+            bindPackageCards();
+            const sel = cfg.packages_list.find(p => p.package_tier === state.pkgTier);
+            if (sel) state.basePrice = parseFloat(sel.price_per_month);
+        }
+
+        // Terms
+        const tgrid = document.querySelector('.dob-term-grid') || $('dob-term-grid');
+        if (tgrid && Array.isArray(cfg.terms_list) && cfg.terms_list.length) {
+            tgrid.innerHTML = cfg.terms_list.map(t => `
+                <button type="button" class="dob-term-btn${t.months === state.termMonths ? ' active' : ''}"
+                        data-term="${t.months}" data-discount="${t.discount_percent}">
+                    ${t.label}${t.discount_percent > 0 ? ` <span class="dob-save-pill">-${t.discount_percent}%</span>` : ''}
+                </button>`).join('');
+            bindTermButtons();
+            const dt = cfg.terms_list.find(t => t.months === state.termMonths)
+                    || cfg.terms_list.find(t => t.is_default) || cfg.terms_list[0];
+            if (dt) { state.termMonths = dt.months; state.termPct = (parseFloat(dt.discount_percent) || 0) / 100; }
+        }
+
+        // Banks
+        const bankSel = $('dob-bank-name');
+        if (bankSel && Array.isArray(cfg.bank_accounts) && cfg.bank_accounts.length) {
+            const otherOpt = Array.from(bankSel.options).find(o => /other/i.test(o.value));
+            bankSel.innerHTML = '<option value="" disabled selected>Select Bank / Wallet</option>'
+                + cfg.bank_accounts.map(b => `<option value="${b.bank}">${b.bank} — ${b.account_no} (${b.account_name})</option>`).join('')
+                + (otherOpt ? otherOpt.outerHTML : '<option value="Other">Other</option>');
+        }
+
+        // Launch promo banner
+        const banner = $('dob-promo-banner');
+        if (banner && cfg.promo && cfg.promo.active) {
+            state.promoActive = true;
+            state.promoFreeMonths = cfg.promo.free_months || state.promoFreeMonths;
+            banner.style.display = 'block';
+            $('dob-promo-title').textContent = cfg.promo.title || 'Launch Offer';
+            $('dob-promo-sub').textContent =
+                `First ${cfg.promo.max_users} signups get ${cfg.promo.free_months} months FREE on the selected package — total due today: 0 ETB.`;
+            $('dob-promo-slots').style.display = cfg.promo.show_slots_left ? '' : 'none';
+            $('dob-promo-slots').textContent = `${cfg.promo.slots_left} of ${cfg.promo.max_users} free slots remaining`;
+        }
+    }
+
+    // ---------- Coupon ----------
+    function resetCoupon() {
+        state.coupon = { code: null, valid: false, amount: 0 };
+        const st = $('dob-coupon-status');
+        if (st) st.textContent = '';
+    }
+
+    function applyCoupon() {
+        const inp = $('dob-coupon-input');
+        const stEl = $('dob-coupon-status');
+        if (!inp || !stEl) return;
+        const code = inp.value.trim().toUpperCase();
+        if (!code) { stEl.textContent = 'Enter a coupon code first.'; stEl.style.color = '#b45309'; return; }
+        stEl.textContent = 'Validating...'; stEl.style.color = '#475569';
+        fetch('/api/method/bizmarketing.api.dobiz_coupon_api.validate_dobiz_coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Frappe-CSRF-Token': (window.frappe && frappe.csrf_token) || window.csrf_token || ''
+            },
+            body: JSON.stringify({
+                coupon_code: code,
+                package_tier: state.pkgTier,
+                billing_term: String(state.termMonths)
+            })
+        })
+        .then(r => r.json())
+        .then(res => {
+            const d = res.message;
+            if (d && d.valid) {
+                state.coupon = { code, valid: true, amount: d.discount_amount };
+                stEl.textContent = `${code} applied — you save ${fmt(d.discount_amount)} ETB`;
+                stEl.style.color = '#047857';
+            } else {
+                state.coupon = { code: null, valid: false, amount: 0 };
+                stEl.textContent = (d && d.message) ? d.message : 'Coupon could not be applied.';
+                stEl.style.color = '#b91c1c';
+            }
             recalc();
-        });
-    });
+        })
+        .catch(() => { stEl.textContent = 'Could not validate coupon right now.'; stEl.style.color = '#b91c1c'; });
+    }
 
-    // Billing Term Selection
-    document.querySelectorAll('.dob-term-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.dob-term-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            selectedTerm = parseInt(this.getAttribute('data-term')) || 3;
-            discountRate = parseFloat(this.getAttribute('data-discount')) || 0.0;
-            recalc();
-        });
-    });
+    const applyBtn = $('dob-coupon-apply');
+    if (applyBtn) applyBtn.addEventListener('click', applyCoupon);
 
+    // ---------- Recalculate ----------
     function recalc() {
-        const rawTotal = basePrice * selectedTerm;
-        const discountAmt = rawTotal * discountRate;
-        const finalTotal = rawTotal - discountAmt;
+        const rawTotal = state.basePrice * state.termMonths;
+        const termDisc = rawTotal * state.termPct;
+        let finalTotal = rawTotal - termDisc;
+        if (state.promoActive) {
+            finalTotal = 0;
+        } else if (state.coupon.valid) {
+            finalTotal = Math.max(0, finalTotal - state.coupon.amount);
+        }
 
-        const totalEl = document.getElementById('dob-calc-total');
-        const saveEl = document.getElementById('dob-calc-savings');
-
-        if (totalEl) totalEl.textContent = finalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ETB';
+        const totalEl = $('dob-calc-total');
+        const saveEl = $('dob-calc-savings');
+        if (totalEl) totalEl.textContent = fmt(finalTotal) + ' ETB';
         if (saveEl) {
-            if (discountRate > 0) {
-                saveEl.textContent = `You Save: ${discountAmt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB (${(discountRate*100).toFixed(0)}% Discount)`;
+            if (state.promoActive) {
+                saveEl.textContent = `Launch Offer: ${state.promoFreeMonths} Months FREE — 0 ETB today`;
                 saveEl.style.display = 'inline-block';
             } else {
-                saveEl.style.display = 'none';
+                const savedAmt = termDisc + (state.coupon.valid ? state.coupon.amount : 0);
+                if (savedAmt > 0) {
+                    const parts = [];
+                    if (termDisc > 0) parts.push(`-${(state.termPct * 100).toFixed(0)}% Term Discount`);
+                    if (state.coupon.valid) parts.push(`-${fmt(state.coupon.amount)} ETB Coupon`);
+                    saveEl.textContent = `You Save: ${fmt(savedAmt)} ETB (${parts.join(' + ')})`;
+                    saveEl.style.display = 'inline-block';
+                } else {
+                    saveEl.style.display = 'none';
+                }
             }
         }
     }
 
-    // Form Submit
-    const form = document.getElementById('dob-signup-form');
-    const btnSubmit = document.getElementById('dob-btn-submit');
+    // ---------- Submit ----------
+    const form = $('dob-signup-form');
+    const btnSubmit = $('dob-btn-submit');
 
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const fullName = document.getElementById('dob-full-name').value.trim();
-            const email = document.getElementById('dob-email').value.trim();
-            const phone = document.getElementById('dob-phone').value.trim();
-            const company = document.getElementById('dob-company').value.trim();
-            const payRef = document.getElementById('dob-payment-ref').value.trim();
-            const bankName = document.getElementById('dob-bank-name').value;
+            const fullName = $('dob-full-name').value.trim();
+            const email = $('dob-email').value.trim();
+            const phone = $('dob-phone').value.trim();
+            const company = $('dob-company').value.trim();
+            const payRef = $('dob-payment-ref').value.trim();
+            const bankName = $('dob-bank-name').value;
 
             if (!fullName || !email || !company) {
                 alert('Please fill in all mandatory fields.');
@@ -858,8 +1088,8 @@
             btnSubmit.disabled = true;
             btnSubmit.textContent = 'Provisioning Sovereign Tenant...';
 
-            const csrfToken = (window.frappe && frappe.csrf_token) || 
-                              (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || 
+            const csrfToken = (window.frappe && frappe.csrf_token) ||
+                              (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) ||
                               window.csrf_token || '';
 
             const payload = {
@@ -867,15 +1097,16 @@
                 email: email,
                 phone: phone,
                 company_name: company,
-                industry: selectedIndustry,
-                package_tier: selectedPackage,
-                billing_term: selectedTerm.toString(),
+                industry: state.industry,
+                package_tier: state.pkgTier,
+                billing_term: String(state.termMonths),
                 payment_ref: payRef,
                 bank_name: bankName,
                 selected_module: 'Accounts'
             };
+            if (state.coupon.valid) payload.coupon_code = state.coupon.code;
 
-            const reqHeaders = { 
+            const reqHeaders = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             };
@@ -893,44 +1124,55 @@
 
                 if (res.message && res.message.success) {
                     form.style.display = 'none';
-                    const successView = document.getElementById('dob-success-view');
-                    successView.style.display = 'block';
+                    $('dob-success-view').style.display = 'block';
 
-                    document.getElementById('dob-success-msg').textContent = res.message.message;
-                    document.getElementById('dob-res-name').textContent = fullName;
-                    document.getElementById('dob-res-email').textContent = email;
+                    const m = res.message;
+                    $('dob-success-msg').textContent = m.message;
+                    $('dob-res-name').textContent = fullName;
+                    $('dob-res-email').textContent = email;
                     if (phone) {
-                        document.getElementById('dob-res-phone').textContent = phone;
-                        document.getElementById('dob-res-phone-row').style.display = '';
+                        $('dob-res-phone').textContent = phone;
+                        $('dob-res-phone-row').style.display = '';
                     } else {
-                        document.getElementById('dob-res-phone-row').style.display = 'none';
+                        $('dob-res-phone-row').style.display = 'none';
                     }
-                    document.getElementById('dob-res-ref').textContent = res.message.signup_ref;
-                    document.getElementById('dob-res-company').textContent = `${res.message.company} (${res.message.abbr})`;
-                    document.getElementById('dob-res-industry').textContent = selectedIndustry;
-                    document.getElementById('dob-res-pkg').textContent = res.message.package_tier;
-                    document.getElementById('dob-res-term').textContent = `${selectedTerm} Months`;
-                    document.getElementById('dob-res-disc').textContent = res.message.discount_applied;
-                    document.getElementById('dob-res-amt').textContent = `${res.message.total_amount.toLocaleString('en-US', {minimumFractionDigits: 2})} ETB`;
-                    const payStatusEl = document.getElementById('dob-res-paystatus');
-                    if (payRef) {
-                        payStatusEl.textContent = '✅ Payment Verified — Account Active';
+                    $('dob-res-ref').textContent = m.signup_ref;
+                    $('dob-res-company').textContent = `${m.company} (${m.abbr})`;
+                    $('dob-res-industry').textContent = state.industry;
+                    $('dob-res-pkg').textContent = m.package_tier;
+                    $('dob-res-term').textContent = `${state.termMonths} Months`;
+                    $('dob-res-disc').textContent = m.discount_applied;
+                    $('dob-res-amt').textContent = `${fmt(m.total_amount)} ETB`;
+
+                    // Breakdown extras
+                    const bd = m.amount_breakdown || {};
+                    if (bd.coupon_code) {
+                        $('dob-res-coupon-row').classList.add('show');
+                        $('dob-res-coupon').textContent = `${bd.coupon_code}: -${fmt(bd.coupon_discount)} ETB`;
+                    }
+                    if (m.promo && m.promo.applied) {
+                        $('dob-res-promo-row').classList.add('show');
+                        $('dob-res-promo').textContent = `${m.promo.free_months} months FREE until ${m.promo.free_until}`;
+                    }
+
+                    const payStatusEl = $('dob-res-paystatus');
+                    if (m.pending_review) {
+                        payStatusEl.textContent = '⏳ Bank Transfer Under Verification — Activated Within 24 Hours InSha\u2019Allah';
+                        payStatusEl.style.color = '#b45309';
+                    } else if (m.promo && m.promo.applied) {
+                        payStatusEl.textContent = `🎉 Launch Offer Active — ${m.promo.free_months} Months FREE! Account Ready.`;
                         payStatusEl.style.color = '#047857';
                     } else {
-                        payStatusEl.textContent = '🆓 7-Day Free Trial Activated';
-                        payStatusEl.style.color = '#1d4ed8';
+                        payStatusEl.textContent = '✅ Registration Complete — Check Your Email For Login Setup';
+                        payStatusEl.style.color = '#047857';
                     }
-                    document.getElementById('dob-login-link').href = res.message.password_setup_link || '/login';
+                    $('dob-login-link').href = m.password_setup_link || '/login';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     let errMsg = 'Registration could not be completed. Please check details.';
                     if (res._server_messages) {
                         try {
-                            const msgs = JSON.parse(res._server_messages);
-                            errMsg = msgs.map(m => {
-                                const parsed = JSON.parse(m);
-                                return parsed.message;
-                            }).join('\n');
+                            errMsg = JSON.parse(res._server_messages).map(m => JSON.parse(m).message).join('\n');
                         } catch(e) {}
                     } else if (res.message && res.message.message) {
                         errMsg = res.message.message;
@@ -949,7 +1191,7 @@
         });
     }
 
-    recalc();
+    loadConfig();
 })();
 </script>
 {% endblock %}
