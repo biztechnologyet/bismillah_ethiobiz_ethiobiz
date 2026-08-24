@@ -1,5 +1,6 @@
 /**
- * EthioBiz Theme v2.2 - Copilot Glassmorphism & Sacred Atmosphere
+ * EthioBiz Theme v2.3 - Copilot Glassmorphism & Sacred Atmosphere
+ * P4-B: both-theme form correctness (T1 scoping / T2 dark reassertions / T3 input pairing)
  * Bismillah Ar-Rahman Ar-Rahim
  */
 
@@ -252,9 +253,11 @@ body,
     font-weight: 700 !important;
 }
 
-/* 5. DESK INPUTS & CONTROLS (Round Copilot Style for Desk Only) */
-body[data-route*="app"] input.form-control,
-body[data-route*="app"] .frappe-control .control-input {
+/* 5. DESK INPUTS & CONTROLS (Round Copilot Style for Desk Only)
+   P4-B T3: split per theme — the old unscoped rule painted WHITE text on
+   translucent black even in LIGHT mode (white-on-white inputs). */
+body[data-route*="app"]:not([data-theme="light"]) input.form-control,
+body[data-route*="app"]:not([data-theme="light"]) .frappe-control .control-input {
     background: rgba(0, 0, 0, 0.35) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: #fff !important;
@@ -262,8 +265,17 @@ body[data-route*="app"] .frappe-control .control-input {
     padding-left: 20px !important;
 }
 
+body[data-route*="app"][data-theme="light"] input.form-control,
+body[data-route*="app"][data-theme="light"] .frappe-control .control-input {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(2, 106, 110, 0.35) !important;
+    color: #072a2e !important;
+    border-radius: 50px !important;
+    padding-left: 20px !important;
+}
+
 body[data-route*="app"] input.form-control:focus {
-    box-shadow: 0 0 0 2px var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.18) !important;
     border-color: var(--primary-color) !important;
 }
 
@@ -317,8 +329,6 @@ div[data-path*="dobiz-payment"] .card {
 .standard-web-form h2,
 .web-form-header h1,
 .web-form-title,
-.form-title,
-.page-title,
 .web-page-container h1,
 .web-page-container h2,
 .dob-signup-title,
@@ -334,7 +344,19 @@ div[data-path*="dobiz-payment"] .title {
     visibility: visible !important;
 }
 
-/* ALL Form Labels in Web Forms */
+/* P4-B T1: doc/page + web-form titles — PUBLIC pages only */
+html:not([data-route*="app"]) .page-title,
+html:not([data-route*="app"]) .form-title {
+    color: #072a2e !important;
+    font-weight: 900 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ALL Form Labels in Web Forms
+   P4-B T1: removed desk-leaking generic selectors (.frappe-control .control-label,
+   .form-group label/.control-label) — they forced near-black labels in DARK mode.
+   They are re-added below, scoped to PUBLIC (non-desk) pages only. */
 .web-form-container label,
 .web-form-container .control-label,
 .web-form-wrapper label,
@@ -343,13 +365,22 @@ div[data-path*="dobiz-payment"] .title {
 .standard-web-form .control-label,
 .web-form label,
 .web-form .control-label,
-.frappe-control .control-label,
-.form-group label,
-.form-group .control-label,
 .dob-signup-container label,
 .dob-pay-container label,
 div[data-path*="dobiz-payment"] label,
 div[data-path*="dobiz-payment"] .control-label {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    opacity: 1 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+    visibility: visible !important;
+}
+
+html:not([data-route*="app"]) .frappe-control .control-label,
+html:not([data-route*="app"]) .form-group label,
+html:not([data-route*="app"]) .form-group .control-label {
     color: #0f172a !important;
     font-weight: 800 !important;
     font-size: 14px !important;
@@ -813,3 +844,46 @@ body {
 }
 body[data-path] { background-attachment: fixed !important; }
 /* ===== END GLOBAL FOOTER FIX ===== */
+
+/* ===== P4-B T2 DARK-THEME FORM REASSERTIONS (2026-08-24) =====
+   Placed LAST so it wins the cascade. Guarantees desk-form field titles,
+   page titles and control text stay readable in dark mode regardless of
+   any earlier web-form leakage. */
+[data-theme="dark"] .frappe-control .control-label,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .form-group .control-label {
+    color: var(--text-color, #cdd6f4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .page-head .title-text,
+[data-theme="dark"] h3.title-text,
+[data-theme="dark"] .page-title {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .form-section .section-head,
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .form-tabs-list .nav-link {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .control-label .reqd,
+[data-theme="dark"] label .reqd { color: #f87171 !important; }
+[data-theme="dark"] select,
+[data-theme="dark"] textarea.form-control,
+[data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
+    color: var(--text-color, #cdd6f4) !important;
+}
+[data-theme="dark"] .frappe-control .control-label.muted,
+[data-theme="dark"] .frappe-control .label-muted,
+[data-theme="dark"] .frappe-control .help-box { color: #94a3b8 !important; }
+
+/* Light-mode desk labels — explicit AA guarantee (pairs with T3 inputs) */
+[data-theme="light"] .frappe-control .control-label,
+[data-theme="light"] .form-group label {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+/* ===== END P4-B T2 ===== */
