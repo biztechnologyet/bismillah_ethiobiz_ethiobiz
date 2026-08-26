@@ -191,14 +191,28 @@
         });
     }
 
+    function cartPageHost() {
+        return document.querySelector("#page-cart .page_content")
+            || document.querySelector("#page-cart main")
+            || document.querySelector("#page-cart")
+            || document.querySelector("main.container")
+            || document.querySelector("main")
+            || document.body;
+    }
+
     function renderCartPage(cart) {
-        const page = document.querySelector(".cart-container, .shopping-cart, #cart-container, .page-content") || document.querySelector("main") || document.body;
+        const page = cartPageHost();
         let box = document.getElementById("magala-checkout-box");
         if (!box) {
             box = document.createElement("div");
             box.id = "magala-checkout-box";
             box.className = "magala-checkout-box";
-            page.appendChild(box);
+        }
+        const empty = page.querySelector(".cart-empty");
+        if (empty) {
+            page.insertBefore(box, empty);
+        } else if (box.parentElement !== page) {
+            page.insertBefore(box, page.firstChild);
         }
         const itemsHtml = (cart.items || []).map((it) => `
             <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #e2e8f0;">
@@ -316,7 +330,7 @@
         MagalaCart.refresh();
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    function bootMagala() {
         get(API.options).then((o) => {
             window.MagalaCheckoutOptions = o || {};
             MagalaCart.refresh();
@@ -330,5 +344,11 @@
         if (location.pathname.replace(/\/$/, "") === "/cart") {
             MagalaCart.refresh().then(renderCartPage);
         }
-    });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootMagala);
+    } else {
+        bootMagala();
+    }
 })();
