@@ -95,7 +95,7 @@ def _item_meta(item_code):
     item = frappe.db.get_value(
         "Item",
         item_code,
-        ["name", "item_name", "item_group", "stock_uom", "is_stock_item", "company"],
+        ["name", "item_name", "item_group", "stock_uom", "is_stock_item", "company", "standard_rate"],
         as_dict=True,
     )
     if not item:
@@ -107,15 +107,29 @@ def _item_meta(item_code):
         as_dict=True,
     ) or {}
     company = wi.get("company") or item.get("company") or _parent_company()
-    price = frappe.db.get_value(
-        "Item Price",
-        {"item_code": item_code, "selling": 1},
-        "price_list_rate",
-    )
+    price = 0
+    selling_pl = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+    if selling_pl:
+        price = flt(
+            frappe.db.get_value(
+                "Item Price",
+                {"item_code": item_code, "price_list": selling_pl, "selling": 1},
+                "price_list_rate",
+            )
+        )
+    if not price:
+        row = frappe.db.sql(
+            """select price_list_rate from `tabItem Price`
+               where item_code=%s and selling=1 order by modified desc limit 1""",
+            item_code,
+        )
+        price = flt(row[0][0]) if row else 0
+    if not price:
+        price = flt(item.get("standard_rate"))
     group = item.get("item_group") or "Products"
     return {
         "item_code": item_code,
-        "item_name": item.get("item_name") or item_code,
+        "item_name": wi.get("web_item_name") or item.get("item_name") or item_code,
         "item_group": group,
         "uom": item.get("stock_uom") or "Nos",
         "company": company,
@@ -147,6 +161,191 @@ def get_bank_accounts():
             for row in s.bank_accounts
         ]
     return DEFAULT_BANKS
+
+
+def _is_guest():
+    return (frappe.session.user or "Guest") == "Guest"
+
+
+def _require_login():
+    if _is_guest():
+        frappe.throw(_("Please log in to add items and complete Magala checkout."), title=_("Login required"))
+
+
+def _webshop_update(item_code, qty):
+    """Keep Frappe Webshop Quotation (the native /cart table) in sync."""
+    if _is_guest():
+        return
+    try:
+        from webshop.webshop.shopping_cart.cart import update_cart
+
+        update_cart(item_code, flt(qty))
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"Magala webshop cart sync skipped: {e}")
+
+
+def _webshop_lines():
+    if _is_guest():
+        return []
+    try:
+        from webshop.webshop.shopping_cart.cart import get_cart_quotation
+
+        data = get_cart_quotation() or {}
+        doc = data.get("doc") if isinstance(data, dict) else data
+        if not doc:
+            return []
+        items = getattr(doc, "items", None) or (doc.get("items") if isinstance(doc, dict) else None) or []
+        out = []
+        for row in items:
+            code = row.get("item_code") if isinstance(row, dict) else getattr(row, "item_code", None)
+            qty = row.get("qty") if isinstance(row, dict) else getattr(row, "qty", 0)
+            if code:
+                out.append({"item_code": code, "qty": flt(qty or 1)})
+        return out
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"Magala webshop cart read skipped: {e}")
+        return []
+
+
+def _clear_webshop_quotation():
+    for row in list(_webshop_lines()):
+        _webshop_update(row["item_code"], 0)
+
+
+def _merged_cart_rows():
+    by_code = {}
+    for row in (_get_cart().get("items") or []) + _webshop_lines():
+        code = row.get("item_code")
+        if not code:
+            continue
+        qty = flt(row.get("qty") or 1)
+        if code in by_code:
+            by_code[code]["qty"] = max(flt(by_code[code].get("qty") or 0), qty)
+        else:
+            by_code[code] = {"item_code": code, "qty": qty}
+    return list(by_code.values())
+
+
+def _link_user_to_customer(user, customer, email=None, phone=None, customer_name=None):
+    if not user or user == "Guest" or not customer:
+        return
+    try:
+        if frappe.get_meta("User").has_field("customer"):
+            existing = frappe.db.get_value("User", user, "customer")
+            if not existing:
+                frappe.db.set_value("User", user, "customer", customer, update_modified=False)
+    except Exception:
+        pass
+    try:
+        if email and frappe.db.exists("Customer", customer):
+            if not frappe.db.get_value("Customer", customer, "email_id"):
+                frappe.db.set_value("Customer", customer, "email_id", email, update_modified=False)
+            if phone and not frappe.db.get_value("Customer", customer, "mobile_no"):
+                frappe.db.set_value("Customer", customer, "mobile_no", phone, update_modified=False)
+    except Exception:
+        pass
+
+
+def _buyer_profile(require=True):
+    """Name, email, phone, Customer, and shipping address from the logged-in User."""
+    if _is_guest():
+        if require:
+            _require_login()
+        return {
+            "logged_in": False,
+            "full_name": "",
+            "email": "",
+            "phone": "",
+            "customer": None,
+            "address_name": None,
+            "shipping_address": "",
+            "login_url": "/login?redirect-to=/cart",
+        }
+    user = frappe.session.user
+    udoc = frappe.get_cached_doc("User", user)
+    email = cstr(udoc.email or user).strip()
+    full_name = cstr(udoc.full_name or " ".join(filter(None, [udoc.first_name, udoc.last_name]))).strip()
+    phone = cstr(udoc.mobile_no or udoc.phone).strip()
+    customer = None
+    if frappe.get_meta("User").has_field("customer"):
+        customer = udoc.get("customer")
+    if not customer and email:
+        customer = frappe.db.get_value("Customer", {"email_id": email}, "name")
+    contact = frappe.db.get_value("Contact", {"user": user}, "name")
+    if not contact and email:
+        contact = frappe.db.get_value("Contact", {"email_id": email}, "name")
+    if contact:
+        crow = frappe.db.get_value("Contact", contact, ["mobile_no", "phone", "full_name"], as_dict=True) or {}
+        if not phone:
+            phone = cstr(crow.get("mobile_no") or crow.get("phone")).strip()
+        if not full_name:
+            full_name = cstr(crow.get("full_name")).strip()
+        if not customer:
+            customer = frappe.db.get_value(
+                "Dynamic Link",
+                {"parenttype": "Contact", "parent": contact, "link_doctype": "Customer"},
+                "link_name",
+            )
+    address_name = None
+    shipping_address = ""
+    if customer:
+        if not phone:
+            phone = cstr(frappe.db.get_value("Customer", customer, "mobile_no")).strip()
+        if not full_name:
+            full_name = cstr(frappe.db.get_value("Customer", customer, "customer_name")).strip()
+        links = frappe.get_all(
+            "Dynamic Link",
+            filters={"link_doctype": "Customer", "link_name": customer, "parenttype": "Address"},
+            pluck="parent",
+        )
+        chosen = None
+        for aname in links:
+            ad = frappe.db.get_value(
+                "Address",
+                aname,
+                ["name", "address_type", "disabled", "address_line1", "address_line2", "city", "state", "pincode", "country"],
+                as_dict=True,
+            )
+            if not ad or ad.get("disabled"):
+                continue
+            if (ad.address_type or "").lower() == "shipping":
+                chosen = ad
+                break
+            if not chosen:
+                chosen = ad
+        if chosen:
+            address_name = chosen.name
+            shipping_address = ", ".join(
+                filter(
+                    None,
+                    [
+                        chosen.address_line1,
+                        chosen.address_line2,
+                        chosen.city,
+                        chosen.state,
+                        chosen.pincode,
+                        chosen.country,
+                    ],
+                )
+            )
+    if not full_name:
+        full_name = email.split("@")[0] if email else user
+    return {
+        "logged_in": True,
+        "user": user,
+        "full_name": full_name,
+        "email": email if "@" in email else "",
+        "phone": phone,
+        "customer": customer,
+        "address_name": address_name,
+        "shipping_address": shipping_address,
+        "login_url": "/login?redirect-to=/cart",
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_buyer_profile():
+    return _buyer_profile(require=False)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -182,10 +381,11 @@ def get_checkout_options():
 
 @frappe.whitelist(allow_guest=True)
 def get_cart():
-    cart = _get_cart()
+    merged_rows = _merged_cart_rows()
+    _set_cart({"items": merged_rows})
     items = []
     total = 0
-    for row in cart.get("items") or []:
+    for row in merged_rows:
         try:
             meta = _item_meta(row["item_code"])
         except Exception:
@@ -195,6 +395,7 @@ def get_cart():
         total += amount
         items.append({**meta, "qty": qty, "amount": amount})
     opts = get_checkout_options()
+    buyer = _buyer_profile(require=False)
     return {
         "items": items,
         "total": total,
@@ -202,11 +403,14 @@ def get_cart():
         "count": int(sum(flt(i.get("qty") or 0) for i in items)),
         "cod_available": bool(items) and all(i.get("cod_eligible") for i in items) and opts.get("enable_cod"),
         "options": opts,
+        "logged_in": buyer.get("logged_in"),
+        "buyer": buyer,
     }
 
 
 @frappe.whitelist(allow_guest=True)
 def add_to_cart(item_code, qty=1):
+    _require_login()
     qty = flt(qty or 1)
     if qty <= 0:
         frappe.throw(_("Quantity must be greater than zero"))
@@ -223,6 +427,7 @@ def add_to_cart(item_code, qty=1):
     if not found:
         cart["items"].append({"item_code": item_code, "qty": qty})
     _set_cart(cart)
+    _webshop_update(item_code, next((r["qty"] for r in cart["items"] if r["item_code"] == item_code), qty))
     return get_cart()
 
 
@@ -238,12 +443,14 @@ def update_cart_qty(item_code, qty):
                 row["qty"] = qty
                 break
     _set_cart(cart)
+    _webshop_update(item_code, qty)
     return get_cart()
 
 
 @frappe.whitelist(allow_guest=True)
 def clear_cart():
     _set_cart({"items": []})
+    _clear_webshop_quotation()
     return get_cart()
 
 
@@ -358,7 +565,15 @@ def place_order(
     if payment_method not in allowed:
         frappe.throw(_("Invalid payment method"))
     payment_method = allowed[payment_method]
+    buyer = _buyer_profile(require=True)
+    customer_name = buyer.get("full_name")
+    email = buyer.get("email")
+    phone = buyer.get("phone")
+    if not delivery_address:
+        delivery_address = buyer.get("shipping_address")
     opts = get_checkout_options()
+    if not phone:
+        phone = cstr(getattr(_checkout_settings(), "addispay_default_phone", None) or "")
     if payment_method == "AddisPay" and not opts.get("enable_addispay"):
         frappe.throw(_("AddisPay is disabled in Magala Checkout Settings"))
     if payment_method == "Bank Transfer" and not opts.get("enable_bank_transfer"):
@@ -372,17 +587,16 @@ def place_order(
         frappe.throw(_("Your cart is empty"))
 
     email = cstr(email or "").strip()
-    if not email or email in ("Guest", "Administrator") or "@" not in email:
-        frappe.throw(_("Email is required to place an order"))
-    if not phone:
-        frappe.throw(_("Phone number is required"))
+    if not email or "@" not in email:
+        frappe.throw(_("Your user account has no email. Update your profile, then try again."))
     if payment_method == "Cash upon Delivery":
         if not delivery_address:
-            frappe.throw(_("Delivery address is required for Cash upon Delivery"))
+            frappe.throw(_("Add a shipping address on your Customer / Address record before using Cash upon Delivery."))
         if not cart.get("cod_available"):
             frappe.throw(_("Cash upon Delivery is only available for products and food items"))
 
-    customer = _ensure_customer(email, customer_name or email.split("@")[0], phone)
+    customer = buyer.get("customer") or _ensure_customer(email, customer_name or email.split("@")[0], phone)
+    _link_user_to_customer(frappe.session.user, customer, email, phone, customer_name)
     grouped = defaultdict(list)
     for it in items:
         grouped[it["company"]].append(it)

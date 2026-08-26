@@ -88,9 +88,23 @@
     border: 1px solid #008080;
     max-width: 320px;
 }
-#page-cart .shopping-cart-header {
-    color: #f8fafc !important;
+.magala-checkout-box.magala-unified {
+    margin-top: 16px;
+    max-width: 100%;
 }
+.magala-buyer-chip {
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #134e4a;
+}
+.magala-ship { margin-top: 4px; color: #0f766e; font-size: 12px; }
+.magala-login-gate { font-weight: 700; }
+.magala-pay-option.disabled { opacity: 0.55; cursor: not-allowed; }
+#page-cart .shopping-cart-header { color: #f8fafc !important; }
 #page-cart .cart-empty.frappe-card {
     background: rgba(15, 23, 42, 0.55);
     color: #e2e8f0;

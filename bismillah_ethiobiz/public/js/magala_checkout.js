@@ -77,9 +77,17 @@
             return post(API.add, { item_code: itemCode, qty: qty || 1 }).then((cart) => {
                 renderBadge(cart);
                 toast(`Added to cart. <a href="/cart" style="color:#5eead4;font-weight:800;">Checkout →</a>`);
+                if (location.pathname.replace(/\/$/, "") === "/cart") {
+                    window.location.reload();
+                }
                 return cart;
             }).catch((e) => {
-                alert((e && e.message) ? String(e.message).replace(/<[^>]+>/g, " ").slice(0, 220) : "Could not add to cart");
+                const msg = (e && e.message) ? String(e.message).replace(/<[^>]+>/g, " ").slice(0, 220) : "Could not add to cart";
+                if (/log in/i.test(msg)) {
+                    window.location.href = "/login?redirect-to=" + encodeURIComponent(location.pathname + location.search);
+                    return;
+                }
+                alert(msg);
                 throw e;
             });
         },
@@ -192,7 +200,9 @@
     }
 
     function cartPageHost() {
-        return document.querySelector("#page-cart .page_content")
+        return document.querySelector("#page-cart .cart-payment-addresses")
+            || document.querySelector("#page-cart .col-lg-4, #page-cart .cart-totals, #page-cart .payment-summary")
+            || document.querySelector("#page-cart .page_content")
             || document.querySelector("#page-cart main")
             || document.querySelector("#page-cart")
             || document.querySelector("main.container")
@@ -200,35 +210,47 @@
             || document.body;
     }
 
+    function fixWebshopTemplateGlitches() {
+        document.querySelectorAll("#page-cart td, #page-cart th, #page-cart .item-name, #page-cart a").forEach((el) => {
+            if ((el.textContent || "").trim() === "d.web_item_name") {
+                el.style.display = "none";
+            }
+        });
+        document.querySelectorAll("#page-cart .btn-place-order, #page-cart button.place-order, #page-cart .btn-request-for-quotation").forEach((btn) => {
+            if (btn.id === "magala-place") return;
+            btn.style.display = "none";
+        });
+    }
+
+    function paymentHost(page) {
+        const summary = document.querySelector("#page-cart .cart-payment-addresses, #page-cart .number-card, #page-cart .cart-totals");
+        if (summary) return summary;
+        const tableWrap = document.querySelector("#page-cart table") && document.querySelector("#page-cart table").closest(".frappe-card, .cart-container, .col-lg-8, .col-md-8");
+        if (tableWrap && tableWrap.parentElement) {
+            const cols = tableWrap.parentElement.querySelector(".col-lg-4, .col-md-4");
+            if (cols) return cols;
+        }
+        return page;
+    }
+
     function renderCartPage(cart) {
+        fixWebshopTemplateGlitches();
         const page = cartPageHost();
+        const host = paymentHost(page);
         let box = document.getElementById("magala-checkout-box");
         if (!box) {
             box = document.createElement("div");
             box.id = "magala-checkout-box";
-            box.className = "magala-checkout-box";
+            box.className = "magala-checkout-box magala-unified";
         }
-        const empty = page.querySelector(".cart-empty");
-        if (empty) {
-            page.insertBefore(box, empty);
-        } else if (box.parentElement !== page) {
-            page.insertBefore(box, page.firstChild);
+        if (box.parentElement !== host) {
+            host.appendChild(box);
         }
-        const itemsHtml = (cart.items || []).map((it) => `
-            <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #e2e8f0;">
-                <div>
-                    <strong>${it.item_name}</strong>
-                    <div style="font-size:12px;color:#64748b;">${it.company || ""} · ${it.item_group || ""}</div>
-                </div>
-                <div style="text-align:right;">
-                    <div>${Number(it.qty)} × ${Number(it.rate).toLocaleString()} ETB</div>
-                    <button type="button" class="magala-remove" data-code="${it.item_code}" style="border:none;background:none;color:#e21d38;font-size:12px;">Remove</button>
-                </div>
-            </div>`).join("") || `<p>Your Magala cart is empty. Browse <a href="/all-products">All Products</a> or <a href="/shop">Shop</a>.</p>`;
 
         const o = cart.options || window.MagalaCheckoutOptions || {};
         const cur = o.currency || "ETB";
         const def = o.default_payment_method || "AddisPay";
+        const buyer = cart.buyer || {};
         const methods = [];
         if (o.enable_addispay !== false) {
             methods.push({ v: "AddisPay", label: o.addispay_label || "AddisPay Payment", desc: o.addispay_description || "Cards, Telebirr, CBE Birr, bank apps." });
@@ -249,24 +271,30 @@
             return `<label class="magala-pay-option ${checked ? "selected" : ""} ${m.disabled ? "disabled" : ""}"><input type="radio" name="magala-pay" value="${m.v}" ${checked} ${m.disabled ? "disabled" : ""}>
                 <span><strong>${m.label}</strong><br><small>${m.desc || ""}</small></span></label>`;
         }).join("") || "<p>No payment methods enabled. Open <strong>Magala Checkout Settings</strong> in Desk.</p>";
+
+        const loginGate = !cart.logged_in
+            ? `<p class="magala-login-gate">Please <a href="/login?redirect-to=/cart">log in</a> to place this order. Your cart items stay on this page.</p>`
+            : "";
+        const profile = cart.logged_in
+            ? `<div class="magala-buyer-chip"><strong>${buyer.full_name || ""}</strong> · ${buyer.email || ""} · ${buyer.phone || "add phone on your profile"}
+               ${buyer.shipping_address ? `<div class="magala-ship">${buyer.shipping_address}</div>` : `<div class="magala-ship">Add a shipping Address on your Customer record for Cash upon Delivery.</div>`}</div>`
+            : "";
+        const emptyHint = (!cart.items || !cart.items.length)
+            ? `<p>Your cart is empty. Browse <a href="/all-products">All Products</a> or <a href="/shop">Shop</a>.</p>`
+            : "";
+
         box.innerHTML = `
-            <h4>Magala Checkout</h4>
-            <div id="magala-cart-lines">${itemsHtml}</div>
-            <p style="font-weight:800;margin:12px 0;">Total: ${(cart.total || 0).toLocaleString()} ${cur}${o.sandbox && o.enable_addispay !== false ? ' <span class="magala-pay-badge">AddisPay UAT</span>' : ""}</p>
-            <input class="magala-field" id="magala-name" placeholder="Full name">
-            <input class="magala-field" id="magala-email" type="email" placeholder="Email">
-            <input class="magala-field" id="magala-phone" placeholder="Phone (09… or 251…)">
-            <textarea class="magala-field" id="magala-address" rows="2" placeholder="Delivery address (required for Cash upon Delivery)"></textarea>
+            <h4>Payment</h4>
+            ${emptyHint}
+            ${profile}
+            ${loginGate}
+            <p style="font-weight:800;margin:12px 0;">Grand Total: ${(cart.total || 0).toLocaleString()} ${cur}${o.sandbox && o.enable_addispay !== false ? ' <span class="magala-pay-badge">AddisPay UAT</span>' : ""}</p>
+            <textarea class="magala-field" id="magala-address" rows="2" placeholder="Delivery notes / address override (optional for AddisPay &amp; Bank Transfer)">${buyer.shipping_address || ""}</textarea>
             ${methodHtml}
             <div id="magala-bank-box" style="display:none;background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;"></div>
-            <button type="button" class="magala-place-btn" id="magala-place">Place Order</button>
+            <button type="button" class="magala-place-btn" id="magala-place" ${cart.logged_in && cart.items && cart.items.length ? "" : "disabled"}>Place Order</button>
             <div id="magala-result" style="margin-top:12px;"></div>
         `;
-        box.querySelectorAll(".magala-remove").forEach((b) => {
-            b.addEventListener("click", () => {
-                post(API.qty, { item_code: b.getAttribute("data-code"), qty: 0 }).then(renderCartPage);
-            });
-        });
         get(API.banks).then((banks) => {
             const el = document.getElementById("magala-bank-box");
             if (!el) return;
@@ -276,57 +304,62 @@
         });
         box.querySelectorAll("input[name=magala-pay]").forEach((r) => {
             r.addEventListener("change", () => {
-                box.querySelectorAll(".magala-pay-option").forEach((o) => o.classList.remove("selected"));
+                box.querySelectorAll(".magala-pay-option").forEach((opt) => opt.classList.remove("selected"));
                 r.closest(".magala-pay-option").classList.add("selected");
                 document.getElementById("magala-bank-box").style.display = r.value === "Bank Transfer" ? "block" : "none";
             });
         });
-        document.getElementById("magala-place").addEventListener("click", function () {
-            const method = (document.querySelector("input[name=magala-pay]:checked") || {}).value;
-            const payload = {
-                payment_method: method,
-                customer_name: document.getElementById("magala-name").value,
-                email: document.getElementById("magala-email").value,
-                phone: document.getElementById("magala-phone").value,
-                delivery_address: document.getElementById("magala-address").value,
-            };
-            const btn = this;
-            btn.disabled = true;
-            btn.textContent = "Placing order…";
-            post(API.place, payload).then((res) => {
-                if (res.redirect) {
-                    window.location.href = res.redirect;
+        const placeBtn = document.getElementById("magala-place");
+        if (placeBtn) {
+            placeBtn.addEventListener("click", function () {
+                if (!cart.logged_in) {
+                    window.location.href = "/login?redirect-to=/cart";
                     return;
                 }
-                let extra = "";
-                if (res.payment_method === "Bank Transfer") {
-                    extra = `<p>Transfer <strong>${(res.amount || 0).toLocaleString()} ETB</strong> then enter your bank slip ID below.</p>
-                    <input class="magala-field" id="magala-ref" placeholder="Bank reference / slip ID">
-                    <button type="button" class="magala-place-btn" id="magala-ref-btn">Submit bank reference</button>`;
-                }
-                document.getElementById("magala-result").innerHTML =
-                    `<div style="color:#0f766e;font-weight:800;">${res.message || "Order placed."}</div>
-                     <div>Reference: <strong>${res.tx_ref}</strong></div>${extra}`;
-                if (res.payment_method === "Bank Transfer") {
-                    document.getElementById("magala-ref-btn").addEventListener("click", () => {
-                        post(API.bankRef, {
-                            tx_ref: res.tx_ref,
-                            bank_name: "Commercial Bank of Ethiopia",
-                            reference_no: document.getElementById("magala-ref").value,
-                            paid_by: document.getElementById("magala-name").value,
-                        }).then(() => {
-                            document.getElementById("magala-result").innerHTML += "<p>Receipt submitted. We will confirm funds shortly.</p>";
+                const method = (document.querySelector("input[name=magala-pay]:checked") || {}).value;
+                const payload = {
+                    payment_method: method,
+                    delivery_address: document.getElementById("magala-address").value,
+                };
+                const btn = this;
+                btn.disabled = true;
+                btn.textContent = "Placing order…";
+                post(API.place, payload).then((res) => {
+                    if (res.redirect) {
+                        window.location.href = res.redirect;
+                        return;
+                    }
+                    let extra = "";
+                    if (res.payment_method === "Bank Transfer") {
+                        extra = `<p>Transfer <strong>${(res.amount || 0).toLocaleString()} ETB</strong> then enter your bank slip ID below.</p>
+                        <input class="magala-field" id="magala-ref" placeholder="Bank reference / slip ID">
+                        <button type="button" class="magala-place-btn" id="magala-ref-btn">Submit bank reference</button>`;
+                    }
+                    document.getElementById("magala-result").innerHTML =
+                        `<div style="color:#0f766e;font-weight:800;">${res.message || "Order placed."}</div>
+                         <div>Reference: <strong>${res.tx_ref}</strong></div>${extra}`;
+                    if (res.payment_method === "Bank Transfer") {
+                        document.getElementById("magala-ref-btn").addEventListener("click", () => {
+                            post(API.bankRef, {
+                                tx_ref: res.tx_ref,
+                                bank_name: "Commercial Bank of Ethiopia",
+                                reference_no: document.getElementById("magala-ref").value,
+                                paid_by: (cart.buyer && cart.buyer.full_name) || "",
+                            }).then(() => {
+                                document.getElementById("magala-result").innerHTML += "<p>Receipt submitted. We will confirm funds shortly.</p>";
+                            });
                         });
-                    });
-                }
-                MagalaCart.refresh();
-            }).catch((e) => {
-                alert(String(e.message || e).replace(/<[^>]+>/g, " ").slice(0, 280));
-            }).finally(() => {
-                btn.disabled = false;
-                btn.textContent = "Place Order";
+                    }
+                    MagalaCart.refresh();
+                    setTimeout(() => { window.location.reload(); }, 1800);
+                }).catch((e) => {
+                    alert(String(e.message || e).replace(/<[^>]+>/g, " ").slice(0, 280));
+                }).finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = "Place Order";
+                });
             });
-        });
+        }
         MagalaCart.refresh();
     }
 
