@@ -73,20 +73,21 @@
             "fieldtype": "Check",
             "label": "Enable Background Images (Master Switch)",
             "default": 0,
-            "description": "Disable to use instant pure CSS gradient atmosphere with zero image load delay."
+            "description": "[FAST] OFF = instant pure CSS gradient, zero image downloads, fastest boot. [SLOW] ON = large wallpaper PNGs load on every page, adds ~500ms+ first paint."
         },
         {
             "fieldname": "enable_desk_bg_image",
             "fieldtype": "Check",
             "label": "Enable Desk Background Image",
             "default": 0,
-            "depends_on": "eval:doc.enable_background_images==1"
+            "depends_on": "eval:doc.enable_background_images==1",
+            "description": "[SLOW] Downloads desk wallpaper. Only visible when master switch is ON."
         },
         {
             "fieldname": "custom_desk_bg_image",
             "fieldtype": "Attach Image",
             "label": "Custom Desk Background Image",
-            "description": "Leave empty for default EthioBiz Desk Wallpaper",
+            "description": "Leave empty for default EthioBiz Desk Wallpaper. [SLOW] Large images slow first paint.",
             "depends_on": "eval:doc.enable_background_images==1 && doc.enable_desk_bg_image==1"
         },
         {
@@ -98,13 +99,14 @@
             "fieldtype": "Check",
             "label": "Enable Website Background Image",
             "default": 0,
-            "depends_on": "eval:doc.enable_background_images==1"
+            "depends_on": "eval:doc.enable_background_images==1",
+            "description": "[SLOW] Downloads website wallpaper. Only visible when master switch is ON."
         },
         {
             "fieldname": "custom_website_bg_image",
             "fieldtype": "Attach Image",
             "label": "Custom Website Background Image",
-            "description": "Leave empty for default EthioBiz Website Wallpaper",
+            "description": "Leave empty for default EthioBiz Website Wallpaper. [SLOW] Large images slow first paint.",
             "depends_on": "eval:doc.enable_background_images==1 && doc.enable_website_bg_image==1"
         },
         {
@@ -117,14 +119,16 @@
             "fieldtype": "Select",
             "label": "Dark Mode Gradient Preset",
             "options": "Obsidian Teal & Emerald Aura (Default)\nMidnight Sapphire & Cyan Glow\nAbyssal Nebula & Sacred Gold\nDeep Obsidian Minimalist",
-            "default": "Obsidian Teal & Emerald Aura (Default)"
+            "default": "Obsidian Teal & Emerald Aura (Default)",
+            "description": "[FAST] Pure CSS gradients, zero image downloads, instant render."
         },
         {
             "fieldname": "bright_gradient_style",
             "fieldtype": "Select",
             "label": "Bright / Light Mode Gradient Preset",
             "options": "Sacred Ivory & Pearl Mist (Default)\nFrosted Cyan & Nordic Sky\nAlabaster & Golden Horizon\nCrisp Pure Minimalist",
-            "default": "Sacred Ivory & Pearl Mist (Default)"
+            "default": "Sacred Ivory & Pearl Mist (Default)",
+            "description": "[FAST] Pure CSS gradients, zero image downloads, instant render."
         },
         {
             "fieldname": "column_break_grad",
@@ -135,14 +139,16 @@
             "fieldtype": "Select",
             "label": "Website Atmosphere Preset",
             "options": "Deep Cosmos & Emerald Glass (Default)\nRoyal Sapphire & Cyber Teal\nOnyx Obsidian & Emerald Pulse\nGolden Dusk & Deep Slate",
-            "default": "Deep Cosmos & Emerald Glass (Default)"
+            "default": "Deep Cosmos & Emerald Glass (Default)",
+            "description": "[FAST] Pure CSS gradients, zero image downloads, instant render."
         },
         {
             "fieldname": "glass_blur_intensity",
             "fieldtype": "Select",
             "label": "Glassmorphism Blur Strength",
             "options": "Subtle (10px)\nBalanced (16px)\nIntense Frost (24px)\nUltra Frosted (32px)",
-            "default": "Balanced (16px)"
+            "default": "Subtle (10px)",
+            "description": "[FASTEST] Subtle 10px = minimal GPU cost. [SLOW] Ultra Frosted 32px = heavy GPU blur on every glass panel, significant repaint cost on scroll."
         },
         {
             "fieldname": "section_login",
@@ -260,6 +266,13 @@
             "fieldname": "section_advanced",
             "fieldtype": "Section Break",
             "label": "Advanced & Custom"
+        },
+        {
+            "fieldname": "enable_website_animation",
+            "fieldtype": "Check",
+            "label": "Enable Website Animated Background",
+            "default": 0,
+            "description": "[SLOW] Adds canvas aurora animation on website pages — GPU + paint cost. [FAST] OFF = pure CSS gradients, zero canvas overhead, fastest pages."
         },
         {
             "fieldname": "enable_light_label_fix",
