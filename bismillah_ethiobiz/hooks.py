@@ -74,7 +74,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
-    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.1.0",
 ]
 
 # ============================================
