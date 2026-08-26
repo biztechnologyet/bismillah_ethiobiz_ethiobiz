@@ -1,0 +1,28 @@
+{% extends "templates/web.html" %}
+{% block title %}Payment Successful | Magala{% endblock %}
+{% block page_content %}
+<div class="magala-checkout-box" style="max-width:640px;margin:40px auto;">
+    <h2 style="color:#008080;font-weight:900;">Payment received</h2>
+    <p id="magala-ok-msg">We are confirming your AddisPay payment. Please wait…</p>
+    <p>Reference: <strong id="magala-ok-ref"></strong></p>
+    <a class="magala-btn-cart" href="/all-products">Continue shopping</a>
+    <a class="magala-btn-ghost" href="/cart">Cart</a>
+</div>
+<script>
+(function(){
+    const q = new URLSearchParams(location.search);
+    const tx = q.get("tx_ref") || "";
+    document.getElementById("magala-ok-ref").textContent = tx;
+    fetch("/api/method/bismillah_ethiobiz.magala_checkout.verify_return", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({tx_ref: tx, uuid: q.get("uuid")||"", status: "success"})
+    }).then(r=>r.json()).then(j=>{
+        const m = j.message || {};
+        document.getElementById("magala-ok-msg").textContent =
+            m.status === "success" ? "Your Magala order is paid. Thank you." : (m.message || "Payment recorded.");
+    }).catch(()=>{ document.getElementById("magala-ok-msg").textContent = "If you were charged, we will confirm shortly."; });
+})();
+</script>
+{% endblock %}

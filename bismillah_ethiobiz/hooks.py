@@ -59,7 +59,8 @@ app_include_js = [
 web_include_css = [
     "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
     "/assets/bismillah_ethiobiz/css/walta.css",
-    "/assets/bismillah_ethiobiz/css/dagu.css"
+    "/assets/bismillah_ethiobiz/css/dagu.css",
+    "/assets/bismillah_ethiobiz/css/magala_checkout.css",
 ]
 
 # JS for website (frontend/portal)
@@ -71,7 +72,9 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
+    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.0.0",
 ]
 
 # ============================================

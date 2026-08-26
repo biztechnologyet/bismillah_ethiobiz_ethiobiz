@@ -1,0 +1,25 @@
+{% extends "templates/web.html" %}
+{% block title %}Payment Failed | Magala{% endblock %}
+{% block page_content %}
+<div class="magala-checkout-box" style="max-width:640px;margin:40px auto;">
+    <h2 style="color:#e21d38;font-weight:900;">Payment not completed</h2>
+    <p>Your AddisPay checkout was cancelled or failed. Your cart items can be checked out again.</p>
+    <p>Reference: <strong id="magala-fail-ref"></strong></p>
+    <a class="magala-btn-cart" href="/cart">Return to cart</a>
+    <a class="magala-btn-ghost" href="/all-products">All Products</a>
+</div>
+<script>
+(function(){
+    const q = new URLSearchParams(location.search);
+    const tx = q.get("tx_ref") || "";
+    document.getElementById("magala-fail-ref").textContent = tx;
+    if (!tx) return;
+    fetch("/api/method/bismillah_ethiobiz.magala_checkout.verify_return", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({tx_ref: tx, uuid: q.get("uuid")||"", status: "failed"})
+    });
+})();
+</script>
+{% endblock %}

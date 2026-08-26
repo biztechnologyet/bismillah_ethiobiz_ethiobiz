@@ -27,6 +27,31 @@ $(() => {
                 if (webshop.webshop.shopping_cart) webshop.webshop.shopping_cart.bind_add_to_cart_action();
                 if (webshop.webshop.wishlist) webshop.webshop.wishlist.bind_wishlist_action();
             }
+            $(".item-card").each(function() {
+                const $card = $(this);
+                if ($card.find(".magala-card-cta").length) return;
+                const code = $card.attr("data-item-code") || $card.find("[data-item-code]").attr("data-item-code") || "";
+                const txt = ($card.text() || "").toLowerCase();
+                const isJob = txt.indexOf("job") >= 0 || txt.indexOf("career") >= 0;
+                if (isJob) return;
+                const $cta = $(`<div class="magala-card-cta">
+                    <button type="button" class="magala-btn-cart">Add to Cart</button>
+                </div>`);
+                $cta.find(".magala-btn-cart").on("click", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const itemCode = code || $card.find("a[href*='/']").data("item-code");
+                    if (window.MagalaCart && (itemCode || $card.attr("data-item-code"))) {
+                        window.MagalaCart.add(itemCode || $card.attr("data-item-code"), 1);
+                    } else if (window.MagalaCart) {
+                        const href = $card.find("a[href]").attr("href") || "";
+                        const parts = href.split("/").filter(Boolean);
+                        const last = parts[parts.length - 1];
+                        if (last) window.MagalaCart.add(decodeURIComponent(last), 1);
+                    }
+                });
+                $card.append($cta);
+            });
         }
 
         fix_fallback_images() {

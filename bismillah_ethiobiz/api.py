@@ -603,15 +603,8 @@ def update_website_context(context):
 
     css_files = [
         "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
-        "/assets/bismillah_ethiobiz/css/walta.css"
-    ]
-    for css in css_files:
-        if css not in context.web_include_css:
-            context.web_include_css.append(css)
-
-    css_files = [
-        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
-        "/assets/bismillah_ethiobiz/css/walta.css"
+        "/assets/bismillah_ethiobiz/css/walta.css",
+        "/assets/bismillah_ethiobiz/css/magala_checkout.css",
     ]
     for css in css_files:
         if css not in context.web_include_css:
@@ -635,7 +628,9 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
         "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
         "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0"
+        "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
+        "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
+        "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.0.0",
     ]
     for js in js_files:
         base = js.split("?")[0]
