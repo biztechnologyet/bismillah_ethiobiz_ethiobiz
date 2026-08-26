@@ -18,6 +18,21 @@
         return m ? decodeURIComponent(m[1]) : "";
     }
 
+    function unwrapApi(res) {
+        if (res == null) return {};
+        if (typeof res === "string") {
+            const t = res.trim();
+            if (t.startsWith("{") || t.startsWith("[")) {
+                try { return unwrapApi(JSON.parse(t)); } catch (e) { return { message: t }; }
+            }
+            return { message: t };
+        }
+        if (typeof res !== "object") return { message: String(res) };
+        if (res.tx_ref || res.reference) return res;
+        if (res.message && typeof res.message === "object") return unwrapApi(res.message);
+        return res;
+    }
+
     function post(url, data) {
         const body = new URLSearchParams(data || {});
         return fetch(url, {
@@ -30,7 +45,7 @@
             body,
         }).then((r) => r.json()).then((j) => {
             if (j.exc) throw new Error((j._server_messages && j._server_messages) || j.exc);
-            return j.message !== undefined ? j.message : j;
+            return unwrapApi(j.message !== undefined ? j.message : j);
         });
     }
 
@@ -213,7 +228,7 @@
     function fixWebshopTemplateGlitches() {
         document.querySelectorAll("#page-cart td, #page-cart th, #page-cart .item-name, #page-cart a").forEach((el) => {
             if ((el.textContent || "").trim() === "d.web_item_name") {
-                el.style.display = "none";
+                el.remove();
             }
         });
         document.querySelectorAll("#page-cart .btn-place-order, #page-cart button.place-order, #page-cart .btn-request-for-quotation").forEach((btn) => {
@@ -324,7 +339,9 @@
                 const btn = this;
                 btn.disabled = true;
                 btn.textContent = "Placing order…";
-                post(API.place, payload).then((res) => {
+                post(API.place, payload).then((raw) => {
+                    const res = unwrapApi(raw);
+                    const tx = res.tx_ref || res.reference || res.payment_name || res.payment || "";
                     if (res.redirect) {
                         window.location.href = res.redirect;
                         return;
@@ -335,13 +352,17 @@
                         <input class="magala-field" id="magala-ref" placeholder="Bank reference / slip ID">
                         <button type="button" class="magala-place-btn" id="magala-ref-btn">Submit bank reference</button>`;
                     }
-                    document.getElementById("magala-result").innerHTML =
-                        `<div style="color:#0f766e;font-weight:800;">${res.message || "Order placed."}</div>
-                         <div>Reference: <strong>${res.tx_ref}</strong></div>${extra}`;
-                    if (res.payment_method === "Bank Transfer") {
+                    const resultEl = document.getElementById("magala-result");
+                    if (resultEl) {
+                        resultEl.innerHTML =
+                            `<div style="color:#0f766e;font-weight:800;">${res.message || "Order placed."}</div>
+                             <div>Reference: <strong>${tx || "(saving…)"}</strong></div>
+                             ${res.payment_name ? `<div>Payment: <strong>${res.payment_name}</strong></div>` : ""}${extra}`;
+                    }
+                    if (res.payment_method === "Bank Transfer" && tx) {
                         document.getElementById("magala-ref-btn").addEventListener("click", () => {
                             post(API.bankRef, {
-                                tx_ref: res.tx_ref,
+                                tx_ref: tx,
                                 bank_name: "Commercial Bank of Ethiopia",
                                 reference_no: document.getElementById("magala-ref").value,
                                 paid_by: (cart.buyer && cart.buyer.full_name) || "",
@@ -351,7 +372,6 @@
                         });
                     }
                     MagalaCart.refresh();
-                    setTimeout(() => { window.location.reload(); }, 1800);
                 }).catch((e) => {
                     alert(String(e.message || e).replace(/<[^>]+>/g, " ").slice(0, 280));
                 }).finally(() => {

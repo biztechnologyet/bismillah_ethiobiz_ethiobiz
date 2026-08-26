@@ -199,8 +199,17 @@ def _webshop_lines():
         for row in items:
             code = row.get("item_code") if isinstance(row, dict) else getattr(row, "item_code", None)
             qty = row.get("qty") if isinstance(row, dict) else getattr(row, "qty", 0)
+            rate = row.get("rate") if isinstance(row, dict) else getattr(row, "rate", 0)
+            iname = row.get("item_name") if isinstance(row, dict) else getattr(row, "item_name", None)
             if code:
-                out.append({"item_code": code, "qty": flt(qty or 1)})
+                out.append(
+                    {
+                        "item_code": code,
+                        "qty": flt(qty or 1),
+                        "rate": flt(rate or 0),
+                        "item_name": iname,
+                    }
+                )
         return out
     except Exception as e:
         frappe.logger("ethiobiz").error(f"Magala webshop cart read skipped: {e}")
@@ -221,8 +230,15 @@ def _merged_cart_rows():
         qty = flt(row.get("qty") or 1)
         if code in by_code:
             by_code[code]["qty"] = max(flt(by_code[code].get("qty") or 0), qty)
+            if flt(row.get("rate") or 0) and not flt(by_code[code].get("rate") or 0):
+                by_code[code]["rate"] = flt(row.get("rate"))
         else:
-            by_code[code] = {"item_code": code, "qty": qty}
+            by_code[code] = {
+                "item_code": code,
+                "qty": qty,
+                "rate": flt(row.get("rate") or 0),
+                "item_name": row.get("item_name"),
+            }
     return list(by_code.values())
 
 
@@ -391,6 +407,9 @@ def get_cart():
         except Exception:
             continue
         qty = flt(row.get("qty") or 1)
+        rate = flt(meta["rate"] or 0) or flt(row.get("rate") or 0)
+        if rate and not meta["rate"]:
+            meta["rate"] = rate
         amount = qty * flt(meta["rate"])
         total += amount
         items.append({**meta, "qty": qty, "amount": amount})
@@ -652,8 +671,11 @@ def place_order(
     frappe.db.commit()
 
     result = {
+        "ok": True,
         "payment": payment.name,
-        "tx_ref": tx_ref,
+        "payment_name": payment.name,
+        "tx_ref": cstr(tx_ref),
+        "reference": cstr(tx_ref),
         "sales_orders": sales_orders,
         "amount": flt(payment.amount),
         "payment_method": payment_method,
@@ -687,6 +709,7 @@ def place_order(
         )
 
     clear_cart()
+    frappe.local.response["message"] = result
     return result
 
 
