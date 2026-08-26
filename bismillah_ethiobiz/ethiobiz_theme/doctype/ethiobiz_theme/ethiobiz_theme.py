@@ -2,6 +2,20 @@ import os
 import frappe
 from frappe.model.document import Document
 
+
+def _safe_bool(value):
+    """Convert Frappe Check field values ('0','1',None,True,False) to real bool.
+
+    Frappe stores Check fields as strings '0'/'1' in MariaDB.
+    Python's bool('0') returns True because it's a non-empty string,
+    which silently enables features the admin disabled.
+    """
+    if value is None or value is False:
+        return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    return str(value).strip() not in ("0", "", "None", "false", "False")
+
 DARK_GRADIENTS = {
     "Obsidian Teal & Emerald Aura (Default)": (
         "radial-gradient(ellipse 80% 50% at 20% -10%, rgba(31, 182, 174, 0.18) 0%, transparent 60%), "
@@ -99,9 +113,11 @@ class EthioBizTheme(Document):
         )
         
         # Check if master background switch and sub-switches are enabled
-        has_bg_master = bool(self.enable_background_images)
-        desk_bg_enabled = has_bg_master and bool(self.enable_desk_bg_image)
-        web_bg_enabled = has_bg_master and bool(self.enable_website_bg_image)
+        # BISMALLAH: use _safe_bool — Frappe Check fields store '0'/'1' as strings;
+        # Python bool('0') returns True, silently enabling disabled features.
+        has_bg_master = _safe_bool(self.enable_background_images)
+        desk_bg_enabled = has_bg_master and _safe_bool(self.enable_desk_bg_image)
+        web_bg_enabled = has_bg_master and _safe_bool(self.enable_website_bg_image)
         
         if desk_bg_enabled:
             desk_img = self.custom_desk_bg_image or "/assets/bismillah_ethiobiz/images/ethiobiz_desk_bg.png"

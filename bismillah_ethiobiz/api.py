@@ -565,8 +565,10 @@ def ensure_csrf_token():
             req_path = frappe.local.request.path or ""
         except Exception:
             pass
-        if req_path.rstrip("/").endswith("/api/method/login") or (
-            frappe.form_dict.get("usr") and frappe.form_dict.get("pwd")
+        if (
+            req_path.rstrip("/") in ("/login", "/api/method/login")
+            or frappe.form_dict.get("cmd") == "login"
+            or (frappe.form_dict.get("usr") and frappe.form_dict.get("pwd"))
         ):
             return
 

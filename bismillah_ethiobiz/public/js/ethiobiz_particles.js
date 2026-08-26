@@ -55,7 +55,7 @@
       cb(conf);
     };
     xhr.onerror = function () {
-      cb({ enable_website_animation: true, animation_speed_factor: BASELINE_SPEED_FACTOR });
+      cb({ enable_website_animation: false, animation_speed_factor: BASELINE_SPEED_FACTOR });
     };
     xhr.send();
   }
