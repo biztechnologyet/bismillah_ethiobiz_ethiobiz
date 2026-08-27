@@ -1175,8 +1175,8 @@ input.chat-input,
 textarea,
 input[type="text"] {
     flex: 1 1 auto !important;
-    width: 100% !important;
-    min-width: 0 !important;
+    width: auto !important;
+    min-width: 50px !important;
     min-height: 38px !important;
     max-height: 120px !important;
     font-size: 14px !important;
@@ -1192,6 +1192,7 @@ input[type="text"] {
     visibility: visible !important;
     opacity: 1 !important;
 }
+
 
 /* Chat Send, Attach and Action Buttons */
 .chat-footer button,

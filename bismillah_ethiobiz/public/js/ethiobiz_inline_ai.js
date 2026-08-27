@@ -354,14 +354,18 @@
                     display: flex; justify-content: space-between; align-items: center;
                     padding: 10px 14px; background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important; font-weight: 700; font-size: 13px;
+                    cursor: move !important; user-select: none !important; -webkit-user-select: none !important;
                 }
-                .hadeeda-inline-brand { display: flex; align-items: center; gap: 8px; }
+                .hadeeda-inline-brand { display: flex; align-items: center; gap: 8px; cursor: move !important; }
+                .hadeeda-inline-title-text { cursor: move !important; }
                 .hadeeda-inline-badge {
                     width: 22px; height: 22px; border-radius: 50%;
                     background: rgba(255,255,255,0.25); display: flex;
                     align-items: center; justify-content: center;
                     font-weight: 800; font-size: 12px; color: #fff;
+                    cursor: move !important;
                 }
+
                 .hadeeda-inline-close {
                     background: none; border: none; color: #FFFFFF !important; font-size: 20px;
                     cursor: pointer; padding: 0 4px; line-height: 1; opacity: 0.8;
@@ -575,6 +579,72 @@
                 closePopup();
             }
         });
+
+        // Setup drag-to-move by title/header
+        const header = popup.querySelector('.hadeeda-inline-header');
+        if (header) {
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let startLeft = 0, startTop = 0;
+
+            function onDragStart(e) {
+                if (e.target.closest('.hadeeda-inline-close')) return;
+                e.preventDefault();
+                isDragging = true;
+
+                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+                startX = clientX;
+                startY = clientY;
+                startLeft = popup.offsetLeft;
+                startTop = popup.offsetTop;
+
+                document.body.style.userSelect = 'none';
+                header.style.cursor = 'grabbing';
+
+                window.addEventListener('mousemove', onDragMove, { passive: false });
+                window.addEventListener('mouseup', onDragEnd);
+                window.addEventListener('touchmove', onDragMove, { passive: false });
+                window.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+
+                const maxLeft = Math.max(0, window.innerWidth - popup.offsetWidth - 10);
+                const maxTop = Math.max(0, window.innerHeight - popup.offsetHeight - 10);
+
+                const newLeft = Math.max(10, Math.min(maxLeft, startLeft + deltaX));
+                const newTop = Math.max(10, Math.min(maxTop, startTop + deltaY));
+
+                popup.style.left = newLeft + 'px';
+                popup.style.top = newTop + 'px';
+            }
+
+            function onDragEnd() {
+                if (isDragging) {
+                    isDragging = false;
+                    document.body.style.userSelect = '';
+                    header.style.cursor = 'move';
+                    window.removeEventListener('mousemove', onDragMove);
+                    window.removeEventListener('mouseup', onDragEnd);
+                    window.removeEventListener('touchmove', onDragMove);
+                    window.removeEventListener('touchend', onDragEnd);
+                }
+            }
+
+            header.addEventListener('mousedown', onDragStart);
+            header.addEventListener('touchstart', onDragStart, { passive: false });
+        }
+
 
         btnInsert.addEventListener('click', function () {
             if (generatedResponse) {

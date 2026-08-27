@@ -899,6 +899,7 @@
                     inputs.style.setProperty('flex-direction', 'row', 'important');
                     inputs.style.setProperty('align-items', 'center', 'important');
                     inputs.style.setProperty('width', '100%', 'important');
+                    inputs.style.setProperty('gap', '8px', 'important');
                     inputs.style.setProperty('min-height', '40px', 'important');
                     inputs.style.setProperty('visibility', 'visible', 'important');
                     inputs.style.setProperty('opacity', '1', 'important');
@@ -908,20 +909,30 @@
                 if (textarea) {
                     textarea.style.setProperty('display', 'block', 'important');
                     textarea.style.setProperty('flex', '1 1 auto', 'important');
-                    textarea.style.setProperty('width', '100%', 'important');
+                    textarea.style.setProperty('width', 'auto', 'important');
+                    textarea.style.setProperty('min-width', '50px', 'important');
                     textarea.style.setProperty('min-height', '34px', 'important');
                     textarea.style.setProperty('visibility', 'visible', 'important');
                     textarea.style.setProperty('opacity', '1', 'important');
                 }
 
-                const buttons = chatWin.querySelectorAll('.chat-footer button, .chat-inputs button, button[class*="send"], button[class*="file"]');
+                // Enforce all buttons in footer (send, attach, file upload)
+                const buttons = chatWin.querySelectorAll('.chat-footer button, .chat-inputs button, button[class*="send"], button[class*="file"], button[type="submit"], [class*="_button_"]');
                 buttons.forEach(b => {
-                    b.style.setProperty('display', 'flex', 'important');
+                    b.style.setProperty('display', 'inline-flex', 'important');
+                    b.style.setProperty('align-items', 'center', 'important');
+                    b.style.setProperty('justify-content', 'center', 'important');
+                    b.style.setProperty('flex', '0 0 auto', 'important');
                     b.style.setProperty('flex-shrink', '0', 'important');
+                    b.style.setProperty('width', '32px', 'important');
+                    b.style.setProperty('height', '32px', 'important');
+                    b.style.setProperty('min-width', '32px', 'important');
+                    b.style.setProperty('min-height', '32px', 'important');
                     b.style.setProperty('visibility', 'visible', 'important');
                     b.style.setProperty('opacity', '1', 'important');
                 });
             }
+
 
             // Continuously enforce copy buttons, resizability, header title, and footer layout
             function setupObservers() {
