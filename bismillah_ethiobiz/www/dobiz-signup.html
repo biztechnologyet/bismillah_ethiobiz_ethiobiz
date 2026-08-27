@@ -784,42 +784,71 @@
         <div class="dob-step-card">
             <div class="dob-step-header">
                 <div class="dob-step-num">5</div>
-                <h3 class="dob-step-title">Bank Settlement & Proof Details</h3>
-            </div>
-            
-            <p style="font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600;">Please transfer the total subscription investment to the verified settlement accounts below:</p>
-
-            <div class="dob-bank-grid" id="dob-bank-grid">
-                <div class="dob-bank-card">
-                    <div class="dob-bank-name">Commercial Bank of Ethiopia (CBE)</div>
-                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
-                    <div class="dob-bank-acc">1000236131606</div>
-                </div>
-                <div class="dob-bank-card">
-                    <div class="dob-bank-name">Telebirr SuperApp</div>
-                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
-                    <div class="dob-bank-acc">+251 98 676 7576</div>
-                </div>
-                <div class="dob-bank-card">
-                    <div class="dob-bank-name">Bank of Abyssinia (BoA)</div>
-                    <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
-                    <div class="dob-bank-acc">94784891</div>
-                </div>
+                <h3 class="dob-step-title">Settlement & Payment</h3>
             </div>
 
-            <div class="dob-form-row">
-                <div class="dob-form-group">
-                    <label class="dob-label">Payment Reference / Transaction ID (Optional)</label>
-                    <input type="text" class="dob-input" id="dob-payment-ref" placeholder="e.g. FT2623490812">
+            <!-- Payment Method Toggle -->
+            <div style="display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;">
+                <label id="dob-pm-addipay" class="dob-pm-option dob-pm-active" onclick="dobSetPaymentMethod('addipay')">
+                    <span style="font-size: 22px;">💳</span>
+                    <span style="font-weight: 700; font-size: 14px;">Pay Online (AddisPay)</span>
+                    <span style="font-size: 11.5px; color: #64748b;">Card, Telebirr, CBE Birr, Bank Apps</span>
+                </label>
+                <label id="dob-pm-bank" class="dob-pm-option" onclick="dobSetPaymentMethod('bank')">
+                    <span style="font-size: 22px;">🏦</span>
+                    <span style="font-weight: 700; font-size: 14px;">Bank Transfer</span>
+                    <span style="font-size: 11.5px; color: #64748b;">Manual transfer + proof upload</span>
+                </label>
+            </div>
+            <style>
+                .dob-pm-option { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 200px; padding: 16px 12px; border: 2px solid #cbd5e1; border-radius: 14px; cursor: pointer; background: #f8fafc; transition: all .2s; text-align: center; }
+                .dob-pm-option:hover { border-color: #94a3b8; background: #f1f5f9; }
+                .dob-pm-active { border-color: #008080 !important; background: #f0fdfa !important; box-shadow: 0 0 0 3px rgba(0,128,128,.15); }
+            </style>
+
+            <!-- AddisPay online info (shown by default) -->
+            <div id="dob-addipay-info" style="background: #f0fdfa; border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+                <p style="font-size: 14px; color: #0f766e; font-weight: 700; margin: 0 0 8px 0;">Pay securely online via AddisPay</p>
+                <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0;">After registration you will be redirected to the AddisPay secure checkout. Supports:</p>
+                <p style="font-size: 13px; color: #334155; margin: 0;">• CBE Birr &nbsp;• Telebirr &nbsp;• Bank Apps &nbsp;• Cards</p>
+            </div>
+
+            <!-- Bank transfer section (hidden by default) -->
+            <div id="dob-bank-transfer-section" style="display: none;">
+                <p style="font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600;">Please transfer the total subscription investment to the verified settlement accounts below:</p>
+
+                <div class="dob-bank-grid" id="dob-bank-grid">
+                    <div class="dob-bank-card">
+                        <div class="dob-bank-name">Commercial Bank of Ethiopia (CBE)</div>
+                        <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                        <div class="dob-bank-acc">1000236131606</div>
+                    </div>
+                    <div class="dob-bank-card">
+                        <div class="dob-bank-name">Telebirr SuperApp</div>
+                        <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                        <div class="dob-bank-acc">+251 98 676 7576</div>
+                    </div>
+                    <div class="dob-bank-card">
+                        <div class="dob-bank-name">Bank of Abyssinia (BoA)</div>
+                        <div class="dob-bank-holder">Account Holder: <strong>Hadi Awad</strong></div>
+                        <div class="dob-bank-acc">94784891</div>
+                    </div>
                 </div>
-                <div class="dob-form-group">
-                    <label class="dob-label">Bank Channel Used</label>
-                    <select class="dob-input" id="dob-bank-name">
-                        <option value="Commercial Bank of Ethiopia">Commercial Bank of Ethiopia (CBE - 1000236131606)</option>
-                        <option value="Telebirr">Telebirr (+251986767576)</option>
-                        <option value="Bank of Abyssinia">Bank of Abyssinia (BoA - 94784891)</option>
-                        <option value="Other">Other Bank</option>
-                    </select>
+
+                <div class="dob-form-row">
+                    <div class="dob-form-group">
+                        <label class="dob-label">Payment Reference / Transaction ID (Optional)</label>
+                        <input type="text" class="dob-input" id="dob-payment-ref" placeholder="e.g. FT2623490812">
+                    </div>
+                    <div class="dob-form-group">
+                        <label class="dob-label">Bank Channel Used</label>
+                        <select class="dob-input" id="dob-bank-name">
+                            <option value="Commercial Bank of Ethiopia">Commercial Bank of Ethiopia (CBE - 1000236131606)</option>
+                            <option value="Telebirr">Telebirr (+251986767576)</option>
+                            <option value="Bank of Abyssinia">Bank of Abyssinia (BoA - 94784891)</option>
+                            <option value="Other">Other Bank</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -884,6 +913,23 @@
 
     const fmt = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const $ = id => document.getElementById(id);
+
+    // ---------- Payment method toggle ----------
+    state.paymentMethod = 'addipay';
+    window.dobSetPaymentMethod = function(method) {
+        state.paymentMethod = method;
+        $('dob-pm-addipay').classList.toggle('dob-pm-active', method === 'addipay');
+        $('dob-pm-bank').classList.toggle('dob-pm-active', method === 'bank');
+        const bankSection = $('dob-bank-transfer-section');
+        const addipayInfo = $('dob-addipay-info');
+        if (method === 'bank') {
+            bankSection.style.display = '';
+            addipayInfo.style.display = 'none';
+        } else {
+            bankSection.style.display = 'none';
+            addipayInfo.style.display = '';
+        }
+    };
 
     // ---------- Industry selection ----------
     document.querySelectorAll('.dob-ind-btn').forEach(btn => {
@@ -1077,8 +1123,8 @@
             const email = $('dob-email').value.trim();
             const phone = $('dob-phone').value.trim();
             const company = $('dob-company').value.trim();
-            const payRef = $('dob-payment-ref').value.trim();
-            const bankName = $('dob-bank-name').value;
+            const payRef = state.paymentMethod === 'bank' ? ($('dob-payment-ref') ? $('dob-payment-ref').value.trim() : '') : '';
+            const bankName = state.paymentMethod === 'bank' ? ($('dob-bank-name') ? $('dob-bank-name').value : '') : 'AddisPay';
 
             if (!fullName || !email || !company) {
                 alert('Please fill in all mandatory fields.');
@@ -1086,7 +1132,9 @@
             }
 
             btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Provisioning Sovereign Tenant...';
+            btnSubmit.textContent = state.paymentMethod === 'addipay'
+                ? 'Creating AddisPay Checkout...'
+                : 'Provisioning Sovereign Tenant...';
 
             const csrfToken = (window.frappe && frappe.csrf_token) ||
                               (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) ||
@@ -1102,7 +1150,8 @@
                 billing_term: String(state.termMonths),
                 payment_ref: payRef,
                 bank_name: bankName,
-                selected_module: 'Accounts'
+                selected_module: 'Accounts',
+                payment_method: state.paymentMethod === 'addipay' ? 'addipay' : 'bank_transfer'
             };
             if (state.coupon.valid) payload.coupon_code = state.coupon.code;
 
@@ -1123,6 +1172,15 @@
                 btnSubmit.textContent = 'Complete Registration & Provision Tenant →';
 
                 if (res.message && res.message.success) {
+                    // --- AddisPay redirect: tenant is created, now pay online ---
+                    if (res.message.checkout_url) {
+                        form.style.display = 'none';
+                        btnSubmit.disabled = true;
+                        btnSubmit.textContent = 'Redirecting to AddisPay...';
+                        window.location.href = res.message.checkout_url;
+                        return;
+                    }
+
                     form.style.display = 'none';
                     $('dob-success-view').style.display = 'block';
 

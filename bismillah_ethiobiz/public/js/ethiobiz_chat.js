@@ -382,7 +382,10 @@
                     box-sizing: border-box !important;
                     overflow: visible !important;
                     display: flex !important;
+                    flex-direction: row !important;
                     align-items: center !important;
+                    justify-content: space-between !important;
+                    gap: 6px !important;
                     flex: 0 0 auto !important;
                     position: relative !important;
                     z-index: 25 !important;
@@ -401,8 +404,10 @@
                     width: 100% !important;
                     max-width: 100% !important;
                     box-sizing: border-box !important;
-                    display: flex !important;
+                    display: inline-flex !important;
+                    flex-direction: row !important;
                     align-items: center !important;
+                    flex-wrap: nowrap !important;
                     gap: 6px !important;
                     overflow: visible !important;
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
@@ -424,9 +429,9 @@
                 .chat-inputs textarea,
                 .chat-inputs input,
                 [class*="chat-input"]:not(button):not([class*="send"]):not([class*="upload"]) {
-                    flex: 1 1 0% !important;
-                    width: 0 !important;
-                    min-width: 0 !important;
+                    flex: 1 1 auto !important;
+                    width: auto !important;
+                    min-width: 40px !important;
                     max-width: 100% !important;
                     background: transparent !important;
                     color: #FFFFFF !important;
@@ -439,8 +444,10 @@
                     box-shadow: none !important;
                     resize: none !important;
                     overflow-y: auto !important;
-                    max-height: 72px !important;
+                    max-height: 160px !important;
+                    min-height: 20px !important;
                     margin: 0 !important;
+                    box-sizing: border-box !important;
                 }
 
                 .chat-input:focus,
@@ -460,14 +467,21 @@
                     font-style: italic !important;
                 }
 
-                /* Controls wrapper */
-                .chat-inputs-controls {
-                    display: flex !important;
+                /* Controls wrapper — must stay visible, inline, horizontal */
+                .chat-inputs-controls,
+                [class*="chat-inputs-controls"] {
+                    display: inline-flex !important;
+                    flex-direction: row !important;
                     align-items: center !important;
                     gap: 4px !important;
                     flex-shrink: 0 !important;
+                    flex-wrap: nowrap !important;
                     margin: 0 !important;
                     padding: 0 !important;
+                    width: auto !important;
+                    min-width: 80px !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
 
                 /* File Upload / Attachment Button */

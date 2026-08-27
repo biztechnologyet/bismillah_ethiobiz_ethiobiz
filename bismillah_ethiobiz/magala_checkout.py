@@ -540,8 +540,7 @@ def _create_sales_order(company, customer, items, payment_method, delivery_addre
             "delivery_date": delivery_date,
             "order_type": "Sales",
             "currency": get_checkout_options().get("currency") or "ETB",
-            "selling_price_list": frappe.db.get_value("Company", company, "default_selling_price_list")
-            or frappe.db.get_single_value("Selling Settings", "selling_price_list")
+            "selling_price_list": frappe.db.get_single_value("Selling Settings", "selling_price_list")
             or "Standard Selling",
             "items": so_items,
             "po_no": payment_method,

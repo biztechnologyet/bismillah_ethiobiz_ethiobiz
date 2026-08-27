@@ -268,24 +268,32 @@
         const buyer = cart.buyer || {};
         const methods = [];
         if (o.enable_addispay !== false) {
-            methods.push({ v: "AddisPay", label: o.addispay_label || "AddisPay Payment", desc: o.addispay_description || "Cards, Telebirr, CBE Birr, bank apps." });
+            methods.push({ v: "AddisPay", icon: "\u{1F4B3}", label: o.addispay_label || "AddisPay", desc: o.addispay_description || "Cards, Telebirr, CBE Birr, bank apps." });
         }
         if (o.enable_bank_transfer !== false) {
-            methods.push({ v: "Bank Transfer", label: o.bank_label || "Bank Transfer", desc: o.bank_description || "Pay to the accounts below, then submit your reference." });
+            methods.push({ v: "Bank Transfer", icon: "\u{1F3E6}", label: o.bank_label || "Bank Transfer", desc: o.bank_description || "Pay to the accounts below, then submit your reference." });
         }
         if (o.enable_cod !== false) {
             methods.push({
-                v: "Cash upon Delivery",
-                label: o.cod_label || "Cash upon Delivery",
-                desc: !cart.cod_available ? "Only for product and food carts (configurable in Magala Checkout Settings)." : (o.cod_description || "Pay the courier in cash."),
+                v: "Cash upon Delivery", icon: "\u{1F4B5}",
+                label: o.cod_label || "Cash on Delivery",
+                desc: !cart.cod_available ? "Only for product and food carts (configurable in Magala Checkout Settings)." : (o.cod_description || "Pay the courier in cash when your order arrives."),
                 disabled: !cart.cod_available,
             });
         }
-        const methodHtml = methods.map((m) => {
-            const checked = (!m.disabled && m.v === def) ? "checked" : "";
-            return `<label class="magala-pay-option ${checked ? "selected" : ""} ${m.disabled ? "disabled" : ""}"><input type="radio" name="magala-pay" value="${m.v}" ${checked} ${m.disabled ? "disabled" : ""}>
-                <span><strong>${m.label}</strong><br><small>${m.desc || ""}</small></span></label>`;
-        }).join("") || "<p>No payment methods enabled. Open <strong>Magala Checkout Settings</strong> in Desk.</p>";
+        const methodHtml = methods.length
+            ? `<div class="magala-pay-row">${methods.map((m) => {
+                const checked = (!m.disabled && m.v === def) ? "checked" : "";
+                return `<label class="magala-pay-option ${checked ? "selected" : ""} ${m.disabled ? "disabled" : ""}">
+                    <input type="radio" name="magala-pay" value="${m.v}" ${checked} ${m.disabled ? "disabled" : ""}>
+                    <span class="magala-pay-icon">${m.icon || ""}</span>
+                    <span>
+                        <div class="magala-pay-label">${m.label}</div>
+                        <div class="magala-pay-desc">${m.desc || ""}</div>
+                    </span>
+                </label>`;
+            }).join("")}</div>`
+            : "<p>No payment methods enabled. Open <strong>Magala Checkout Settings</strong> in Desk.</p>";
 
         const loginGate = !cart.logged_in
             ? `<p class="magala-login-gate">Please <a href="/login?redirect-to=/cart">log in</a> to place this order. Your cart items stay on this page.</p>`
