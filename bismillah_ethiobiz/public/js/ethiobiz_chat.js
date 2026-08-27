@@ -494,9 +494,9 @@
                 [class*="_body_"],
                 .recycle-scroller,
                 .recycle-scroller-wrapper {
-                    flex: 1 1 auto !important;
+                    flex: 1 1 0% !important;
                     min-height: 0 !important;
-                    height: 100% !important;
+                    height: auto !important;
                     max-height: none !important;
                     overflow-y: auto !important;
                     overflow-x: hidden !important;
@@ -509,6 +509,7 @@
                     gap: 10px !important;
                     box-sizing: border-box !important;
                 }
+
 
                 /* Messages Containers — Full height and word wrapping */
                 .chat-message,
@@ -866,17 +867,75 @@
                 },
             });
 
-            // Continuously enforce copy buttons, resizability, and header title
+            // Enforce uncompressed footer, textarea, and send/attach button visibility
+            function enforceFooterLayout() {
+                const chatWin = document.querySelector('.chat-window, [class*="chat-window"]');
+                if (!chatWin) return;
+
+                const chatBody = chatWin.querySelector('.chat-layout .chat-body, .chat-body, .chat-messages-list, [class*="_body_"], [class*="_messages_"]');
+                if (chatBody) {
+                    chatBody.style.setProperty('flex', '1 1 0%', 'important');
+                    chatBody.style.setProperty('min-height', '0px', 'important');
+                    chatBody.style.setProperty('height', 'auto', 'important');
+                    chatBody.style.setProperty('max-height', 'none', 'important');
+                    chatBody.style.setProperty('overflow-y', 'auto', 'important');
+                }
+
+                const footer = chatWin.querySelector('.chat-footer, footer, [class*="_footer_"], [class*="chat-footer"]');
+                if (footer) {
+                    footer.style.setProperty('display', 'flex', 'important');
+                    footer.style.setProperty('flex-shrink', '0', 'important');
+                    footer.style.setProperty('flex-grow', '0', 'important');
+                    footer.style.setProperty('min-height', '60px', 'important');
+                    footer.style.setProperty('height', 'auto', 'important');
+                    footer.style.setProperty('width', '100%', 'important');
+                    footer.style.setProperty('visibility', 'visible', 'important');
+                    footer.style.setProperty('opacity', '1', 'important');
+                }
+
+                const inputs = chatWin.querySelector('.chat-inputs, .chat-input-wrapper, form, [class*="_inputContainer_"], [class*="chat-inputs"]');
+                if (inputs) {
+                    inputs.style.setProperty('display', 'flex', 'important');
+                    inputs.style.setProperty('flex-direction', 'row', 'important');
+                    inputs.style.setProperty('align-items', 'center', 'important');
+                    inputs.style.setProperty('width', '100%', 'important');
+                    inputs.style.setProperty('min-height', '40px', 'important');
+                    inputs.style.setProperty('visibility', 'visible', 'important');
+                    inputs.style.setProperty('opacity', '1', 'important');
+                }
+
+                const textarea = chatWin.querySelector('.chat-input, textarea.chat-input, textarea, input[type="text"], [class*="_textarea_"]');
+                if (textarea) {
+                    textarea.style.setProperty('display', 'block', 'important');
+                    textarea.style.setProperty('flex', '1 1 auto', 'important');
+                    textarea.style.setProperty('width', '100%', 'important');
+                    textarea.style.setProperty('min-height', '34px', 'important');
+                    textarea.style.setProperty('visibility', 'visible', 'important');
+                    textarea.style.setProperty('opacity', '1', 'important');
+                }
+
+                const buttons = chatWin.querySelectorAll('.chat-footer button, .chat-inputs button, button[class*="send"], button[class*="file"]');
+                buttons.forEach(b => {
+                    b.style.setProperty('display', 'flex', 'important');
+                    b.style.setProperty('flex-shrink', '0', 'important');
+                    b.style.setProperty('visibility', 'visible', 'important');
+                    b.style.setProperty('opacity', '1', 'important');
+                });
+            }
+
+            // Continuously enforce copy buttons, resizability, header title, and footer layout
             function setupObservers() {
                 injectCopyButtons();
                 fixHeaderTitle(config.widget_title);
                 setupResizableWindow();
+                enforceFooterLayout();
 
                 const chatBody = document.querySelector('.chat-messages-list') || document.querySelector('.chat-body');
                 if (chatBody) {
                     const observer = new MutationObserver(() => {
                         injectCopyButtons();
                         fixHeaderTitle(config.widget_title);
+                        enforceFooterLayout();
                     });
                     observer.observe(chatBody, { childList: true, subtree: true });
                 }
@@ -888,7 +947,8 @@
             });
             bodyObserver.observe(document.body, { childList: true, subtree: true });
             setTimeout(setupObservers, 300);
-            setTimeout(setupObservers, 1000);
+            setTimeout(setupObservers, 800);
+            setTimeout(setupObservers, 1500);
 
             // Toggle handler
             function setupToggleHandler() {
@@ -910,6 +970,9 @@
                             chatWin.style.setProperty('display', 'flex', 'important');
                             setupResizableWindow();
                             fixHeaderTitle(config.widget_title);
+                            enforceFooterLayout();
+                            setTimeout(enforceFooterLayout, 100);
+                            setTimeout(enforceFooterLayout, 300);
                         }
                     } else {
                         wrapper.classList.remove('chat-open', 'chat-window-open');
@@ -918,6 +981,7 @@
                         if (chatWin) chatWin.style.setProperty('display', 'none', 'important');
                     }
                 }
+
 
                 toggle.addEventListener('click', function (e) {
                     const isCurrentlyOpen = wrapper.classList.contains('chat-open');

@@ -1066,11 +1066,16 @@ body[data-path] { background-attachment: fixed !important; }
 /* ==========================================================================
    HADEEDA BIZAI CHAT WIDGET ENHANCEMENTS (FULL-WIDTH, FULL-CONTENT, RESIZABLE)
    ========================================================================== */
-.chat-window {
+.chat-window,
+[class*="chat-window"],
+[class*="_window_"] {
     min-width: 340px !important;
-    max-width: min(800px, calc(100vw - 20px)) !important;
-    min-height: 420px !important;
-    max-height: min(900px, calc(100vh - 90px)) !important;
+    max-width: min(850px, calc(100vw - 20px)) !important;
+    min-height: 480px !important;
+    max-height: min(920px, calc(100vh - 80px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
 }
 
 /* Chat message full text rendering - prevent any cutting */
@@ -1092,34 +1097,122 @@ body[data-path] { background-attachment: fixed !important; }
     min-height: auto !important;
 }
 
-/* Full-width footer */
+/* Chat message container takes remaining space and scrolls - NEVER squashes footer */
+.chat-layout,
+.chat-body,
+.chat-messages-container,
+.chat-messages-list,
+[class*="chat-layout"],
+[class*="chat-body"],
+[class*="chat-messages"],
+[class*="_messages_"],
+[class*="_body_"],
+main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Full-width uncompressed footer */
 .chat-layout .chat-footer,
 .chat-footer,
-[class*="_footer_"] {
-    padding: 8px 10px !important;
+[class*="chat-footer"],
+[class*="_footer_"],
+footer {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    min-height: 64px !important;
+    max-height: 180px !important;
+    height: auto !important;
+    padding: 8px 12px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    background: #111827 !important;
+    border-top: 1px solid rgba(31, 182, 174, 0.3) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
+/* Full-width inputs wrapper */
 .chat-inputs,
 .chat-input-wrapper,
-[class*="_inputContainer_"] {
+.chat-footer form,
+[class*="chat-inputs"],
+[class*="inputContainer"],
+[class*="_inputContainer_"],
+[class*="_inputs_"],
+[class*="_form_"],
+form {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 4px 6px 4px 12px !important;
+    padding: 4px 6px !important;
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
+/* Chat text input / textarea */
 .chat-input,
 textarea.chat-input,
 input.chat-input,
 .chat-inputs textarea,
-.chat-inputs input {
+.chat-inputs input,
+[class*="_textarea_"],
+[class*="textarea"],
+textarea,
+input[type="text"] {
     flex: 1 1 auto !important;
     width: 100% !important;
     min-width: 0 !important;
+    min-height: 38px !important;
+    max-height: 120px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
+
+/* Chat Send, Attach and Action Buttons */
+.chat-footer button,
+.chat-inputs button,
+[class*="sendButton"],
+[class*="attachButton"],
+[class*="_send_"],
+[class*="_file_"],
+[class*="_button_"] {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
