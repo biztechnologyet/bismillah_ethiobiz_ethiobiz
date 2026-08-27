@@ -1194,26 +1194,107 @@ input[type="text"] {
 }
 
 
-/* Chat Send, Attach and Action Buttons */
-.chat-footer button,
-.chat-inputs button,
-[class*="sendButton"],
-[class*="attachButton"],
-[class*="_send_"],
-[class*="_file_"],
-[class*="_button_"] {
+/* Controls Container */
+.chat-inputs-controls,
+[class*="chat-inputs-controls"] {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
     flex: 0 0 auto !important;
     flex-shrink: 0 !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
+    margin-left: auto !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
+
+/* Attach / File Button */
+.chat-input-file-button,
+button.chat-input-file-button,
+[data-test-id="chat-attach-file-button"],
+button[class*="file-button"],
+button[class*="file"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    background: rgba(31, 182, 174, 0.18) !important;
+    border: 1px solid rgba(31, 182, 174, 0.45) !important;
+    color: #1FB6AE !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 34px !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+}
+.chat-input-file-button:hover,
+button.chat-input-file-button:hover {
+    background: rgba(31, 182, 174, 0.35) !important;
+    border-color: #1FB6AE !important;
+    transform: scale(1.06) !important;
+}
+.chat-input-file-button svg,
+button.chat-input-file-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #1FB6AE !important;
+    color: #1FB6AE !important;
+    display: block !important;
+}
+
+/* Send Button */
+.chat-input-send-button,
+button.chat-input-send-button,
+button[class*="send-button"],
+button[type="submit"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 34px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 8px rgba(31, 182, 174, 0.45) !important;
+    transition: all 0.2s ease !important;
+}
+.chat-input-send-button:disabled,
+.chat-input-send-button[disabled] {
+    cursor: pointer !important;
+    opacity: 0.85 !important;
+    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+    color: #FFFFFF !important;
+}
+.chat-input-send-button:hover:not([disabled]) {
+    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 3px 12px rgba(31, 182, 174, 0.6) !important;
+}
+.chat-input-send-button svg,
+button.chat-input-send-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    color: #FFFFFF !important;
+    display: block !important;
+}
+
 

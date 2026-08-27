@@ -837,8 +837,8 @@
                 showWelcomeScreen: false,
                 defaultLanguage: config.default_language || 'en',
                 initialMessages: initialMessages,
-                allowFileUploads: Boolean(config.allow_file_uploads),
-                allowedFilesMimeTypes: config.allowed_mime_types || '',
+                allowFileUploads: true,
+                allowedFilesMimeTypes: config.allowed_mime_types || 'image/*,application/pdf,text/*',
                 metadata: {
                     username: config.username,
                     user_id: config.username,
@@ -899,7 +899,7 @@
                     inputs.style.setProperty('flex-direction', 'row', 'important');
                     inputs.style.setProperty('align-items', 'center', 'important');
                     inputs.style.setProperty('width', '100%', 'important');
-                    inputs.style.setProperty('gap', '8px', 'important');
+                    inputs.style.setProperty('gap', '6px', 'important');
                     inputs.style.setProperty('min-height', '40px', 'important');
                     inputs.style.setProperty('visibility', 'visible', 'important');
                     inputs.style.setProperty('opacity', '1', 'important');
@@ -916,22 +916,36 @@
                     textarea.style.setProperty('opacity', '1', 'important');
                 }
 
+                const controls = chatWin.querySelector('.chat-inputs-controls, [class*="chat-inputs-controls"]');
+                if (controls) {
+                    controls.style.setProperty('display', 'flex', 'important');
+                    controls.style.setProperty('flex-direction', 'row', 'important');
+                    controls.style.setProperty('align-items', 'center', 'important');
+                    controls.style.setProperty('gap', '6px', 'important');
+                    controls.style.setProperty('flex', '0 0 auto', 'important');
+                    controls.style.setProperty('flex-shrink', '0', 'important');
+                    controls.style.setProperty('margin-left', 'auto', 'important');
+                    controls.style.setProperty('visibility', 'visible', 'important');
+                    controls.style.setProperty('opacity', '1', 'important');
+                }
+
                 // Enforce all buttons in footer (send, attach, file upload)
                 const buttons = chatWin.querySelectorAll('.chat-footer button, .chat-inputs button, button[class*="send"], button[class*="file"], button[type="submit"], [class*="_button_"]');
                 buttons.forEach(b => {
                     b.style.setProperty('display', 'inline-flex', 'important');
                     b.style.setProperty('align-items', 'center', 'important');
                     b.style.setProperty('justify-content', 'center', 'important');
-                    b.style.setProperty('flex', '0 0 auto', 'important');
+                    b.style.setProperty('flex', '0 0 34px', 'important');
                     b.style.setProperty('flex-shrink', '0', 'important');
-                    b.style.setProperty('width', '32px', 'important');
-                    b.style.setProperty('height', '32px', 'important');
-                    b.style.setProperty('min-width', '32px', 'important');
-                    b.style.setProperty('min-height', '32px', 'important');
+                    b.style.setProperty('width', '34px', 'important');
+                    b.style.setProperty('height', '34px', 'important');
+                    b.style.setProperty('min-width', '34px', 'important');
+                    b.style.setProperty('min-height', '34px', 'important');
                     b.style.setProperty('visibility', 'visible', 'important');
                     b.style.setProperty('opacity', '1', 'important');
                 });
             }
+
 
 
             // Continuously enforce copy buttons, resizability, header title, and footer layout
