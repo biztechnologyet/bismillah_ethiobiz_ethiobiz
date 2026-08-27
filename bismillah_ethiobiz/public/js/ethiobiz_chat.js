@@ -194,7 +194,7 @@
 
                 /* Collapsed text & logo */
                 .chat-window-wrapper .chat-window-toggle::before {
-                    content: 'HADEEDA AI' !important;
+                    content: 'HADEEDA BizAi' !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                     font-weight: 700 !important; font-size: 0.85rem !important;
                     color: #FFFFFF !important; order: 1 !important;
@@ -612,6 +612,40 @@
                         border-radius: 16px 16px 0 0 !important;
                     }
                     .chat-window-wrapper .chat-window-toggle { height: 50px !important; min-width: 50px !important; }
+                }
+
+                /* ─── P4-E: LIGHT-MODE CHAT VARIANTS ─── */
+                [data-theme='light'] .chat-window {
+                    background: rgba(255,255,255,0.95) !important;
+                    border: 1.5px solid rgba(2,106,110,0.3) !important;
+                    box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 0 24px rgba(31,182,174,0.12) !important;
+                    color: #0f172a !important;
+                }
+                [data-theme='light'] .chat-message {
+                    color: #0f172a !important;
+                }
+                [data-theme='light'] .chat-message.bot {
+                    background: rgba(240,253,250,0.9) !important;
+                    color: #0f172a !important;
+                }
+                [data-theme='light'] .chat-message.user {
+                    background: rgba(13,148,136,0.12) !important;
+                    color: #0f172a !important;
+                }
+                [data-theme='light'] .chat-window-wrapper .chat-window-toggle {
+                    box-shadow: 0 4px 20px rgba(31,182,174,0.25), 0 0 0 2px rgba(2,106,110,0.15) !important;
+                }
+                [data-theme='light'] .chat-messages-list::-webkit-scrollbar-thumb {
+                    background: rgba(2,106,110,0.35) !important;
+                }
+                [data-theme='light'] .chat-inputs textarea,
+                [data-theme='light'] .chat-input {
+                    color: #0f172a !important;
+                    background: rgba(255,255,255,0.9) !important;
+                }
+                [data-theme='light'] .chat-message.hadeeda-copy-btn {
+                    background: rgba(0,0,0,0.05) !important;
+                    color: rgba(0,0,0,0.45) !important;
                 }
             `;
             document.head.appendChild(style);

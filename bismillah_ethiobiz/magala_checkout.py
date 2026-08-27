@@ -830,6 +830,9 @@ def mark_addispay_failed(tx_ref, uuid=None):
 
 @frappe.whitelist(allow_guest=True)
 def verify_return(tx_ref=None, uuid=None, status=None):
+    """Return URL handler after AddisPay redirect. SECURITY: Never auto-approve
+    based on URL query parameters alone — only mark as 'Pending Review'.
+    Actual approval must come from the verified webhook callback."""
     tx_ref = tx_ref or frappe.form_dict.get("tx_ref")
     uuid = uuid or frappe.form_dict.get("uuid")
     status = cstr(status or frappe.form_dict.get("status")).lower()
@@ -839,13 +842,20 @@ def verify_return(tx_ref=None, uuid=None, status=None):
     if failed:
         mark_addispay_failed(tx_ref, uuid)
         return {"status": "failed", "tx_ref": tx_ref}
-    mark_addispay_success(tx_ref, uuid)
     name = frappe.db.get_value("Magala Shop Payment", {"tx_ref": tx_ref}, "name")
-    doc = frappe.get_doc("Magala Shop Payment", name) if name else None
+    if not name:
+        return {"status": "not_found", "tx_ref": tx_ref}
+    doc = frappe.get_doc("Magala Shop Payment", name)
+    if doc.status == "Completed" and doc.payment_status == "Approved":
+        return {"status": "success", "tx_ref": tx_ref, "payment": name}
+    if uuid and not doc.addispay_uuid:
+        doc.db_set("addispay_uuid", uuid)
+    doc.db_set("payment_status", "Pending")
+    frappe.db.commit()
     return {
-        "status": "success",
+        "status": "pending_review",
         "tx_ref": tx_ref,
         "payment": name,
-        "amount": flt(doc.amount) if doc else 0,
-        "payment_method": doc.payment_method if doc else "AddisPay",
+        "amount": flt(doc.amount),
+        "message": "Payment received. Awaiting webhook verification from AddisPay.",
     }

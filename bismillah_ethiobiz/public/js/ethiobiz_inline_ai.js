@@ -248,7 +248,7 @@
             <div class="hadeeda-inline-header">
                 <div class="hadeeda-inline-brand">
                     <span class="hadeeda-inline-badge">H</span>
-                    <span class="hadeeda-inline-title-text">HADEEDA AI Assistant</span>
+                    <span class="hadeeda-inline-title-text">HADEEDA BizAi</span>
                 </div>
                 <button class="hadeeda-inline-close" title="Close (Esc)">&times;</button>
             </div>
@@ -440,6 +440,53 @@
                     border: 1px solid rgba(31, 182, 174, 0.2); color: #1FB6AE;
                 }
 
+                /* ─── P4-F: LIGHT-MODE INLINE AI ─── */
+                [data-theme='light'] .hadeeda-inline-popup {
+                    background: rgba(255,255,255,0.98) !important;
+                    border: 1px solid rgba(2,106,110,0.25) !important;
+                    box-shadow: 0 16px 48px rgba(0,0,0,0.1), 0 0 16px rgba(31,182,174,0.12) !important;
+                }
+                [data-theme='light'] .hadeeda-inline-body {
+                    background: #f8fafc !important;
+                }
+                [data-theme='light'] .hadeeda-option-btn {
+                    background: rgba(240,253,250,0.8) !important;
+                    border-color: rgba(2,106,110,0.2) !important;
+                    color: #0f172a !important;
+                }
+                [data-theme='light'] .hadeeda-option-btn:hover {
+                    background: #1FB6AE !important; color: #fff !important;
+                }
+                [data-theme='light'] .hadeeda-inline-input {
+                    background: #ffffff !important; color: #0f172a !important;
+                    border-color: rgba(2,106,110,0.3) !important;
+                }
+                [data-theme='light'] .hadeeda-result-label { color: #475569 !important; }
+                [data-theme='light'] .hadeeda-result-preview {
+                    background: #f1f5f9 !important; color: #0f172a !important;
+                    border-color: rgba(2,106,110,0.2) !important;
+                }
+                [data-theme='light'] .hadeeda-btn-copy,
+                [data-theme='light'] .hadeeda-btn-retry {
+                    background: #e2e8f0 !important; color: #0f172a !important;
+                    border-color: rgba(2,106,110,0.2) !important;
+                }
+                [data-theme='light'] .hadeeda-inline-status {
+                    background: rgba(240,253,250,0.8) !important;
+                    border-color: rgba(2,106,110,0.25) !important;
+                    color: #0f766e !important;
+                }
+
+                /* ─── P4-F: RESIZE HANDLE ─── */
+                .hadeeda-inline-popup::after {
+                    content: '' !important; position: absolute !important;
+                    bottom: 0 !important; right: 0 !important;
+                    width: 16px !important; height: 16px !important;
+                    cursor: nwse-resize !important;
+                    background: linear-gradient(135deg, transparent 50%, rgba(31,182,174,0.35) 50%) !important;
+                    border-radius: 0 0 8px 0 !important;
+                }
+
                 @media (max-width: 600px) {
                     .hadeeda-inline-popup {
                         width: calc(100vw - 24px) !important;
@@ -551,6 +598,36 @@
         });
 
         close.addEventListener('click', closePopup);
+
+        // P4-F: User-resizable popup (persist size to localStorage)
+        (function() {
+            var szKey = 'ebInlineAiSize';
+            try {
+                var sz = JSON.parse(localStorage.getItem(szKey));
+                if (sz && sz.w && sz.h) {
+                    popup.style.width = sz.w + 'px';
+                    popup.style.height = sz.h + 'px';
+                }
+            } catch(e) {}
+            popup.addEventListener('mousedown', function(e) {
+                if (e.target !== popup || e.offsetX < popup.offsetWidth - 20 || e.offsetY < popup.offsetHeight - 20) return;
+                e.preventDefault();
+                var sx = e.clientX, sy = e.clientY;
+                var sw = popup.offsetWidth, sh = popup.offsetHeight;
+                function onMove(ev) {
+                    popup.style.width = Math.max(280, sw + ev.clientX - sx) + 'px';
+                    popup.style.height = Math.max(200, sh + ev.clientY - sy) + 'px';
+                }
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    try { localStorage.setItem(szKey, JSON.stringify({w: popup.offsetWidth, h: popup.offsetHeight})); } catch(ex) {}
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        })();
+
         setTimeout(function () { input.focus(); }, 80);
     }
 

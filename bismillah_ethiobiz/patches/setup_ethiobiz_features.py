@@ -103,6 +103,30 @@ def execute():
     create_custom_fields(custom_fields, update=True)
     frappe.db.commit()
 
+    # P4-D: User per-user particles + Theme desk animation toggle
+    p4_fields = {
+        "User": [
+            {
+                "fieldname": "ethiobiz_enable_particles",
+                "fieldtype": "Check",
+                "label": "Enable Desk Particles",
+                "default": "1",
+                "insert_after": "last_active"
+            }
+        ],
+        "EthioBiz Theme": [
+            {
+                "fieldname": "enable_desk_animation",
+                "fieldtype": "Check",
+                "label": "Enable Desk Animation (Global Default)",
+                "default": "1",
+                "insert_after": "enable_background_images"
+            }
+        ]
+    }
+    create_custom_fields(p4_fields, update=True)
+    frappe.db.commit()
+
     # 3. Ensure Website Homepage is set to index
     if frappe.db.exists("DocType", "Website Settings"):
         frappe.db.set_value("Website Settings", "Website Settings", "home_page", "index")

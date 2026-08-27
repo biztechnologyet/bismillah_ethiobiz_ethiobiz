@@ -12,8 +12,6 @@
 
   if (typeof window === "undefined") return;
   if (window.__ETHIOBIZ_AMBIENT__) return;
-  // Desk pages keep their own UI; animation is a website experience.
-  if (window.location.pathname.indexOf("/app") === 0) return;
 
   var BASELINE_SPEED_FACTOR = 0.7;
   var SPEED_FACTORS = { Slow: 0.45, Normal: 0.7, Fast: 0.95 };
@@ -74,7 +72,11 @@
       ".aurora-blob-3{width:30vw;height:30vw;left:28vw;bottom:-14vh;background:radial-gradient(circle,rgba(56,189,248,.4),transparent 65%);animation:aurora-drift-3 29s ease-in-out infinite alternate}" +
       "@keyframes aurora-drift-1{to{transform:translate(6vw,4vh) scale(1.08)}}" +
       "@keyframes aurora-drift-2{to{transform:translate(-5vw,-3vh) scale(.94)}}" +
-      "@keyframes aurora-drift-3{to{transform:translate(4vw,-5vh) scale(1.06)}}";
+      "@keyframes aurora-drift-3{to{transform:translate(4vw,-5vh) scale(1.06)}}" +
+      "[data-theme='light'] #ethio-canvas{opacity:.45}" +
+      "[data-theme='light'] .aurora-blob-1{background:radial-gradient(circle,rgba(13,148,136,.28),transparent 65%)}" +
+      "[data-theme='light'] .aurora-blob-2{background:radial-gradient(circle,rgba(99,102,241,.22),transparent 65%)}" +
+      "[data-theme='light'] .aurora-blob-3{background:radial-gradient(circle,rgba(59,130,246,.22),transparent 65%)}";
     document.head.appendChild(style);
   }
 

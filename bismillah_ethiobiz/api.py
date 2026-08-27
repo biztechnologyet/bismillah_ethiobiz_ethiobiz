@@ -680,3 +680,34 @@ def on_theme_update(doc, method=None):
         frappe.logger("ethiobiz").error(f"on_theme_update error: {e}")
 
 
+@frappe.whitelist()
+def set_user_particle_pref(enabled):
+    """Set per-user particle preference (0 or 1)."""
+    if not frappe.session.user or frappe.session.user == "Guest":
+        frappe.throw("Login required")
+    try:
+        val = 1 if int(enabled) else 0
+        frappe.db.set_value("User", frappe.session.user, "ethiobiz_enable_particles", val)
+        frappe.db.commit()
+        return {"status": "ok", "enabled": val}
+    except Exception as e:
+        frappe.logger("ethiobiz").error(f"set_user_particle_pref error: {e}")
+        frappe.throw("Failed to save preference")
+
+
+@frappe.whitelist(allow_guest=True)
+def get_user_particle_pref():
+    """Get particle preference: user pref > global Theme setting > default ON."""
+    try:
+        user_pref = None
+        if frappe.session.user and frappe.session.user != "Guest":
+            user_pref = frappe.db.get_value("User", frappe.session.user, "ethiobiz_enable_particles")
+        if user_pref is not None:
+            return {"enabled": bool(int(user_pref))}
+        theme = frappe.get_single("EthioBiz Theme")
+        global_val = getattr(theme, "enable_desk_animation", 1)
+        return {"enabled": bool(int(global_val or 1))}
+    except Exception:
+        return {"enabled": True}
+
+
