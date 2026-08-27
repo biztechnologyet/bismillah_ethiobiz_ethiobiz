@@ -1,0 +1,13 @@
+{
+  "name": "Salon Settings",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "issingle": 1,
+  "fields": [
+    {"fieldname": "default_company", "fieldtype": "Link", "label": "Default Company", "options": "Company"},
+    {"fieldname": "booking_window_days", "fieldtype": "Int", "label": "Booking Window (days)", "default": 30},
+    {"fieldname": "reminder_template", "fieldtype": "Small Text", "label": "Reminder Message Template"},
+    {"fieldname": "cancellation_policy", "fieldtype": "Small Text", "label": "Cancellation Policy"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1}]
+}

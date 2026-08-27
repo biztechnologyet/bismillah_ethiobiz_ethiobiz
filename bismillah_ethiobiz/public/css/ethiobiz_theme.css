@@ -946,6 +946,110 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] textarea.form-control,
 [data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
     color: var(--text-color, #cdd6f4) !important;
+body[data-path] { background-attachment: fixed !important; }
+/* ===== END GLOBAL FOOTER FIX ===== */
+
+/* ===== P4-B: FULL-WIDTH DOC HEADERS, BUTTONS BELOW RIGHT-ALIGNED ===== */
+[data-route*="app"] .page-head .container {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+[data-route*="app"] .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+[data-route*="app"] .page-title,
+[data-route*="app"] .page-title.col-md-4,
+[data-route*="app"] .page-title.col-sm-6,
+[data-route*="app"] .page-title.col-xs-7 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    -webkit-flex: 0 0 100% !important;
+}
+[data-route*="app"] .page-actions {
+    justify-content: flex-end !important;
+    margin-top: 4px !important;
+}
+
+/* ===== P4-C: COLLAPSIBLE FILTERS PANEL ===== */
+.filter-selector .filter-section {
+    border: 1px solid var(--border-color, #313244) !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+}
+.filter-selector .filter-section .filter-label {
+    cursor: pointer !important;
+    user-select: none !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+}
+.filter-selector .filter-section .collapse-indicator {
+    font-size: 11px;
+    transition: transform .2s;
+}
+.filter-selector .filter-section.collapsed .collapse-indicator {
+    transform: rotate(-90deg);
+}
+.filter-selector .filter-section .filter-body {
+    overflow: hidden !important;
+    transition: max-height .25s ease;
+    max-height: 600px;
+}
+.filter-selector .filter-section.collapsed .filter-body {
+    max-height: 0 !important;
+}
+[data-theme="light"] .filter-selector .filter-section {
+    background: rgba(255,255,255,0.85) !important;
+    border-color: rgba(2,106,110,0.25) !important;
+}
+[data-theme="light"] .filter-selector .filter-section .filter-label {
+    color: #0f172a !important;
+}
+
+/* ===== P4-L: WEBSITE ACCOUNT-MENU CLEANUP ===== */
+.navbar .dropdown-menu a.dropdown-item[href="/apps"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app/switch"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app?type=switch"] {
+    display: none !important;
+}
+
+/* ===== P4-B T2 DARK-THEME FORM REASSERTIONS (2026-08-24) =====
+   Placed LAST so it wins the cascade. Guarantees desk-form field titles,
+   page titles and control text stay readable in dark mode regardless of
+   any earlier web-form leakage. */
+[data-theme="dark"] .frappe-control .control-label,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .form-group .control-label {
+    color: var(--text-color, #cdd6f4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .page-head .title-text,
+[data-theme="dark"] h3.title-text,
+[data-theme="dark"] .page-title {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .form-section .section-head,
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .form-tabs-list .nav-link {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .control-label .reqd,
+[data-theme="dark"] label .reqd { color: #f87171 !important; }
+[data-theme="dark"] select,
+[data-theme="dark"] textarea.form-control,
+[data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
+    color: var(--text-color, #cdd6f4) !important;
 }
 [data-theme="dark"] .frappe-control .control-label.muted,
 [data-theme="dark"] .frappe-control .label-muted,
@@ -958,3 +1062,64 @@ body[data-path] { background-attachment: fixed !important; }
     font-weight: 600 !important;
 }
 /* ===== END P4-B T2 ===== */
+
+/* ==========================================================================
+   HADEEDA BIZAI CHAT WIDGET ENHANCEMENTS (FULL-WIDTH, FULL-CONTENT, RESIZABLE)
+   ========================================================================== */
+.chat-window {
+    min-width: 340px !important;
+    max-width: min(800px, calc(100vw - 20px)) !important;
+    min-height: 420px !important;
+    max-height: min(900px, calc(100vh - 90px)) !important;
+}
+
+/* Chat message full text rendering - prevent any cutting */
+.chat-message,
+.chat-message-markdown,
+.chat-message-text,
+.chat-message p,
+.chat-message span,
+.n8n-markdown,
+.n8n-markdown p,
+[class*="_markdown_"],
+[class*="_message_"] {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: auto !important;
+}
+
+/* Full-width footer */
+.chat-layout .chat-footer,
+.chat-footer,
+[class*="_footer_"] {
+    padding: 8px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.chat-inputs,
+.chat-input-wrapper,
+[class*="_inputContainer_"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 4px 6px 4px 12px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+}
+
+.chat-input,
+textarea.chat-input,
+input.chat-input,
+.chat-inputs textarea,
+.chat-inputs input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}

@@ -1,2 +1,3 @@
 
 bismillah_ethiobiz.patches.setup_ethiobiz_features
+bismillah_ethiobiz.ethiobiz_theme.patches.force_refresh_workspaces_patch.execute

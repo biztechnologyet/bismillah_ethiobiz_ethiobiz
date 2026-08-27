@@ -3,9 +3,9 @@ from frappe.desk.doctype.event.event import send_event_digest as original_send_e
 
 
 def send_event_digest():
-    from frappe.desk.doctype.event.event import get_events, get_enabled_system_users
-    from frappe.utils.email import is_email_notifications_enabled_for_type
+    from frappe.desk.doctype.event.event import get_events, get_enabled_system_users, is_email_notifications_enabled_for_type
     from frappe.utils import getdate, format_datetime
+
 
     today = getdate()
 

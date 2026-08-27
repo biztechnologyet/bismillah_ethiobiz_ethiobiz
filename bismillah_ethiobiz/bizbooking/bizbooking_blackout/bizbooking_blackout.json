@@ -1,0 +1,17 @@
+{
+  "name": "BizBooking Blackout",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "title_field": "reason",
+  "fields": [
+    {"fieldname": "service", "fieldtype": "Link", "label": "Service", "options": "BizBookable Service"},
+    {"fieldname": "provider_doctype", "fieldtype": "Select", "label": "Provider DocType", "options": "Practitioner\nSalon Stylist\nAgent\nUser"},
+    {"fieldname": "provider_name", "fieldtype": "Data", "label": "Provider Name"},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "from_date", "fieldtype": "Date", "label": "From Date", "reqd": 1},
+    {"fieldname": "to_date", "fieldtype": "Date", "label": "To Date", "reqd": 1},
+    {"fieldname": "reason", "fieldtype": "Data", "label": "Reason", "reqd": 1}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "EthioBiz Ad Slot",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "field:slot_code",
+  "title_field": "slot_name",
+  "fields": [
+    {"fieldname": "slot_code", "fieldtype": "Data", "label": "Slot Code", "unique": 1, "reqd": 1, "read_only": 1},
+    {"fieldname": "slot_name", "fieldtype": "Data", "label": "Slot Name", "reqd": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "width_px", "fieldtype": "Int", "label": "Width (px)", "default": 300},
+    {"fieldname": "height_px", "fieldtype": "Int", "label": "Height (px)", "default": 250},
+    {"fieldname": "responsive", "fieldtype": "Check", "label": "Responsive", "default": 0},
+    {"fieldname": "section_break_status", "fieldtype": "Section Break", "label": "Status"},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Available\nReserved\nRented\nMaintenance", "default": "Available", "reqd": 1},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

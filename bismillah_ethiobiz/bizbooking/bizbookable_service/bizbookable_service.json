@@ -1,0 +1,29 @@
+{
+  "name": "BizBookable Service",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:BKS-{####}",
+  "title_field": "service_title",
+  "fields": [
+    {"fieldname": "service_title", "fieldtype": "Data", "label": "Service Title", "reqd": 1},
+    {"fieldname": "industry", "fieldtype": "Link", "label": "Industry", "options": "BizBooking Industry", "reqd": 1},
+    {"fieldname": "company_profile", "fieldtype": "Link", "label": "Company Profile", "options": "BizBooking Company Profile", "reqd": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "provider_doctype", "fieldtype": "Select", "label": "Provider DocType", "options": "Practitioner\nSalon Stylist\nAgent\nUser"},
+    {"fieldname": "provider_field", "fieldtype": "Data", "label": "Provider Field Name"},
+    {"fieldname": "resource", "fieldtype": "Link", "label": "Resource", "options": "BizBooking Resource"},
+    {"fieldname": "section_break_pricing", "fieldtype": "Section Break", "label": "Pricing & Duration"},
+    {"fieldname": "duration_minutes", "fieldtype": "Int", "label": "Duration (minutes)", "reqd": 1, "default": 30},
+    {"fieldname": "price_etb", "fieldtype": "Currency", "label": "Price (ETB)"},
+    {"fieldname": "column_break_pricing", "fieldtype": "Column Break"},
+    {"fieldname": "buffer_before_min", "fieldtype": "Int", "label": "Buffer Before (min)", "default": 0},
+    {"fieldname": "buffer_after_min", "fieldtype": "Int", "label": "Buffer After (min)", "default": 0},
+    {"fieldname": "capacity_per_slot", "fieldtype": "Int", "label": "Capacity per Slot", "default": 1},
+    {"fieldname": "section_break_payment", "fieldtype": "Section Break", "label": "Payment"},
+    {"fieldname": "requires_payment", "fieldtype": "Check", "label": "Requires Payment"},
+    {"fieldname": "deposit_percent", "fieldtype": "Percent", "label": "Deposit %"},
+    {"fieldname": "vertical_payload_schema", "fieldtype": "Code", "label": "Vertical Payload Schema (JSON)", "options": "JSON"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

@@ -34,7 +34,9 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def submit_job_application(job_title=None, applicant_name=None, email_id=None, phone_number=None, company=None, cover_letter=None):
-    """Creates a verified Job Applicant record in ERPNext HRMS linked to the company."""
+    """Creates a verified Job Applicant record in ERPNext HRMS with attached CV/documents."""
+    from frappe.utils.file_manager import save_file
+    
     user = frappe.session.user
     if user and user != "Guest":
         u_doc = frappe.get_doc("User", user)
@@ -57,8 +59,33 @@ def submit_job_application(job_title=None, applicant_name=None, email_id=None, p
     app_doc.flags.ignore_permissions = True
     app_doc.insert(ignore_permissions=True)
 
+    # Handle CV / Resume file attachment if uploaded
+    if hasattr(frappe.local, "uploaded_file") and frappe.local.uploaded_file:
+        file_content = frappe.local.uploaded_file
+        file_name = frappe.local.uploaded_filename or "resume.pdf"
+        saved = save_file(
+            fname=file_name,
+            content=file_content,
+            dt="Job Applicant",
+            dn=app_doc.name,
+            df="resume_attachment",
+            is_private=1
+        )
+        app_doc.db_set("resume_attachment", saved.file_url)
+    elif frappe.request and frappe.request.files and "cv_file" in frappe.request.files:
+        uploaded = frappe.request.files["cv_file"]
+        saved = save_file(
+            fname=uploaded.filename,
+            content=uploaded.read(),
+            dt="Job Applicant",
+            dn=app_doc.name,
+            df="resume_attachment",
+            is_private=1
+        )
+        app_doc.db_set("resume_attachment", saved.file_url)
+
     return {
         "status": "success",
-        "message": "Application submitted successfully! Our HR team has received your profile.",
+        "message": "Application submitted successfully with documents! Our HR team has received your profile.",
         "applicant_id": app_doc.name
     }

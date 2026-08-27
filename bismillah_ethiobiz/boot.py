@@ -25,7 +25,8 @@ def boot_session(bootinfo):
 
     primary_color = "#1FB6AE" 
     
-    bootinfo.ethiobiz_theme_css = f"""
+    bootinfo["ethiobiz_theme_css"] = f"""
+
     <style id="ethiobiz-boot-css">
         :root {{
             --primary-color: {primary_color} !important;

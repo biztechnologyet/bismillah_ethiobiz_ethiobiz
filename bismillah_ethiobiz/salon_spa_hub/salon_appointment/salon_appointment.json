@@ -1,0 +1,25 @@
+{
+  "name": "Salon Appointment",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:APT-{YYYY}{MM}{DD}-{####}",
+  "title_field": "customer_name",
+  "calendar_view": "salon_appointments",
+  "fields": [
+    {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer", "reqd": 1},
+    {"fieldname": "customer_name", "fieldtype": "Data", "label": "Customer Name", "fetch_from": "customer.customer_name"},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "stylist", "fieldtype": "Link", "label": "Stylist", "options": "Salon Stylist", "reqd": 1},
+    {"fieldname": "source", "fieldtype": "Select", "label": "Source", "options": "Walk-in\nPhone\nOnline", "default": "Walk-in"},
+    {"fieldname": "section_break_date", "fieldtype": "Section Break", "label": "Date & Time"},
+    {"fieldname": "appointment_date", "fieldtype": "Date", "label": "Date", "reqd": 1},
+    {"fieldname": "start_time", "fieldtype": "Time", "label": "Start Time", "reqd": 1},
+    {"fieldname": "column_break_date", "fieldtype": "Column Break"},
+    {"fieldname": "end_time", "fieldtype": "Time", "label": "End Time", "reqd": 1},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Draft\nBooked\nConfirmed\nIn Service\nCompleted\nCancelled\nNo Show", "default": "Draft", "reqd": 1},
+    {"fieldname": "services", "fieldtype": "Table", "label": "Services", "options": "Salon Appointment Service"},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

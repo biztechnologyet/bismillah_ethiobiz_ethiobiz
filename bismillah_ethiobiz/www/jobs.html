@@ -268,6 +268,12 @@
             </div>
 
             <div id="job-form-body">
+                <div class="form-group mb-3">
+                    <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📎 Upload CV / Resume (PDF or DOCX)</label>
+                    <input type="file" id="job-cv-file" accept=".pdf,.doc,.docx" class="form-control" style="border-radius: 14px; font-size: 13px; padding: 10px 14px; border: 1.5px dashed #cbd5e1; background: #f8fafc;">
+                    <small style="color: #64748b; font-size: 11px;">Supported formats: PDF, DOCX (Max 10MB)</small>
+                </div>
+
                 <label style="font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 4px; display: block;">📝 Cover Note / Brief Introduction</label>
                 <textarea id="job-cover-note" class="form-control mb-3" rows="3" placeholder="Highlight your key achievements and why you are a great fit..."></textarea>
 
@@ -280,7 +286,7 @@
                 <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
                 <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 8px;">Application Submitted!</h4>
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
-                    Your profile has been submitted directly to the hiring team in Desk.
+                    Your profile and attached resume have been submitted directly to the hiring team in Desk.
                 </p>
                 <button type="button" class="job-btn-apply" onclick="document.getElementById('job-apply-modal').style.display='none';">
                     Done
@@ -383,21 +389,32 @@
         }
 
         const note = document.getElementById('job-cover-note').value.trim();
+        const fileInput = document.getElementById('job-cv-file');
         const btn = this;
         btn.disabled = true;
-        btn.innerText = 'Submitting Application...';
+        btn.innerText = 'Submitting Application & Documents...';
+
+        const formData = new FormData();
+        formData.append('job_title', selectedJobTitle);
+        formData.append('applicant_name', loggedUser.full_name);
+        formData.append('email_id', loggedUser.email || '');
+        formData.append('phone_number', loggedUser.phone || '0911000000');
+        formData.append('company', selectedJobCompany);
+        formData.append('cover_letter', note);
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            formData.append('cv_file', fileInput.files[0]);
+        }
+
+        const headers = {};
+        if (window.frappe && window.frappe.csrf_token) {
+            headers['X-Frappe-CSRF-Token'] = window.frappe.csrf_token;
+        }
 
         fetch('/api/method/bismillah_ethiobiz.jobs.submit_job_application', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                job_title: selectedJobTitle,
-                applicant_name: loggedUser.full_name,
-                email_id: loggedUser.email || '',
-                phone_number: loggedUser.phone || '0911000000',
-                company: selectedJobCompany,
-                cover_letter: note
-            })
+            headers: headers,
+            body: formData
         })
         .then(r => r.json())
         .then(res => {
@@ -415,5 +432,6 @@
         });
     };
 })();
+
 </script>
 {% endblock %}

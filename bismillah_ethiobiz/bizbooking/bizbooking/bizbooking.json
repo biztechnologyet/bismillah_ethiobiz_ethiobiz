@@ -1,0 +1,32 @@
+{
+  "name": "BizBooking",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:BK-{YYYY}{MM}{DD}-{####}",
+  "title_field": "customer_name",
+  "search_fields": "customer_name,customer",
+  "fields": [
+    {"fieldname": "service", "fieldtype": "Link", "label": "Service", "options": "BizBookable Service", "reqd": 1},
+    {"fieldname": "provider_doctype", "fieldtype": "Data", "label": "Provider DocType", "read_only": 1},
+    {"fieldname": "provider_name", "fieldtype": "Data", "label": "Provider Name", "read_only": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer"},
+    {"fieldname": "customer_name", "fieldtype": "Data", "label": "Guest Name"},
+    {"fieldname": "customer_phone", "fieldtype": "Phone", "label": "Guest Phone"},
+    {"fieldname": "customer_email", "fieldtype": "Data", "label": "Guest Email", "options": "Email"},
+    {"fieldname": "section_break_datetime", "fieldtype": "Section Break", "label": "Date & Time"},
+    {"fieldname": "booking_date", "fieldtype": "Date", "label": "Date", "reqd": 1},
+    {"fieldname": "start_time", "fieldtype": "Time", "label": "Start Time", "reqd": 1},
+    {"fieldname": "end_time", "fieldtype": "Time", "label": "End Time", "reqd": 1},
+    {"fieldname": "column_break_datetime", "fieldtype": "Column Break"},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Pending\nHold\nConfirmed\nRescheduled\nCompleted\nCancelled\nNo Show", "default": "Pending", "reqd": 1},
+    {"fieldname": "source", "fieldtype": "Select", "label": "Source", "options": "Web\nDesk\nAPI", "default": "Desk"},
+    {"fieldname": "section_break_payment", "fieldtype": "Section Break", "label": "Payment", "collapsible": 1},
+    {"fieldname": "invoice", "fieldtype": "Link", "label": "Sales Invoice", "options": "Sales Invoice", "read_only": 1},
+    {"fieldname": "gateway_ref", "fieldtype": "Data", "label": "Gateway Reference", "read_only": 1},
+    {"fieldname": "industry_payload", "fieldtype": "Code", "label": "Industry Payload (JSON)", "options": "JSON"},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

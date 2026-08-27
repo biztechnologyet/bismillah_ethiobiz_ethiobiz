@@ -301,3 +301,87 @@ def vote_poll(post_id=None, option_index=0):
         frappe.db.commit()
 
     return {"status": "success", "poll_data": _format_poll_data(post)}
+
+
+@frappe.whitelist()
+def toggle_follow(target_user=None):
+    """Follows or unfollows a target creator on Afocha Social."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Authentication required. Please sign in to follow creators."), frappe.PermissionError)
+
+    target_user = target_user or frappe.form_dict.get("target_user")
+    if not target_user or target_user == user:
+        return {"status": "error", "message": "Invalid target user"}
+
+    if not frappe.db.exists("DocType", "AF Social Follow"):
+        # Auto-create table if not yet provisioned
+        from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+        frappe.get_doc({
+            "doctype": "DocType",
+            "name": "AF Social Follow",
+            "module": "EthioBiz Theme",
+            "custom": 1,
+            "fields": [
+                {"fieldname": "user", "fieldtype": "Link", "label": "Follower", "options": "User", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "following_user", "fieldtype": "Link", "label": "Following User", "options": "User", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "followed_on", "fieldtype": "Datetime", "label": "Followed On", "default": "now"}
+            ],
+            "permissions": [{"role": "All", "read": 1, "write": 1, "create": 1, "delete": 1}]
+        }).insert(ignore_permissions=True)
+
+    existing = frappe.db.get_value("AF Social Follow", {"user": user, "following_user": target_user}, "name")
+    if existing:
+        frappe.delete_doc("AF Social Follow", existing, ignore_permissions=True)
+        frappe.db.commit()
+        return {"status": "unfollowed", "target_user": target_user, "is_following": False}
+    else:
+        doc = frappe.get_doc({
+            "doctype": "AF Social Follow",
+            "user": user,
+            "following_user": target_user
+        })
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return {"status": "following", "target_user": target_user, "is_following": True}
+
+
+@frappe.whitelist()
+def repost_post(post_id=None, quote_text=None):
+    """Creates a native or quote repost of an Afocha Post."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Authentication required. Please sign in to repost."), frappe.PermissionError)
+
+    post_id = post_id or frappe.form_dict.get("post_id")
+    quote_text = quote_text or frappe.form_dict.get("quote_text") or ""
+
+    if not post_id or not frappe.db.exists("Afocha Post", post_id):
+        return {"status": "error", "message": "Post not found"}
+
+    if not frappe.db.exists("DocType", "AF Social Share"):
+        frappe.get_doc({
+            "doctype": "DocType",
+            "name": "AF Social Share",
+            "module": "EthioBiz Theme",
+            "custom": 1,
+            "fields": [
+                {"fieldname": "original_post", "fieldtype": "Link", "label": "Original Post", "options": "Afocha Post", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "shared_by", "fieldtype": "Link", "label": "Shared By", "options": "User", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "quote_text", "fieldtype": "Small Text", "label": "Quote Text"},
+                {"fieldname": "shared_on", "fieldtype": "Datetime", "label": "Shared On", "default": "now"}
+            ],
+            "permissions": [{"role": "All", "read": 1, "write": 1, "create": 1, "delete": 1}]
+        }).insert(ignore_permissions=True)
+
+    share = frappe.get_doc({
+        "doctype": "AF Social Share",
+        "original_post": post_id,
+        "shared_by": user,
+        "quote_text": quote_text
+    })
+    share.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {"status": "success", "message": "Post shared successfully to your network!"}
+

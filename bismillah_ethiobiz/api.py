@@ -184,8 +184,10 @@ def get_chat_config():
     is_guest = user == "Guest"
 
     if is_guest:
+        guest_webhook = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
         return {
-            "webhook_url": settings.chat_webhook_url,
+            "webhook_url": guest_webhook,
+            "is_guest": True,
             "enabled": bool(settings.enabled and settings.chat_enabled),
             "session_id": f"guest::{frappe.utils.nowdate()}",
             "full_name": "Guest",
@@ -220,7 +222,9 @@ def get_chat_config():
 
     return {
         "webhook_url": settings.chat_webhook_url,
+        "is_guest": False,
         "enabled": bool(settings.enabled and settings.chat_enabled),
+
         "session_id": f"{user}::{company}" if company else user,
         "full_name": frappe.db.get_value("User", user, "full_name") or user,
         "email": frappe.db.get_value("User", user, "email") or "",
@@ -349,12 +353,18 @@ def chat_webhook_proxy():
         except Exception as e:
             frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
 
-    webhook_url = settings.chat_webhook_url
+    # Route to guest webhook if caller is Guest and guest webhook is configured
+    if not user or user == "Guest":
+        webhook_url = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
+    else:
+        webhook_url = settings.chat_webhook_url
+
     if not webhook_url:
         return WerkzeugResponse(
             json.dumps({"output": "Webhook URL not configured."}),
             status=500, content_type="application/json"
         )
+
 
     headers = {"Content-Type": "application/json"}
     if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
@@ -462,46 +472,53 @@ def get_user_credentials(username=None, telegram_username=None):
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def chat_inline(prompt, context=None):
     user = frappe.session.user
-    if user == "Guest":
-        frappe.throw("Authentication required", frappe.PermissionError)
-
     settings = _get_hadeeda_settings()
     if not settings.enabled or not settings.inline_ai_enabled:
         frappe.throw("Inline AI is disabled", frappe.PermissionError)
 
-    api_key, api_secret = _get_user_api_credentials(user)
-    company = frappe.defaults.get_user_default("company") or ""
-    full_name = frappe.db.get_value("User", user, "full_name") or user
-    department, designation = _get_user_department_designation(user)
+    is_guest = not user or user == "Guest"
+    if is_guest:
+        inline_url = getattr(settings, "inline_webhook_url_guest", None) or settings.inline_webhook_url
+        api_key, api_secret = "", ""
+        company = ""
+        full_name = "Guest"
+        department, designation = "", ""
+        session_id = f"guest::{frappe.utils.nowdate()}"
+    else:
+        inline_url = settings.inline_webhook_url
+        api_key, api_secret = _get_user_api_credentials(user)
+        company = frappe.defaults.get_user_default("company") or ""
+        full_name = frappe.db.get_value("User", user, "full_name") or user
+        department, designation = _get_user_department_designation(user)
+        session_id = f"{user}::{company}" if company else user
+
     document_content = _get_document_context(context)
 
-    # Embed the actual document content directly into the message so the
-    # n8n AI agent can act on the specific record the user is viewing,
-    # even if it does not read the metadata object.
+    # Embed the actual document content directly into the message
     chat_input = prompt
     if document_content:
         chat_input = "%s\n\n[DOCUMENT CONTEXT]\n%s" % (prompt, document_content)
 
     payload = {
         "action": "sendMessage",
-        "sessionId": f"{user}::{company}" if company else user,
+        "sessionId": session_id,
         "chatInput": chat_input,
         "metadata": {
             "source": "widget",
-            "username": user,
-            "user_id": user,
+            "username": user or "Guest",
+            "user_id": user or "Guest",
             "full_name": full_name,
             "company": company,
             "department": department,
             "designation": designation,
-            "industry": _get_user_industry_religion(user)[0],
-            "religion": _get_user_industry_religion(user)[1],
-            "user_behaviour": _get_user_behaviour_and_company_industry(user, company)[0],
-            "company_industry": _get_user_behaviour_and_company_industry(user, company)[1],
-            "language": _get_user_language(user),
+            "industry": _get_user_industry_religion(user)[0] if not is_guest else "",
+            "religion": _get_user_industry_religion(user)[1] if not is_guest else "",
+            "user_behaviour": _get_user_behaviour_and_company_industry(user, company)[0] if not is_guest else "",
+            "company_industry": _get_user_behaviour_and_company_industry(user, company)[1] if not is_guest else "",
+            "language": _get_user_language(user) if not is_guest else (settings.default_language or "en"),
             "api_key": api_key or "",
             "api_secret": api_secret or "",
             "field_context": context or "",
@@ -509,17 +526,21 @@ def chat_inline(prompt, context=None):
         }
     }
 
+    if not inline_url:
+        frappe.throw("Inline AI webhook URL is not configured", frappe.DoesNotExistError)
+
     headers = {"Content-Type": "application/json"}
     if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
         headers[settings.webhook_auth_header] = settings.get_password("webhook_auth_value")
 
     try:
         resp = requests.post(
-            settings.inline_webhook_url,
+            inline_url,
             json=payload,
             headers=headers,
             timeout=60
         )
+
         raw_text = resp.text
 
         # 1. Try NDJSON parsing first (n8n Formatter node output)

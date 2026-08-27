@@ -1,185 +1,185 @@
-{
- "doctype": "DocType",
- "name": "HADEEDA Settings",
- "module": "EthioBiz Theme",
- "custom": 1,
- "issingle": 1,
- "fields": [
-  {
-   "fieldname": "general_section",
-   "fieldtype": "Section Break",
-   "label": "General"
-  },
-  {
-   "fieldname": "enabled",
-   "fieldtype": "Check",
-   "label": "Enable All HADEEDA Features",
-   "default": "1"
-  },
-  {
-   "fieldname": "bot_name",
-   "fieldtype": "Data",
-   "label": "Bot Name",
-   "default": "HADEEDA"
-  },
-  {
-   "fieldname": "default_language",
-   "fieldtype": "Select",
-   "label": "Default Language",
-   "options": "en\nam\nar",
-   "default": "en"
-  },
-  {
-   "fieldname": "webhook_section",
-   "fieldtype": "Section Break",
-   "label": "Webhook Configuration"
-  },
-  {
-   "fieldname": "chat_webhook_url",
-   "fieldtype": "Data",
-   "label": "Chat Widget Webhook URL",
-   "default": "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat"
-  },
-  {
-   "fieldname": "inline_webhook_url",
-   "fieldtype": "Data",
-   "label": "Inline AI Webhook URL",
-   "default": "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat"
-  },
-  {
-   "fieldname": "webhook_auth_header",
-   "fieldtype": "Data",
-   "label": "Webhook Auth Header Name (optional)"
-  },
-  {
-   "fieldname": "webhook_auth_value",
-   "fieldtype": "Password",
-   "label": "Webhook Auth Header Value (optional)"
-  },
-  {
-   "fieldname": "chat_widget_section",
-   "fieldtype": "Section Break",
-   "label": "Chat Widget Customization"
-  },
-  {
-   "fieldname": "chat_enabled",
-   "fieldtype": "Check",
-   "label": "Enable Chat Widget",
-   "default": "1"
-  },
-  {
-   "fieldname": "enable_streaming",
-   "fieldtype": "Check",
-   "label": "Enable Streaming Responses",
-   "default": "1"
-  },
-  {
-   "fieldname": "widget_title",
-   "fieldtype": "Data",
-   "label": "Widget Title",
-   "default": "HADEEDA AI Assistant"
-  },
-  {
-   "fieldname": "widget_subtitle",
-   "fieldtype": "Data",
-   "label": "Widget Subtitle",
-   "default": "Your intelligent executive assistant, ready 24/7."
-  },
-  {
-   "fieldname": "widget_position",
-   "fieldtype": "Select",
-   "label": "Widget Position",
-   "options": "Right\nLeft",
-   "default": "Right"
-  },
-  {
-   "fieldname": "widget_primary_color",
-   "fieldtype": "Color",
-   "label": "Primary Color",
-   "default": "#1FB6AE"
-  },
-  {
-   "fieldname": "widget_mode",
-   "fieldtype": "Select",
-   "label": "Widget Mode",
-   "options": "window\nfullscreen",
-   "default": "window"
-  },
-  {
-   "fieldname": "initial_messages",
-   "fieldtype": "Small Text",
-   "label": "Initial Messages (JSON array)",
-   "default": "[\"Selam! 👋\",\"I am HADEEDA, your AI Executive Assistant. How can I help you today?\"]"
-  },
-  {
-   "fieldname": "allow_file_uploads",
-   "fieldtype": "Check",
-   "label": "Allow File Uploads",
-   "default": "0"
-  },
-  {
-   "fieldname": "allowed_mime_types",
-   "fieldtype": "Small Text",
-   "label": "Allowed File MIME Types (comma-separated)"
-  },
-  {
-   "fieldname": "inline_ai_section",
-   "fieldtype": "Section Break",
-   "label": "Inline AI Customization"
-  },
-  {
-   "fieldname": "inline_ai_enabled",
-   "fieldtype": "Check",
-   "label": "Enable Inline AI Assistant",
-   "default": "1"
-  },
-  {
-   "fieldname": "trigger_character",
-   "fieldtype": "Data",
-   "label": "Trigger Character",
-   "default": "/",
-   "description": "Type this character in any text field to invoke the AI"
-  },
-  {
-   "fieldname": "show_trigger_hint",
-   "fieldtype": "Check",
-   "label": "Show Trigger Hint in Text Fields",
-   "default": "1"
-  },
-  {
-   "fieldname": "excluded_doctypes",
-   "fieldtype": "Small Text",
-   "label": "Excluded Doctypes (JSON array)"
-  },
-  {
-   "fieldname": "excluded_fields",
-   "fieldtype": "Small Text",
-   "label": "Excluded Fields (JSON array)"
-  },
-  {
-   "fieldname": "branding_section",
-   "fieldtype": "Section Break",
-   "label": "Branding"
-  },
-  {
-   "fieldname": "bot_avatar",
-   "fieldtype": "Data",
-   "label": "Bot Avatar URL"
-  },
-  {
-   "fieldname": "custom_css",
-   "fieldtype": "Code",
-   "options": "CSS",
-   "label": "Custom CSS"
-  }
- ],
- "permissions": [
-  {
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1
-  }
- ]
+﻿{
+    "doctype":  "DocType",
+    "name":  "HADEEDA Settings",
+    "module":  "EthioBiz Theme",
+    "custom":  1,
+    "issingle":  1,
+    "fields":  [
+                   {
+                       "fieldname":  "general_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "General"
+                   },
+                   {
+                       "fieldname":  "enabled",
+                       "fieldtype":  "Check",
+                       "label":  "Enable All HADEEDA Features",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "bot_name",
+                       "fieldtype":  "Data",
+                       "label":  "Bot Name",
+                       "default":  "HADEEDA"
+                   },
+                   {
+                       "fieldname":  "default_language",
+                       "fieldtype":  "Select",
+                       "label":  "Default Language",
+                       "options":  "en\nam\nar",
+                       "default":  "en"
+                   },
+                   {
+                       "fieldname":  "webhook_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "Webhook Configuration"
+                   },
+                   {
+                       "fieldname":  "chat_webhook_url",
+                       "fieldtype":  "Data",
+                       "label":  "Chat Widget Webhook URL",
+                       "default":  "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat"
+                   },
+                   {
+                       "fieldname":  "inline_webhook_url",
+                       "fieldtype":  "Data",
+                       "label":  "Inline AI Webhook URL",
+                       "default":  "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat"
+                   },
+                   {
+                       "fieldname":  "webhook_auth_header",
+                       "fieldtype":  "Data",
+                       "label":  "Webhook Auth Header Name (optional)"
+                   },
+                   {
+                       "fieldname":  "webhook_auth_value",
+                       "fieldtype":  "Password",
+                       "label":  "Webhook Auth Header Value (optional)"
+                   },
+                   {
+                       "fieldname":  "chat_widget_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "Chat Widget Customization"
+                   },
+                   {
+                       "fieldname":  "chat_enabled",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Chat Widget",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "enable_streaming",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Streaming Responses",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "widget_title",
+                       "fieldtype":  "Data",
+                       "label":  "Widget Title",
+                       "default":  "HADEEDA AI Assistant"
+                   },
+                   {
+                       "fieldname":  "widget_subtitle",
+                       "fieldtype":  "Data",
+                       "label":  "Widget Subtitle",
+                       "default":  "Your intelligent executive assistant, ready 24/7."
+                   },
+                   {
+                       "fieldname":  "widget_position",
+                       "fieldtype":  "Select",
+                       "label":  "Widget Position",
+                       "options":  "Right\nLeft",
+                       "default":  "Right"
+                   },
+                   {
+                       "fieldname":  "widget_primary_color",
+                       "fieldtype":  "Color",
+                       "label":  "Primary Color",
+                       "default":  "#1FB6AE"
+                   },
+                   {
+                       "fieldname":  "widget_mode",
+                       "fieldtype":  "Select",
+                       "label":  "Widget Mode",
+                       "options":  "window\nfullscreen",
+                       "default":  "window"
+                   },
+                   {
+                       "fieldname":  "initial_messages",
+                       "fieldtype":  "Small Text",
+                       "label":  "Initial Messages (JSON array)",
+                       "default":  "[\"Selam! 👋\",\"I am HADEEDA, your AI Executive Assistant. How can I help you today?\"]"
+                   },
+                   {
+                       "fieldname":  "allow_file_uploads",
+                       "fieldtype":  "Check",
+                       "label":  "Allow File Uploads",
+                       "default":  "0"
+                   },
+                   {
+                       "fieldname":  "allowed_mime_types",
+                       "fieldtype":  "Small Text",
+                       "label":  "Allowed File MIME Types (comma-separated)"
+                   },
+                   {
+                       "fieldname":  "inline_ai_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "Inline AI Customization"
+                   },
+                   {
+                       "fieldname":  "inline_ai_enabled",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Inline AI Assistant",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "trigger_character",
+                       "fieldtype":  "Data",
+                       "label":  "Trigger Character",
+                       "default":  "/",
+                       "description":  "Type this character in any text field to invoke the AI"
+                   },
+                   {
+                       "fieldname":  "show_trigger_hint",
+                       "fieldtype":  "Check",
+                       "label":  "Show Trigger Hint in Text Fields",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "excluded_doctypes",
+                       "fieldtype":  "Small Text",
+                       "label":  "Excluded Doctypes (JSON array)"
+                   },
+                   {
+                       "fieldname":  "excluded_fields",
+                       "fieldtype":  "Small Text",
+                       "label":  "Excluded Fields (JSON array)"
+                   },
+                   {
+                       "fieldname":  "branding_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "Branding"
+                   },
+                   {
+                       "fieldname":  "bot_avatar",
+                       "fieldtype":  "Data",
+                       "label":  "Bot Avatar URL"
+                   },
+                   {
+                       "fieldname":  "custom_css",
+                       "fieldtype":  "Code",
+                       "options":  "CSS",
+                       "label":  "Custom CSS"
+                   }
+               ],
+    "permissions":  [
+                        {
+                            "role":  "System Manager",
+                            "read":  1,
+                            "write":  1,
+                            "create":  1,
+                            "delete":  1
+                        }
+                    ]
 }

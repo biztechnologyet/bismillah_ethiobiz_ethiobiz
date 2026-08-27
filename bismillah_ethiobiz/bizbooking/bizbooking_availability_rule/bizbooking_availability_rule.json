@@ -1,0 +1,22 @@
+{
+  "name": "BizBooking Availability Rule",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "fields": [
+    {"fieldname": "service", "fieldtype": "Link", "label": "Service", "options": "BizBookable Service"},
+    {"fieldname": "provider_doctype", "fieldtype": "Select", "label": "Provider DocType", "options": "Practitioner\nSalon Stylist\nAgent\nUser"},
+    {"fieldname": "provider_name", "fieldtype": "Data", "label": "Provider Name"},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "weekdays", "fieldtype": "Data", "label": "Weekdays (comma-sep: Mon,Tue,...)"},
+    {"fieldname": "window_start", "fieldtype": "Time", "label": "Window Start", "reqd": 1},
+    {"fieldname": "window_end", "fieldtype": "Time", "label": "Window End", "reqd": 1},
+    {"fieldname": "break_start", "fieldtype": "Time", "label": "Break Start"},
+    {"fieldname": "break_end", "fieldtype": "Time", "label": "Break End"},
+    {"fieldname": "effective_from", "fieldtype": "Date", "label": "Effective From"},
+    {"fieldname": "effective_to", "fieldtype": "Date", "label": "Effective To"},
+    {"fieldname": "min_notice_min", "fieldtype": "Int", "label": "Min Notice (minutes)", "default": 0},
+    {"fieldname": "max_advance_days", "fieldtype": "Int", "label": "Max Advance (days)", "default": 60}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

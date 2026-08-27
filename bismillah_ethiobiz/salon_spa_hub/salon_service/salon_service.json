@@ -1,0 +1,18 @@
+{
+  "name": "Salon Service",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:SRV-{####}",
+  "title_field": "service_name",
+  "fields": [
+    {"fieldname": "service_name", "fieldtype": "Data", "label": "Service Name", "reqd": 1, "unique": 1},
+    {"fieldname": "item", "fieldtype": "Link", "label": "Item (ERPNext)", "options": "Item"},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "duration_minutes", "fieldtype": "Int", "label": "Duration (minutes)", "reqd": 1, "default": 30},
+    {"fieldname": "price_etb", "fieldtype": "Currency", "label": "Price (ETB)", "reqd": 1},
+    {"fieldname": "for_company", "fieldtype": "Link", "label": "Company", "options": "Company", "reqd": 1},
+    {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": 1}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

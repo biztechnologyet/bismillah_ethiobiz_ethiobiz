@@ -1,0 +1,32 @@
+{
+  "name": "EthioBiz Ad Campaign",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "is_submittable": 1,
+  "autoname": "format:AD-CAM-{#####}",
+  "title_field": "campaign_name",
+  "fields": [
+    {"fieldname": "campaign_name", "fieldtype": "Data", "label": "Campaign Name", "reqd": 1},
+    {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer", "reqd": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "slot", "fieldtype": "Link", "label": "Ad Slot", "options": "EthioBiz Ad Slot", "reqd": 1},
+    {"fieldname": "billing_model", "fieldtype": "Select", "label": "Billing Model", "options": "Flat\nCPM\nCPC\nDay", "default": "Flat", "reqd": 1},
+    {"fieldname": "rate_etb", "fieldtype": "Currency", "label": "Rate (ETB)", "reqd": 1},
+    {"fieldname": "section_break_creative", "fieldtype": "Section Break", "label": "Creative"},
+    {"fieldname": "creative_image", "fieldtype": "Attach Image", "label": "Creative Image"},
+    {"fieldname": "click_url", "fieldtype": "Data", "label": "Click URL", "options": "URL"},
+    {"fieldname": "alt_text", "fieldtype": "Data", "label": "Alt Text"},
+    {"fieldname": "section_break_schedule", "fieldtype": "Section Break", "label": "Schedule"},
+    {"fieldname": "start_date", "fieldtype": "Date", "label": "Start Date", "reqd": 1},
+    {"fieldname": "end_date", "fieldtype": "Date", "label": "End Date", "reqd": 1},
+    {"fieldname": "column_break_schedule", "fieldtype": "Column Break"},
+    {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Draft\nPending Approval\nActive\nPaused\nCompleted\nRejected", "default": "Draft", "reqd": 1},
+    {"fieldname": "section_break_stats", "fieldtype": "Section Break", "label": "Performance"},
+    {"fieldname": "impressions", "fieldtype": "Int", "label": "Impressions", "default": 0, "read_only": 1},
+    {"fieldname": "clicks", "fieldtype": "Int", "label": "Clicks", "default": 0, "read_only": 1},
+    {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company"},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1}]
+}
