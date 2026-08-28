@@ -1177,6 +1177,8 @@ body[data-path] { background-attachment: fixed !important; }
     font-size: 14px !important;
     line-height: 1.4 !important;
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    caret-color: #1FB6AE !important;
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-radius: 8px !important;
@@ -1190,6 +1192,7 @@ body[data-path] { background-attachment: fixed !important; }
 .chat-window .chat-input::placeholder,
 .chat-window textarea::placeholder {
     color: rgba(255, 255, 255, 0.5) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ─── LIGHT THEME: Chat Widget Text Fix ─── */
@@ -1202,6 +1205,8 @@ body[data-path] { background-attachment: fixed !important; }
 html[data-theme="light"] .chat-window textarea,
 html[data-theme="light"] .chat-window input[type="text"] {
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    caret-color: #1FB6AE !important;
     background: rgba(255, 255, 255, 0.12) !important;
     border-color: rgba(255, 255, 255, 0.22) !important;
 }
@@ -1209,7 +1214,9 @@ html[data-theme="light"] .chat-window input[type="text"] {
 [data-theme="light"] .chat-window textarea::placeholder,
 html[data-theme="light"] .chat-window textarea::placeholder {
     color: rgba(255, 255, 255, 0.6) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.6) !important;
 }
+
 
 /* ─── Controls Container ─── */
 .chat-window .chat-inputs-controls,

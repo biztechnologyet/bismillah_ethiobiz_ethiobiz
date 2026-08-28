@@ -912,6 +912,9 @@
                     textarea.style.setProperty('width', 'auto', 'important');
                     textarea.style.setProperty('min-width', '50px', 'important');
                     textarea.style.setProperty('min-height', '34px', 'important');
+                    textarea.style.setProperty('color', '#FFFFFF', 'important');
+                    textarea.style.setProperty('-webkit-text-fill-color', '#FFFFFF', 'important');
+                    textarea.style.setProperty('caret-color', '#1FB6AE', 'important');
                     textarea.style.setProperty('visibility', 'visible', 'important');
                     textarea.style.setProperty('opacity', '1', 'important');
                 }
@@ -930,20 +933,58 @@
                 }
 
                 // Enforce all buttons in footer (send, attach, file upload)
-                const buttons = chatWin.querySelectorAll('.chat-footer button, .chat-inputs button, button[class*="send"], button[class*="file"], button[type="submit"], [class*="_button_"]');
-                buttons.forEach(b => {
-                    b.style.setProperty('display', 'inline-flex', 'important');
-                    b.style.setProperty('align-items', 'center', 'important');
-                    b.style.setProperty('justify-content', 'center', 'important');
-                    b.style.setProperty('flex', '0 0 34px', 'important');
-                    b.style.setProperty('flex-shrink', '0', 'important');
-                    b.style.setProperty('width', '34px', 'important');
-                    b.style.setProperty('height', '34px', 'important');
-                    b.style.setProperty('min-width', '34px', 'important');
-                    b.style.setProperty('min-height', '34px', 'important');
-                    b.style.setProperty('visibility', 'visible', 'important');
-                    b.style.setProperty('opacity', '1', 'important');
-                });
+                const sendBtn = chatWin.querySelector('.chat-input-send-button, button[class*="send-button"], button[type="submit"]');
+                if (sendBtn) {
+                    sendBtn.style.setProperty('display', 'inline-flex', 'important');
+                    sendBtn.style.setProperty('align-items', 'center', 'important');
+                    sendBtn.style.setProperty('justify-content', 'center', 'important');
+                    sendBtn.style.setProperty('flex', '0 0 34px', 'important');
+                    sendBtn.style.setProperty('flex-shrink', '0', 'important');
+                    sendBtn.style.setProperty('width', '34px', 'important');
+                    sendBtn.style.setProperty('height', '34px', 'important');
+                    sendBtn.style.setProperty('min-width', '34px', 'important');
+                    sendBtn.style.setProperty('min-height', '34px', 'important');
+                    sendBtn.style.setProperty('background', 'linear-gradient(135deg, #1FB6AE 0%, #147974 100%)', 'important');
+                    sendBtn.style.setProperty('color', '#FFFFFF', 'important');
+                    sendBtn.style.setProperty('visibility', 'visible', 'important');
+                    sendBtn.style.setProperty('opacity', '1', 'important');
+                    const svg = sendBtn.querySelector('svg');
+                    if (svg) {
+                        svg.style.setProperty('fill', '#FFFFFF', 'important');
+                        svg.style.setProperty('stroke', '#FFFFFF', 'important');
+                        svg.style.setProperty('color', '#FFFFFF', 'important');
+                        svg.style.setProperty('width', '18px', 'important');
+                        svg.style.setProperty('height', '18px', 'important');
+                        svg.style.setProperty('display', 'block', 'important');
+                    }
+                }
+
+                const fileBtn = chatWin.querySelector('.chat-input-file-button, button[class*="file-button"], [data-test-id="chat-attach-file-button"]');
+                if (fileBtn) {
+                    fileBtn.style.setProperty('display', 'inline-flex', 'important');
+                    fileBtn.style.setProperty('align-items', 'center', 'important');
+                    fileBtn.style.setProperty('justify-content', 'center', 'important');
+                    fileBtn.style.setProperty('flex', '0 0 34px', 'important');
+                    fileBtn.style.setProperty('flex-shrink', '0', 'important');
+                    fileBtn.style.setProperty('width', '34px', 'important');
+                    fileBtn.style.setProperty('height', '34px', 'important');
+                    fileBtn.style.setProperty('min-width', '34px', 'important');
+                    fileBtn.style.setProperty('min-height', '34px', 'important');
+                    fileBtn.style.setProperty('background', 'rgba(31, 182, 174, 0.18)', 'important');
+                    fileBtn.style.setProperty('border', '1px solid rgba(31, 182, 174, 0.45)', 'important');
+                    fileBtn.style.setProperty('color', '#1FB6AE', 'important');
+                    fileBtn.style.setProperty('visibility', 'visible', 'important');
+                    fileBtn.style.setProperty('opacity', '1', 'important');
+                    const svg = fileBtn.querySelector('svg');
+                    if (svg) {
+                        svg.style.setProperty('stroke', '#1FB6AE', 'important');
+                        svg.style.setProperty('color', '#1FB6AE', 'important');
+                        svg.style.setProperty('width', '18px', 'important');
+                        svg.style.setProperty('height', '18px', 'important');
+                        svg.style.setProperty('display', 'block', 'important');
+                    }
+                }
+
             }
 
 
