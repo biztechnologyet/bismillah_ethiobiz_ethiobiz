@@ -391,6 +391,57 @@ def create_doctypes():
                 {"fieldname": "install_prompt_enabled", "fieldtype": "Check", "label": "Enable Install Prompt Pill", "default": 1}
             ],
             "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1}]
+        },
+
+        # --- DAGU INSTRUCTOR REGISTRATION ---
+        {
+            "name": "Dagu Instructor Registration",
+            "module": "EthioBiz Theme",
+            "custom": 1,
+            "naming_rule": "By \"Naming Series\" field",
+            "autoname": "naming_series:",
+            "is_submittable": 0,
+            "track_changes": 1,
+            "title_field": "full_name",
+            "sort_field": "creation",
+            "sort_order": "DESC",
+            "fields": [
+                {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "DAGU-INST-.YYYY.-.#####", "default": "DAGU-INST-.YYYY.-.#####", "hidden": 1},
+                {"fieldname": "sec_personal", "fieldtype": "Section Break", "label": "1. Personal & Professional Details"},
+                {"fieldname": "full_name", "fieldtype": "Data", "label": "Full Name", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1},
+                {"fieldname": "email", "fieldtype": "Data", "label": "Email Address", "options": "Email", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1},
+                {"fieldname": "phone", "fieldtype": "Data", "label": "Phone Number", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "col_break_1", "fieldtype": "Column Break"},
+                {"fieldname": "role_expertise", "fieldtype": "Data", "label": "Role / Expertise", "reqd": 1},
+                {"fieldname": "company_organization", "fieldtype": "Data", "label": "Company / Organization"},
+                {"fieldname": "linkedin_portfolio", "fieldtype": "Data", "label": "LinkedIn / Portfolio Profile"},
+                {"fieldname": "brief_bio", "fieldtype": "Small Text", "label": "Brief Bio", "reqd": 1},
+                {"fieldname": "sec_course", "fieldtype": "Section Break", "label": "2. Course Proposal"},
+                {"fieldname": "proposed_course_title", "fieldtype": "Data", "label": "Proposed Course Title", "reqd": 1, "in_list_view": 1},
+                {"fieldname": "target_audience", "fieldtype": "Data", "label": "Target Audience", "reqd": 1},
+                {"fieldname": "col_break_2", "fieldtype": "Column Break"},
+                {"fieldname": "language_of_instruction", "fieldtype": "Select", "label": "Language of Instruction", "options": "Amharic\nEnglish\nAmharic & English\nOromo\nTigrinya\nOther", "default": "Amharic & English", "reqd": 1},
+                {"fieldname": "course_description", "fieldtype": "Text", "label": "Course Description / Outline", "reqd": 1},
+                {"fieldname": "sec_qualifications", "fieldtype": "Section Break", "label": "3. Instructor Qualification & Experience"},
+                {"fieldname": "teaching_experience", "fieldtype": "Text", "label": "Teaching Experience", "reqd": 1},
+                {"fieldname": "why_dagu", "fieldtype": "Text", "label": "Why Dagu? (Motivation)", "reqd": 1},
+                {"fieldname": "col_break_3", "fieldtype": "Column Break"},
+                {"fieldname": "proof_of_expertise", "fieldtype": "Data", "label": "Proof of Expertise (Link/File URL)"},
+                {"fieldname": "sec_business", "fieldtype": "Section Break", "label": "4. Operational & Business Model"},
+                {"fieldname": "preferred_course_model", "fieldtype": "Select", "label": "Preferred Course Model", "options": "Paid Course\nFree Course\nSubscription\nHybrid", "default": "Paid Course", "reqd": 1},
+                {"fieldname": "availability", "fieldtype": "Select", "label": "Availability", "options": "1 - 5 hours/week\n5 - 10 hours/week\n10 - 20 hours/week\n20+ hours/week / Full-time", "default": "5 - 10 hours/week", "reqd": 1},
+                {"fieldname": "col_break_4", "fieldtype": "Column Break"},
+                {"fieldname": "technical_equipment", "fieldtype": "Select", "label": "Technical Equipment / Setup", "options": "Yes - High quality mic, camera & quiet setup\nNo - Need assistance/guidance", "default": "Yes - High quality mic, camera & quiet setup", "reqd": 1},
+                {"fieldname": "sec_agreement", "fieldtype": "Section Break", "label": "Agreement & Status"},
+                {"fieldname": "terms_agreed", "fieldtype": "Check", "label": "I agree to the Terms & Conditions and certify that all information provided is accurate.", "reqd": 1, "default": "0"},
+                {"fieldname": "status", "fieldtype": "Select", "label": "Application Status", "options": "Pending\nUnder Review\nApproved\nRejected", "default": "Pending", "in_list_view": 1, "in_standard_filter": 1}
+            ],
+            "permissions": [
+                {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "email": 1, "print": 1, "report": 1, "share": 1, "export": 1},
+                {"role": "Marketing User", "read": 1, "write": 1, "create": 1, "delete": 0, "email": 1, "print": 1, "report": 1},
+                {"role": "Guest", "read": 1, "write": 1, "create": 1, "delete": 0},
+                {"role": "All", "read": 1, "write": 0, "create": 0, "delete": 0}
+            ]
         }
     ]
 
@@ -413,6 +464,49 @@ def create_doctypes():
         else:
             print(f"Already exists: {name}")
 
+    # Ensure Web Form dagu-instructor-registration exists
+    if not frappe.db.exists("Web Form", "dagu-instructor-registration"):
+        print("Creating Web Form: dagu-instructor-registration")
+        try:
+            wf = frappe.new_doc("Web Form")
+            wf.name = "dagu-instructor-registration"
+            wf.title = "🎓 Dagu Instructor Registration"
+            wf.route = "dagu-instructor-registration"
+            wf.doc_type = "Dagu Instructor Registration"
+            wf.module = "EthioBiz Theme"
+            wf.published = 1
+            wf.login_required = 0
+            wf.allow_edit = 0
+            wf.allow_multiple = 1
+            wf.allow_incomplete = 0
+            wf.allow_comments = 0
+            wf.allow_print = 0
+            wf.anonymous = 1
+            wf.show_attachments = 0
+            wf.button_label = "🚀 SUBMIT APPLICATION"
+            wf.introduction_text = "<p class='lead'><strong>Join our expert community. Complete this form to begin your journey as a Dagu Instructor.</strong></p>"
+            wf.success_message = "Thank you for applying to become a Dagu Instructor! Our academic team will review your course proposal and contact you shortly InSha'Allah."
+            wf.success_url = "/dagu-instructor-registration"
+
+            dt_doc = frappe.get_doc("DocType", "Dagu Instructor Registration")
+            for df in dt_doc.fields:
+                if df.fieldname not in ["naming_series", "status"]:
+                    wf.append("web_form_fields", {
+                        "fieldname": df.fieldname,
+                        "label": df.label,
+                        "fieldtype": df.fieldtype,
+                        "options": df.options,
+                        "reqd": df.reqd,
+                        "default": df.default,
+                        "description": df.description,
+                        "hidden": 0,
+                        "read_only": 0
+                    })
+            wf.insert(ignore_permissions=True)
+            print("SUCCESS: Web Form dagu-instructor-registration")
+        except Exception as e:
+            print("FAILED Web Form:", e)
+
     # Ensure default values in Singles tables
     if frappe.db.exists("DocType", "DOBiz PWA Settings"):
         pwa = frappe.get_single("DOBiz PWA Settings")
@@ -433,8 +527,9 @@ def create_doctypes():
         ads.save()
 
     frappe.db.commit()
-    print("ALL DOCTYPES CREATED AND SEEDED SUCCESSFULLY!")
+    print("ALL DOCTYPES & WEB FORMS CREATED AND SEEDED SUCCESSFULLY!")
 
 if __name__ == "__main__":
     create_doctypes()
+
 
