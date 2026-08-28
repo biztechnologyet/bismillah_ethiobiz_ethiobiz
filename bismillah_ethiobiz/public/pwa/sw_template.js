@@ -147,7 +147,7 @@ function cacheFirst(request) {
 function networkWithFallback(request) {
     return fetch(request).catch(function () {
         return caches.match(request).then(function (cached) {
-            return cached || (isNavigation(request) ? offlinePage() : Response.error());
+            return cached || (isNavigation(request) ? offlinePage() : new Response("", { status: 404, statusText: "Not Found" }));
         });
     });
 }

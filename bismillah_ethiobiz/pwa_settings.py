@@ -77,7 +77,7 @@ def _doc():
     return frappe.get_doc("DOBiz PWA Settings")
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_config():
     """Return the active PWA config for pwa_register.js."""
     try:
