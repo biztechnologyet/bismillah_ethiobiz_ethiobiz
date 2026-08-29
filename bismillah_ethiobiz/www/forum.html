@@ -645,7 +645,18 @@
                     if (fUrl) {
                         setTopicImgPreview(fUrl);
                     } else {
-                        alert('Image upload failed. Please try again.');
+                        console.error('Forum upload error:', resp);
+                        let errMsg = 'Image upload failed. Please try again.';
+                        if (msg.exc || msg._server_messages) {
+                            try {
+                                const smsgs = JSON.parse(msg._server_messages);
+                                if (smsgs && smsgs[0]) {
+                                    const parsed = JSON.parse(smsgs[0]);
+                                    if (parsed.message) errMsg = parsed.message.replace(/<[^>]*>?/gm, '');
+                                }
+                            } catch(pe) {}
+                        }
+                        alert(errMsg);
                     }
                 } catch(e) {
                     alert('Error parsing upload response.');

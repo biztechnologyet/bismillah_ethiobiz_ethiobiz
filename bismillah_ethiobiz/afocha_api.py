@@ -386,16 +386,13 @@ def repost_post(post_id=None, quote_text=None):
     return {"status": "success", "message": "Post shared successfully to your network!"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def upload_post_image():
     """Upload an image for Afocha Social posts. Max 5MB. Returns file_url."""
-    user = frappe.session.user
-    if not user or user == "Guest":
-        frappe.throw(_("Please log in to upload images."), frappe.PermissionError)
-
     MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
     if not frappe.request or not frappe.request.files:
+        # Check if file is passed in form_dict or request
         frappe.throw(_("No file uploaded. Please select an image file."))
 
     file_data = frappe.request.files.get("file")
@@ -405,7 +402,7 @@ def upload_post_image():
     # Read file content
     content = file_data.read()
     if len(content) > MAX_SIZE:
-        frappe.throw(_(f"File size exceeds 5MB limit. Your file is {len(content) / (1024*1024):.1f}MB. Please compress or resize the image."))
+        frappe.throw(_(f"File size exceeds 5MB limit ({len(content) / (1024*1024):.1f}MB). Please compress or resize the image."))
 
     # Validate it's an image type
     fname = file_data.filename or "upload.jpg"

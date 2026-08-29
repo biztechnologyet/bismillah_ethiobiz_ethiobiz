@@ -51,15 +51,23 @@ html, body {
     background-repeat: no-repeat !important;
 }
 
-/* Website Atmosphere */
+/* Website Atmosphere — Clean Luminous Light Theme (No dark smoky wallpaper) */
 body.website-page,
 .website-wrapper,
-#page-container.website-view {
-    background: var(--ethiobiz-website-atmosphere) !important;
-    background-size: cover !important;
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
+#page-container.website-view,
+.main-section,
+#page-list,
+.page-container {
+    background: #f8fafc !important;
+    background-image: none !important;
+    color: #0f172a !important;
+}
+
+body.website-page #ethiobiz-atmosphere,
+body[data-path*="blog"] #ethiobiz-atmosphere,
+body[data-path="list"] #ethiobiz-atmosphere {
+    display: none !important;
+    background: transparent !important;
 }
 
 /* 2. CORE FRAPPE OVERRIDES - Glass Transparency */
@@ -1348,8 +1356,15 @@ div[data-path="blog"],
 .blog-list-content,
 .blog-content,
 .page-content-wrapper {
-    background: linear-gradient(145deg, #f8fafc 0%, #f0fdfa 40%, #f1f5f9 100%) !important;
+    background: #f8fafc !important;
+    background-image: none !important;
     color: #0f172a !important;
+}
+
+body[data-path*="blog"] #ambient-canvas-wrapper,
+body[data-path="list"] #ambient-canvas-wrapper,
+#page-list[data-path="blog"] #ambient-canvas-wrapper {
+    display: none !important;
 }
 
 /* Blog Headings & Breadcrumbs */
@@ -1366,12 +1381,16 @@ body[data-path="list"] .page-head h1,
 body[data-path*="blog"] .page-head h1,
 body[data-path="list"] .page-title,
 body[data-path*="blog"] .page-title,
+#page-list h1,
+#page-list .page-head h1,
 .blog-header h1,
 .blog-list-content h1,
 .blog-list-content h2 {
     color: #072a2e !important;
     font-weight: 800 !important;
     letter-spacing: -0.5px !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
 }
 
 /* Blog Cards */

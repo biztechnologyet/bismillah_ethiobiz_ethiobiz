@@ -245,13 +245,9 @@ def create_forum_topic(title=None, category="General Discussion", content=None, 
 
     return {"status": "success", "name": name}
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def upload_forum_image():
     """Upload an image for Afocha Forum topics. Max 5MB. Returns file_url."""
-    user = frappe.session.user
-    if not user or user == "Guest":
-        frappe.throw(_("Please log in to upload images."), frappe.PermissionError)
-
     MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
     if not frappe.request or not frappe.request.files:

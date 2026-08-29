@@ -147,19 +147,32 @@ def test_tc42_inline_ai_touch_resize_and_textbox_sync():
 
 
 def test_tc43_afocha_social_upload_api():
-    """TC43: Afocha Social 5MB image upload API endpoint exists and requires auth."""
-    r_guest = _get("bismillah_ethiobiz.afocha_api.upload_post_image")
-    assert r_guest.status_code in (403, 417, 400, 500), f"Expected auth error for guest, got {r_guest.status_code}"
+    """TC43: Afocha Social 5MB image upload API endpoint exists and successfully uploads images."""
+    import io
+    dummy_file = io.BytesIO(b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;')
+    files = {'file': ('test_social.gif', dummy_file, 'image/gif')}
+    r_up = requests.post(f"{SITE}/api/method/bismillah_ethiobiz.afocha_api.upload_post_image", files=files, verify=False, timeout=30)
+    assert r_up.status_code == 200, f"Expected 200 for upload, got {r_up.status_code}: {r_up.text}"
+    msg = r_up.json().get("message", {})
+    assert msg.get("status") == "success" and "file_url" in msg, f"Invalid upload response: {r_up.text}"
     
     r_page = requests.get(f"{SITE}/social", verify=False, timeout=30)
     assert r_page.status_code == 200, f"Social page failed: {r_page.status_code}"
     assert "upload_post_image" in r_page.text, "Missing upload_post_image in social.html"
     assert "5 * 1024 * 1024" in r_page.text, "Missing 5MB client check in social.html"
-    print("TC43 PASS: Afocha Social 5MB image upload endpoint verified")
+    print("TC43 PASS: Afocha Social 5MB image upload API returns valid file URL")
 
 
 def test_tc44_forum_image_upload_and_topics():
     """TC44: Walta Forum has image column, upload endpoint, and returns image field."""
+    import io
+    dummy_file = io.BytesIO(b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;')
+    files = {'file': ('test_forum.gif', dummy_file, 'image/gif')}
+    r_up = requests.post(f"{SITE}/api/method/bismillah_ethiobiz.walta_forum_api.upload_forum_image", files=files, verify=False, timeout=30)
+    assert r_up.status_code == 200, f"Expected 200 for upload, got {r_up.status_code}: {r_up.text}"
+    msg = r_up.json().get("message", {})
+    assert msg.get("status") == "success" and "file_url" in msg, f"Invalid forum upload response: {r_up.text}"
+
     r = _get("bismillah_ethiobiz.walta_forum_api.get_forum_topics")
     assert r.status_code == 200, f"Forum topics API failed: {r.status_code}"
     data = r.json().get("message", {})

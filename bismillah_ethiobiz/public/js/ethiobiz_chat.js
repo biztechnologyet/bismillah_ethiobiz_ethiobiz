@@ -140,51 +140,64 @@
         let resizeType = null;
         let startX, startY, startWidth, startHeight;
 
-        function onMouseDown(e, type) {
+        function onResizeStart(e, type) {
             e.preventDefault();
             e.stopPropagation();
             isResizing = true;
             resizeType = type;
-            startX = e.clientX;
-            startY = e.clientY;
+            const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+            startX = clientX;
+            startY = clientY;
             startWidth = parseInt(document.defaultView.getComputedStyle(chatWin).width, 10);
             startHeight = parseInt(document.defaultView.getComputedStyle(chatWin).height, 10);
             document.body.style.userSelect = 'none';
-            document.body.style.cursor = type === 'nw' ? 'nwse-resize' : (type === 'w' ? 'ew-resize' : 'ns-resize');
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
+
+            function onMove(ev) {
+                if (!isResizing) return;
+                ev.preventDefault();
+                const cx = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
+                const cy = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
+                const minW = 280, maxW = Math.min(800, window.innerWidth - 10);
+                const minH = 300, maxH = Math.min(900, window.innerHeight - 70);
+
+                if (resizeType === 'nw' || resizeType === 'w') {
+                    const newW = Math.min(maxW, Math.max(minW, startWidth - (cx - startX)));
+                    chatWin.style.width = newW + 'px';
+                }
+                if (resizeType === 'nw' || resizeType === 'n') {
+                    const newH = Math.min(maxH, Math.max(minH, startHeight - (cy - startY)));
+                    chatWin.style.height = newH + 'px';
+                }
+            }
+
+            function onUp() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.userSelect = '';
+                    try {
+                        localStorage.setItem('hadeeda_chat_width', chatWin.style.width);
+                        localStorage.setItem('hadeeda_chat_height', chatWin.style.height);
+                    } catch(ex) {}
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                    window.removeEventListener('touchmove', onMove);
+                    window.removeEventListener('touchend', onUp);
+                }
+            }
+
+            window.addEventListener('mousemove', onMove, { passive: false });
+            window.addEventListener('mouseup', onUp);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onUp);
         }
 
-        function onMouseMove(e) {
-            if (!isResizing) return;
-            const minW = 340, maxW = Math.min(800, window.innerWidth - 30);
-            const minH = 420, maxH = Math.min(900, window.innerHeight - 90);
-
-            if (resizeType === 'nw' || resizeType === 'w') {
-                const newW = Math.min(maxW, Math.max(minW, startWidth - (e.clientX - startX)));
-                chatWin.style.width = newW + 'px';
-            }
-            if (resizeType === 'nw' || resizeType === 'n') {
-                const newH = Math.min(maxH, Math.max(minH, startHeight - (e.clientY - startY)));
-                chatWin.style.height = newH + 'px';
-            }
-        }
-
-        function onMouseUp() {
-            if (isResizing) {
-                isResizing = false;
-                document.body.style.userSelect = '';
-                document.body.style.cursor = '';
-                localStorage.setItem('hadeeda_chat_width', chatWin.style.width);
-                localStorage.setItem('hadeeda_chat_height', chatWin.style.height);
-                window.removeEventListener('mousemove', onMouseMove);
-                window.removeEventListener('mouseup', onMouseUp);
-            }
-        }
-
-        handleNW.addEventListener('mousedown', (e) => onMouseDown(e, 'nw'));
-        handleW.addEventListener('mousedown', (e) => onMouseDown(e, 'w'));
-        handleN.addEventListener('mousedown', (e) => onMouseDown(e, 'n'));
+        handleNW.addEventListener('mousedown', (e) => onResizeStart(e, 'nw'));
+        handleNW.addEventListener('touchstart', (e) => onResizeStart(e, 'nw'), { passive: false });
+        handleW.addEventListener('mousedown', (e) => onResizeStart(e, 'w'));
+        handleW.addEventListener('touchstart', (e) => onResizeStart(e, 'w'), { passive: false });
+        handleN.addEventListener('mousedown', (e) => onResizeStart(e, 'n'));
+        handleN.addEventListener('touchstart', (e) => onResizeStart(e, 'n'), { passive: false });
     }
 
     async function initChat() {
@@ -783,16 +796,20 @@
                 .chat-messages-list::-webkit-scrollbar-thumb,
                 .chat-body::-webkit-scrollbar-thumb { background: #1FB6AE !important; border-radius: 3px !important; }
 
-                /* ─── P5: MOBILE FULL-SCREEN EXPANSION ─── */
+                /* ─── P5: MOBILE FULL-SCREEN EXPANSION & TOUCH RESIZING ─── */
                 @media (max-width: 600px) {
                     .chat-window-wrapper .chat-window,
                     .chat-window {
-                        width: calc(100vw - 16px) !important;
-                        height: calc(100vh - 75px) !important;
+                        max-width: calc(100vw - 12px);
+                        max-height: calc(100vh - 70px);
                         border-radius: 20px !important;
-                        right: 8px !important;
-                        bottom: 10px !important;
-                        max-height: calc(100vh - 75px) !important;
+                        right: 6px !important;
+                        bottom: 8px !important;
+                    }
+                    .hadeeda-resize-nw {
+                        width: 32px !important;
+                        height: 32px !important;
+                        background: rgba(31, 182, 174, 0.45) !important;
                     }
                     .chat-window-wrapper .chat-window-toggle { height: 50px !important; min-width: 50px !important; }
                     .chat-inputs,

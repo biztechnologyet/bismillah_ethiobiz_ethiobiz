@@ -681,7 +681,7 @@
                     <input type="file" id="upload-file-input" accept="image/*">
                     <div class="upload-icon">📷</div>
                     <div class="upload-label">Drag & Drop or Click to Upload Image</div>
-                    <div class="upload-hint">JPG, PNG, GIF, WEBP • Max 10 MB</div>
+                    <div class="upload-hint">JPG, PNG, GIF, WEBP • Max 5 MB</div>
                     <div class="af-upload-progress" id="upload-progress-bar">
                         <div class="af-upload-progress-fill" id="upload-progress-fill"></div>
                     </div>
@@ -888,8 +888,9 @@
             alert('Please select an image file (JPG, PNG, GIF, WEBP).');
             return;
         }
-        if (file.size > 10 * 1024 * 1024) {
-            alert('Image must be under 10 MB.');
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_SIZE) {
+            alert('File size exceeds 5MB limit (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please compress or resize the image.');
             return;
         }
 
@@ -899,15 +900,6 @@
 
         const formData = new FormData();
         formData.append('file', file);
-
-        // P5: Client-side 5MB limit check
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-        if (file.size > MAX_SIZE) {
-            alert('File size exceeds 5MB limit (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please compress or resize the image.');
-            uploadProgressBar.style.display = 'none';
-            if (uploadFileInput) uploadFileInput.value = '';
-            return;
-        }
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/method/bismillah_ethiobiz.afocha_api.upload_post_image', true);

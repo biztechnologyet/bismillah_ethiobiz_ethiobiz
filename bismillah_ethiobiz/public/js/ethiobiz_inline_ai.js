@@ -289,6 +289,7 @@
                 </div>
 
                 <div class="hadeeda-inline-status" style="display:none;"></div>
+                <div class="hadeeda-resize-handle" title="Tap & drag to resize">⤡</div>
             </div>
         `;
 
@@ -481,23 +482,43 @@
                     color: #0f766e !important;
                 }
 
-                /* ─── P4-F: RESIZE HANDLE ─── */
-                .hadeeda-inline-popup::after {
-                    content: '' !important; position: absolute !important;
-                    bottom: 0 !important; right: 0 !important;
-                    width: 16px !important; height: 16px !important;
+                /* ─── P5: ENHANCED MOBILE & DESKTOP RESIZE HANDLE ─── */
+                .hadeeda-resize-handle {
+                    position: absolute !important;
+                    bottom: 0 !important;
+                    right: 0 !important;
+                    width: 32px !important;
+                    height: 32px !important;
                     cursor: nwse-resize !important;
-                    background: linear-gradient(135deg, transparent 50%, rgba(31,182,174,0.35) 50%) !important;
-                    border-radius: 0 0 8px 0 !important;
+                    z-index: 100 !important;
+                    touch-action: none !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    color: rgba(31, 182, 174, 0.9) !important;
+                    font-size: 16px !important;
+                    user-select: none !important;
+                    -webkit-user-select: none !important;
+                    background: rgba(31, 182, 174, 0.15) !important;
+                    border-radius: 8px 0 10px 0 !important;
+                    border-top: 1px solid rgba(31, 182, 174, 0.35) !important;
+                    border-left: 1px solid rgba(31, 182, 174, 0.35) !important;
+                }
+                .hadeeda-resize-handle:hover, .hadeeda-resize-handle:active {
+                    background: rgba(31, 182, 174, 0.4) !important;
+                    color: #FFFFFF !important;
                 }
 
                 @media (max-width: 600px) {
                     .hadeeda-inline-popup {
-                        width: calc(100vw - 24px) !important;
-                        left: 12px !important;
-                        top: auto !important;
-                        bottom: 16px !important;
-                        max-height: 80vh !important;
+                        max-width: calc(100vw - 12px);
+                        max-height: 90vh;
+                        border-radius: 16px !important;
+                    }
+                    .hadeeda-resize-handle {
+                        width: 38px !important;
+                        height: 38px !important;
+                        font-size: 18px !important;
                     }
                 }
             `;
@@ -715,16 +736,9 @@
             // Initial sync
             setTimeout(syncInnerSizes, 100);
 
-            // Resize handle area detection (bottom-right 20x20 corner)
-            function isResizeCorner(e, el) {
-                var rect = el.getBoundingClientRect();
-                var cx = (e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX);
-                var cy = (e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY);
-                return (cx >= rect.right - 24 && cy >= rect.bottom - 24);
-            }
+            const resizeHandle = popup.querySelector('.hadeeda-resize-handle');
 
             function onResizeStart(e) {
-                if (!isResizeCorner(e, popup)) return;
                 e.preventDefault();
                 e.stopPropagation();
                 var sx = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
@@ -735,11 +749,11 @@
                     ev.preventDefault();
                     var cx = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
                     var cy = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
-                    var nw = Math.max(280, sw + cx - sx);
-                    var nh = Math.max(200, sh + cy - sy);
+                    var nw = Math.max(260, sw + (cx - sx));
+                    var nh = Math.max(180, sh + (cy - sy));
                     // Viewport boundary safety
-                    nw = Math.min(nw, window.innerWidth - popup.offsetLeft - 10);
-                    nh = Math.min(nh, window.innerHeight - popup.offsetTop - 10);
+                    nw = Math.min(nw, window.innerWidth - popup.offsetLeft - 8);
+                    nh = Math.min(nh, window.innerHeight - popup.offsetTop - 8);
                     popup.style.width = nw + 'px';
                     popup.style.height = nh + 'px';
                     syncInnerSizes();
@@ -758,8 +772,25 @@
                 document.addEventListener('touchend', onUp);
             }
 
-            popup.addEventListener('mousedown', onResizeStart);
-            popup.addEventListener('touchstart', onResizeStart, { passive: false });
+            if (resizeHandle) {
+                resizeHandle.addEventListener('mousedown', onResizeStart);
+                resizeHandle.addEventListener('touchstart', onResizeStart, { passive: false });
+            }
+
+            // Fallback corner detection on popup body
+            popup.addEventListener('mousedown', function(e) {
+                if (e.offsetX >= popup.offsetWidth - 28 && e.offsetY >= popup.offsetHeight - 28) {
+                    onResizeStart(e);
+                }
+            });
+            popup.addEventListener('touchstart', function(e) {
+                if (!e.touches || !e.touches[0]) return;
+                var rect = popup.getBoundingClientRect();
+                var cx = e.touches[0].clientX, cy = e.touches[0].clientY;
+                if (cx >= rect.right - 34 && cy >= rect.bottom - 34) {
+                    onResizeStart(e);
+                }
+            }, { passive: false });
 
             // Also sync on window resize
             window.addEventListener('resize', syncInnerSizes);
