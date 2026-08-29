@@ -78,30 +78,39 @@
         });
     }
 
-    /** Ensure Header Title is always beautifully visible */
+    /** Ensure Header Title and Close Button are always beautifully visible */
     function fixHeaderTitle(titleText) {
         const headers = document.querySelectorAll('.chat-header, .chat-layout header, [class*="_header_"]');
         headers.forEach(header => {
-            if (header.querySelector('.hadeeda-custom-title-wrapper')) return;
-            
-            // Look for existing title element or inject clean one
-            let titleEl = header.querySelector('.chat-header-title, [class*="_title_"], h1, h2');
-            if (titleEl) {
-                titleEl.style.display = 'flex';
-                titleEl.style.alignItems = 'center';
-                titleEl.style.gap = '8px';
-                titleEl.style.color = '#FFFFFF';
-                titleEl.style.fontWeight = '700';
-                titleEl.style.fontSize = '14.5px';
-                if (!titleEl.textContent.trim()) {
-                    titleEl.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span>${titleText || 'HADEEDA BizAi'}</span>`;
+            if (!header.querySelector('.hadeeda-custom-title-wrapper')) {
+                // Look for existing title element or inject clean one
+                let titleEl = header.querySelector('.chat-header-title, [class*="_title_"], h1, h2');
+                if (titleEl) {
+                    titleEl.style.display = 'flex';
+                    titleEl.style.alignItems = 'center';
+                    titleEl.style.gap = '8px';
+                    titleEl.style.color = '#FFFFFF';
+                    titleEl.style.fontWeight = '700';
+                    titleEl.style.fontSize = '14.5px';
+                    if (!titleEl.textContent.trim()) {
+                        titleEl.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span>${titleText || 'HADEEDA BizAi'}</span>`;
+                    }
+                } else {
+                    const customTitle = document.createElement('div');
+                    customTitle.className = 'hadeeda-custom-title-wrapper';
+                    customTitle.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span style="font-weight:700;font-size:14.5px;color:#FFFFFF;letter-spacing:0.2px;">${titleText || 'HADEEDA BizAi'}</span>`;
+                    customTitle.style.cssText = 'display:flex;align-items:center;gap:8px;color:#FFFFFF;flex:1;';
+                    header.insertBefore(customTitle, header.firstChild);
                 }
-            } else {
-                const customTitle = document.createElement('div');
-                customTitle.className = 'hadeeda-custom-title-wrapper';
-                customTitle.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span style="font-weight:700;font-size:14.5px;color:#FFFFFF;letter-spacing:0.2px;">${titleText || 'HADEEDA BizAi'}</span>`;
-                customTitle.style.cssText = 'display:flex;align-items:center;gap:8px;color:#FFFFFF;flex:1;';
-                header.insertBefore(customTitle, header.firstChild);
+            }
+
+            // Ensure prominent Close button is always present in header
+            if (!header.querySelector('.hadeeda-chat-close-btn')) {
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'chat-header-close hadeeda-chat-close-btn';
+                closeBtn.title = 'Close Chat (Collapse)';
+                closeBtn.innerHTML = '✕';
+                header.appendChild(closeBtn);
             }
         });
     }
@@ -343,8 +352,9 @@
                     width: 52px !important; min-width: 52px !important; height: 52px !important;
                     border-radius: 50% !important; padding: 0 !important;
                     background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%) !important;
-                    box-shadow: 0 4px 20px rgba(225,29,72,0.45), 0 0 0 2px rgba(13,17,23,0.6) !important;
+                    box-shadow: 0 4px 20px rgba(225,29,72,0.55), 0 0 0 2px rgba(13,17,23,0.8) !important;
                     animation: none !important;
+                    z-index: 1000001 !important;
                 }
                 .chat-window-wrapper.chat-open .chat-window-toggle::before,
                 .chat-window-wrapper.chat-window-open .chat-window-toggle::before,
@@ -364,7 +374,7 @@
                     display: none !important;
                 }
 
-                /* ─── TRANSLUCENT GLASS CHAT WINDOW WITH RESIZE CAPABILITY ─── */
+                /* ─── TRANSLUCENT GLASS CHAT WINDOW WITH VERTICAL & HORIZONTAL RESIZE CAPABILITY ─── */
                 .chat-window-wrapper .chat-window,
                 .chat-window {
                     display: none !important;
@@ -375,10 +385,10 @@
                     border-radius: 20px !important;
                     overflow: hidden !important;
                     box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 24px rgba(31,182,174,0.25) !important;
-                    min-width: 340px !important;
-                    max-width: min(800px, calc(100vw - 20px)) !important;
-                    min-height: 420px !important;
-                    max-height: min(900px, calc(100vh - 90px)) !important;
+                    min-width: 300px !important;
+                    max-width: min(850px, calc(100vw - 16px)) !important;
+                    min-height: 320px !important;
+                    max-height: min(900px, calc(100vh - 80px)) !important;
                     width: min(420px, calc(100vw - 24px));
                     height: min(580px, calc(100vh - 100px));
                     position: fixed !important;
@@ -397,30 +407,35 @@
                     animation: hadeeda-window-open 0.25s cubic-bezier(0.16, 1, 0.3, 1) both !important;
                 }
 
-                /* ─── RESIZE HANDLES ─── */
+                /* ─── RESIZE HANDLES (TOP & CORNER FOR VERTICAL/HORIZONTAL RESIZING) ─── */
                 .hadeeda-resize-handle {
                     position: absolute !important;
-                    z-index: 100 !important;
+                    z-index: 100000 !important;
+                    touch-action: none !important;
                 }
                 .hadeeda-resize-nw {
                     top: 0 !important; left: 0 !important;
-                    width: 22px !important; height: 22px !important;
+                    width: 32px !important; height: 32px !important;
                     cursor: nwse-resize !important;
                     display: flex !important; align-items: center !important; justify-content: center !important;
-                    background: rgba(31, 182, 174, 0.25) !important;
+                    background: rgba(31, 182, 174, 0.35) !important;
                     border-bottom-right-radius: 12px !important;
                     transition: background 0.2s ease !important;
                 }
-                .hadeeda-resize-nw:hover {
-                    background: rgba(31, 182, 174, 0.6) !important;
+                .hadeeda-resize-nw:hover, .hadeeda-resize-nw:active {
+                    background: rgba(31, 182, 174, 0.7) !important;
                 }
                 .hadeeda-resize-w {
-                    top: 22px !important; left: 0 !important; bottom: 0 !important;
-                    width: 6px !important; cursor: ew-resize !important;
+                    top: 32px !important; left: 0 !important; bottom: 0 !important;
+                    width: 10px !important; cursor: ew-resize !important;
                 }
                 .hadeeda-resize-n {
-                    top: 0 !important; left: 22px !important; right: 40px !important;
-                    height: 6px !important; cursor: ns-resize !important;
+                    top: 0 !important; left: 32px !important; right: 50px !important;
+                    height: 12px !important; cursor: ns-resize !important;
+                    background: rgba(31, 182, 174, 0.12) !important;
+                }
+                .hadeeda-resize-n:hover, .hadeeda-resize-n:active {
+                    background: rgba(31, 182, 174, 0.4) !important;
                 }
 
                 .chat-layout {
@@ -476,27 +491,33 @@
                     text-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
                 }
                 .chat-header-close,
+                .hadeeda-chat-close-btn,
                 .chat-header button,
                 [class*="_header_"] button {
                     color: #FFFFFF !important;
-                    opacity: 0.9 !important;
-                    background: rgba(255,255,255,0.15) !important;
-                    border: none !important;
+                    opacity: 0.95 !important;
+                    background: rgba(255,255,255,0.2) !important;
+                    border: 1px solid rgba(255,255,255,0.3) !important;
                     border-radius: 50% !important;
-                    width: 28px !important;
-                    height: 28px !important;
-                    min-width: 28px !important;
+                    width: 32px !important;
+                    height: 32px !important;
+                    min-width: 32px !important;
                     cursor: pointer !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
+                    font-size: 16px !important;
+                    font-weight: 800 !important;
+                    z-index: 1000002 !important;
                     transition: all 0.2s ease !important;
+                    margin-left: auto !important;
                 }
                 .chat-header-close:hover,
+                .hadeeda-chat-close-btn:hover,
                 .chat-header button:hover,
                 [class*="_header_"] button:hover {
                     opacity: 1 !important;
-                    background: rgba(255,255,255,0.3) !important;
+                    background: rgba(225, 29, 72, 0.85) !important;
                     transform: scale(1.1) !important;
                 }
 
@@ -1082,11 +1103,16 @@
                     setOpen(!isCurrentlyOpen);
                 });
 
-                document.addEventListener('click', function(e) {
-                    if (e.target.closest('.chat-header-close') || e.target.closest('[class*="header-close"]') || e.target.closest('.chat-close-button')) {
+                function handleCloseClick(e) {
+                    if (e.target.closest('.chat-header-close') || e.target.closest('.hadeeda-chat-close-btn') || e.target.closest('[class*="header-close"]') || e.target.closest('.chat-close-button')) {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setOpen(false);
                     }
-                });
+                }
+
+                document.addEventListener('click', handleCloseClick);
+                document.addEventListener('touchend', handleCloseClick);
 
                 setOpen(false);
                 return true;

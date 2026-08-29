@@ -371,10 +371,25 @@
                     background: none; border: none; color: #FFFFFF !important; font-size: 20px;
                     cursor: pointer; padding: 0 4px; line-height: 1; opacity: 0.8;
                 }
-                .hadeeda-inline-close:hover { opacity: 1; }
-                .hadeeda-inline-body { padding: 14px; background: #0D1117 !important; }
+                .hadeeda-inline-body {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    flex: 1 1 auto !important;
+                    height: calc(100% - 46px) !important;
+                    padding: 12px 14px !important;
+                    box-sizing: border-box !important;
+                    position: relative !important;
+                    overflow: hidden !important;
+                }
+                .hadeeda-view-prompt,
+                .hadeeda-view-result {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    flex: 1 1 auto !important;
+                    height: 100% !important;
+                }
                 .hadeeda-inline-quick-options {
-                    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+                    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; flex-shrink: 0;
                 }
                 .hadeeda-option-btn {
                     background: #161B22 !important; border: 1px solid rgba(255,255,255,0.15) !important;
@@ -384,16 +399,29 @@
                 .hadeeda-option-btn:hover {
                     background: #1FB6AE !important; color: #FFFFFF !important; border-color: #1FB6AE !important;
                 }
-                .hadeeda-inline-input-wrapper { margin-bottom: 10px; }
+                .hadeeda-inline-input-wrapper {
+                    flex: 1 1 auto !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    margin-bottom: 8px !important;
+                    min-height: 70px !important;
+                }
                 .hadeeda-inline-input {
-                    width: 100% !important; box-sizing: border-box !important; padding: 10px 12px !important;
-                    border: 1px solid rgba(31, 182, 174, 0.4) !important; border-radius: 8px !important;
+                    width: 100% !important;
+                    flex: 1 1 auto !important;
+                    box-sizing: border-box !important;
+                    padding: 10px 12px !important;
+                    border: 1px solid rgba(31, 182, 174, 0.4) !important;
+                    border-radius: 8px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-                    font-size: 13px !important; resize: vertical !important;
-                    outline: none !important; background: #161B22 !important; color: #FFFFFF !important;
+                    font-size: 13px !important;
+                    resize: none !important;
+                    outline: none !important;
+                    background: #161B22 !important;
+                    color: #FFFFFF !important;
                 }
                 .hadeeda-inline-input:focus { border-color: #1FB6AE !important; box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.2) !important; }
-                .hadeeda-prompt-actions { display: flex; justify-content: flex-end; }
+                .hadeeda-prompt-actions { display: flex; justify-content: flex-end; flex-shrink: 0; }
                 .hadeeda-inline-submit {
                     padding: 8px 18px !important; background: #1FB6AE !important; color: #FFFFFF !important;
                     border: none !important; border-radius: 8px !important; cursor: pointer;
@@ -704,30 +732,29 @@
             // Synchronize inner elements (textarea, result preview) with popup size
             function syncInnerSizes() {
                 var popH = popup.offsetHeight;
-                var popW = popup.offsetWidth;
-                // Header is ~42px, body padding ~28px, quick options ~50px, input wrapper ~46px, actions ~38px
-                var headerH = 42;
-                var bodyPadding = 28;
-                var quickOptsH = 50;
+                var headerH = 44;
+                var bodyPadding = 24;
+                var quickOptsH = 46;
                 var actionsH = 38;
 
-                // Auto-size the textarea
+                // Auto-size the textarea to take all remaining vertical height
                 var ta = popup.querySelector('.hadeeda-inline-input');
                 if (ta) {
-                    var availH = popH - headerH - bodyPadding - quickOptsH - actionsH - 30;
-                    var taH = Math.max(50, Math.min(availH, popH * 0.4));
+                    var availH = popH - headerH - bodyPadding - quickOptsH - actionsH - 12;
+                    var taH = Math.max(70, availH);
                     ta.style.height = taH + 'px';
-                    ta.style.minHeight = '50px';
+                    ta.style.minHeight = '70px';
                     ta.style.maxHeight = taH + 'px';
                     ta.style.width = '100%';
                     ta.style.boxSizing = 'border-box';
                 }
 
-                // Auto-size the result preview
+                // Auto-size the result preview to take all remaining vertical height
                 var rp = popup.querySelector('.hadeeda-result-preview');
                 if (rp) {
-                    var rpAvailH = popH - headerH - bodyPadding - actionsH - 60;
-                    var rpH = Math.max(80, Math.min(rpAvailH, popH * 0.55));
+                    var rpAvailH = popH - headerH - bodyPadding - actionsH - 25;
+                    var rpH = Math.max(90, rpAvailH);
+                    rp.style.height = rpH + 'px';
                     rp.style.maxHeight = rpH + 'px';
                     rp.style.overflowY = 'auto';
                 }

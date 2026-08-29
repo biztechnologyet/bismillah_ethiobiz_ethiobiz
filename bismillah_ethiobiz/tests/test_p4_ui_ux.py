@@ -208,6 +208,22 @@ def test_tc46_blog_light_theme_css():
     print("TC46 PASS: Blog page luminous light theme & typography verified")
 
 
+def test_tc47_navbar_menu_and_chat_close():
+    """TC47: Website navbar has bright high-contrast menu coloring and chat widget has close button."""
+    r_css = requests.get(f"{SITE}/assets/bismillah_ethiobiz/css/ethiobiz_theme.css", verify=False, timeout=30)
+    assert r_css.status_code == 200, "Theme CSS failed"
+    css = r_css.text
+    assert "PREMIUM WEBSITE NAVBAR & MENU BAR COLORING" in css, "Missing navbar styling marker"
+    assert "#5eead4" in css, "Missing teal hover color"
+    
+    r_chat = requests.get(f"{SITE}/assets/bismillah_ethiobiz/js/ethiobiz_chat.js", verify=False, timeout=30)
+    assert r_chat.status_code == 200, "Chat JS failed"
+    js = r_chat.text
+    assert "hadeeda-chat-close-btn" in js, "Missing chat close button"
+    assert "z-index: 1000001" in js, "Missing high z-index for chat toggle"
+    print("TC47 PASS: Navbar menu coloring & chat close button verified")
+
+
 def run_all():
     """Run all P4 & P5 tests."""
     frappe.connect()
@@ -226,6 +242,7 @@ def run_all():
         test_tc44_forum_image_upload_and_topics,
         test_tc45_homepage_infinite_feed_forum_images,
         test_tc46_blog_light_theme_css,
+        test_tc47_navbar_menu_and_chat_close,
     ]
     passed = 0
     failed = 0
@@ -243,4 +260,3 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
-
