@@ -2,7 +2,7 @@
 """
 Bismillah Ar-Rahman Ar-Rahim
 EthioBiz Runtime Self-Healing & Permanence Patches
-Ensures Helpdesk, LMS, Healthcare, and Telephony fallbacks persist across reboots, rebuilds, and migrations.
+Ensures Helpdesk, LMS, Healthcare, Multi-Company, and Telephony fallbacks persist across reboots, rebuilds, and migrations.
 """
 
 import os
@@ -27,7 +27,7 @@ def apply_runtime_patches():
         sys.modules["telephony"] = telephony_mod
         sys.modules["telephony.api"] = telephony_api_mod
 
-    # 2. Patch Helpdesk auth.get_user for guest safety
+    # 2. Patch Helpdesk auth.get_user for guest & logged-in user safety
     try:
         import helpdesk.api.auth as _hd_auth
         _orig_get_user = getattr(_hd_auth, "get_user", None)
@@ -58,7 +58,7 @@ def apply_runtime_patches():
     except Exception:
         pass
 
-    # 3. Patch Helpdesk get_boot for safe CSRF token
+    # 3. Patch Helpdesk get_boot for safe CSRF token & multi-company
     try:
         import helpdesk.www.helpdesk as _hd_www
         
@@ -102,6 +102,20 @@ def apply_runtime_patches():
             })
             
         _lms_www.get_boot = _patched_lms_boot
+    except Exception:
+        pass
+
+    # 5. Multi-Company Custom Fields Guarantee
+    try:
+        if frappe.db and hasattr(frappe.db, "exists") and frappe.db.exists("DocType", "HD Ticket"):
+            if not frappe.db.exists("Custom Field", "HD Ticket-company"):
+                from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+                create_custom_fields({
+                    "HD Ticket": [{"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company", "insert_after": "subject", "in_list_view": 1, "in_standard_filter": 1, "in_global_search": 1}],
+                    "HD Team": [{"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company", "insert_after": "team_name", "in_list_view": 1, "in_standard_filter": 1}],
+                    "HD Service Level Agreement": [{"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company", "insert_after": "service_level", "in_list_view": 1, "in_standard_filter": 1}]
+                }, update=True)
+                frappe.db.commit()
     except Exception:
         pass
 
