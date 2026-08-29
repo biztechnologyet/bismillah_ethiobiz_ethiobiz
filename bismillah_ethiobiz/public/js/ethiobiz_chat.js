@@ -352,9 +352,8 @@
                     width: 52px !important; min-width: 52px !important; height: 52px !important;
                     border-radius: 50% !important; padding: 0 !important;
                     background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%) !important;
-                    box-shadow: 0 4px 20px rgba(225,29,72,0.55), 0 0 0 2px rgba(13,17,23,0.8) !important;
+                    box-shadow: 0 4px 20px rgba(225,29,72,0.45), 0 0 0 2px rgba(13,17,23,0.6) !important;
                     animation: none !important;
-                    z-index: 1000001 !important;
                 }
                 .chat-window-wrapper.chat-open .chat-window-toggle::before,
                 .chat-window-wrapper.chat-window-open .chat-window-toggle::before,
@@ -388,13 +387,27 @@
                     min-width: 300px !important;
                     max-width: min(850px, calc(100vw - 16px)) !important;
                     min-height: 320px !important;
-                    max-height: min(900px, calc(100vh - 80px)) !important;
+                    max-height: calc(100vh - 100px) !important;
                     width: min(420px, calc(100vw - 24px));
-                    height: min(580px, calc(100vh - 100px));
+                    height: min(580px, calc(100vh - 110px));
                     position: fixed !important;
                     bottom: 84px !important;
                     right: 20px !important;
                     z-index: 99999 !important;
+                }
+
+                /* Mobile: ensure chat window stacks vertically upward and toggle stays below */
+                @media (max-width: 600px) {
+                    .chat-window-wrapper .chat-window,
+                    .chat-window {
+                        bottom: 80px !important;
+                        right: 8px !important;
+                        left: 8px !important;
+                        width: calc(100vw - 16px) !important;
+                        max-width: calc(100vw - 16px) !important;
+                        max-height: calc(100vh - 95px) !important;
+                        min-width: unset !important;
+                    }
                 }
 
                 .chat-window-wrapper.chat-open .chat-window,

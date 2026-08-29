@@ -336,8 +336,18 @@
                 ? explicitTheme === 'dark'
                 : window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            // Check if background images are enabled in theme
-            const bgImagesEnabled = getComputedStyle(document.documentElement).getPropertyValue('--ethiobiz-bg-images-enabled').trim() === '1';
+            const isWebsitePage = document.body.classList.contains('website-page') ||
+                                  document.getElementById('page-container') !== null && !window.location.hash.includes('#app');
+
+            // Read from cached theme settings (fetched by the API)
+            const cached = window.__ethiobizThemeSettings || null;
+
+            const masterBgEnabled = cached ? cached.enable_background_images : false;
+            const deskBgEnabled   = cached ? cached.enable_desk_bg_image      : false;
+            const webBgEnabled    = cached ? cached.enable_website_bg_image   : false;
+
+            // Determine if bg image should be applied for this context
+            const bgImagesEnabled = masterBgEnabled && (isWebsitePage ? webBgEnabled : deskBgEnabled);
 
             let styleEl = document.getElementById('ethiobiz-nuclear-bg');
             if (!styleEl) {
@@ -389,8 +399,40 @@
         }
     }
 
+    // ─── Fetch & cache Theme Settings from API ───────────────────────────────
+    function fetchAndCacheThemeSettings(callback) {
+        if (window.__ethiobizThemeSettings) {
+            if (callback) callback(window.__ethiobizThemeSettings);
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/method/bismillah_ethiobiz.api.get_theme_settings', true);
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                var s = (res && res.message) || {};
+                window.__ethiobizThemeSettings = s;
+                // Expose desk animation flag for particles.js too
+                window.__ethiobizDeskAnimEnabled = s.enable_desk_animation !== false;
+                if (callback) callback(s);
+            } catch(e) {
+                window.__ethiobizThemeSettings = {};
+                if (callback) callback({});
+            }
+        };
+        xhr.onerror = function() {
+            window.__ethiobizThemeSettings = {};
+            if (callback) callback({});
+        };
+        xhr.send();
+    }
+
     window.EthioBizBrandManager = new BrandManager();
-    window.EthioBizBrandManager.init();
+
+    // Fetch settings first, then init so updateBackground has correct flags
+    fetchAndCacheThemeSettings(function() {
+        window.EthioBizBrandManager.init();
+    });
 
 })();
 
