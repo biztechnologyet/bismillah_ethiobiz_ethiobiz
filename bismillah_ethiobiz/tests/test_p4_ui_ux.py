@@ -209,7 +209,7 @@ def test_tc46_blog_light_theme_css():
 
 
 def test_tc47_navbar_menu_and_chat_close():
-    """TC47: Website navbar has bright high-contrast menu coloring and chat widget has close button."""
+    """TC47: Website navbar has bright high-contrast menu coloring and chat widget has close button and vertical stack."""
     r_css = requests.get(f"{SITE}/assets/bismillah_ethiobiz/css/ethiobiz_theme.css", verify=False, timeout=30)
     assert r_css.status_code == 200, "Theme CSS failed"
     css = r_css.text
@@ -220,8 +220,8 @@ def test_tc47_navbar_menu_and_chat_close():
     assert r_chat.status_code == 200, "Chat JS failed"
     js = r_chat.text
     assert "hadeeda-chat-close-btn" in js, "Missing chat close button"
-    assert "z-index: 1000001" in js, "Missing high z-index for chat toggle"
-    print("TC47 PASS: Navbar menu coloring & chat close button verified")
+    assert "max-height: calc(100vh" in js, "Missing vertical stacking max-height rule"
+    print("TC47 PASS: Navbar menu coloring, chat close button & mobile vertical stacking verified")
 
 
 def run_all():
