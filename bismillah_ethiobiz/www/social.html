@@ -899,16 +899,23 @@
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('is_private', '0');
-        formData.append('folder', 'Home/Attachments');
+
+        // P5: Client-side 5MB limit check
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_SIZE) {
+            alert('File size exceeds 5MB limit (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please compress or resize the image.');
+            uploadProgressBar.style.display = 'none';
+            if (uploadFileInput) uploadFileInput.value = '';
+            return;
+        }
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/method/upload_file', true);
+        xhr.open('POST', '/api/method/bismillah_ethiobiz.afocha_api.upload_post_image', true);
 
         // Get CSRF token
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         const csrfCookie = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
-        const csrfToken = csrfMeta ? csrfMeta.content : csrfCookie;
+        const csrfToken = csrfMeta ? csrfMeta.content : (csrfCookie || (window.frappe && frappe.csrf_token));
         if (csrfToken) {
             xhr.setRequestHeader('X-Frappe-CSRF-Token', csrfToken);
         }
@@ -929,9 +936,13 @@
 
             try {
                 const resp = JSON.parse(xhr.responseText);
-                if (resp.message && resp.message.file_url) {
-                    setImagePreview(resp.message.file_url);
+                // P5: Handle nested response from custom endpoint
+                const msg = resp.message || resp;
+                const fileUrl = msg.file_url || (msg.message && msg.message.file_url);
+                if (fileUrl) {
+                    setImagePreview(fileUrl);
                 } else {
+                    console.error('Upload response:', resp);
                     alert('Upload completed but no file URL returned. Please try again.');
                 }
             } catch (err) {

@@ -26,6 +26,7 @@ def ensure_tables_exist():
             `is_verified` INT(1) DEFAULT 1,
             `content` LONGTEXT,
             `tags` VARCHAR(255),
+            `image` TEXT,
             `likes_count` INT(8) DEFAULT 0,
             `replies_count` INT(8) DEFAULT 0,
             `views_count` INT(8) DEFAULT 0,
@@ -37,6 +38,15 @@ def ensure_tables_exist():
             INDEX (`likes_count`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     """)
+
+    # Ensure image column exists if table was already created
+    try:
+        frappe.db.sql("""
+            ALTER TABLE `tabWalta Forum Topic` 
+            ADD COLUMN IF NOT EXISTS `image` TEXT;
+        """)
+    except Exception:
+        pass
 
     frappe.db.sql("""
         CREATE TABLE IF NOT EXISTS `tabWalta Forum Reply` (
@@ -125,7 +135,7 @@ def get_forum_topics(category=None, search=None, sort="latest", limit=30, start=
     query = f"""
         SELECT 
             name, title, category, author_name, author_handle, author_image,
-            company, is_verified, content, tags, likes_count, replies_count,
+            company, is_verified, content, tags, image, likes_count, replies_count,
             views_count, is_pinned, is_closed, creation, last_reply_on
         FROM `tabWalta Forum Topic`
         {where_clause}
@@ -195,7 +205,7 @@ def get_forum_topic_detail(topic_id):
     }
 
 @frappe.whitelist()
-def create_forum_topic(title=None, category="General Discussion", content=None, tags=None):
+def create_forum_topic(title=None, category="General Discussion", content=None, tags=None, image=None):
     ensure_tables_exist()
     user = frappe.session.user
     if not user or user == "Guest":
@@ -205,6 +215,7 @@ def create_forum_topic(title=None, category="General Discussion", content=None, 
     content = (content or frappe.form_dict.get("content") or "").strip()
     category = category or frappe.form_dict.get("category") or "General Discussion"
     tags = tags or frappe.form_dict.get("tags") or ""
+    image = (image or frappe.form_dict.get("image") or "").strip()
 
     if not title or not content:
         frappe.throw(_("Topic title and discussion content are required."))
@@ -217,22 +228,63 @@ def create_forum_topic(title=None, category="General Discussion", content=None, 
         INSERT INTO `tabWalta Forum Topic` (
             name, creation, modified, modified_by, owner,
             title, category, author_name, author_handle, author_image,
-            company, is_verified, content, tags, likes_count, replies_count,
+            company, is_verified, content, tags, image, likes_count, replies_count,
             views_count, is_pinned, is_closed, last_reply_on
         ) VALUES (
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, 0, 0,
+            %s, %s, %s, %s, %s, 0, 0,
             1, 0, 0, %s
         )
     """, (
         name, now, now, user, user,
         title, category, user_info["full_name"], user_info["handle"], user_info["user_image"],
-        user_info["company"], 1 if user_info["is_verified"] else 0, content, tags, now
+        user_info["company"], 1 if user_info["is_verified"] else 0, content, tags, image, now
     ))
     frappe.db.commit()
 
     return {"status": "success", "name": name}
+
+@frappe.whitelist()
+def upload_forum_image():
+    """Upload an image for Afocha Forum topics. Max 5MB. Returns file_url."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Please log in to upload images."), frappe.PermissionError)
+
+    MAX_SIZE = 5 * 1024 * 1024  # 5MB
+
+    if not frappe.request or not frappe.request.files:
+        frappe.throw(_("No file uploaded. Please select an image file."))
+
+    file_data = frappe.request.files.get("file")
+    if not file_data:
+        frappe.throw(_("No file found in the upload request."))
+
+    content = file_data.read()
+    if len(content) > MAX_SIZE:
+        frappe.throw(_(f"File size exceeds 5MB limit ({len(content)/(1024*1024):.1f}MB). Please compress the image."))
+
+    fname = file_data.filename or "forum_upload.jpg"
+    allowed_exts = ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg')
+    if not any(fname.lower().endswith(ext) for ext in allowed_exts):
+        frappe.throw(_(f"Invalid file type. Allowed: {', '.join(allowed_exts)}"))
+
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "file_name": fname,
+        "content": content,
+        "is_private": 0,
+        "folder": "Home/Attachments"
+    })
+    file_doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "file_url": file_doc.file_url,
+        "file_name": file_doc.file_name
+    }
 
 @frappe.whitelist()
 def add_forum_reply(topic_id=None, reply_text=None):

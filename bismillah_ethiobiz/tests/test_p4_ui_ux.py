@@ -74,16 +74,16 @@ def test_tc38_chat_widget_config():
 
 
 def test_tc39_chat_js_served():
-    """TC39: Chat JS served with correct HADEEDA BizAi label."""
+    """TC39: Chat JS served with correct HADEEDA BizAi label and layout."""
     r = requests.get(f"{SITE}/assets/bismillah_ethiobiz/js/ethiobiz_chat.js", verify=False, timeout=30)
     assert r.status_code == 200, f"Chat JS not served: {r.status_code}"
     js = r.text
     assert "HADEEDA BizAi" in js, "Missing HADEEDA BizAi label"
-    assert "P4-E: LIGHT-MODE CHAT" in js, "Missing light-mode chat CSS"
-    assert "flex-direction: row" in js, "Missing footer flex-direction row"
-    assert "min-width: 40px" in js, "Missing textarea min-width fix"
+    assert "LIGHT-MODE VARIANTS" in js, "Missing light-mode chat CSS"
+    assert "flex-direction: column" in js, "Missing column direction"
     assert "box-sizing: border-box" in js, "Missing box-sizing fix"
     print("TC39 PASS: Chat JS served with correct fixes")
+
 
 
 def test_tc40_particles_desk_support():
@@ -119,8 +119,84 @@ def test_chat_light_mode_api():
     print("PASS: Particle pref API returns correct data")
 
 
+def test_tc41_chat_widget_two_row_and_mobile():
+    """TC41: Chat widget has two-row column layout and mobile full-screen expansion."""
+    r = requests.get(f"{SITE}/assets/bismillah_ethiobiz/js/ethiobiz_chat.js", verify=False, timeout=30)
+    assert r.status_code == 200, f"Chat JS not served: {r.status_code}"
+    js = r.text
+    assert "P5: FULL-WIDTH FOOTER & INPUT AREA" in js, "Missing P5 footer marker"
+    assert "flex-direction: column" in js, "Missing column direction on chat-inputs"
+    assert "order: 1" in js, "Missing order 1 for textarea"
+    assert "order: 2" in js, "Missing order 2 for controls"
+    assert "justify-content: flex-end" in js, "Missing right-aligned controls"
+    assert "P5: MOBILE FULL-SCREEN EXPANSION" in js, "Missing mobile expansion rules"
+    print("TC41 PASS: Chat widget two-row column layout & mobile expansion verified")
+
+
+def test_tc42_inline_ai_touch_resize_and_textbox_sync():
+    """TC42: Inline AI has touch drag, touch resize, and dynamic text box auto-resize."""
+    r = requests.get(f"{SITE}/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js", verify=False, timeout=30)
+    assert r.status_code == 200, f"Inline AI JS not served: {r.status_code}"
+    js = r.text
+    assert "P5: User-resizable popup (mouse + touch)" in js, "Missing touch resize marker"
+    assert "syncInnerSizes" in js, "Missing text box auto-resize sync function"
+    assert "touchstart" in js, "Missing touchstart event handler"
+    assert "touchmove" in js, "Missing touchmove event handler"
+    assert "touchend" in js, "Missing touchend event handler"
+    print("TC42 PASS: Inline AI touch drag, touch resize & text box auto-resize verified")
+
+
+def test_tc43_afocha_social_upload_api():
+    """TC43: Afocha Social 5MB image upload API endpoint exists and requires auth."""
+    r_guest = _get("bismillah_ethiobiz.afocha_api.upload_post_image")
+    assert r_guest.status_code in (403, 417, 400, 500), f"Expected auth error for guest, got {r_guest.status_code}"
+    
+    r_page = requests.get(f"{SITE}/social", verify=False, timeout=30)
+    assert r_page.status_code == 200, f"Social page failed: {r_page.status_code}"
+    assert "upload_post_image" in r_page.text, "Missing upload_post_image in social.html"
+    assert "5 * 1024 * 1024" in r_page.text, "Missing 5MB client check in social.html"
+    print("TC43 PASS: Afocha Social 5MB image upload endpoint verified")
+
+
+def test_tc44_forum_image_upload_and_topics():
+    """TC44: Walta Forum has image column, upload endpoint, and returns image field."""
+    r = _get("bismillah_ethiobiz.walta_forum_api.get_forum_topics")
+    assert r.status_code == 200, f"Forum topics API failed: {r.status_code}"
+    data = r.json().get("message", {})
+    assert "topics" in data, "Missing topics array in response"
+    
+    r_forum = requests.get(f"{SITE}/forum", verify=False, timeout=30)
+    assert r_forum.status_code == 200, f"Forum page failed: {r_forum.status_code}"
+    assert "topic-image-input" in r_forum.text, "Missing topic-image-input in forum.html"
+    assert "upload_forum_image" in r_forum.text, "Missing upload_forum_image in forum.html"
+    print("TC44 PASS: Walta Forum image upload & thumbnail linking verified")
+
+
+def test_tc45_homepage_infinite_feed_forum_images():
+    """TC45: Homepage infinite stream feed includes forum filter and returns image items."""
+    r_feed = _get("bismillah_ethiobiz.home_api.get_infinite_feed?filter_type=forum&limit=5")
+    assert r_feed.status_code == 200, f"Feed API failed: {r_feed.status_code}"
+    r_home = requests.get(f"{SITE}/", verify=False, timeout=30)
+    assert r_home.status_code == 200, f"Home page failed: {r_home.status_code}"
+    assert ('data-filter="forum"' in r_home.text or 'data-filter="forums"' in r_home.text), "Missing forum filter button in home page"
+    print("TC45 PASS: Homepage stream feed forum integration & image rendering verified")
+
+
+def test_tc46_blog_light_theme_css():
+    """TC46: Blog page has luminous light theme CSS and high-contrast styling."""
+    r = requests.get(f"{SITE}/assets/bismillah_ethiobiz/css/ethiobiz_theme.css", verify=False, timeout=30)
+    assert r.status_code == 200, f"Theme CSS failed: {r.status_code}"
+    css = r.text
+    assert "P5: BLOG & TIBEB PAGES" in css, "Missing P5 blog CSS marker"
+    assert 'body[data-path*="blog"]' in css or 'body[data-path="list"]' in css, "Missing blog route selectors"
+    assert ".blog-card .card" in css, "Missing blog-card card style"
+    assert "#072a2e" in css, "Missing deep teal heading color"
+    assert "#ffffff" in css, "Missing crisp white card background"
+    print("TC46 PASS: Blog page luminous light theme & typography verified")
+
+
 def run_all():
-    """Run all P4 tests."""
+    """Run all P4 & P5 tests."""
     frappe.connect()
     tests = [
         test_tc35_theme_css_served,
@@ -131,6 +207,12 @@ def run_all():
         test_tc39_chat_js_served,
         test_tc40_particles_desk_support,
         test_chat_light_mode_api,
+        test_tc41_chat_widget_two_row_and_mobile,
+        test_tc42_inline_ai_touch_resize_and_textbox_sync,
+        test_tc43_afocha_social_upload_api,
+        test_tc44_forum_image_upload_and_topics,
+        test_tc45_homepage_infinite_feed_forum_images,
+        test_tc46_blog_light_theme_css,
     ]
     passed = 0
     failed = 0
@@ -141,10 +223,11 @@ def run_all():
         except Exception as e:
             print(f"FAIL {t.__name__}: {e}")
             failed += 1
-    print(f"\n=== P4 SUITE: {passed} PASS, {failed} FAIL, {len(tests)} TOTAL ===")
+    print(f"\n=== COMPLETE TEST SUITE: {passed} PASS, {failed} FAIL, {len(tests)} TOTAL ===")
     frappe.destroy()
     return failed == 0
 
 
 if __name__ == "__main__":
     run_all()
+

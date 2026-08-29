@@ -669,7 +669,7 @@
 
         close.addEventListener('click', closePopup);
 
-        // P4-F: User-resizable popup (persist size to localStorage)
+        // P5: User-resizable popup (mouse + touch) with text box auto-resize
         (function() {
             var szKey = 'ebInlineAiSize';
             try {
@@ -679,23 +679,90 @@
                     popup.style.height = sz.h + 'px';
                 }
             } catch(e) {}
-            popup.addEventListener('mousedown', function(e) {
-                if (e.target !== popup || e.offsetX < popup.offsetWidth - 20 || e.offsetY < popup.offsetHeight - 20) return;
+
+            // Synchronize inner elements (textarea, result preview) with popup size
+            function syncInnerSizes() {
+                var popH = popup.offsetHeight;
+                var popW = popup.offsetWidth;
+                // Header is ~42px, body padding ~28px, quick options ~50px, input wrapper ~46px, actions ~38px
+                var headerH = 42;
+                var bodyPadding = 28;
+                var quickOptsH = 50;
+                var actionsH = 38;
+
+                // Auto-size the textarea
+                var ta = popup.querySelector('.hadeeda-inline-input');
+                if (ta) {
+                    var availH = popH - headerH - bodyPadding - quickOptsH - actionsH - 30;
+                    var taH = Math.max(50, Math.min(availH, popH * 0.4));
+                    ta.style.height = taH + 'px';
+                    ta.style.minHeight = '50px';
+                    ta.style.maxHeight = taH + 'px';
+                    ta.style.width = '100%';
+                    ta.style.boxSizing = 'border-box';
+                }
+
+                // Auto-size the result preview
+                var rp = popup.querySelector('.hadeeda-result-preview');
+                if (rp) {
+                    var rpAvailH = popH - headerH - bodyPadding - actionsH - 60;
+                    var rpH = Math.max(80, Math.min(rpAvailH, popH * 0.55));
+                    rp.style.maxHeight = rpH + 'px';
+                    rp.style.overflowY = 'auto';
+                }
+            }
+
+            // Initial sync
+            setTimeout(syncInnerSizes, 100);
+
+            // Resize handle area detection (bottom-right 20x20 corner)
+            function isResizeCorner(e, el) {
+                var rect = el.getBoundingClientRect();
+                var cx = (e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX);
+                var cy = (e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY);
+                return (cx >= rect.right - 24 && cy >= rect.bottom - 24);
+            }
+
+            function onResizeStart(e) {
+                if (!isResizeCorner(e, popup)) return;
                 e.preventDefault();
-                var sx = e.clientX, sy = e.clientY;
+                e.stopPropagation();
+                var sx = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                var sy = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
                 var sw = popup.offsetWidth, sh = popup.offsetHeight;
+
                 function onMove(ev) {
-                    popup.style.width = Math.max(280, sw + ev.clientX - sx) + 'px';
-                    popup.style.height = Math.max(200, sh + ev.clientY - sy) + 'px';
+                    ev.preventDefault();
+                    var cx = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
+                    var cy = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
+                    var nw = Math.max(280, sw + cx - sx);
+                    var nh = Math.max(200, sh + cy - sy);
+                    // Viewport boundary safety
+                    nw = Math.min(nw, window.innerWidth - popup.offsetLeft - 10);
+                    nh = Math.min(nh, window.innerHeight - popup.offsetTop - 10);
+                    popup.style.width = nw + 'px';
+                    popup.style.height = nh + 'px';
+                    syncInnerSizes();
                 }
                 function onUp() {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onUp);
                     try { localStorage.setItem(szKey, JSON.stringify({w: popup.offsetWidth, h: popup.offsetHeight})); } catch(ex) {}
+                    syncInnerSizes();
                 }
-                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mousemove', onMove, { passive: false });
                 document.addEventListener('mouseup', onUp);
-            });
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
+            }
+
+            popup.addEventListener('mousedown', onResizeStart);
+            popup.addEventListener('touchstart', onResizeStart, { passive: false });
+
+            // Also sync on window resize
+            window.addEventListener('resize', syncInnerSizes);
         })();
 
         setTimeout(function () { input.focus(); }, 80);

@@ -279,6 +279,7 @@
     <div class="stream-filter-bar" id="stream-filters">
         <button class="stream-filter-btn active" data-filter="all">🔥 All Updates</button>
         <button class="stream-filter-btn" data-filter="products">🛍️ Products & Goods</button>
+        <button class="stream-filter-btn" data-filter="forum">💬 Walta Forum</button>
         <button class="stream-filter-btn" data-filter="social">🌟 Afocha Stories</button>
         <button class="stream-filter-btn" data-filter="bookings">⚡ Service Bookings</button>
         <button class="stream-filter-btn" data-filter="blogs">📝 Tibeb Articles</button>
@@ -345,15 +346,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'stream-card';
+
+                    let mediaHtml = '';
+                    if (item.image && !item.image.includes('default-avatar')) {
+                        mediaHtml = `<div style="margin: 0 0 12px 0; border-radius: 12px; overflow: hidden; height: 160px; background: #f8fafc;"><img src="${item.image}" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.title}" onerror="this.parentElement.style.display='none'"></div>`;
+                    }
+
                     card.innerHTML = `
                         <div>
+                            ${mediaHtml}
                             <span class="stream-card-badge ${item.badge_class}">${item.badge}</span>
                             <h5 class="stream-card-title">${item.title}</h5>
                             <div class="stream-card-sub">${item.subtitle}</div>
                             <p class="stream-card-content">${item.content}</p>
                         </div>
                         <div class="stream-card-footer">
-                            <span class="text-muted small font-weight-bold">${item.price ? item.price : item.stats}</span>
+                            <span class="text-muted small font-weight-bold">${item.price ? item.price : (item.stats || '')}</span>
                             <a href="${item.action_url}" class="stream-card-link">${item.action_label}</a>
                         </div>
                     `;

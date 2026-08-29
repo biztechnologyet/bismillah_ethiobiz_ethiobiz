@@ -385,3 +385,47 @@ def repost_post(post_id=None, quote_text=None):
 
     return {"status": "success", "message": "Post shared successfully to your network!"}
 
+
+@frappe.whitelist()
+def upload_post_image():
+    """Upload an image for Afocha Social posts. Max 5MB. Returns file_url."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Please log in to upload images."), frappe.PermissionError)
+
+    MAX_SIZE = 5 * 1024 * 1024  # 5MB
+
+    if not frappe.request or not frappe.request.files:
+        frappe.throw(_("No file uploaded. Please select an image file."))
+
+    file_data = frappe.request.files.get("file")
+    if not file_data:
+        frappe.throw(_("No file found in the upload request."))
+
+    # Read file content
+    content = file_data.read()
+    if len(content) > MAX_SIZE:
+        frappe.throw(_(f"File size exceeds 5MB limit. Your file is {len(content) / (1024*1024):.1f}MB. Please compress or resize the image."))
+
+    # Validate it's an image type
+    fname = file_data.filename or "upload.jpg"
+    allowed_exts = ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg')
+    if not any(fname.lower().endswith(ext) for ext in allowed_exts):
+        frappe.throw(_(f"Invalid file type. Allowed: {', '.join(allowed_exts)}"))
+
+    # Save using Frappe's File doctype
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "file_name": fname,
+        "content": content,
+        "is_private": 0,
+        "folder": "Home/Attachments"
+    })
+    file_doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "file_url": file_doc.file_url,
+        "file_name": file_doc.file_name
+    }

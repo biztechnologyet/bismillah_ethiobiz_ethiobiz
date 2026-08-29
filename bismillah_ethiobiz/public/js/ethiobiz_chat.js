@@ -580,7 +580,7 @@
                 /* ─── TYPING ─── */
                 .chat-message-typing-circle { background: #1FB6AE !important; }
 
-                /* ─── FULL-WIDTH FOOTER & INPUT AREA ─── */
+                /* ─── P5: FULL-WIDTH FOOTER & INPUT AREA — TWO-ROW COLUMN LAYOUT ─── */
                 .chat-layout .chat-footer,
                 .chat-footer,
                 [class*="_footer_"] {
@@ -596,32 +596,32 @@
                     box-sizing: border-box !important;
                     display: flex !important;
                     flex-direction: row !important;
-                    align-items: center !important;
+                    align-items: stretch !important;
                     justify-content: stretch !important;
                     flex: 0 0 auto !important;
                     position: relative !important;
                     z-index: 25 !important;
                 }
 
-                /* Full-width container pill */
+                /* P5: Two-row column layout — textarea on top, controls below right-aligned */
                 .chat-inputs,
                 .chat-input-wrapper,
                 [class*="_inputContainer_"],
                 [class*="chat-inputs"] {
                     background: rgba(255, 255, 255, 0.08) !important;
                     border: 1px solid rgba(255, 255, 255, 0.18) !important;
-                    border-radius: 24px !important;
-                    padding: 4px 6px 4px 12px !important;
+                    border-radius: 16px !important;
+                    padding: 8px 10px 6px 10px !important;
                     margin: 0 !important;
                     width: 100% !important;
                     max-width: 100% !important;
                     flex: 1 1 100% !important;
                     box-sizing: border-box !important;
                     display: flex !important;
-                    flex-direction: row !important;
-                    align-items: center !important;
+                    flex-direction: column !important;
+                    align-items: stretch !important;
                     flex-wrap: nowrap !important;
-                    gap: 6px !important;
+                    gap: 4px !important;
                     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
                 }
 
@@ -633,7 +633,7 @@
                     box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.35) !important;
                 }
 
-                /* Textarea input field - Takes all flex space */
+                /* P5: Textarea input field — full width on top row */
                 .chat-input,
                 textarea.chat-input,
                 input.chat-input,
@@ -659,6 +659,7 @@
                     min-height: 22px !important;
                     margin: 0 !important;
                     box-sizing: border-box !important;
+                    order: 1 !important;
                 }
 
                 .chat-input::placeholder,
@@ -667,31 +668,33 @@
                     font-style: italic !important;
                 }
 
-                /* Controls container for attach & send */
+                /* P5: Controls container — below textarea, right-aligned */
                 .chat-inputs-controls,
                 [class*="_buttons_"],
                 [class*="chat-inputs-controls"] {
-                    display: inline-flex !important;
+                    display: flex !important;
                     flex-direction: row !important;
                     align-items: center !important;
+                    justify-content: flex-end !important;
                     gap: 6px !important;
                     flex-shrink: 0 !important;
                     flex-wrap: nowrap !important;
                     margin: 0 !important;
-                    padding: 0 !important;
-                    width: auto !important;
+                    padding: 2px 0 0 0 !important;
+                    width: 100% !important;
+                    order: 2 !important;
                 }
 
                 /* File Upload Button */
                 .chat-footer button:not(.chat-input-send-button):not([class*="send"]),
                 .chat-file-upload-button,
                 button[class*="file-upload"] {
-                    flex: 0 0 32px !important;
+                    flex: 0 0 30px !important;
                     flex-shrink: 0 !important;
-                    width: 32px !important;
-                    height: 32px !important;
-                    min-width: 32px !important;
-                    min-height: 32px !important;
+                    width: 30px !important;
+                    height: 30px !important;
+                    min-width: 30px !important;
+                    min-height: 30px !important;
                     background: rgba(255,255,255,0.1) !important;
                     color: rgba(255,255,255,0.8) !important;
                     border: 1px solid rgba(255,255,255,0.15) !important;
@@ -718,12 +721,12 @@
                 button.chat-input-send-button,
                 button[class*="send-button"],
                 button[class*="_button_"][class*="_primary_"] {
-                    flex: 0 0 34px !important;
+                    flex: 0 0 32px !important;
                     flex-shrink: 0 !important;
-                    width: 34px !important;
-                    height: 34px !important;
-                    min-width: 34px !important;
-                    min-height: 34px !important;
+                    width: 32px !important;
+                    height: 32px !important;
+                    min-width: 32px !important;
+                    min-height: 32px !important;
                     background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important;
                     border: none !important;
@@ -780,17 +783,24 @@
                 .chat-messages-list::-webkit-scrollbar-thumb,
                 .chat-body::-webkit-scrollbar-thumb { background: #1FB6AE !important; border-radius: 3px !important; }
 
-                /* ─── MOBILE ─── */
-                @media (max-width: 480px) {
+                /* ─── P5: MOBILE FULL-SCREEN EXPANSION ─── */
+                @media (max-width: 600px) {
                     .chat-window-wrapper .chat-window,
                     .chat-window {
-                        width: calc(100vw - 1rem) !important;
-                        height: calc(100vh - 5rem) !important;
-                        border-radius: 16px 16px 0 0 !important;
-                        right: 0.5rem !important;
-                        bottom: 4.5rem !important;
+                        width: calc(100vw - 16px) !important;
+                        height: calc(100vh - 75px) !important;
+                        border-radius: 20px !important;
+                        right: 8px !important;
+                        bottom: 10px !important;
+                        max-height: calc(100vh - 75px) !important;
                     }
                     .chat-window-wrapper .chat-window-toggle { height: 50px !important; min-width: 50px !important; }
+                    .chat-inputs,
+                    .chat-input-wrapper,
+                    [class*="chat-inputs"] {
+                        border-radius: 14px !important;
+                        padding: 6px 8px 4px 8px !important;
+                    }
                 }
 
                 /* ─── LIGHT-MODE VARIANTS ─── */
@@ -896,10 +906,10 @@
                 const inputs = chatWin.querySelector('.chat-inputs, .chat-input-wrapper, form, [class*="_inputContainer_"], [class*="chat-inputs"]');
                 if (inputs) {
                     inputs.style.setProperty('display', 'flex', 'important');
-                    inputs.style.setProperty('flex-direction', 'row', 'important');
-                    inputs.style.setProperty('align-items', 'center', 'important');
+                    inputs.style.setProperty('flex-direction', 'column', 'important');
+                    inputs.style.setProperty('align-items', 'stretch', 'important');
                     inputs.style.setProperty('width', '100%', 'important');
-                    inputs.style.setProperty('gap', '6px', 'important');
+                    inputs.style.setProperty('gap', '4px', 'important');
                     inputs.style.setProperty('min-height', '40px', 'important');
                     inputs.style.setProperty('visibility', 'visible', 'important');
                     inputs.style.setProperty('opacity', '1', 'important');
@@ -924,10 +934,11 @@
                     controls.style.setProperty('display', 'flex', 'important');
                     controls.style.setProperty('flex-direction', 'row', 'important');
                     controls.style.setProperty('align-items', 'center', 'important');
+                    controls.style.setProperty('justify-content', 'flex-end', 'important');
                     controls.style.setProperty('gap', '6px', 'important');
                     controls.style.setProperty('flex', '0 0 auto', 'important');
                     controls.style.setProperty('flex-shrink', '0', 'important');
-                    controls.style.setProperty('margin-left', 'auto', 'important');
+                    controls.style.setProperty('width', '100%', 'important');
                     controls.style.setProperty('visibility', 'visible', 'important');
                     controls.style.setProperty('opacity', '1', 'important');
                 }

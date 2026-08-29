@@ -271,14 +271,25 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
     # 7. WALTA FORUM DISCUSSIONS
     if filter_type in ("all", "forums", "forum", "discussions", "walta"):
         try:
-            forum_topics = frappe.db.sql("""
-                SELECT name, title, category, author_name, company, content, replies_count, likes_count, creation
+            forum_cond = []
+            forum_vals = []
+            if search:
+                forum_cond.append("(title LIKE %s OR content LIKE %s)")
+                forum_vals.extend([f"%{search}%", f"%{search}%"])
+            
+            where_sql = f"WHERE {' AND '.join(forum_cond)}" if forum_cond else ""
+            forum_vals.extend([limit, start])
+
+            forum_topics = frappe.db.sql(f"""
+                SELECT name, title, category, author_name, company, content, image, replies_count, likes_count, creation
                 FROM `tabWalta Forum Topic`
+                {where_sql}
                 ORDER BY creation desc
                 LIMIT %s OFFSET %s
-            """, (limit, start), as_dict=True)
+            """, tuple(forum_vals), as_dict=True)
             for ft in forum_topics:
                 clean_c = frappe.utils.strip_html(ft.content or "")
+                img = ft.image if (ft.image and ft.image.strip()) else None
                 items.append({
                     "type": "forum",
                     "badge": f"💬 {ft.category or 'Walta Forum'}",
@@ -287,7 +298,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🛡️ {ft.author_name} • {ft.company or 'EthioBiz'}",
                     "content": (clean_c[:150] + "...") if len(clean_c) > 150 else clean_c,
                     "price": f"💬 {ft.replies_count or 0} replies • ❤️ {ft.likes_count or 0} likes",
-                    "image": "/files/walta_logo.png",
+                    "image": img,
                     "icon": "💬",
                     "action_label": "Join Discussion →",
                     "action_url": f"/forum?topic={ft.name}",

@@ -441,6 +441,24 @@
             </div>
 
             <div class="mb-3">
+                <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Discussion Thumbnail Image (Optional, max 5MB)</label>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="topic-image-input" class="form-control" placeholder="Paste image URL (https://...) or upload below" style="border-radius: 12px; height: 40px; font-size: 13px;">
+                    <label class="wf-btn-outline" style="cursor: pointer; margin: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;">
+                        📷 Upload
+                        <input type="file" id="topic-image-file" accept="image/*" style="display: none;">
+                    </label>
+                </div>
+                <div id="topic-image-upload-progress" style="display: none; height: 4px; background: #e2e8f0; border-radius: 2px; margin-bottom: 8px; overflow: hidden;">
+                    <div id="topic-image-upload-fill" style="width: 0%; height: 100%; background: #008080; transition: width 0.2s;"></div>
+                </div>
+                <div id="topic-image-preview-box" style="display: none; position: relative; max-width: 220px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+                    <img id="topic-image-preview" src="" style="width: 100%; height: 120px; object-fit: cover;">
+                    <button type="button" id="btn-remove-topic-image" style="position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.65); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 11px;">✕</button>
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Tags (comma separated)</label>
                 <input type="text" id="topic-tags-input" class="form-control" placeholder="e.g. erpnext, cloud, agriculture, fintech" style="border-radius: 12px; height: 44px; font-size: 14px;">
             </div>
@@ -545,6 +563,104 @@
         });
     }
 
+    // Topic Image Upload & Preview Handling
+    const topicImgInput = document.getElementById('topic-image-input');
+    const topicImgFile = document.getElementById('topic-image-file');
+    const topicImgPreviewBox = document.getElementById('topic-image-preview-box');
+    const topicImgPreview = document.getElementById('topic-image-preview');
+    const btnRemoveImg = document.getElementById('btn-remove-topic-image');
+    const topicImgProgress = document.getElementById('topic-image-upload-progress');
+    const topicImgFill = document.getElementById('topic-image-upload-fill');
+
+    function setTopicImgPreview(url) {
+        if (topicImgInput) topicImgInput.value = url;
+        if (url) {
+            if (topicImgPreview) topicImgPreview.src = url;
+            if (topicImgPreviewBox) topicImgPreviewBox.style.display = 'block';
+        } else {
+            if (topicImgPreview) topicImgPreview.src = '';
+            if (topicImgPreviewBox) topicImgPreviewBox.style.display = 'none';
+        }
+    }
+
+    if (topicImgInput) {
+        topicImgInput.addEventListener('input', function() {
+            setTopicImgPreview(this.value.trim());
+        });
+    }
+
+    if (btnRemoveImg) {
+        btnRemoveImg.addEventListener('click', function() {
+            setTopicImgPreview('');
+            if (topicImgFile) topicImgFile.value = '';
+        });
+    }
+
+    if (topicImgFile) {
+        topicImgFile.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            // 5MB limit check
+            const MAX_SIZE = 5 * 1024 * 1024;
+            if (file.size > MAX_SIZE) {
+                alert('File size exceeds 5MB limit (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please compress the image.');
+                this.value = '';
+                return;
+            }
+
+            if (topicImgProgress) topicImgProgress.style.display = 'block';
+            if (topicImgFill) topicImgFill.style.width = '30%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/method/bismillah_ethiobiz.walta_forum_api.upload_forum_image', true);
+
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfCookie = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
+            const csrfToken = csrfMeta ? csrfMeta.content : (csrfCookie || (window.frappe && frappe.csrf_token));
+            if (csrfToken) {
+                xhr.setRequestHeader('X-Frappe-CSRF-Token', csrfToken);
+            }
+
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable && topicImgFill) {
+                    topicImgFill.style.width = Math.round((e.loaded / e.total) * 100) + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                if (topicImgFill) topicImgFill.style.width = '100%';
+                setTimeout(() => {
+                    if (topicImgProgress) topicImgProgress.style.display = 'none';
+                    if (topicImgFill) topicImgFill.style.width = '0%';
+                }, 500);
+
+                try {
+                    const resp = JSON.parse(xhr.responseText);
+                    const msg = resp.message || resp;
+                    const fUrl = msg.file_url || (msg.message && msg.message.file_url);
+                    if (fUrl) {
+                        setTopicImgPreview(fUrl);
+                    } else {
+                        alert('Image upload failed. Please try again.');
+                    }
+                } catch(e) {
+                    alert('Error parsing upload response.');
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                if (topicImgProgress) topicImgProgress.style.display = 'none';
+                alert('Image upload network error.');
+            });
+
+            xhr.send(formData);
+        });
+    }
+
     // Submit Topic
     const btnSubmit = document.getElementById('btn-submit-topic');
     if (btnSubmit) {
@@ -553,6 +669,7 @@
             const cat = document.getElementById('topic-category-select').value;
             const content = document.getElementById('topic-content-input').value.trim();
             const tags = document.getElementById('topic-tags-input').value.trim();
+            const image = (topicImgInput ? topicImgInput.value.trim() : '');
 
             if (!title || !content) {
                 alert('Please enter both title and discussion content.');
@@ -569,7 +686,8 @@
                     title: title,
                     category: cat,
                     content: content,
-                    tags: tags
+                    tags: tags,
+                    image: image
                 })
             })
             .then(r => r.json())
@@ -580,6 +698,7 @@
                 document.getElementById('topic-title-input').value = '';
                 document.getElementById('topic-content-input').value = '';
                 document.getElementById('topic-tags-input').value = '';
+                setTopicImgPreview('');
                 loadTopics();
             })
             .catch(err => {
@@ -637,6 +756,12 @@
                 res.message.topics.forEach(t => {
                     const card = document.createElement('div');
                     card.className = 'forum-topic-card';
+
+                    let mediaHtml = '';
+                    if (t.image) {
+                        mediaHtml = `<div style="margin: 12px 0; border-radius: 16px; overflow: hidden; max-height: 280px;"><img src="${t.image}" style="width: 100%; max-height: 260px; object-fit: cover;" alt="Thumbnail"></div>`;
+                    }
+
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -651,6 +776,7 @@
 
                         <div class="topic-title-link" onclick="window.location.href='/forum?topic=${t.name}'">${t.title}</div>
                         <div class="topic-snippet">${t.snippet}</div>
+                        ${mediaHtml}
 
                         <div class="topic-meta-row">
                             <div style="display: flex; gap: 12px; align-items: center;">
@@ -685,6 +811,11 @@
 
                 const t = res.message.topic;
                 const replies = res.message.replies || [];
+
+                let mediaHtml = '';
+                if (t.image) {
+                    mediaHtml = `<div style="margin: 18px 0; border-radius: 18px; overflow: hidden; max-height: 480px;"><img src="${t.image}" style="width: 100%; max-height: 440px; object-fit: cover;" alt="Cover"></div>`;
+                }
 
                 let repliesHtml = '';
                 replies.forEach(r => {
@@ -723,6 +854,7 @@
                         </div>
 
                         <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 14px;">${t.title}</h2>
+                        ${mediaHtml}
                         <div style="font-size: 15px; color: #334155; line-height: 1.7; white-space: pre-wrap; margin-bottom: 20px;">
                             ${t.content}
                         </div>
