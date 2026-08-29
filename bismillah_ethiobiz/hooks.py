@@ -21,6 +21,11 @@ from bismillah_ethiobiz.event_notification import send_event_digest as _patched_
 _event_module.send_event_digest = _patched_send_event_digest
 
 # ============================================
+# RUNTIME SELF-HEALING PATCHES
+# ============================================
+import bismillah_ethiobiz.runtime_patch  # noqa: F401
+
+# ============================================
 
 app_name = "bismillah_ethiobiz"
 app_title = "EthioBiz Theme"
