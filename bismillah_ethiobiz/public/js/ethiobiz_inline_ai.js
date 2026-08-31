@@ -387,6 +387,8 @@
                     flex-direction: column !important;
                     flex: 1 1 auto !important;
                     height: 100% !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
                 }
                 .hadeeda-inline-quick-options {
                     display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; flex-shrink: 0;
@@ -405,6 +407,8 @@
                     flex-direction: column !important;
                     margin-bottom: 8px !important;
                     min-height: 70px !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
                 }
                 .hadeeda-inline-input {
                     width: 100% !important;
@@ -430,31 +434,43 @@
                 }
                 .hadeeda-inline-submit:hover { background: #19a095 !important; }
 
-                /* Loading View */
+                /* Loading View — Full Body Centered */
                 .hadeeda-view-loading {
-                    display: flex; flex-direction: column; align-items: center; justify-content: center;
-                    padding: 24px 12px; gap: 12px; text-align: center;
+                    display: none;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    flex: 1 1 auto !important;
+                    height: 100% !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    padding: 24px 12px !important;
+                    gap: 14px !important;
+                    text-align: center !important;
                 }
                 .hadeeda-loading-spinner {
-                    width: 28px; height: 28px; border: 3px solid rgba(31, 182, 174, 0.2);
+                    width: 32px; height: 32px; border: 3px solid rgba(31, 182, 174, 0.2);
                     border-top-color: #1FB6AE; border-radius: 50%;
                     animation: hadeeda-spin 0.8s linear infinite;
                 }
-                .hadeeda-loading-text { color: #1FB6AE; font-weight: 600; font-size: 13px; }
+                .hadeeda-loading-text { color: #1FB6AE; font-weight: 600; font-size: 13.5px; }
 
-                /* Result Preview View */
+                /* Result Preview View — Full Body */
                 .hadeeda-result-label {
-                    font-size: 12px; font-weight: 600; color: #8B949E; margin-bottom: 6px;
+                    font-size: 12px; font-weight: 600; color: #8B949E; margin-bottom: 6px; flex-shrink: 0;
                 }
                 .hadeeda-result-preview {
                     background: #161B22 !important; color: #FFFFFF !important;
                     border: 1px solid rgba(255,255,255,0.15) !important;
                     border-radius: 8px !important; padding: 10px 12px !important;
-                    max-height: 220px !important; overflow-y: auto !important;
+                    flex: 1 1 auto !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow-y: auto !important;
                     white-space: pre-wrap !important; word-break: break-word !important;
                     font-size: 13px !important; line-height: 1.5 !important; margin-bottom: 12px !important;
                 }
-                .hadeeda-result-actions { display: flex; gap: 8px; justify-content: flex-end; }
+                .hadeeda-result-actions { display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
                 .hadeeda-btn-insert {
                     padding: 8px 18px !important; background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important; border: none !important; border-radius: 8px !important;
@@ -471,6 +487,7 @@
                     margin-top: 10px; padding: 8px 12px; font-size: 12px;
                     border-radius: 6px; background: rgba(31, 182, 174, 0.1);
                     border: 1px solid rgba(31, 182, 174, 0.2); color: #1FB6AE;
+                    flex-shrink: 0;
                 }
 
                 /* ─── P4-F: LIGHT-MODE INLINE AI ─── */
@@ -568,6 +585,17 @@
         const btnCopy = popup.querySelector('.hadeeda-btn-copy');
         const btnRetry = popup.querySelector('.hadeeda-btn-retry');
 
+        function switchView(viewName) {
+            viewPrompt.style.setProperty('display', (viewName === 'prompt') ? 'flex' : 'none', 'important');
+            viewLoading.style.setProperty('display', (viewName === 'loading') ? 'flex' : 'none', 'important');
+            viewResult.style.setProperty('display', (viewName === 'result') ? 'flex' : 'none', 'important');
+            if (status) status.style.display = 'none';
+            if (typeof syncInnerSizes === 'function') syncInnerSizes();
+            if (viewName === 'prompt') {
+                setTimeout(() => input.focus(), 60);
+            }
+        }
+
         optionBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 input.value = this.getAttribute('data-prompt');
@@ -579,10 +607,7 @@
             const promptText = input.value.trim();
             if (!promptText) return;
 
-            viewPrompt.style.display = 'none';
-            viewResult.style.display = 'none';
-            viewLoading.style.display = 'flex';
-            status.style.display = 'none';
+            switchView('loading');
 
             const context = targetState ? getFormContext(targetState.el) : '';
 
@@ -599,20 +624,18 @@
                 const reply = (data.message && data.message.reply) || '';
                 generatedResponse = reply;
 
-                viewLoading.style.display = 'none';
                 if (reply) {
                     resultPreview.textContent = reply;
-                    viewResult.style.display = 'block';
+                    switchView('result');
                 } else {
-                    viewPrompt.style.display = 'block';
+                    switchView('prompt');
                     status.style.display = 'block';
                     status.textContent = '⚠️ No response generated. Please try again.';
                 }
             })
             .catch(err => {
                 console.warn('HADEEDA inline AI error:', err);
-                viewLoading.style.display = 'none';
-                viewPrompt.style.display = 'block';
+                switchView('prompt');
                 status.style.display = 'block';
                 status.textContent = '⚠️ Error connecting to HADEEDA AI. Please try again.';
             });
@@ -711,9 +734,7 @@
         });
 
         btnRetry.addEventListener('click', function () {
-            viewResult.style.display = 'none';
-            viewPrompt.style.display = 'block';
-            setTimeout(() => input.focus(), 80);
+            switchView('prompt');
         });
 
         close.addEventListener('click', closePopup);

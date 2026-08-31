@@ -1,0 +1,319 @@
+﻿{
+    "name":  "EthioBiz Theme",
+    "module":  "EthioBiz Theme",
+    "custom":  1,
+    "docstatus":  0,
+    "doctype":  "DocType",
+    "issingle":  1,
+    "fields":  [
+                   {
+                       "fieldname":  "section_branding",
+                       "fieldtype":  "Section Break",
+                       "label":  "Branding \u0026 General"
+                   },
+                   {
+                       "fieldname":  "pillars",
+                       "fieldtype":  "Table",
+                       "label":  "Brand Pillars",
+                       "options":  "EthioBiz Pillar Settings",
+                       "description":  "Define specific branding for sub-brands (e.g. Tibeb, Dagu, Walta, Magala, Afocha) linked to Workspaces."
+                   },
+                   {
+                       "fieldname":  "hide_sidebar",
+                       "fieldtype":  "Check",
+                       "label":  "Collapse Sidebar by Default",
+                       "default":  1,
+                       "description":  "If user preference is allowed, this sets the default state."
+                   },
+                   {
+                       "fieldname":  "column_break_1",
+                       "fieldtype":  "Column Break"
+                   },
+                   {
+                       "fieldname":  "app_name",
+                       "fieldtype":  "Data",
+                       "label":  "Platform Name",
+                       "default":  "EthioBiz"
+                   },
+                   {
+                       "fieldname":  "app_logo",
+                       "fieldtype":  "Attach Image",
+                       "label":  "App Logo"
+                   },
+                   {
+                       "fieldname":  "favicon",
+                       "fieldtype":  "Attach Image",
+                       "label":  "Favicon"
+                   },
+                   {
+                       "fieldname":  "primary_color",
+                       "fieldtype":  "Color",
+                       "label":  "Primary Color",
+                       "default":  "#1FB6AE"
+                   },
+                   {
+                       "fieldname":  "copyright_text",
+                       "fieldtype":  "Data",
+                       "label":  "Copyright Text",
+                       "default":  "© 2026 EthioBiz. All rights reserved."
+                   },
+                   {
+                       "fieldname":  "footer_powered_by",
+                       "fieldtype":  "Data",
+                       "label":  "Footer Powered By",
+                       "default":  "Powered by Biz Technology Solutions"
+                   },
+                   {
+                       "fieldname":  "section_backgrounds",
+                       "fieldtype":  "Section Break",
+                       "label":  "Atmospheric Background \u0026 Engine"
+                   },
+                   {
+                       "fieldname":  "enable_background_images",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Background Images (Master Switch)",
+                       "default":  0,
+                       "description":  "[FAST] OFF = instant pure CSS gradient, zero image downloads, fastest boot. [SLOW] ON = large wallpaper PNGs load on every page, adds ~500ms+ first paint."
+                   },
+                   {
+                       "fieldname":  "enable_desk_bg_image",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Desk Background Image",
+                       "default":  0,
+                       "depends_on":  "eval:doc.enable_background_images==1",
+                       "description":  "[SLOW] Downloads desk wallpaper. Only visible when master switch is ON."
+                   },
+                   {
+                       "fieldname":  "custom_desk_bg_image",
+                       "fieldtype":  "Attach Image",
+                       "label":  "Custom Desk Background Image",
+                       "description":  "Leave empty for default EthioBiz Desk Wallpaper. [SLOW] Large images slow first paint.",
+                       "depends_on":  "eval:doc.enable_background_images==1 \u0026\u0026 doc.enable_desk_bg_image==1"
+                   },
+                   {
+                       "fieldname":  "column_break_bg",
+                       "fieldtype":  "Column Break"
+                   },
+                   {
+                       "fieldname":  "enable_website_bg_image",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Website Background Image",
+                       "default":  0,
+                       "depends_on":  "eval:doc.enable_background_images==1",
+                       "description":  "[SLOW] Downloads website wallpaper. Only visible when master switch is ON."
+                   },
+                   {
+                       "fieldname":  "custom_website_bg_image",
+                       "fieldtype":  "Attach Image",
+                       "label":  "Custom Website Background Image",
+                       "description":  "Leave empty for default EthioBiz Website Wallpaper. [SLOW] Large images slow first paint.",
+                       "depends_on":  "eval:doc.enable_background_images==1 \u0026\u0026 doc.enable_website_bg_image==1"
+                   },
+                   {
+                       "fieldname":  "section_gradients",
+                       "fieldtype":  "Section Break",
+                       "label":  "Gradient Atmosphere Presets (Ultra-Fast \u0026 Creative)"
+                   },
+                   {
+                       "fieldname":  "dark_gradient_style",
+                       "fieldtype":  "Select",
+                       "label":  "Dark Mode Gradient Preset",
+                       "options":  "Obsidian Teal \u0026 Emerald Aura (Default)\nMidnight Sapphire \u0026 Cyan Glow\nAbyssal Nebula \u0026 Sacred Gold\nDeep Obsidian Minimalist",
+                       "default":  "Obsidian Teal \u0026 Emerald Aura (Default)",
+                       "description":  "[FAST] Pure CSS gradients, zero image downloads, instant render."
+                   },
+                   {
+                       "fieldname":  "bright_gradient_style",
+                       "fieldtype":  "Select",
+                       "label":  "Bright / Light Mode Gradient Preset",
+                       "options":  "Sacred Ivory \u0026 Pearl Mist (Default)\nFrosted Cyan \u0026 Nordic Sky\nAlabaster \u0026 Golden Horizon\nCrisp Pure Minimalist",
+                       "default":  "Sacred Ivory \u0026 Pearl Mist (Default)",
+                       "description":  "[FAST] Pure CSS gradients, zero image downloads, instant render."
+                   },
+                   {
+                       "fieldname":  "column_break_grad",
+                       "fieldtype":  "Column Break"
+                   },
+                   {
+                       "fieldname":  "website_gradient_style",
+                       "fieldtype":  "Select",
+                       "label":  "Website Atmosphere Preset",
+                       "options":  "Deep Cosmos \u0026 Emerald Glass (Default)\nRoyal Sapphire \u0026 Cyber Teal\nOnyx Obsidian \u0026 Emerald Pulse\nGolden Dusk \u0026 Deep Slate",
+                       "default":  "Deep Cosmos \u0026 Emerald Glass (Default)",
+                       "description":  "[FAST] Pure CSS gradients, zero image downloads, instant render."
+                   },
+                   {
+                       "fieldname":  "glass_blur_intensity",
+                       "fieldtype":  "Select",
+                       "label":  "Glassmorphism Blur Strength",
+                       "options":  "Subtle (10px)\nBalanced (16px)\nIntense Frost (24px)\nUltra Frosted (32px)",
+                       "default":  "Subtle (10px)",
+                       "description":  "[FASTEST] Subtle 10px = minimal GPU cost. [SLOW] Ultra Frosted 32px = heavy GPU blur on every glass panel, significant repaint cost on scroll."
+                   },
+                   {
+                       "fieldname":  "section_login",
+                       "fieldtype":  "Section Break",
+                       "label":  "Login Page"
+                   },
+                   {
+                       "fieldname":  "login_page_title",
+                       "fieldtype":  "Data",
+                       "label":  "Login Page Title"
+                   },
+                   {
+                       "fieldname":  "login_bg_image",
+                       "fieldtype":  "Attach Image",
+                       "label":  "Login Background Image"
+                   },
+                   {
+                       "fieldname":  "login_bg_color",
+                       "fieldtype":  "Color",
+                       "label":  "Login Background Color",
+                       "default":  "#0E1A1A"
+                   },
+                   {
+                       "fieldname":  "login_box_position",
+                       "fieldtype":  "Select",
+                       "label":  "Login Box Position",
+                       "options":  "Default\nLeft\nRight",
+                       "default":  "Default"
+                   },
+                   {
+                       "fieldname":  "login_box_bg",
+                       "fieldtype":  "Color",
+                       "label":  "Login Box Background Color",
+                       "default":  "#16222F"
+                   },
+                   {
+                       "fieldname":  "login_btn_bg",
+                       "fieldtype":  "Color",
+                       "label":  "Login Button Background Color",
+                       "default":  "#1FB6AE"
+                   },
+                   {
+                       "fieldname":  "login_btn_color",
+                       "fieldtype":  "Color",
+                       "label":  "Login Button Text Color",
+                       "default":  "#FFFFFF"
+                   },
+                   {
+                       "fieldname":  "section_navbar",
+                       "fieldtype":  "Section Break",
+                       "label":  "Navbar \u0026 Navigation"
+                   },
+                   {
+                       "fieldname":  "navbar_bg_color",
+                       "fieldtype":  "Color",
+                       "label":  "Navbar Background Color",
+                       "default":  "rgba(14, 26, 26, 0.75)"
+                   },
+                   {
+                       "fieldname":  "navbar_text_color",
+                       "fieldtype":  "Color",
+                       "label":  "Navbar Text Color",
+                       "default":  "#F8F6F2"
+                   },
+                   {
+                       "fieldname":  "hide_help_button",
+                       "fieldtype":  "Check",
+                       "label":  "Hide Help Button",
+                       "default":  1
+                   },
+                   {
+                       "fieldname":  "hide_app_switcher",
+                       "fieldtype":  "Check",
+                       "label":  "Hide App Switcher"
+                   },
+                   {
+                       "fieldname":  "section_buttons",
+                       "fieldtype":  "Section Break",
+                       "label":  "Buttons \u0026 Primary Actions"
+                   },
+                   {
+                       "fieldname":  "btn_primary_bg",
+                       "fieldtype":  "Color",
+                       "label":  "Primary Button BG Color",
+                       "default":  "#1FB6AE"
+                   },
+                   {
+                       "fieldname":  "btn_primary_color",
+                       "fieldtype":  "Color",
+                       "label":  "Primary Button Text Color",
+                       "default":  "#FFFFFF"
+                   },
+                   {
+                       "fieldname":  "section_workspace",
+                       "fieldtype":  "Section Break",
+                       "label":  "Workspace \u0026 Sidebar"
+                   },
+                   {
+                       "fieldname":  "background_color",
+                       "fieldtype":  "Color",
+                       "label":  "Body Background Color",
+                       "default":  "#0E1A1A"
+                   },
+                   {
+                       "fieldname":  "sidebar_bg_color",
+                       "fieldtype":  "Color",
+                       "label":  "Sidebar Background Color"
+                   },
+                   {
+                       "fieldname":  "sidebar_text_color",
+                       "fieldtype":  "Color",
+                       "label":  "Sidebar Text Color"
+                   },
+                   {
+                       "fieldname":  "section_advanced",
+                       "fieldtype":  "Section Break",
+                       "label":  "Advanced \u0026 Custom"
+                   },
+                   {
+                       "fieldname":  "enable_website_animation",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Website Animated Background",
+                       "default":  0,
+                       "description":  "[SLOW] Adds canvas aurora animation on website pages — GPU + paint cost. [FAST] OFF = pure CSS gradients, zero canvas overhead, fastest pages."
+                   },
+                   {
+                       "fieldname":  "enable_light_label_fix",
+                       "fieldtype":  "Check",
+                       "label":  "Enable \u0027Light\u0027 Label Fix",
+                       "default":  1
+                   },
+                   {
+                       "fieldname":  "custom_css",
+                       "fieldtype":  "Code",
+                       "label":  "Custom CSS Overrides",
+                       "options":  "CSS"
+                   }
+               ],
+    "index_loggable":  0,
+    "links":  [
+
+              ],
+    "modified":  "2026-08-21 18:40:00.000000",
+    "modified_by":  "Administrator",
+    "owner":  "Administrator",
+    "permissions":  [
+                        {
+                            "role":  "System Manager",
+                            "read":  1,
+                            "write":  1,
+                            "create":  1,
+                            "delete":  1
+                        },
+                        {
+                            "role":  "Biz Service Administrator",
+                            "read":  1,
+                            "write":  1,
+                            "create":  1,
+                            "delete":  0
+                        }
+                    ],
+    "sort_field":  "modified",
+    "sort_order":  "DESC",
+    "states":  [
+
+               ],
+    "track_changes":  1
+}
