@@ -1,0 +1,155 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Health — Find Verified Doctors, Clinics & Book Teleconsultations{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+
+<div class="vertical-portal-wrapper">
+    <!-- HERO SECTION -->
+    <header class="vertical-hero health-hero">
+        <div class="hero-content">
+            <span class="hero-badge" style="background:var(--vert-health-light); color:var(--vert-health);">🩺 Practo-Grade Healthcare Hub</span>
+            <h1 class="hero-title">Your Health, Verified & Accessible</h1>
+            <p class="hero-subtitle">Book in-clinic appointments, schedule video teleconsultations, or request doctor home visits across Ethiopia.</p>
+            
+            <!-- SEARCH BAR -->
+            <div class="vertical-search-card">
+                <div class="search-input-group">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="health-search-input" placeholder="Search doctor name, specialty (e.g. Cardiology, Dental)..." autocomplete="off" />
+                </div>
+                <button id="btn-search-doctors" class="btn-vertical-primary" style="background:var(--vert-health);">Find Doctors</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SPECIALTY CHIPS CAROUSEL -->
+    <section class="specialty-chips-section">
+        <div class="container-fluid px-lg-4">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 class="section-title" style="margin-bottom:0;">Top Medical Specialties</h3>
+                <span style="font-size:0.78rem; color:#64748b; font-weight:600;">Scroll for more →</span>
+            </div>
+            <div class="specialty-chips-scroll">
+                <button class="spec-chip active" data-dept="all">🌟 All Doctors</button>
+                <button class="spec-chip" data-dept="Cardiology">❤️ Cardiology</button>
+                <button class="spec-chip" data-dept="Dermatology">🧴 Dermatology</button>
+                <button class="spec-chip" data-dept="Pediatrics">👶 Pediatrics</button>
+                <button class="spec-chip" data-dept="Orthopedics">🦴 Orthopedics</button>
+                <button class="spec-chip" data-dept="Dental">🦷 Dental Care</button>
+                <button class="spec-chip" data-dept="General Medicine">🩺 General Medicine</button>
+                <button class="spec-chip" data-dept="Gynecology">🌸 Gynecology</button>
+                <button class="spec-chip" data-dept="Ophthalmology">👁️ Ophthalmology</button>
+                <button class="spec-chip" data-dept="Neurology">🧠 Neurology</button>
+                <button class="spec-chip" data-dept="ENT">👂 ENT</button>
+                <button class="spec-chip" data-dept="Urology">🔬 Urology</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST BANNER -->
+    <div style="background:#f0fdf4; border-bottom:1px solid #d1fae5; padding:10px 24px;">
+        <div style="display:flex; justify-content:center; gap:28px; flex-wrap:wrap;">
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">✅ Verified Physicians</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">📋 Digital Prescriptions</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">🔒 Secure Health Records</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">💊 Pharmacy Delivery</span>
+        </div>
+    </div>
+
+    <!-- DOCTOR DIRECTORY -->
+    <main class="container-fluid px-lg-4 py-4">
+        <div class="results-header-bar">
+            <span id="health-results-count">Loading verified medical specialists...</span>
+            <div class="consultation-type-pills">
+                <button class="type-pill active" data-type="all">All Types</button>
+                <button class="type-pill" data-type="in_clinic">🏥 In-Clinic</button>
+                <button class="type-pill" data-type="video">📹 Video Consult</button>
+                <button class="type-pill" data-type="home">🏠 Home Visit</button>
+            </div>
+        </div>
+
+        <div id="health-doctor-grid" class="doctor-cards-grid">
+            <!-- Dynamically populated via bizhealth.js -->
+        </div>
+    </main>
+</div>
+
+<!-- CLINICAL APPOINTMENT BOOKING MODAL -->
+<div id="health-booking-modal" class="modal-backdrop-custom" style="display:none;">
+    <div class="modal-dialog-glass">
+        <div class="modal-header-custom">
+            <h3 id="modal-doc-name">Book Doctor Appointment</h3>
+            <button id="btn-close-health-modal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body-custom">
+            <div class="doc-summary-badge" id="modal-doc-summary"></div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold">Consultation Mode:</label>
+                <div class="consult-mode-selector">
+                    <label class="mode-radio"><input type="radio" name="consult_mode" value="In-Clinic" checked /> 🏥 In-Clinic Visit</label>
+                    <label class="mode-radio"><input type="radio" name="consult_mode" value="Video Telehealth" /> 📹 Video Call</label>
+                    <label class="mode-radio"><input type="radio" name="consult_mode" value="Home Visit" /> 🏠 Doctor Home Visit</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Appointment Date:</label>
+                    <input type="date" id="book-appointment-date" class="form-control-custom" />
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Available Time Slot:</label>
+                    <select id="book-time-slot" class="form-control-custom">
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold">Patient Full Name:</label>
+                <input type="text" id="book-patient-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Phone Number:</label>
+                    <input type="text" id="book-patient-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Email (Optional):</label>
+                    <input type="email" id="book-patient-email" class="form-control-custom" placeholder="e.g. name@email.com" />
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label font-weight-bold">Symptoms / Reason for Consultation:</label>
+                <textarea id="book-symptoms" class="form-control-custom" rows="3" placeholder="Briefly describe what you are experiencing..."></textarea>
+            </div>
+
+            <button id="btn-confirm-appointment" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-health); font-size:1rem; border-radius:14px;">
+                Confirm & Book Appointment ➔
+            </button>
+
+            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:12px;">
+                🔒 Your health data is encrypted and protected under Ethiopian e-Health standards.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.0.0"></script>
+{% endblock %}

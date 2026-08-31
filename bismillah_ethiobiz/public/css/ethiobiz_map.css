@@ -34,8 +34,27 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.btn-collapse-map-sidebar:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    transform: scale(1.05);
+}
+
+.btn-floating-map-expand:hover {
+    background: #0f766e !important;
+    color: #ffffff !important;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 128, 128, 0.25);
+}
+
+.ethiobiz-map-pin, .magala-shop-pin {
+    background: transparent;
+    border: none;
+}
+
 
 @media (max-width: 768px) {
     .map-portal-wrapper {

@@ -23,7 +23,7 @@ def search_practitioners(specialty=None, region=None, availability=None,
                          gender=None, min_rating=None, fee_range=None,
                          consultation_type=None, query=None, page=1, limit=20):
     """Search healthcare practitioners with specialty, location, rating & fee filters."""
-    conditions = ["p.status = 'Active'"]
+    conditions = ["(p.status != 'Disabled' OR p.status IS NULL)"]
     values = {}
 
     if specialty and specialty.strip():
@@ -32,7 +32,7 @@ def search_practitioners(specialty=None, region=None, availability=None,
 
     if query and query.strip():
         q = f"%{query.strip()}%"
-        conditions.append("(p.practitioner_name LIKE %(q)s OR p.department LIKE %(q)s)")
+        conditions.append("(p.practitioner_name LIKE %(q)s OR p.first_name LIKE %(q)s OR p.department LIKE %(q)s)")
         values["q"] = q
 
     if min_rating:
@@ -43,7 +43,7 @@ def search_practitioners(specialty=None, region=None, availability=None,
     sql = f"""
         SELECT
             p.name as id,
-            p.practitioner_name as name,
+            COALESCE(p.practitioner_name, p.first_name, p.name) as name,
             COALESCE(p.department, 'General Medicine') as specialty,
             COALESCE(p.qualifications_display, 'Senior Medical Practitioner') as qualifications,
             COALESCE(p.consultation_fee, 1000.0) as consultation_fee,
@@ -311,7 +311,8 @@ def search_services(category=None, region=None, query=None,
     )
 
     for s in services:
-        s["formatted_price"] = f"{flt(s['price']):,.2f} ETB"
+        s["title"] = s.get("service_name") or s.get("name")
+        s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
         s["company_name"] = frappe.db.get_value("Company", s["company"], "company_name") or s["company"]
         s["rating"] = flt(s.get("average_rating") or 4.9)
 
@@ -323,14 +324,16 @@ def search_services(category=None, region=None, query=None,
 
 
 @frappe.whitelist()
-def book_service(service_id, date, time_slot, customer_name=None,
+def book_service(service_id, booking_date=None, booking_time=None, customer_name=None,
                  customer_phone=None, practitioner=None, notes=None,
-                 address=None):
+                 address=None, date=None, time_slot=None):
     """Creates real BizService Booking and dispatches BizRide if requires_travel."""
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
     service_doc = frappe.get_doc("BizService Listing", service_id)
+    b_date = booking_date or date or str(frappe.utils.now_datetime().date())
+    b_time = booking_time or time_slot or "14:00"
 
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
@@ -339,12 +342,12 @@ def book_service(service_id, date, time_slot, customer_name=None,
         "service": service_id,
         "company": service_doc.company,
         "practitioner_name": practitioner or "Standard Specialist",
-        "booking_date": date,
-        "booking_time": time_slot,
+        "booking_date": b_date,
+        "booking_time": b_time,
         "duration_minutes": service_doc.duration_minutes or 30,
         "status": "Confirmed",
         "payment_status": "Unpaid",
-        "total_amount": service_doc.price,
+        "total_amount": flt(getattr(service_doc, "price", 0.0)),
         "customer_address": address or "",
         "customer_notes": notes or ""
     })
@@ -355,7 +358,68 @@ def book_service(service_id, date, time_slot, customer_name=None,
         "message": f"Booking confirmed for {service_doc.service_name}!",
         "booking_id": b_doc.name,
         "service_name": service_doc.service_name,
-        "date": date,
-        "time": time_slot,
+        "status_text": "Confirmed",
+        "date": b_date,
+        "time": b_time,
         "amount": f"{flt(service_doc.price):,.2f} ETB"
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_booking_catalog(category=None):
+    """Returns aggregated catalog of bookable services and items."""
+    cats = []
+    if frappe.db.exists("DocType", "BizService Category"):
+        cats = frappe.get_all("BizService Category", filters={"is_active": 1}, fields=["name", "category_name", "category_icon"])
+
+    srvs = search_services(category=category).get("services", [])
+    return {
+        "status": "success",
+        "categories": cats,
+        "services": srvs
+    }
+
+
+@frappe.whitelist()
+def create_unified_booking(booking_type=None, service_id=None, resource_id=None, practitioner=None, company=None, date=None, time_slot=None, customer_name=None, customer_phone=None, address=None, booking_date=None, **kwargs):
+    """Universal booking dispatcher across all verticals."""
+    s_id = service_id or resource_id
+    b_date = booking_date or date or str(frappe.utils.now_datetime().date())
+
+    # --- Salon bookings ---
+    if booking_type and booking_type.lower() == "salon":
+        if frappe.db.exists("DocType", "Salon Appointment"):
+            sa = frappe.get_doc({
+                "doctype": "Salon Appointment",
+                "customer_name": customer_name or frappe.session.user,
+                "customer_phone": customer_phone or "0911000000",
+                "appointment_date": b_date,
+                "appointment_time": time_slot or "10:00",
+                "status": "Confirmed"
+            })
+            sa.flags.ignore_mandatory = True
+            sa.insert(ignore_permissions=True)
+            frappe.db.commit()
+            return {"status": "success", "message": "Salon appointment booked!", "booking_id": sa.name, "date": b_date, "time": time_slot}
+        else:
+            frappe.throw("Salon Appointment module not installed")
+
+    # --- Healthcare bookings ---
+    if booking_type and booking_type.lower() == "healthcare" or (practitioner and not s_id):
+        return create_appointment(practitioner=practitioner, date=b_date, time_slot=time_slot, patient_name=customer_name, patient_phone=customer_phone)
+
+    # --- Hotel bookings ---
+    if booking_type and booking_type.lower() == "hotel":
+        return book_room(company=company, room_type=kwargs.get("room_type", "Standard"), check_in=b_date, check_out=kwargs.get("check_out", add_days(b_date, 1)), guest_name=customer_name, guest_phone=customer_phone)
+
+    # --- Default: BizService / maintenance bookings ---
+    if not s_id:
+        srvs = frappe.get_all("BizService Listing", filters={"is_active": 1}, limit=1)
+        if srvs:
+            s_id = srvs[0].name
+    return book_service(service_id=s_id, booking_date=b_date, booking_time=time_slot, customer_name=customer_name, customer_phone=customer_phone, practitioner=practitioner, address=address)
+
+
+
+
+

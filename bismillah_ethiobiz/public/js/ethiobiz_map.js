@@ -83,7 +83,29 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("btn-close-dossier").addEventListener("click", function() {
             document.getElementById("map-dossier-panel").style.display = "none";
         });
+
+        // Collapsible Sidebar Toggle
+        const sidebar = document.getElementById("map-sidebar");
+        const btnToggle = document.getElementById("btn-toggle-map-sidebar");
+        const btnFloatingExpand = document.getElementById("btn-floating-expand-sidebar");
+
+        if (btnToggle && sidebar) {
+            btnToggle.addEventListener("click", function() {
+                sidebar.style.transform = "translateX(-110%)";
+                if (btnFloatingExpand) btnFloatingExpand.style.display = "flex";
+                setTimeout(() => { if (map) map.invalidateSize(); }, 350);
+            });
+        }
+
+        if (btnFloatingExpand && sidebar) {
+            btnFloatingExpand.addEventListener("click", function() {
+                sidebar.style.transform = "translateX(0)";
+                btnFloatingExpand.style.display = "none";
+                setTimeout(() => { if (map) map.invalidateSize(); }, 350);
+            });
+        }
     }
+
 
     function loadCompanies(userLat=null, userLng=null, radius=null) {
         const params = new URLSearchParams();
@@ -134,8 +156,23 @@ document.addEventListener("DOMContentLoaded", function() {
             card.addEventListener("click", () => openCompanyDossier(comp));
             listContainer.appendChild(card);
 
-            // Add Pin to Map with rich Image & Go to Company action
-            const marker = L.marker([comp.lat, comp.lng]);
+            // Add Pin to Map with rich SVG Pin Icon & Image
+            const customIcon = L.divIcon({
+                className: "ethiobiz-map-pin",
+                html: `
+                    <div style="position:relative; width:34px; height:34px; transform:translate(-50%, -100%);">
+                        <div style="width:34px; height:34px; border-radius:50% 50% 50% 0; background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%); transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.3); border:2px solid #ffffff;">
+                            <span style="transform:rotate(45deg); font-size:14px;">📍</span>
+                        </div>
+                    </div>
+                `,
+                iconSize: [34, 34],
+                iconAnchor: [17, 34],
+                popupAnchor: [0, -32]
+            });
+
+            const marker = L.marker([comp.lat, comp.lng], { icon: customIcon });
+
             const popupHtml = `
                 <div class="map-rich-popup" style="min-width: 240px; font-family: 'Inter', sans-serif;">
                     <div style="width:100%; height:110px; overflow:hidden; border-radius:8px; margin-bottom:8px; background:#f1f5f9;">

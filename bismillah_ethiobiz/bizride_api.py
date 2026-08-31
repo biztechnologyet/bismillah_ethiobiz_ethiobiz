@@ -29,6 +29,9 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
     delivery_lat = flt(delivery_lat) or 9.020
     delivery_lng = flt(delivery_lng) or 38.770
 
+    if vehicle_type == "Motorbike":
+        vehicle_type = "Motorcycle"
+
     # Calculate distance using Haversine formula
     dlat = math.radians(delivery_lat - pickup_lat)
     dlng = math.radians(delivery_lng - pickup_lng)
@@ -223,3 +226,115 @@ def get_tracking(delivery_id):
         "fee": f"{flt(d.delivery_fee):,.2f} ETB",
         "rider": rider_info
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def estimate_fare(pickup_lat=None, pickup_lng=None, drop_lat=None, drop_lng=None, vehicle_type="Any"):
+    """
+    Computes real-time trip fare estimates for Bajaj, Motorbike, Car, and Truck.
+    """
+    p_lat = flt(pickup_lat) or 9.001
+    p_lng = flt(pickup_lng) or 38.785
+    d_lat = flt(drop_lat) or 9.019
+    d_lng = flt(drop_lng) or 38.769
+
+    dlat = math.radians(d_lat - p_lat)
+    dlng = math.radians(d_lng - p_lng)
+    a = math.sin(dlat / 2)**2 + math.cos(math.radians(p_lat)) * math.cos(math.radians(d_lat)) * math.sin(dlng / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance_km = round(max(0.5, 6371 * c), 2)
+
+    tier_rates = {
+        "Bajaj": {"base": 50.0, "per_km": 15.0, "time_min": max(10, round(distance_km * 4))},
+        "Motorbike": {"base": 60.0, "per_km": 20.0, "time_min": max(8, round(distance_km * 3))},
+        "Car": {"base": 100.0, "per_km": 28.0, "time_min": max(12, round(distance_km * 3.5))},
+        "Truck": {"base": 250.0, "per_km": 45.0, "time_min": max(20, round(distance_km * 5))},
+        "Any": {"base": 60.0, "per_km": 20.0, "time_min": max(10, round(distance_km * 3))}
+    }
+
+    rates = tier_rates.get(vehicle_type, tier_rates["Any"])
+    estimated_fare = round(rates["base"] + (distance_km * rates["per_km"]), 2)
+
+    all_estimates = {}
+    for vt, r in tier_rates.items():
+        if vt != "Any":
+            all_estimates[vt] = {
+                "base_fee": r["base"],
+                "per_km": r["per_km"],
+                "total_fare": round(r["base"] + (distance_km * r["per_km"]), 2),
+                "formatted_fare": f"{round(r['base'] + (distance_km * r['per_km']), 2):,.2f} ETB",
+                "estimated_minutes": r["time_min"]
+            }
+
+    return {
+        "status": "success",
+        "distance_km": distance_km,
+        "vehicle_type": vehicle_type,
+        "estimated_fare": estimated_fare,
+        "formatted_fare": f"{estimated_fare:,.2f} ETB",
+        "estimated_minutes": rates["time_min"],
+        "tier_estimates": all_estimates
+    }
+
+
+@frappe.whitelist()
+def find_bizride(reference_doctype, reference_name, vehicle_type="Motorbike", cod_amount=0.0):
+    """
+    Desk-Level 'Find BizRide' action handler for Delivery Note & Sales Invoice.
+    Initiates broadcast to active online riders within a 5km radius.
+    """
+    if not frappe.db.exists(reference_doctype, reference_name):
+        frappe.throw(f"{reference_doctype} {reference_name} not found")
+
+    doc = frappe.get_doc(reference_doctype, reference_name)
+
+    # Determine Pickup (Seller/Company address) and Delivery (Customer shipping)
+    seller_company = getattr(doc, "company", "Biz Technology Solutions")
+    buyer_name = getattr(doc, "customer_name", getattr(doc, "customer", "Valued Customer"))
+    buyer_phone = getattr(doc, "contact_mobile", getattr(doc, "contact_phone", "0911000000"))
+
+    pickup_lat, pickup_lng = 9.001, 38.785
+    delivery_lat, delivery_lng = 9.019, 38.769
+
+    if hasattr(doc, "company") and frappe.db.exists("Company", doc.company):
+        comp = frappe.get_doc("Company", doc.company)
+        if comp.latitude and comp.longitude:
+            pickup_lat, pickup_lng = flt(comp.latitude), flt(comp.longitude)
+
+    # Create Delivery request
+    res = request_delivery(
+        order_reference=reference_name,
+        order_doctype=reference_doctype,
+        seller_company=seller_company,
+        pickup_address=getattr(doc, "company_address", "Addis Ababa"),
+        delivery_address=getattr(doc, "shipping_address", getattr(doc, "customer_address", "Addis Ababa")),
+        buyer_name=buyer_name,
+        buyer_phone=buyer_phone,
+        pickup_lat=pickup_lat,
+        pickup_lng=pickup_lng,
+        delivery_lat=delivery_lat,
+        delivery_lng=delivery_lng,
+        vehicle_type=vehicle_type,
+        is_cod=bool(flt(cod_amount) > 0),
+        cod_amount=flt(cod_amount)
+    )
+
+    # Update reference document custom fields if present
+    try:
+        frappe.db.set_value(reference_doctype, reference_name, {
+            "bizride_delivery_id": res.get("delivery_id"),
+            "delivery_status": "BizRide Dispatched"
+        }, update_modified=False)
+        frappe.db.commit()
+    except Exception:
+        pass
+
+    return {
+        "status": "success",
+        "message": f"Broadcast initiated for {reference_name}! Nearby riders alerted.",
+        "delivery_id": res.get("delivery_id"),
+        "pickup_otp": res.get("pickup_otp"),
+        "delivery_otp": res.get("delivery_otp"),
+        "tracking_url": f"/track/{res.get('delivery_id')}"
+    }
+

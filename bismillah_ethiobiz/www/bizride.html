@@ -1,0 +1,109 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Ride — On-Demand Hyperlocal Delivery, Courier & Logistics{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+
+<div class="vertical-portal-wrapper" style="padding-bottom:0;">
+    <div class="ride-layout-grid">
+        <!-- LEFT DISPATCH & FARE ESTIMATOR SIDEBAR -->
+        <aside class="ride-planner-card">
+            <span class="hero-badge" style="background:var(--vert-ride-light); color:var(--vert-ride);">🚚 BizRide Express Logistics</span>
+            <h2>Book Fast Courier & Rides</h2>
+            <p class="text-muted mb-4" style="font-size:0.88rem; line-height:1.5;">Instant dispatch to nearby Bajaj, Motorcycle, Car, or Truck couriers across Ethiopia.</p>
+
+            <!-- TRIP FORM -->
+            <div class="form-group mb-3">
+                <label class="form-label">📍 Pickup Location</label>
+                <div class="d-flex gap-2">
+                    <input type="text" id="ride-pickup-input" class="form-control-custom" value="Bole Medhanialem, Addis Ababa" />
+                    <button id="btn-ride-gps" class="btn-geo-action" title="Use GPS">📍 GPS</button>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label">🏁 Delivery Destination</label>
+                <input type="text" id="ride-drop-input" class="form-control-custom" value="Kazanchis Commercial Hub, Addis Ababa" />
+            </div>
+
+            <!-- FARE ESTIMATE PREVIEW -->
+            <div style="background:#f0f7ff; border:1.5px solid #bfdbfe; border-radius:14px; padding:12px 16px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:0.8rem; font-weight:700; color:#1e40af;">📏 Est. Distance</span>
+                    <strong id="ride-est-distance" style="color:#1d4ed8; font-size:0.92rem;">~5.2 km</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.8rem; font-weight:700; color:#1e40af;">⏱️ Est. Duration</span>
+                    <strong id="ride-est-duration" style="color:#1d4ed8; font-size:0.92rem;">~15 min</strong>
+                </div>
+            </div>
+
+            <!-- VEHICLE FLEET TIERS -->
+            <label class="form-label mb-2">Select Vehicle Type</label>
+            <div class="vehicle-tier-list">
+                <div class="vehicle-tier-card active" data-vehicle="Motorbike">
+                    <span class="v-icon">🏍️</span>
+                    <div class="v-info">
+                        <strong>Motorcycle Courier</strong>
+                        <span>Fastest for documents & food (15 mins)</span>
+                    </div>
+                    <span class="v-price" id="price-motorbike">60.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Bajaj">
+                    <span class="v-icon">🛺</span>
+                    <div class="v-info">
+                        <strong>Bajaj Express</strong>
+                        <span>Affordable short distance (20 mins)</span>
+                    </div>
+                    <span class="v-price" id="price-bajaj">50.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Car">
+                    <span class="v-icon">🚗</span>
+                    <div class="v-info">
+                        <strong>Standard Car / Van</strong>
+                        <span>Comfort rides & fragile parcels</span>
+                    </div>
+                    <span class="v-price" id="price-car">100.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Truck">
+                    <span class="v-icon">🚚</span>
+                    <div class="v-info">
+                        <strong>Pickup / Cargo Truck</strong>
+                        <span>Heavy appliances, furniture & bulk</span>
+                    </div>
+                    <span class="v-price" id="price-truck">250.00 ETB</span>
+                </div>
+            </div>
+
+            <!-- PROMO CODE -->
+            <div class="form-group mt-4 mb-3">
+                <label class="form-label">🎟️ Promo Code (Optional)</label>
+                <input type="text" id="ride-promo-code" class="form-control-custom" placeholder="Enter promo code for discount..." />
+            </div>
+
+            <button id="btn-request-ride" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-ride); font-size:1rem; border-radius:14px;">
+                🚀 Request Instant Dispatch
+            </button>
+            
+            <div id="ride-status-box" class="ride-status-box" style="display:none;"></div>
+
+            <!-- TRUST BADGES -->
+            <div style="display:flex; gap:16px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+                <span style="font-size:0.72rem; color:#64748b; font-weight:600;">🔒 Insured Delivery</span>
+                <span style="font-size:0.72rem; color:#64748b; font-weight:600;">📞 24/7 Support</span>
+                <span style="font-size:0.72rem; color:#64748b; font-weight:600;">⭐ 4.9 Rating</span>
+            </div>
+        </aside>
+
+        <!-- RIGHT LEAFLET ROUTE MAP CANVAS -->
+        <main class="ride-map-container">
+            <div id="bizride-leaflet-map" class="ride-leaflet-map"></div>
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizride.js?v=4.0.0"></script>
+{% endblock %}

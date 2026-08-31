@@ -1,0 +1,150 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Fix — 24/7 Universal Maintenance & Repair Services{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+
+<div class="vertical-portal-wrapper">
+    <!-- HERO SECTION -->
+    <header class="vertical-hero fix-hero">
+        <div class="hero-content">
+            <span class="hero-badge" style="background:var(--vert-fix-light); color:var(--vert-fix);">⚡ Universal Maintenance & Repair Engine</span>
+            <h1 class="hero-title">Certified Technicians for Home, Auto & Industry</h1>
+            <p class="hero-subtitle">Electrical, Plumbing, HVAC, Automotive, IT Hardware, Facility Care, Woodwork, and Sanitization across Ethiopia.</p>
+            
+            <!-- SEARCH BAR -->
+            <div class="vertical-search-card">
+                <div class="search-input-group">
+                    <span class="search-icon">🔧</span>
+                    <input type="text" id="fix-search-input" placeholder="What needs fixing? (e.g. Generator, Water Leak, AC, Car Battery, Laptop)..." autocomplete="off" />
+                </div>
+                <button id="btn-search-fix" class="btn-vertical-primary" style="background:var(--vert-fix);">Find Services</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- TRUST STRIP -->
+    <div style="background:#fffbeb; border-bottom:1px solid #fef3c7; padding:10px 24px;">
+        <div style="display:flex; justify-content:center; gap:28px; flex-wrap:wrap;">
+            <span style="font-size:0.78rem; color:#92400e; font-weight:700;">⚡ 45-Min Express Dispatch</span>
+            <span style="font-size:0.78rem; color:#92400e; font-weight:700;">🛡️ 30-Day Service Guarantee</span>
+            <span style="font-size:0.78rem; color:#92400e; font-weight:700;">📜 Certified Technicians</span>
+            <span style="font-size:0.78rem; color:#92400e; font-weight:700;">💳 Transparent Fixed Pricing</span>
+        </div>
+    </div>
+
+    <!-- 8 UNIVERSAL MAINTENANCE CATEGORIES -->
+    <section class="container-fluid px-lg-4 py-4">
+        <h3 class="section-title text-center mb-4">8 Core Maintenance Verticals</h3>
+        <div class="maintenance-category-grid">
+            <div class="fix-cat-card active" data-cat="all">
+                <span class="cat-icon">🌟</span>
+                <h4>All Services</h4>
+                <p>Complete Maintenance Catalog</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Electrical & Power">
+                <span class="cat-icon">⚡</span>
+                <h4>Electrical & Power</h4>
+                <p>Wiring, Solar, Generators & Panels</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Plumbing & Water">
+                <span class="cat-icon">🚿</span>
+                <h4>Plumbing & Water</h4>
+                <p>Leaks, Pumps, Tanks & Drainage</p>
+            </div>
+            <div class="fix-cat-card" data-cat="HVAC & Appliances">
+                <span class="cat-icon">❄️</span>
+                <h4>HVAC & Appliances</h4>
+                <p>Cold Rooms, AC, Fridges & Ovens</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Auto Mechanics">
+                <span class="cat-icon">🚗</span>
+                <h4>Auto & Roadside</h4>
+                <p>Mobile Mechanics & Diagnostics</p>
+            </div>
+            <div class="fix-cat-card" data-cat="IT & Security">
+                <span class="cat-icon">💻</span>
+                <h4>IT & Security</h4>
+                <p>PC/Laptop, CCTV & Structured Cabling</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Facility Maintenance">
+                <span class="cat-icon">🏢</span>
+                <h4>Facility Handyman</h4>
+                <p>Office Repairs, Locks, Glass & Drywall</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Carpentry & Woodwork">
+                <span class="cat-icon">🪵</span>
+                <h4>Carpentry & Wood</h4>
+                <p>Custom Cabinets & Furniture Fixes</p>
+            </div>
+            <div class="fix-cat-card" data-cat="Sanitation & Cleaning">
+                <span class="cat-icon">🧹</span>
+                <h4>Sanitation & Cleaning</h4>
+                <p>Fumigation, Deep Cleaning & Tanks</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICE LISTINGS & RATE CARDS -->
+    <main class="container-fluid px-lg-4 py-3">
+        <div class="results-header-bar">
+            <span id="fix-results-count">Loading certified maintenance packages...</span>
+            <span class="dispatch-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">🚚 45-Min Express Dispatch Available</span>
+        </div>
+
+        <div id="fix-service-grid" class="fix-service-grid">
+            <!-- Dynamically populated via bizfix.js -->
+        </div>
+    </main>
+</div>
+
+<!-- TECHNICIAN DISPATCH & BOOKING MODAL -->
+<div id="fix-booking-modal" class="modal-backdrop-custom" style="display:none;">
+    <div class="modal-dialog-glass">
+        <div class="modal-header-custom">
+            <h3 id="modal-fix-title">Request Maintenance Technician</h3>
+            <button id="btn-close-fix-modal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body-custom">
+            <div class="doc-summary-badge" id="modal-fix-summary" style="background:#fffbeb; border-color:#fde68a; color:#92400e;"></div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold">Dispatch Urgency:</label>
+                <div class="consult-mode-selector">
+                    <label class="mode-radio"><input type="radio" name="fix_urgency" value="Emergency" checked /> 🚨 Emergency Dispatch (Within 45 Mins)</label>
+                    <label class="mode-radio"><input type="radio" name="fix_urgency" value="Scheduled" /> 📅 Scheduled Technician Inspection</label>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold">Service Address / Location:</label>
+                <input type="text" id="fix-address" class="form-control-custom" placeholder="e.g. Bole Medhanialem, House 102, Addis Ababa" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Contact Name:</label>
+                    <input type="text" id="fix-contact-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Phone Number:</label>
+                    <input type="text" id="fix-contact-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label font-weight-bold">Fault Description & Issue Details:</label>
+                <textarea id="fix-fault-desc" class="form-control-custom" rows="3" placeholder="Describe the fault or symptoms (e.g. water pressure low, sparks from breaker, AC blowing warm air)..."></textarea>
+            </div>
+
+            <button id="btn-confirm-fix" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:14px; font-size:1rem;">Dispatch Certified Technician ➔</button>
+            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:12px;">
+                🔒 All repairs backed by EthioBiz 30-day workmanship warranty.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/bismillah_ethiobiz/js/bizfix.js?v=4.0.0"></script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Booking — Hotels, Lodging, Salons, Spaces & Vehicle Rentals{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+
+<div class="vertical-portal-wrapper">
+    <!-- HERO SECTION -->
+    <header class="vertical-hero booking-hero">
+        <div class="hero-content">
+            <span class="hero-badge" style="background:var(--vert-book-light); color:var(--vert-book);">🏨 Universal Reservation Hub</span>
+            <h1 class="hero-title">Book Hotels, Salons, Workspaces & Rentals</h1>
+            <p class="hero-subtitle">Instant verified reservations across Ethiopia with digital check-in passes and live availability.</p>
+            
+            <!-- MULTI-VERTICAL SEARCH CARD -->
+            <div class="booking-search-card">
+                <div class="booking-tab-switcher">
+                    <button class="book-tab-btn active" data-vertical="hotels">🏨 Hotels & Rooms</button>
+                    <button class="book-tab-btn" data-vertical="salons">💇 Salons & Spas</button>
+                    <button class="book-tab-btn" data-vertical="spaces">🏢 Workspaces & Venues</button>
+                    <button class="book-tab-btn" data-vertical="rentals">🚗 Vehicle Rentals</button>
+                </div>
+                
+                <div class="booking-inputs-grid">
+                    <div class="form-group">
+                        <label>📍 Destination / City</label>
+                        <input type="text" id="book-location" class="form-control-custom" placeholder="e.g. Addis Ababa, Hawassa, Bahir Dar" value="Addis Ababa" />
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Check-In / Start Date</label>
+                        <input type="date" id="book-checkin" class="form-control-custom" />
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Check-Out / End Date</label>
+                        <input type="date" id="book-checkout" class="form-control-custom" />
+                    </div>
+                    <div class="form-group d-flex align-items-end">
+                        <button id="btn-search-bookables" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-book); border-radius:12px;">Search Listings ➔</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TRUST STRIP -->
+    <div style="background:#f5f3ff; border-bottom:1px solid #ede9fe; padding:10px 24px;">
+        <div style="display:flex; justify-content:center; gap:28px; flex-wrap:wrap;">
+            <span style="font-size:0.78rem; color:#6b21a8; font-weight:700;">✅ Verified Listings</span>
+            <span style="font-size:0.78rem; color:#6b21a8; font-weight:700;">🎫 Instant Digital PIN Pass</span>
+            <span style="font-size:0.78rem; color:#6b21a8; font-weight:700;">🔒 Free Cancellation</span>
+            <span style="font-size:0.78rem; color:#6b21a8; font-weight:700;">💳 Telebirr & CBE Birr Ready</span>
+        </div>
+    </div>
+
+    <!-- LISTINGS GRID -->
+    <main class="container-fluid px-lg-4 py-4">
+        <div class="results-header-bar">
+            <span id="booking-results-count">Discovering verified hospitality and service listings...</span>
+            <span class="dispatch-badge" style="background:#f5f3ff; color:#6b21a8; border:1px solid #d8b4fe;">✓ Instant Voucher Confirmation</span>
+        </div>
+
+        <div id="booking-items-grid" class="booking-items-grid">
+            <!-- Dynamically populated via bizbooking.js -->
+        </div>
+    </main>
+</div>
+
+<!-- UNIVERSAL CHECK-IN / RESERVATION MODAL -->
+<div id="universal-booking-modal" class="modal-backdrop-custom" style="display:none;">
+    <div class="modal-dialog-glass">
+        <div class="modal-header-custom">
+            <h3 id="modal-book-title">Complete Reservation</h3>
+            <button id="btn-close-book-modal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body-custom">
+            <div class="doc-summary-badge" id="modal-book-summary" style="background:#f5f3ff; border-color:#d8b4fe; color:#6b21a8;"></div>
+            
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Guest / Customer Name:</label>
+                    <input type="text" id="modal-guest-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Phone Number:</label>
+                    <input type="text" id="modal-guest-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Check-In Date:</label>
+                    <input type="date" id="modal-checkin-date" class="form-control-custom" />
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label class="form-label font-weight-bold">Number of Guests / Quantity:</label>
+                    <select id="modal-guest-count" class="form-control-custom">
+                        <option value="1">1 Person / Unit</option>
+                        <option value="2" selected>2 Persons / Units</option>
+                        <option value="3">3 Persons / Units</option>
+                        <option value="4">4+ Persons / Units</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label font-weight-bold">Special Requests (Optional):</label>
+                <textarea id="modal-guest-notes" class="form-control-custom" rows="2" placeholder="Airport pickup, early check-in, quiet room, dietary preferences..."></textarea>
+            </div>
+
+            <button id="btn-confirm-universal-book" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-book); border-radius:14px; font-size:1rem;">Confirm Reservation & Get Digital Pass ➔</button>
+            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:12px;">
+                🔒 Zero booking fees. Pay directly or via Telebirr at check-in.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/bismillah_ethiobiz/js/bizbooking.js?v=4.0.0"></script>
+{% endblock %}

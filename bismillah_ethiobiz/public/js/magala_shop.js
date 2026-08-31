@@ -304,9 +304,22 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (res.message && res.message.companies) {
                     markerCluster.clearLayers();
                     res.message.companies.forEach(c => {
-                        const marker = L.marker([c.lat, c.lng]).bindPopup(`
+                        const shopPinIcon = L.divIcon({
+                            className: "magala-shop-pin",
+                            html: `
+                                <div style="position:relative; width:32px; height:32px; transform:translate(-50%, -100%);">
+                                    <div style="width:32px; height:32px; border-radius:50% 50% 50% 0; background: linear-gradient(135deg, #0f766e 0%, #0284c7 100%); transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.25); border:2px solid #ffffff;">
+                                        <span style="transform:rotate(45deg); font-size:13px;">🏪</span>
+                                    </div>
+                                </div>
+                            `,
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32],
+                            popupAnchor: [0, -30]
+                        });
+                        const marker = L.marker([c.lat, c.lng], { icon: shopPinIcon }).bindPopup(`
                             <div style="min-width:220px; font-family:'Inter',sans-serif;">
-                                <div style="width:100%; height:90px; overflow:hidden; border-radius:6px; margin-bottom:6px;">
+                                <div style="width:100%; height:90px; overflow:hidden; border-radius:6px; margin-bottom:6px; background:#f1f5f9;">
                                     <img src="${c.banner || c.logo}" alt="${c.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
                                 </div>
                                 <strong style="font-size:0.95rem;">${c.name}</strong><br>
@@ -318,6 +331,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         markerCluster.addLayer(marker);
                     });
                 }
+
             });
     }
 

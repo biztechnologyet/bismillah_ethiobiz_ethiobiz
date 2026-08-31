@@ -14,10 +14,16 @@
     <aside id="map-sidebar" class="map-sidebar">
         <!-- TOP SEARCH & HEADER -->
         <div class="sidebar-header">
-            <div class="sidebar-search-box">
-                <input type="text" id="map-search-input" placeholder="Search businesses, clinics, hotels..." autocomplete="off" />
-                <button id="btn-sidebar-search" class="btn-search-icon">🔍</button>
+            <div class="sidebar-top-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div class="sidebar-search-box" style="flex: 1; margin-bottom: 0;">
+                    <input type="text" id="map-search-input" placeholder="Search businesses, clinics, hotels..." autocomplete="off" />
+                    <button id="btn-sidebar-search" class="btn-search-icon">🔍</button>
+                </div>
+                <button id="btn-toggle-map-sidebar" class="btn-collapse-map-sidebar" title="Collapse / Expand Sidebar" style="background: #ffffff; border: 1px solid var(--map-border); border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
+                    ◀
+                </button>
             </div>
+
 
             <!-- CATEGORY CHIPS SCROLLER -->
             <div class="sidebar-cat-chips">
@@ -56,11 +62,17 @@
         </div>
     </aside>
 
+    <!-- FLOATING EXPAND BUTTON (Visible when sidebar collapsed) -->
+    <button id="btn-floating-expand-sidebar" class="btn-floating-map-expand" style="display:none; position:absolute; top:20px; left:20px; z-index:1001; background:#ffffff; color:#0f766e; border:1px solid rgba(0,0,0,0.15); border-radius:30px; padding:10px 18px; font-weight:700; font-size:0.9rem; box-shadow:0 6px 20px rgba(0,0,0,0.15); cursor:pointer; align-items:center; gap:8px;">
+        ▶ Search Businesses
+    </button>
+
     <!-- FULLSCREEN LEAFLET CANVAS -->
     <main class="map-canvas-container">
         <div id="ethiobiz-fullscreen-map" class="map-canvas"></div>
     </main>
 </div>
+
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>

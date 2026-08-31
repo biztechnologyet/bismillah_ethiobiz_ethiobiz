@@ -58,7 +58,8 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
+    "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js"
 ]
 
 # CSS for website (frontend/portal)
@@ -107,6 +108,11 @@ website_route_rules = [
     {"from_route": "/map", "to_route": "map"},
     {"from_route": "/companies", "to_route": "map"},
     {"from_route": "/shop", "to_route": "shop"},
+    {"from_route": "/bizhealth", "to_route": "bizhealth"},
+    {"from_route": "/bizfix", "to_route": "bizfix"},
+    {"from_route": "/bizride", "to_route": "bizride"},
+    {"from_route": "/booking", "to_route": "booking"},
+    {"from_route": "/bizhome", "to_route": "bizhome"},
 ]
 
 # ============================================
