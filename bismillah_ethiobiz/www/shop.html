@@ -1,0 +1,153 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Magala Marketplace & Supermarket | EthioBiz.ET{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+
+{% block page_content %}
+<!-- BISMALLAH DIKKA SHOP & MAGALA MARKETPLACE -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.2.0" />
+
+<div class="magala-shop-container">
+    <!-- HERO / SEARCH BAR -->
+    <div class="magala-search-hero">
+        <div class="magala-search-box">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="magala-search-input" placeholder="Search products, services, companies (e.g. Samsung, Dentist, Hotel)..." autocomplete="off" />
+                <button id="magala-clear-search" class="clear-btn" style="display:none;">✕</button>
+            </div>
+            <button id="btn-near-me" class="btn-geo">📍 Near Me</button>
+            
+            <!-- VIEW SWITCHER (GRID | LIST | MAP) -->
+            <div class="magala-view-toggle">
+                <button class="view-btn active" data-view="grid" title="Grid View">🔲 <span class="d-none d-md-inline">Grid</span></button>
+                <button class="view-btn" data-view="list" title="List View">📋 <span class="d-none d-md-inline">List</span></button>
+                <button class="view-btn" data-view="map" title="Map View">🗺️ <span class="d-none d-md-inline">Map</span></button>
+            </div>
+        </div>
+        <div id="magala-typeahead-dropdown" class="typeahead-dropdown" style="display:none;"></div>
+    </div>
+
+    <!-- CATEGORY PILLS BAR -->
+    <div class="magala-category-bar">
+        <button class="cat-pill active" data-category="all">🌟 All Categories</button>
+        <button class="cat-pill" data-category="Mobile Phones">📱 Mobile Phones</button>
+        <button class="cat-pill" data-category="Computers & Laptops">💻 Computers & Laptops</button>
+        <button class="cat-pill" data-category="Electronics">⚡ Electronics</button>
+        <button class="cat-pill" data-category="Fashion & Apparel">👗 Fashion</button>
+        <button class="cat-pill" data-category="Food & Groceries">🛒 Groceries</button>
+        <button class="cat-pill" data-category="Health & Beauty">🩺 Health & Beauty</button>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="magala-layout">
+        <!-- SIDEBAR FILTERS (DESKTOP) -->
+        <aside class="magala-sidebar">
+            <div class="filter-card">
+                <div class="filter-header">
+                    <h4>⚙️ Refine Search</h4>
+                    <button id="btn-reset-filters" class="btn-link">Reset</button>
+                </div>
+
+                <!-- Price Filter -->
+                <div class="filter-group">
+                    <label class="filter-title">💰 Price Range (ETB)</label>
+                    <div class="price-inputs">
+                        <input type="number" id="filter-min-price" placeholder="Min" />
+                        <span>—</span>
+                        <input type="number" id="filter-max-price" placeholder="Max" />
+                    </div>
+                </div>
+
+                <!-- Star Rating -->
+                <div class="filter-group">
+                    <label class="filter-title">⭐ Customer Rating</label>
+                    <div class="rating-options">
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.5" /> 4.5★ & Above</label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.0" /> 4.0★ & Above</label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="3.0" /> 3.0★ & Above</label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="" checked /> Any Rating</label>
+                    </div>
+                </div>
+
+                <!-- Sorting -->
+                <div class="filter-group">
+                    <label class="filter-title">🔃 Sort By</label>
+                    <select id="filter-sort-by" class="form-control">
+                        <option value="relevance">Top Relevant</option>
+                        <option value="price_low_high">Price: Low to High</option>
+                        <option value="price_high_low">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="newest">Newest Arrivals</option>
+                    </select>
+                </div>
+
+                <!-- BizRide Express Toggle -->
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-bizride-express" checked />
+                        <span>🚚 BizRide Express Eligible</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- PRODUCTS / VIEW DISPLAY -->
+        <main class="magala-main-display">
+            <!-- Results Header -->
+            <div class="results-meta-bar">
+                <span id="results-count-text">Loading items...</span>
+                <a href="/map" class="btn-open-map-portal">🗺️ Open Fullscreen Map Portal →</a>
+            </div>
+
+            <!-- GRID & LIST CONTAINER -->
+            <div id="magala-items-container" class="magala-grid-view">
+                <!-- Dynamically rendered items -->
+            </div>
+
+            <!-- EMBEDDED MAP VIEW CONTAINER (Hidden by default) -->
+            <div id="magala-embedded-map-container" style="display:none;">
+                <div id="magala-split-map" class="embedded-leaflet-map"></div>
+            </div>
+
+            <!-- PAGINATION -->
+            <div id="magala-pagination" class="magala-pagination"></div>
+        </main>
+    </div>
+</div>
+
+<!-- FLOATING CART DRAWER -->
+<div id="magala-cart-drawer" class="cart-drawer">
+    <div class="cart-drawer-header">
+        <h3>🛒 Shopping Cart (<span id="cart-drawer-count">0</span>)</h3>
+        <button id="close-cart-drawer" class="btn-close">✕</button>
+    </div>
+    <div id="cart-drawer-items" class="cart-drawer-body">
+        <p class="empty-cart-msg">Your cart is empty. Explore items to add!</p>
+    </div>
+    <div class="cart-drawer-footer">
+        <div class="cart-subtotal">
+            <span>Estimated Total:</span>
+            <strong id="cart-drawer-total">0.00 ETB</strong>
+        </div>
+        <a href="/cart" class="btn-checkout-primary">Proceed to Checkout →</a>
+    </div>
+</div>
+
+<!-- PRODUCT QUICK VIEW MODAL -->
+<div id="magala-quickview-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content-glass">
+        <button id="close-quickview-modal" class="btn-modal-close">✕</button>
+        <div id="quickview-modal-body" class="quickview-body"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=2.2.0"></script>
+{% endblock %}

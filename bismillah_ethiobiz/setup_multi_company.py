@@ -26,7 +26,18 @@ def after_migrate():
         setup_user_behaviour_and_company_industry()
         clean_third_party_workspace_links()
         ensure_hadeeda_settings()
-        print("EthioBiz: Multi-company isolation & workspace link sanitization complete.")
+        
+        # Bismallah: Magala Marketplace, BizBooking & BizRide setups
+        from bismillah_ethiobiz.magala_setup import ensure_magala_doctypes, seed_ethiopian_regions
+        from bismillah_ethiobiz.bizbooking_setup import ensure_booking_doctypes
+        from bismillah_ethiobiz.bizride_setup import ensure_bizride_doctypes
+
+        ensure_magala_doctypes()
+        seed_ethiopian_regions()
+        ensure_booking_doctypes()
+        ensure_bizride_doctypes()
+
+        print("EthioBiz: Multi-company, Magala, BizBooking & BizRide setup complete.")
     except Exception as e:
         print(f"EthioBiz: Error in multi-company setup: {e}")
 

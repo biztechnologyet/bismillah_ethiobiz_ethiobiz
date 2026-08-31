@@ -67,6 +67,8 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
+    "/assets/bismillah_ethiobiz/css/magala_shop.css",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_map.css",
 ]
 
 # JS for website (frontend/portal)
@@ -102,6 +104,9 @@ website_route_rules = [
     {"from_route": "/helpdesk/<path:app_path>", "to_route": "helpdesk"},
     {"from_route": "/lms", "to_route": "lms"},
     {"from_route": "/lms/<path:app_path>", "to_route": "lms"},
+    {"from_route": "/map", "to_route": "map"},
+    {"from_route": "/companies", "to_route": "map"},
+    {"from_route": "/shop", "to_route": "shop"},
 ]
 
 # ============================================
