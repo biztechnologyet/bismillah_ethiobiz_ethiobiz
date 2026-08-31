@@ -1601,3 +1601,72 @@ div[data-doctype="Blog Post"] .card {
     font-weight: 800 !important;
 }
 
+/* ==========================================================================
+   DESK FULL-WIDTH TITLE BAR & BUTTONS ROW BELOW
+   ========================================================================== */
+.page-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 24px 12px 24px !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    gap: 12px !important;
+}
+
+.page-head .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+}
+
+/* Row 1: Full-Width Title with status badge */
+.page-head .title-area {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    gap: 12px !important;
+}
+
+.page-head .title-area .title-text {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.3 !important;
+    text-overflow: unset !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+}
+
+.page-head .indicator-pill,
+.page-head .status-pill,
+.page-head .indicator {
+    margin-left: 8px !important;
+}
+
+/* Row 2: Action buttons placed underneath the title bar */
+.page-head .page-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding-top: 4px !important;
+}
+
+.page-head .page-actions .btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Page content below buttons */
+.page-body {
+    padding-top: 16px !important;
+}
+
+

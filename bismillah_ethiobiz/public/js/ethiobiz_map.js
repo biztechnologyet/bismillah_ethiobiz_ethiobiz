@@ -134,16 +134,28 @@ document.addEventListener("DOMContentLoaded", function() {
             card.addEventListener("click", () => openCompanyDossier(comp));
             listContainer.appendChild(card);
 
-            // Add Pin to Map
+            // Add Pin to Map with rich Image & Go to Company action
             const marker = L.marker([comp.lat, comp.lng]);
-            marker.bindPopup(`
-                <div style="min-width:200px;">
-                    <strong>${comp.name}</strong><br>
-                    <span style="font-size:0.8rem; color:#64748b;">${comp.category}</span><br>
-                    <p style="margin:4px 0; font-size:0.85rem;">${comp.address}</p>
-                    <button style="background:#1FB6AE; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-weight:600; cursor:pointer; width:100%; margin-top:4px;" onclick="window.viewDossier('${comp.id}')">View Details & Services</button>
+            const popupHtml = `
+                <div class="map-rich-popup" style="min-width: 240px; font-family: 'Inter', sans-serif;">
+                    <div style="width:100%; height:110px; overflow:hidden; border-radius:8px; margin-bottom:8px; background:#f1f5f9;">
+                        <img src="${comp.banner || comp.logo}" alt="${comp.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <img src="${comp.logo}" alt="${comp.name}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; border:1px solid #e2e8f0;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                        <div>
+                            <h4 style="margin:0; font-size:0.95rem; font-weight:700; color:#0f172a;">${comp.name}</h4>
+                            <span style="font-size:0.75rem; color:#1FB6AE; font-weight:600;">${comp.category.toUpperCase()} • ⭐ ${comp.rating}</span>
+                        </div>
+                    </div>
+                    <p style="margin:0 0 8px 0; font-size:0.8rem; color:#64748b; line-height:1.3;">📍 ${comp.address}</p>
+                    <div style="display:flex; gap:6px;">
+                        <a href="/shop?company=${encodeURIComponent(comp.id)}" style="flex:1; text-align:center; background:#1FB6AE; color:#ffffff !important; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.8rem; text-decoration:none; display:inline-block;">Go to Company ➔</a>
+                        <button onclick="window.viewDossier('${comp.id}')" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.8rem; cursor:pointer;">Dossier</button>
+                    </div>
                 </div>
-            `);
+            `;
+            marker.bindPopup(popupHtml, { maxWidth: 280 });
             markers.addLayer(marker);
         });
 
