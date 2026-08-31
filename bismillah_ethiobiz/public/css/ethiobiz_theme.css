@@ -1669,4 +1669,73 @@ div[data-doctype="Blog Post"] .card {
     padding-top: 16px !important;
 }
 
+/* ==========================================================================
+   PORTAL & WEBPAGE PAGINATION (PREV & NEXT BUTTONS FIX)
+   ========================================================================== */
+.pagination,
+.product-paging-area,
+.page-footer,
+.frappe-list-pagination,
+.web-pagination {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    padding: 24px 0 !important;
+    margin: 20px 0 !important;
+    width: 100% !important;
+}
+
+.btn-prev,
+.btn-next,
+.pagination .btn,
+.product-paging-area .btn,
+.web-pagination .btn {
+    background: #008080 !important;
+    color: #ffffff !important;
+    border: 1px solid #008080 !important;
+    border-radius: 25px !important;
+    padding: 8px 24px !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    box-shadow: 0 4px 14px rgba(0, 128, 128, 0.25) !important;
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.btn-prev:hover,
+.btn-next:hover,
+.pagination .btn:hover,
+.product-paging-area .btn:hover {
+    background: #006666 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 128, 128, 0.35) !important;
+}
+
+.btn-prev[disabled],
+.btn-next[disabled],
+.pagination .btn.disabled {
+    background: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* Hide orphaned Prev/Next when viewing Maps */
+.view-map-active .pagination,
+.view-map-active .product-paging-area,
+.view-map-active .btn-prev,
+.view-map-active .btn-next,
+#products-map-area ~ .product-paging-area,
+#magala-embedded-map-container[style*="block"] ~ #magala-pagination {
+    display: none !important;
+}
+
+
 

@@ -99,9 +99,15 @@
 
         <!-- PRODUCTS / VIEW DISPLAY -->
         <main class="magala-main-display">
-            <!-- Results Header -->
+            <!-- Results Header with Collapsible Filter Toggle -->
             <div class="results-meta-bar">
-                <span id="results-count-text">Loading items...</span>
+                <div class="d-flex align-items-center gap-2">
+                    <button id="btn-toggle-filters" class="btn-toggle-filters">
+                        <span class="filter-icon">⚙️</span>
+                        <span id="toggle-filter-text">Hide Filters</span>
+                    </button>
+                    <span id="results-count-text">Loading items...</span>
+                </div>
                 <a href="/map" class="btn-open-map-portal">🗺️ Open Fullscreen Map Portal →</a>
             </div>
 
