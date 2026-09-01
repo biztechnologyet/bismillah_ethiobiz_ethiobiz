@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Bismillah Ar-Rahman Ar-Rahim
 EthioBiz Runtime Self-Healing & Permanence Patches
