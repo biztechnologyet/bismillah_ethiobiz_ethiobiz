@@ -274,22 +274,80 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     booking_id = f"STAY-{property_id}-{cint(now_datetime().timestamp())}"
     if frappe.db.exists("DocType", "BizBooking"):
         try:
-            b_doc = frappe.get_doc({
-                "doctype": "BizBooking",
-                "customer_name": user,
-                "customer_phone": phone,
-                "booking_type": "Daily Stay",
-                "resource_name": prop.get("title", property_id),
-                "booking_date": str(d1),
-                "end_date": str(d2),
-                "total_amount": total_amount,
-                "status": "Confirmed",
-                "notes": f"Nights: {nights}, Guests: {guests}. Requests: {special_requests or 'None'}"
-            })
-            b_doc.flags.ignore_mandatory = True
-            b_doc.insert(ignore_permissions=True)
-            frappe.db.commit()
-            booking_id = b_doc.name
+            # BISMALLAH (Phase 6.5 unified money flow): unify property stays under the
+            # BizService Booking model (same name on Desk + website) when a Hotels &
+            # Stays listing exists; fall back to the legacy BizBooking otherwise.
+            unified_created = False
+            if frappe.db.exists("DocType", "BizService Booking") and frappe.db.exists("DocType", "BizService Listing"):
+                stay_cat = None
+                if frappe.db.exists("DocType", "BizService Category"):
+                    stay_cat = frappe.db.get_value(
+                        "BizService Category", {"category_name": ["like", "%Hotel%"]}, "name"
+                    )
+                listing = None
+                if stay_cat:
+                    listing = frappe.db.get_value(
+                        "BizService Listing",
+                        {"category": stay_cat, "is_active": 1},
+                        "name"
+                    )
+                if not listing:
+                    # Create a Hotels & Stays listing to host the stay (DB-first)
+                    co = (frappe.db.get_single_value("BizService Settings", "company")
+                          or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0])
+                    if co:
+                        try:
+                            listing = frappe.get_doc({
+                                "doctype": "BizService Listing",
+                                "service_name": f"Stay - {prop.get('title', property_id)}",
+                                "company": co,
+                                "category": stay_cat,
+                                "price": rate_per_night,
+                                "price_type": "Starting From",
+                                "duration_minutes": nights,
+                                "is_active": 1
+                            }).insert(ignore_permissions=True).name
+                        except Exception:
+                            listing = None
+                if listing:
+                    bsvc = frappe.get_doc({
+                        "doctype": "BizService Booking",
+                        "customer_name": user,
+                        "customer_phone": phone,
+                        "service": listing,
+                        "company": frappe.db.get_value("BizService Listing", listing, "company") or "",
+                        "practitioner_name": "Property Host",
+                        "booking_date": str(d1),
+                        "booking_time": "12:00",
+                        "duration_minutes": max(1, nights * 24 * 60),
+                        "status": "Confirmed",
+                        "payment_status": "Unpaid",
+                        "total_amount": total_amount,
+                        "customer_address": "",
+                        "customer_notes": f"Daily Stay. Nights: {nights}, Guests: {guests}. Requests: {special_requests or 'None'}"
+                    })
+                    bsvc.flags.ignore_mandatory = True
+                    bsvc.insert(ignore_permissions=True)
+                    frappe.db.commit()
+                    booking_id = bsvc.name
+                    unified_created = True
+            if not unified_created:
+                b_doc = frappe.get_doc({
+                    "doctype": "BizBooking",
+                    "customer_name": user,
+                    "customer_phone": phone,
+                    "booking_type": "Daily Stay",
+                    "resource_name": prop.get("title", property_id),
+                    "booking_date": str(d1),
+                    "end_date": str(d2),
+                    "total_amount": total_amount,
+                    "status": "Confirmed",
+                    "notes": f"Nights: {nights}, Guests: {guests}. Requests: {special_requests or 'None'}"
+                })
+                b_doc.flags.ignore_mandatory = True
+                b_doc.insert(ignore_permissions=True)
+                frappe.db.commit()
+                booking_id = b_doc.name
         except Exception as e:
             frappe.log_error(f"BizBooking insert error: {str(e)}")
 

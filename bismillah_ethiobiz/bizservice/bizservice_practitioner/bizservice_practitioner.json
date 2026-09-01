@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "",
+ "creation": "2026-08-31 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+  "field_order": ["practitioner_name", "role_title", "user", "employee", "phone", "working_hours", "custom_slots", "slot_days", "days_off", "is_active"],
+ "fields": [
+  {
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Professional Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "role_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Role / Specialty"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone Number"
+  },
+   {
+    "fieldname": "working_hours",
+    "fieldtype": "Small Text",
+    "label": "Working Hours",
+    "description": "Fallback window, e.g. 09:00-13:00, 14:00-18:00 (used only when no custom slots set)."
+   },
+   {
+    "fieldname": "custom_slots",
+    "fieldtype": "Small Text",
+    "label": "Custom Time Slots (Provider-Wise)",
+    "description": "Most-specific override for THIS service+provider. Same format as service-wise:\n  - Simple list:  09:00, 10:30, 14:00\n  - Per-day list:  MON:09:00,10:00|TUE:09:00,11:00,14:00\nTakes precedence over the service-level slots and this provider's working hours."
+   },
+   {
+    "default": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "fieldname": "slot_days",
+    "fieldtype": "Data",
+    "label": "Available Days (per Provider)",
+    "description": "Comma-separated weekdays this provider can serve: MON,TUE,WED,THU,FRI,SAT,SUN"
+   },
+   {
+    "fieldname": "days_off",
+    "fieldtype": "Small Text",
+    "label": "Days Off (unavailable dates)",
+    "description": "One ISO date (2026-09-11) per line, or a weekdays token (e.g. FRI) to blacklist that weekday for this provider."
+   },
+   {
+    "default": "1",
+    "fieldname": "is_active",
+    "fieldtype": "Check",
+    "in_list_view": 1,
+    "label": "Active"
+   }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-31 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizService Practitioner",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

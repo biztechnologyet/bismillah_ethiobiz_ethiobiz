@@ -1,0 +1,192 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "BIZ-SRV-.#####",
+ "creation": "2026-08-31 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+  "field_order": ["service_name", "company", "category", "slug", "price", "price_type", "currency", "duration_minutes", "requires_travel", "serving_region", "serving_city", "featured", "is_active", "average_rating", "total_bookings", "settings_section", "custom_slots", "slot_days", "days_off", "details_section", "description", "website_page", "images", "practitioners"],
+ "fields": [
+  {
+   "fieldname": "service_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Service Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Category",
+   "options": "BizService Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slug",
+   "fieldtype": "Data",
+   "label": "URL Slug"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price",
+   "reqd": 1
+  },
+  {
+   "default": "Fixed",
+   "fieldname": "price_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Price Type",
+   "options": "Fixed\nStarting From\nHourly\nCustom Quote"
+  },
+  {
+   "default": "ETB",
+   "fieldname": "currency",
+   "fieldtype": "Select",
+   "label": "Currency",
+   "options": "ETB\nUSD\nEUR"
+  },
+  {
+   "default": "30",
+   "fieldname": "duration_minutes",
+   "fieldtype": "Int",
+   "label": "Duration (Minutes)"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_travel",
+   "fieldtype": "Check",
+   "label": "Requires Travel (Home Dispatch via BizRide)"
+  },
+  {
+   "fieldname": "serving_region",
+   "fieldtype": "Data",
+   "label": "Serving Region"
+  },
+  {
+   "fieldname": "serving_city",
+   "fieldtype": "Data",
+   "label": "Serving City"
+  },
+  {
+   "default": "0",
+   "fieldname": "featured",
+   "fieldtype": "Check",
+   "label": "Featured (Promotable via Ads)"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "average_rating",
+   "fieldtype": "Float",
+   "label": "Average Rating",
+   "read_only": 1
+  },
+   {
+    "default": "0",
+    "fieldname": "total_bookings",
+    "fieldtype": "Int",
+    "label": "Total Bookings",
+    "read_only": 1
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "settings_section",
+    "fieldtype": "Section Break",
+    "label": "Booking Time Slots (Service-Wise)"
+   },
+   {
+    "fieldname": "custom_slots",
+    "fieldtype": "Small Text",
+    "label": "Custom Time Slots (Service-Wise)",
+    "description": "Exact bookable times for THIS service. One of:\n  - Simple list:  09:00, 10:30, 14:00, 15:30\n  - Per-day list (DAY:.. ; supports MON,TUE,WED,THU,FRI,SAT,SUN):  MON:09:00,10:00|TUE:09:00,11:00,14:00\nLeave empty to derive slots from assigned staff working hours (provider-wise)."
+   },
+   {
+    "default": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "fieldname": "slot_days",
+    "fieldtype": "Data",
+    "label": "Available Days (per Service)",
+    "description": "Comma-separated weekdays this service can be booked: MON,TUE,WED,THU,FRI,SAT,SUN"
+   },
+   {
+    "fieldname": "days_off",
+    "fieldtype": "Small Text",
+    "label": "Days Off (unavailable dates)",
+    "description": "One ISO date (2026-09-11) per line, or a weekdays token (e.g. FRI) to blacklist that weekday."
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "details_section",
+    "fieldtype": "Section Break",
+    "label": "Details & Description"
+   },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "website_page",
+   "fieldtype": "Data",
+   "label": "Website Page Slug"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Table",
+   "label": "Service Gallery",
+   "options": "BizService Image"
+  },
+  {
+   "fieldname": "practitioners",
+   "fieldtype": "Table",
+   "label": "Assigned Staff",
+   "options": "BizService Practitioner"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-31 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizService Listing",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Service Provider"
+  },
+  {
+   "read": 1,
+   "role": "All"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

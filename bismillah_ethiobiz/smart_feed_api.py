@@ -642,15 +642,28 @@ def get_ad_campaigns(slot=None):
     ads = frappe.get_all(
         "EthioBiz Ad Campaign",
         filters=filters,
-        fields=["name", "campaign_name", "click_url", "creative_image", "alt_text", "company", "impressions", "clicks"],
+        fields=["name", "campaign_name", "click_url", "creative_image", "alt_text", "company",
+                "impressions", "clicks", "promoted_listing", "target_vertical", "budget_etb", "campaign_url", "slot"],
         limit=5,
         order_by="modified desc"
     )
 
-    # Increment impressions counter
+    # Increment impressions counter + decrement budget on each served impression
     for ad in ads:
         try:
             frappe.db.set_value("EthioBiz Ad Campaign", ad.name, "impressions", cint(ad.impressions) + 1, update_modified=False)
+        except Exception:
+            pass
+        # BISMALLAH (Phase 6.3): surface campaign_url (fallback to legacy click_url) and
+        # decrement running budget so Desk Ads analytics match the served feed.
+        if not ad.get("campaign_url"):
+            ad["campaign_url"] = ad.get("click_url") or ""
+        try:
+            budget = flt(ad.get("budget_etb") or 0)
+            if budget > 0:
+                new_budget = max(0.0, round(budget - 0.01, 2))
+                frappe.db.set_value("EthioBiz Ad Campaign", ad.name, "budget_etb", new_budget, update_modified=False)
+                ad["budget_etb"] = new_budget
         except Exception:
             pass
 

@@ -162,72 +162,125 @@ def get_companies_map(category=None, region=None, user_lat=None, user_lng=None, 
     Returns full GeoJSON and company listings with coordinates for the /map portal
     and shop map view.
     """
-    filters = {"show_on_map": 1}
+    filters = {}
+
+    # BISMALLAH — honor BOTH the legacy `show_on_map` flag and the `map_enabled`
+    # flag added by magala_setup, and error-safely handle either missing column
+    # (defensive: DocTypes come from the DB on this server, not guaranteed JSON).
+    has_show = frappe.db.has_column("Company", "show_on_map")
+    has_enabled = frappe.db.has_column("Company", "map_enabled")
+
+    # Company is mapable if EITHER flag is set (OR), or unconditionally when neither
+    # column exists (so pins are not hidden by a missing flag schema).
+    or_filters = []
+    if has_show:
+        or_filters.append(["show_on_map", "=", 1])
+    if has_enabled:
+        or_filters.append(["map_enabled", "=", 1])
+
     if category and category.strip() and category != "all":
         filters["map_category"] = category.strip()
+
+    _fields = [
+        "name", "company_name", "company_slug", "company_description_public",
+        "business_category", "map_category", "map_pin_color", "latitude", "longitude",
+        "location_address", "phone_no", "email", "website", "company_logo",
+        "company_banner", "established_year", "store_tier"
+    ]
 
     companies = frappe.get_all(
         "Company",
         filters=filters,
-        fields=[
-            "name", "company_name", "company_slug", "company_description_public",
-            "business_category", "map_category", "map_pin_color", "latitude", "longitude",
-            "location_address", "phone_no", "email", "website", "company_logo",
-            "company_banner", "established_year", "store_tier"
-        ]
+        or_filters=or_filters if or_filters else None,
+        fields=_fields
     )
 
     user_lat = flt(user_lat) if user_lat else None
     user_lng = flt(user_lng) if user_lng else None
     radius_km = flt(radius_km) if radius_km else None
 
+    # BISMALLAH (Phase 6.5 multi-pin): reuse the shared per-company pin resolver so
+    # every `company_locations` child row (Addis Ababa Branch, Hawasa Branch,
+    # Showroom, Factory, ...) renders as its own pin. Defensive import.
+    _pin_rows = None
+    try:
+        from bismillah_ethiobiz import company_map_api as _cma
+        _pin_rows = _cma._company_pin_rows
+        _sound = _cma._sound_pin
+    except Exception:
+        _pin_rows = None
+
     locations = []
     for comp in companies:
         lat = flt(comp.get("latitude"))
         lng = flt(comp.get("longitude"))
 
-        # Skip companies without valid GPS coordinates
-        if not lat or not lng or (lat == 0 and lng == 0):
-            continue
+        # Multi-point: one pin per branch row when available
+        if _pin_rows is not None:
+            rows = _pin_rows(comp)
+        else:
+            # Defensive fallback: treat the single coordinate as one pin
+            rows = [frappe._dict({"latitude": lat, "longitude": lng,
+                                  "location_name": "Head Office", "branch_type": "Head Office",
+                                  "is_primary": 1, "is_active": 1,
+                                  "location_address": comp.get("location_address") or "",
+                                  "ethiopian_region": comp.get("ethiopian_region") or "",
+                                  "gps_accuracy": comp.get("gps_accuracy") or 0})] \
+                if (lat and lng and not (lat == 0 and lng == 0)) else []
 
-        distance_km = None
-        if user_lat and user_lng:
-            # Haversine distance
-            dlat = math.radians(lat - user_lat)
-            dlng = math.radians(lng - user_lng)
-            a = math.sin(dlat / 2)**2 + math.cos(math.radians(user_lat)) * math.cos(math.radians(lat)) * math.sin(dlng / 2)**2
-            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-            distance_km = round(6371 * c, 2)
-
-            if radius_km and distance_km > radius_km:
+        emitted = 0
+        for row in rows:
+            rlat = flt(row.get("latitude"))
+            rlng = flt(row.get("longitude"))
+            if _pin_rows is not None and not _sound(rlat, rlng):
+                continue
+            if _pin_rows is None and (not rlat or not rlng or (rlat == 0 and rlng == 0)):
                 continue
 
-        # Count active products & services for this company
-        product_count = frappe.db.count("Item", {"company": comp.name, "disabled": 0})
-        service_count = frappe.db.count("BizService Listing", {"company": comp.name, "is_active": 1}) if frappe.db.exists("DocType", "BizService Listing") else 0
+            distance_km = None
+            if user_lat and user_lng:
+                dlat = math.radians(rlat - user_lat)
+                dlng = math.radians(rlng - user_lng)
+                a = math.sin(dlat / 2)**2 + math.cos(math.radians(user_lat)) * math.cos(math.radians(rlat)) * math.sin(dlng / 2)**2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                distance_km = round(6371 * c, 2)
+                if radius_km and distance_km > radius_km:
+                    continue
 
-        locations.append({
-            "id": comp.name,
-            "name": comp.company_name or comp.name,
-            "slug": comp.company_slug or comp.name.lower().replace(" ", "-"),
-            "category": comp.map_category or comp.business_category or "shops",
-            "pin_color": comp.map_pin_color or "#1FB6AE",
-            "lat": lat,
-            "lng": lng,
-            "address": comp.location_address or "Addis Ababa, Ethiopia",
-            "phone": comp.phone_no or "",
-            "email": comp.email or "",
-            "website": comp.website or "",
-            "logo": comp.company_logo or "/assets/frappe/images/default-avatar.png",
-            "banner": comp.company_banner or "/assets/bismillah_ethiobiz/images/default-banner.jpg",
-            "description": comp.company_description_public or "",
-            "product_count": product_count,
-            "service_count": service_count,
-            "rating": 4.9,
-            "distance_km": distance_km,
-            "is_open": True,
-            "working_hours": "Mon - Sat: 8:30 AM - 8:00 PM"
-        })
+            # Count active products & services once per company (shared across pins)
+            if emitted == 0:
+                product_count = frappe.db.count("Item", {"company": comp.name, "disabled": 0})
+                service_count = frappe.db.count("BizService Listing", {"company": comp.name, "is_active": 1}) if frappe.db.exists("DocType", "BizService Listing") else 0
+
+            emitted += 1
+            locations.append({
+                "id": f"{comp.name}:{row.get('location_name') or 'loc'}",
+                "company": comp.name,
+                "company_name": comp.company_name or comp.name,
+                "name": row.get("location_name") or comp.company_name or comp.name,
+                "branch_type": row.get("branch_type") or "Branch",
+                "is_primary": int(row.get("is_primary") or 0),
+                "slug": comp.company_slug or comp.name.lower().replace(" ", "-"),
+                "category": comp.map_category or comp.business_category or "shops",
+                "pin_color": comp.map_pin_color or "#1FB6AE",
+                "lat": rlat,
+                "lng": rlng,
+                "address": row.get("location_address") or comp.location_address or "Addis Ababa, Ethiopia",
+                "region": row.get("ethiopian_region") or comp.ethiopian_region or "",
+                "serving_cities": row.get("serving_cities") or "",
+                "phone": comp.phone_no or "",
+                "email": comp.email or "",
+                "website": comp.website or "",
+                "logo": comp.company_logo or "/assets/frappe/images/default-avatar.png",
+                "banner": comp.company_banner or "/assets/bismillah_ethiobiz/images/default-banner.jpg",
+                "description": comp.company_description_public or "",
+                "product_count": product_count,
+                "service_count": service_count,
+                "rating": 4.9,
+                "distance_km": distance_km,
+                "is_open": True,
+                "working_hours": "Mon - Sat: 8:30 AM - 8:00 PM"
+            })
 
     if user_lat and user_lng:
         locations.sort(key=lambda x: x.get("distance_km") or 999999)
@@ -359,3 +412,272 @@ def submit_review(item_code, rating, review_text, review_title="Customer Review"
         frappe.db.commit()
 
     return {"status": "success", "message": "Review submitted successfully"}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_categories(parent=None):
+    """
+    Returns the hierarchical Item Group (category) tree with live product
+    counts per category for building the marketplace category sidebar.
+    """
+    filters = {}
+    if parent:
+        filters["parent_item_group"] = parent
+
+    groups = frappe.db.sql("""
+        SELECT
+            ig.name as item_group,
+            ig.item_group_name,
+            ig.parent_item_group,
+            ig.is_group,
+            ig.image,
+            (SELECT COUNT(*) FROM `tabItem` it WHERE it.item_group = ig.name AND it.disabled = 0) as product_count
+        FROM `tabItem Group` ig
+        WHERE ig.name != 'All Item Groups'
+        AND (%(parent)s = '' OR ig.parent_item_group = %(parent)s)
+        ORDER BY ig.lft ASC
+    """, {"parent": parent or ""}, as_dict=True)
+
+    for g in groups:
+        # Include sub-group counts for non-group parents if requested
+        if not parent:
+            sub_count = frappe.db.count(
+                "Item",
+                {
+                    "item_group": [
+                        "in",
+                        frappe.db.sql_list(
+                            "SELECT name FROM `tabItem Group` WHERE parent_item_group = %s",
+                            g["item_group"]
+                        )
+                    ],
+                    "disabled": 0,
+                },
+            )
+            g["product_count"] = cint(g["product_count"]) + cint(sub_count)
+
+    return {
+        "status": "success",
+        "total": len(groups),
+        "categories": groups
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_companies(query="", region=None, category=None, page=1, limit=10):
+    """
+    Returns a paginated list of seller companies with product/service counts,
+    ratings, and map coordinates — used for the seller directory / storefronts.
+    """
+    page = max(1, cint(page))
+    limit = min(50, max(1, cint(limit)))
+    offset = (page - 1) * limit
+
+    conditions = ["1=1"]
+    values = {}
+
+    if query and query.strip():
+        q = f"%{query.strip()}%"
+        conditions.append("(c.company_name LIKE %(q)s OR c.name LIKE %(q)s OR c.business_category LIKE %(q)s)")
+        values["q"] = q
+
+    if category and category.strip() and category != "all":
+        conditions.append("(c.business_category = %(category)s OR c.map_category = %(category)s)")
+        values["category"] = category.strip()
+
+    if region and region.strip():
+        conditions.append("(c.region = %(region)s OR c.location_address LIKE %(region)s)")
+        values["region"] = region.strip()
+
+    where_sql = " AND ".join(conditions)
+
+    sql = f"""
+        SELECT
+            c.name as id,
+            c.company_name,
+            c.company_slug,
+            c.company_description_public as description,
+            c.business_category,
+            c.map_category,
+            c.latitude,
+            c.longitude,
+            c.location_address as address,
+            c.phone_no,
+            c.email,
+            c.website,
+            c.company_logo,
+            c.company_banner,
+            c.established_year,
+            c.store_tier,
+            (SELECT COUNT(*) FROM `tabItem` it WHERE it.company = c.name AND it.disabled = 0) as product_count
+        FROM `tabCompany` c
+        WHERE {where_sql}
+        ORDER BY c.company_name ASC
+        LIMIT %(limit)s OFFSET %(offset)s
+    """
+    values["limit"] = limit
+    values["offset"] = offset
+
+    companies = frappe.db.sql(sql, values, as_dict=True)
+
+    total = 0
+    count_sql = f"SELECT COUNT(*) FROM `tabCompany` c WHERE {where_sql}"
+    total = frappe.db.sql(count_sql, values)[0][0]
+
+    for comp in companies:
+        comp["service_count"] = frappe.db.count(
+            "BizService Listing", {"company": comp["id"], "is_active": 1}
+        ) if frappe.db.exists("DocType", "BizService Listing") else 0
+        comp["rating"] = 4.9
+        comp["storefront_url"] = f"/company/{comp['company_slug'] or comp['id']}"
+        if not comp.get("company_logo"):
+            comp["company_logo"] = "/assets/frappe/images/default-avatar.png"
+
+    return {
+        "status": "success",
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": math.ceil(total / limit) if limit else 1,
+        "companies": companies
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_company_storefront(company_slug=None, company_name=None):
+    """
+    Returns a complete company storefront: profile, products, services,
+    reviews, and map coordinates.
+    """
+    lookup = None
+    if company_slug:
+        lookup = frappe.db.get_value("Company", {"company_slug": company_slug}, "name")
+    if not lookup and company_name:
+        lookup = frappe.db.get_value("Company", {"company_name": company_name}, "name") or (company_name if frappe.db.exists("Company", company_name) else None)
+    if not lookup:
+        frappe.throw("Company not found", frappe.DoesNotExistError)
+
+    company = frappe.get_doc("Company", lookup)
+
+    # Products
+    products = frappe.db.sql("""
+        SELECT
+            it.name as item_code,
+            it.item_name,
+            it.item_group,
+            it.image,
+            COALESCE(it.average_product_rating, 5.0) as rating,
+            COALESCE(it.total_product_reviews, 0) as total_reviews,
+            COALESCE(ip.price_list_rate, 0.0) as price
+        FROM `tabItem` it
+        LEFT JOIN `tabItem Price` ip ON ip.item_code = it.name AND ip.price_list = 'Standard Selling' AND ip.selling = 1
+        WHERE it.company = %s AND it.disabled = 0
+        ORDER BY it.modified DESC
+        LIMIT 50
+    """, (lookup,), as_dict=True)
+
+    for p in products:
+        p["formatted_price"] = f"{flt(p['price']):,.2f} ETB"
+
+    # Services
+    services = []
+    if frappe.db.exists("DocType", "BizService Listing"):
+        services = frappe.get_all(
+            "BizService Listing",
+            filters={"company": lookup, "is_active": 1},
+            fields=["name", "service_name", "category", "price", "duration_minutes", "average_rating"]
+        )
+        for s in services:
+            s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
+
+    # Reviews (aggregated across products)
+    reviews = []
+    if frappe.db.exists("DocType", "Item Review"):
+        reviews = frappe.db.sql("""
+            SELECT ir.name, ir.item_code, it.item_name, ir.user, ir.rating,
+                   ir.review_title, ir.comment, ir.verified_purchase, ir.seller_response, ir.creation
+            FROM `tabItem Review` ir
+            LEFT JOIN `tabItem` it ON it.name = ir.item_code
+            WHERE it.company = %s
+            ORDER BY ir.creation DESC
+            LIMIT 20
+        """, (lookup,), as_dict=True)
+        for r in reviews:
+            r["rating_stars"] = cint(r.get("rating") or 0)
+
+    return {
+        "status": "success",
+        "company": {
+            "id": company.name,
+            "company_name": company.company_name or company.name,
+            "slug": company.company_slug or company.name.lower().replace(" ", "-"),
+            "description": company.company_description_public or "",
+            "business_category": company.business_category or "",
+            "map_category": company.map_category or "",
+            "logo": company.company_logo or "/assets/frappe/images/default-avatar.png",
+            "banner": company.company_banner or "/assets/bismillah_ethiobiz/images/default-banner.jpg",
+            "established_year": company.established_year or "",
+            "store_tier": company.store_tier or "",
+            "latitude": company.latitude or 0.0,
+            "longitude": company.longitude or 0.0,
+            "address": company.location_address or "",
+            "phone": company.phone_no or "",
+            "email": company.email or "",
+            "website": company.website or ""
+        },
+        "product_count": len(products),
+        "service_count": len(services),
+        "products": products,
+        "services": services,
+        "reviews": reviews
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_product_reviews(item_code, page=1, limit=12, sort_by="newest"):
+    """
+    Returns paginated reviews for a product with optional sorting
+    (newest / highest / lowest) and includes the seller's response.
+    """
+    if not item_code or not frappe.db.exists("Item", item_code):
+        frappe.throw("Product not found", frappe.DoesNotExistError)
+
+    if not frappe.db.exists("DocType", "Item Review"):
+        return {"status": "success", "total": 0, "page": page, "limit": limit, "reviews": []}
+
+    page = max(1, cint(page))
+    limit = min(50, max(1, cint(limit)))
+    offset = (page - 1) * limit
+
+    order_clause = "ir.creation DESC"
+    if sort_by == "highest":
+        order_clause = "ir.rating DESC"
+    elif sort_by == "lowest":
+        order_clause = "ir.rating ASC"
+
+    reviews = frappe.db.sql(f"""
+        SELECT ir.name, ir.user, ir.rating, ir.review_title, ir.comment,
+               ir.verified_purchase, ir.seller_response, ir.creation
+        FROM `tabItem Review` ir
+        WHERE ir.item_code = %s
+        ORDER BY {order_clause}
+        LIMIT %s OFFSET %s
+    """, (item_code, limit, offset), as_dict=True)
+
+    total = frappe.db.count("Item Review", {"item_code": item_code})
+
+    item = frappe.get_doc("Item", item_code)
+    for r in reviews:
+        r["rating_stars"] = cint(r.get("rating") or 0)
+
+    return {
+        "status": "success",
+        "item_code": item_code,
+        "item_name": item.item_name,
+        "average_rating": flt(getattr(item, "average_product_rating", 5.0)),
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": math.ceil(total / limit) if limit else 1,
+        "reviews": reviews
+    }

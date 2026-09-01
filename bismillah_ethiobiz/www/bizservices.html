@@ -1,0 +1,73 @@
+{% extends "templates/web.html" %}
+
+{% block title %}BizServices — All Service Providers, One Platform | EthioBiz.ET{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizservices.css?v=1.0.0">
+<script src="/assets/bismillah_ethiobiz/js/bizservices.js?v=1.0.0" defer></script>
+
+<div class="bizservices-page" id="bizservices-app">
+  <div class="bs-hero">
+    <h1>BizServices — All Service Providers, One Platform</h1>
+    <p>Book hair salons, spas, barbers, massage &amp; beauty, home services, auto care, events, tutoring and professional services — direct from trusted local providers.</p>
+    <div class="bs-stats">
+      <div class="bs-stat"><b id="bs-total-services">0</b><span>Services</span></div>
+      <div class="bs-stat"><b id="bs-total-cats">8</b><span>Categories</span></div>
+      <div class="bs-stat"><b>24/7</b><span>Booking</span></div>
+    </div>
+  </div>
+
+  <div class="bs-container">
+    <div class="bs-panel">
+      <div class="bs-search-row">
+        <input type="text" id="bs-search" class="bs-search" placeholder="Search services, categories, cities…">
+        <button type="button" class="bs-btn" onclick="window.location='/bizservices?provider=1'">I'm a Provider</button>
+      </div>
+
+      <div class="bs-cats" id="bs-cats"></div>
+
+      <div class="bs-grid" id="bs-grid">
+        <div class="bs-empty">Loading services…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking modal -->
+  <div class="bs-modal" id="bs-modal">
+    <div class="bs-modal-box">
+      <span class="bs-close" id="bs-close-modal">&times;</span>
+      <h3 id="bs-modal-title">Book this service</h3>
+      <input type="hidden" id="bs-book-service">
+      <div id="bs-book-result"></div>
+
+      <label>Date</label>
+      <input type="date" id="bs-date">
+
+      <label>Service Provider (optional — for provider-specific time slots)</label>
+      <select id="bs-provider">
+        <option value="">Any available provider</option>
+      </select>
+
+      <label>Time Slot</label>
+      <select id="bs-slot-select"><option value="">Select a time…</option></select>
+      <div id="bs-avail-note" style="font-size:0.78rem;color:#64748b;margin-top:4px;"></div>
+
+      <label>Full Name</label>
+      <input type="text" id="bs-name" placeholder="Your name">
+
+      <label>Phone</label>
+      <input type="tel" id="bs-phone" placeholder="09xxxxxxxx">
+
+      <label>Address (for home dispatch)</label>
+      <textarea id="bs-address" rows="2" placeholder="Area / landmark"></textarea>
+
+      <label>Notes / Requests</label>
+      <textarea id="bs-notes" rows="2" placeholder="Optional"></textarea>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="bs-btn" id="bs-submit" style="width:100%;">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

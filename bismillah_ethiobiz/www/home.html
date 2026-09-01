@@ -1397,6 +1397,7 @@ function closeFlip(btn, event) {
         btn.innerText = 'Confirming Reservation...';
 
         const payload = {
+            booking_type: activeBookingResource && activeBookingResource.type ? activeBookingResource.type : 'salon',
             resource_name: activeBookingResource ? activeBookingResource.title : 'General Booking',
             customer_name: loggedUser.full_name,
             customer_phone: loggedUser.phone || '0911000000',
@@ -1408,7 +1409,7 @@ function closeFlip(btn, event) {
             amount: activeBookingResource ? (activeBookingResource.price_num || 0) : 0
         };
 
-        fetch('/api/method/bismillah_ethiobiz.bizbooking_api.create_online_booking', {
+        fetch('/api/method/bismillah_ethiobiz.bizbooking_api.create_unified_booking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(payload)
@@ -1594,3 +1595,4 @@ function closeFlip(btn, event) {
     else initHomePage();
 })();
 </script>
+<script src="/assets/bismillah_ethiobiz/js/feed_tracker.js?v=1.0.0" defer></script>

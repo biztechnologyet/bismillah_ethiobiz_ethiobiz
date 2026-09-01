@@ -42,9 +42,17 @@ def after_install():
                 "permissions": dt_def.get("permissions", [{"role": "System Manager", "read": 1, "write": 1}]),
             })
             doc.insert(ignore_permissions=True)
-
     # Seed HADEEDA Settings defaults
     ensure_hadeeda_settings_installed()
+
+    # BISMALLAH (Phase 6.5 multi-pin): create the `BizCompany Location` child
+    # DocType + Company `company_locations` Table field so every provider can
+    # carry multiple map pins (Addis Ababa Branch, Hawasa Branch, Showroom, ...).
+    try:
+        from bismillah_ethiobiz.company_map_api import ensure_company_map_locations_installed
+        ensure_company_map_locations_installed()
+    except Exception as _me:
+        print(f"EthioBiz: Error installing company map locations: {_me}")
 
 
 def ensure_hadeeda_settings_installed():

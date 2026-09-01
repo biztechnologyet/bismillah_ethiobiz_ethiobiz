@@ -1,0 +1,156 @@
+{
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"BizServices — All Service Providers, One Platform\",\"level\":2,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Category\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Listing\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Booking\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"Catalog & Operations\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Booking Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizService Practitioner\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BizRide Delivery\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ad Campaign\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"Number Cards\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Service Listings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bookings This Month\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pending Payments\",\"col\":4}},{\"type\":\"header\",\"data\":{\"text\":\"New Provider Onboarding\",\"level\":3,\"col\":12}},{\"type\":\"paragraph\",\"data\":{\"text\":\"1) Create your Company  •  2) Add a BizService Listing  •  3) Assign Practitioners  •  4) Set Categories  •  5) Go Live  •  6) Get your first Booking\",\"col\":12}}]",
+ "creation": "2026-08-31 10:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "BizServices",
+ "links": [
+  {
+   "label": "BizService Settings",
+   "link_to": "BizService Settings",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizService Category",
+   "link_to": "BizService Category",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizService Listing",
+   "link_to": "BizService Listing",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizService Booking",
+   "link_to": "BizService Booking",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizService Booking Item",
+   "link_to": "BizService Booking Item",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizService Practitioner",
+   "link_to": "BizService Practitioner",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "BizRide Delivery",
+   "link_to": "BizRide Delivery",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "EthioBiz Ad Campaign",
+   "link_to": "EthioBiz Ad Campaign",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Open BizServices Website",
+   "link_to": "/bizservices",
+   "link_type": "URL",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-31 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizServices",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "BizService Booking",
+   "label": "Recent Bookings"
+  },
+  {
+   "document_type": "BizService Listing",
+   "label": "Active Listings"
+  },
+  {
+   "document_type": "BizService Category",
+   "label": "Categories"
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Service Provider"
+  }
+ ],
+ "shortcuts": [
+  {
+   "label": "BizService Settings",
+   "link_to": "BizService Settings",
+   "type": "DocType"
+  },
+  {
+   "label": "BizService Category",
+   "link_to": "BizService Category",
+   "type": "DocType"
+  },
+  {
+   "label": "BizService Listing",
+   "link_to": "BizService Listing",
+   "type": "DocType"
+  },
+  {
+   "label": "BizService Booking",
+   "link_to": "BizService Booking",
+   "type": "DocType"
+  },
+  {
+   "label": "BizService Booking Item",
+   "link_to": "BizService Booking Item",
+   "type": "DocType"
+  },
+  {
+   "label": "BizService Practitioner",
+   "link_to": "BizService Practitioner",
+   "type": "DocType"
+  },
+  {
+   "label": "BizRide Delivery",
+   "link_to": "BizRide Delivery",
+   "type": "DocType"
+  },
+  {
+   "label": "EthioBiz Ad Campaign",
+   "link_to": "EthioBiz Ad Campaign",
+   "type": "DocType"
+  },
+  {
+   "label": "Open BizServices Website",
+   "link_to": "/bizservices",
+   "type": "URL"
+  }
+ ],
+ "title": "BizServices"
+}

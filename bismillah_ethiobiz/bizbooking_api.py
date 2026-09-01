@@ -306,7 +306,7 @@ def search_services(category=None, region=None, query=None,
     services = frappe.get_all(
         "BizService Listing",
         filters=filters,
-        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug"],
+        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug", "practitioners"],
         limit=limit
     )
 
@@ -335,6 +335,26 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
     b_date = booking_date or date or str(frappe.utils.now_datetime().date())
     b_time = booking_time or time_slot or "14:00"
 
+    # BISMALLAH (Phase 6.5): enforce the provider/service-wise custom time slot.
+    # The chosen time must be in the resolved slot set (or rejected) so customers
+    # can only book times the provider actually offers for THIS service+provider.
+    try:
+        from bismillah_ethiobiz import bizservice_api
+        _sl = bizservice_api.validate_time_slot(
+            listing=service_id, date=b_date, time_slot=b_time, practitioner=practitioner
+        )
+        if _sl and _sl.get("status") == "success" and not _sl.get("valid"):
+            frappe.throw(
+                _("Requested time {0} is not available for this service on {1}. "
+                  "Available slots: {2}").format(
+                    b_time, b_date, ", ".join(_sl.get("valid_slots") or [])
+                )
+            )
+    except frappe.ValidationError:
+        raise
+    except Exception as _ve:
+        frappe.log_error(f"Slot validation skipped for {service_id} {b_time}: {_ve}", "BizService")
+
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
         "customer_name": customer_name or frappe.session.user,
@@ -352,6 +372,30 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
         "customer_notes": notes or ""
     })
     b_doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    # BISMALLAH (Phase 6.1.4): real BizRide dispatch when the listing requires travel.
+    # The docstring previously claimed dispatch but never executed it — now wired to the
+    # real dispatch engine (bizride_api.request_delivery) and the delivery linked back.
+    delivery_id = None
+    if getattr(service_doc, "requires_travel", 0):
+        try:
+            from bismillah_ethiobiz import bizride_api
+            _res = bizride_api.request_delivery(
+                order_reference=b_doc.name,
+                order_doctype="BizService Booking",
+                seller_company=service_doc.company,
+                delivery_address=address or "Addis Ababa",
+                buyer_name=customer_name or "Valued Customer",
+                buyer_phone=customer_phone or "0911000000",
+                vehicle_type="Motorcycle"
+            )
+            delivery_id = (_res or {}).get("delivery_id")
+            if delivery_id:
+                frappe.db.set_value("BizService Booking", b_doc.name, "bizride_delivery", delivery_id, update_modified=False)
+                frappe.db.commit()
+        except Exception as _be:
+            frappe.log_error(f"BizService BizRide dispatch failed for {b_doc.name}: {_be}", "BizService")
 
     return {
         "status": "success",
@@ -361,7 +405,8 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
         "status_text": "Confirmed",
         "date": b_date,
         "time": b_time,
-        "amount": f"{flt(service_doc.price):,.2f} ETB"
+        "amount": f"{flt(service_doc.price):,.2f} ETB",
+        "bizride_delivery": delivery_id or ""
     }
 
 
@@ -418,6 +463,18 @@ def create_unified_booking(booking_type=None, service_id=None, resource_id=None,
         if srvs:
             s_id = srvs[0].name
     return book_service(service_id=s_id, booking_date=b_date, booking_time=time_slot, customer_name=customer_name, customer_phone=customer_phone, practitioner=practitioner, address=address)
+
+
+@frappe.whitelist()
+def create_universal_booking(booking_data=None, **kwargs):
+    """
+    Universal booking dispatcher across all verticals.
+    Delegates to `bizbooking_aggregator_api.create_universal_booking`
+    (the canonical implementation) so a single source of truth is preserved,
+    while remaining backward-compatible for existing callers.
+    """
+    from .bizbooking_aggregator_api import create_universal_booking as _agg
+    return _agg(booking_data=booking_data, **kwargs)
 
 
 

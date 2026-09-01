@@ -139,6 +139,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
         document.getElementById("map-feed-count").innerText = `Found ${filtered.length} verified companies`;
 
+        if (filtered.length === 0) {
+            listContainer.innerHTML = `<div style="padding:16px;text-align:center;color:#64748b;font-size:0.85rem;">
+                No verified companies mapped here yet — pins appear as providers add their location.</div>`;
+            return;
+        }
+
         filtered.forEach(comp => {
             // Render Card in Sidebar
             const card = document.createElement("div");

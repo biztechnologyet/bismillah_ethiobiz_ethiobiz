@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "creation": "2026-08-31 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": ["company", "booking_window_days", "closed_days", "auto_dispatch_bizride", "default_payment_method", "commission_percent", "review_gating", "tax_template", "default_price_list", "reminder_template"],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "default": "30",
+   "fieldname": "booking_window_days",
+   "fieldtype": "Int",
+   "label": "Booking Window (Days)"
+  },
+  {
+   "fieldname": "closed_days",
+   "fieldtype": "Small Text",
+   "label": "Closed Days"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_dispatch_bizride",
+   "fieldtype": "Check",
+   "label": "Auto-Dispatch BizRide for Travel"
+  },
+  {
+   "default": "Cash on Delivery",
+   "fieldname": "default_payment_method",
+   "fieldtype": "Select",
+   "label": "Default Payment Method",
+   "options": "Cash on Delivery\nBank Transfer\nAddisPay\nMobile Money"
+  },
+  {
+   "fieldname": "commission_percent",
+   "fieldtype": "Percent",
+   "label": "Platform Commission %"
+  },
+  {
+   "default": "1",
+   "fieldname": "review_gating",
+   "fieldtype": "Check",
+   "label": "Gate Reviews to Completed Bookings"
+  },
+  {
+   "fieldname": "tax_template",
+   "fieldtype": "Link",
+   "label": "Tax Template",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "fieldname": "default_price_list",
+   "fieldtype": "Link",
+   "label": "Default Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "reminder_template",
+   "fieldtype": "Link",
+   "label": "Reminder Template",
+   "options": "Email Template"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-31 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizService Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

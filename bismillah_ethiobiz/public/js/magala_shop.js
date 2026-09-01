@@ -303,6 +303,12 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(res => {
                 if (res.message && res.message.companies) {
                     markerCluster.clearLayers();
+                    if (res.message.companies.length === 0 && mapInstance) {
+                        L.popup()
+                            .setLatLng([9.010, 38.761])
+                            .setContent('<div style="font-family:inherit;text-align:center;font-size:12px;color:#64748b;padding:6px;">No verified companies mapped here yet — pins appear as providers add their location.</div>')
+                            .openOn(mapInstance);
+                    }
                     res.message.companies.forEach(c => {
                         const shopPinIcon = L.divIcon({
                             className: "magala-shop-pin",
