@@ -171,7 +171,7 @@ def search_all_bookables(vertical=None, location=None, check_in=None,
     }
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def create_universal_booking(booking_data=None, **kwargs):
     """
     Universal booking dispatch across every vertical. Accepts either a JSON
