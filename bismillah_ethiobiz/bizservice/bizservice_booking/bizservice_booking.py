@@ -13,6 +13,10 @@ class BizServiceBooking(Document):
     def validate(self):
         self.set_total_amount()
         self.validate_booking_window()
+        self.assign_provider_user()
+
+    def after_insert(self):
+        self.share_with_provider()
 
     def on_submit(self):
         self.increment_listing_stats()
@@ -20,6 +24,48 @@ class BizServiceBooking(Document):
 
     def on_cancel(self):
         self.decrement_listing_stats()
+
+    def resolve_provider_user(self):
+        """Return the provider User who should manage this booking in Desk.
+
+        Resolution order (per booked listing):
+          1. any assigned practitioner row that has a `user` set and is active
+          2. the listing's owner if they are (or become) a Service Provider
+          3. the session user when it is not a guest booking
+        """
+        if self.service:
+            try:
+                listing = frappe.get_doc("BizService Listing", self.service)
+            except Exception:
+                listing = None
+            if listing:
+                for p in (listing.practitioners or []):
+                    if p.get("user") and p.get("is_active", 1):
+                        return p.get("user")
+                owner = listing.owner
+                if owner and owner not in ("Administrator", "Guest", None):
+                    return owner
+        caller = frappe.session.user
+        if caller and caller not in ("Administrator", "Guest", None):
+            return caller
+        return None
+
+    def assign_provider_user(self):
+        if not self.practitioner_user:
+            self.practitioner_user = self.resolve_provider_user()
+
+    def share_with_provider(self):
+        """Grant the managing provider read/write on this booking so it shows in Desk."""
+        if not self.practitioner_user or self.practitioner_user == frappe.session.user:
+            return
+        try:
+            from frappe.share import add as share_add
+            if not frappe.db.exists("DocShare",
+                                    {"share_doctype": self.doctype, "share_name": self.name,
+                                     "user": self.practitioner_user}):
+                share_add(self.doctype, self.name, self.practitioner_user, read=1, write=1, submit=1)
+        except Exception as e:
+            frappe.log_error(f"BizService provider share failed for {self.name}->{self.practitioner_user}: {e}", "BizService")
 
     def set_total_amount(self):
         if self.items:

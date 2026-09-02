@@ -6,7 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "is_submittable": 1,
- "field_order": ["customer_name", "customer_phone", "customer_email", "customer", "service", "company", "practitioner_name", "booking_date", "booking_time", "duration_minutes", "status", "payment_status", "total_amount", "sales_order", "invoice", "payment_entry", "bizride_delivery", "items_section", "items", "address_notes_section", "customer_address", "customer_notes", "review_section", "rating", "review"],
+  "field_order": ["customer_name", "customer_phone", "customer_email", "customer", "service", "company", "practitioner_name", "practitioner_user", "booking_date", "booking_time", "duration_minutes", "status", "payment_status", "total_amount", "sales_order", "invoice", "payment_entry", "bizride_delivery", "items_section", "items", "address_notes_section", "customer_address", "customer_notes", "review_section", "rating", "review"],
  "fields": [
   {
    "fieldname": "customer_name",
@@ -53,6 +53,14 @@
    "fieldname": "practitioner_name",
    "fieldtype": "Data",
    "label": "Assigned Professional"
+  },
+  {
+   "fieldname": "practitioner_user",
+   "fieldtype": "Link",
+   "in_list_view": 0,
+   "label": "Service Provider User",
+   "options": "User",
+   "description": "The provider user who manages this booking in Desk. Auto-populated from the booked service's assigned staff."
   },
   {
    "fieldname": "booking_date",
@@ -197,6 +205,14 @@
    "role": "Sales Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Service Provider",
+   "share": 1,
    "write": 1
   },
   {

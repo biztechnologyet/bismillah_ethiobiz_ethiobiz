@@ -334,6 +334,32 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
     service_doc = frappe.get_doc("BizService Listing", service_id)
     b_date = booking_date or date or str(frappe.utils.now_datetime().date())
     b_time = booking_time or time_slot or "14:00"
+    provider_user = None
+
+    # BISMALLAH (multi-company): resolve the booking company reliably. Prefer the
+    # listing's own company; fall back to BizService Settings > Global Defaults >
+    # a company owned by the provided service provider. This keeps BizService
+    # usable across many companies without a hard 417 on missing company.
+    company = getattr(service_doc, "company", None)
+    if not company or not frappe.db.exists("Company", company or "-"):
+        company = None
+    if not company:
+        try:
+            company = frappe.db.get_single_value("BizService Settings", "company")
+        except Exception:
+            company = None
+    if not company:
+        try:
+            company = frappe.defaults.get_global_default("company")
+        except Exception:
+            company = None
+    if not company:
+        try:
+            company = frappe.db.get_value("Company", {"is_default": 1}, "name")
+        except Exception:
+            company = None
+    if not company:
+        frappe.throw(_("No valid Company resolved for this service booking. Set the listing's Company or a default company."))
 
     # BISMALLAH (Phase 6.5): enforce the provider/service-wise custom time slot.
     # The chosen time must be in the resolved slot set (or rejected) so customers
@@ -360,8 +386,9 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
         "customer_name": customer_name or frappe.session.user,
         "customer_phone": customer_phone or "0911000000",
         "service": service_id,
-        "company": service_doc.company,
+        "company": company,
         "practitioner_name": practitioner or "Standard Specialist",
+        "practitioner_user": practitioner if practitioner and frappe.db.exists("User", practitioner) else provider_user,
         "booking_date": b_date,
         "booking_time": b_time,
         "duration_minutes": service_doc.duration_minutes or 30,
