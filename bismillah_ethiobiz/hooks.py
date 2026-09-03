@@ -111,11 +111,8 @@ website_route_rules = [
     {"from_route": "/bizhealth", "to_route": "bizhealth"},
     {"from_route": "/bizfix", "to_route": "bizfix"},
     {"from_route": "/bizride", "to_route": "bizride"},
-    {"from_route": "/booking", "to_route": "booking"},
     {"from_route": "/bizhome", "to_route": "bizhome"},
     {"from_route": "/bizservice", "to_route": "bizservice"},
-    {"from_route": "/bizservices", "to_route": "bizservices"},
-    {"from_route": "/bizservices/<path:app_path>", "to_route": "bizservices"},
 ]
 
 # ============================================
