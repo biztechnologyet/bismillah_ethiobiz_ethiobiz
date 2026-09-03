@@ -1,0 +1,245 @@
+{
+ "charts": [
+  {
+   "chart_name": "Active Subscriptions",
+   "label": "Active Subscriptions",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Monthly Revenue",
+   "label": "Monthly Revenue (ETB)",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Pending Activations",
+   "label": "Pending Activations",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Coupon Usage",
+   "label": "Coupons Used This Month",
+   "type": "Number"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"📊 Subscription Overview\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Subscriptions\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Monthly Revenue\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pending Activations\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coupon Usage\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🏭 Per-Industry Pricing\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Price\",\"col\":2}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pricing Rule\",\"col\":2}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Industry Categories\",\"col\":2}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open DOBiz Signup\",\"col\":2,\"type\":\"URL\",\"url\":\"https://ethiobiz.et/dobiz-signup\"}},{\"type\":\"header\",\"data\":{\"text\":\"🎟️ Coupons & Promotions\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"DOBiz Coupon\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promo Campaign\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Launch Offer Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Coupon Analytics\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🔄 Subscription Lifecycle\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Contract\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Plan\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Log\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"💳 Payment Transactions\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Reconciliation\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bank Account\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"👥 Customer Management\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer Group\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open Payment Portal\",\"col\":3,\"type\":\"URL\",\"url\":\"https://ethiobiz.et/dobiz-payment\"}}]",
+ "creation": "2026-09-03 17:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "DOBiz Subscription Management",
+ "links": [
+  {
+   "label": "Per-Industry Pricing",
+   "type": "Card Break"
+  },
+  {
+   "label": "Item Price",
+   "link_to": "Item Price",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Pricing Rule",
+   "link_to": "Pricing Rule",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "type": "Link",
+   "filters": "[[\"item_group\",\"=\",\"DOBiz Packages\"]]"
+  },
+  {
+   "label": "Coupons & Promotions",
+   "type": "Card Break"
+  },
+  {
+   "label": "DOBiz Coupon",
+   "link_to": "DOBiz Coupon",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Promo Campaign",
+   "link_to": "Promo Campaign",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Subscription Lifecycle",
+   "type": "Card Break"
+  },
+  {
+   "label": "Subscription Contract",
+   "link_to": "Subscription Contract",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Subscription Plan",
+   "link_to": "Subscription Plan",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Subscription Invoice",
+   "link_to": "Subscription Invoice",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Payment Transactions",
+   "type": "Card Break"
+  },
+  {
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Payment Request",
+   "link_to": "Payment Request",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer Management",
+   "type": "Card Break"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer Group",
+   "link_to": "Customer Group",
+   "link_type": "DocType",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-09-03 17:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "DOBiz Subscription Management",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Item Price",
+   "label": "DOBiz Package Prices",
+   "filters": [
+    ["item_code", "like", "DOBiz%"]
+   ]
+  },
+  {
+   "document_type": "DOBiz Coupon",
+   "label": "Active Coupons",
+   "filters": [
+    ["active", "=", 1]
+   ]
+  },
+  {
+   "document_type": "Subscription Contract",
+   "label": "Active Subscriptions",
+   "filters": [
+    ["status", "=", "Active"]
+   ]
+  },
+  {
+   "document_type": "Payment Entry",
+   "label": "Recent Payments",
+   "filters": [
+    ["payment_type", "=", "Receive"]
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Item Price",
+   "link_to": "Item Price",
+   "stats_filter": "[[\"Item Price\",\"item_code\",\"like\",\"DOBiz%\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Pricing Rule",
+   "link_to": "Pricing Rule",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "DOBiz Coupon",
+   "link_to": "DOBiz Coupon",
+   "stats_filter": "[[\"DOBiz Coupon\",\"active\",\"=\",1,false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Subscription Contract",
+   "link_to": "Subscription Contract",
+   "stats_filter": "[[\"Subscription Contract\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Subscription Invoice",
+   "link_to": "Subscription Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Teal",
+   "doc_view": "List",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "stats_filter": "[[\"Payment Entry\",\"payment_type\",\"=\",\"Receive\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Open DOBiz Signup",
+   "type": "URL",
+   "url": "https://ethiobiz.et/dobiz-signup"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Open Payment Portal",
+   "type": "URL",
+   "url": "https://ethiobiz.et/dobiz-payment"
+  }
+ ],
+ "title": "DOBiz Subscription Management"
+}

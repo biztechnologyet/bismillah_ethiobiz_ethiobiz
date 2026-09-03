@@ -15,6 +15,12 @@ def execute():
 			"label": "Salon & Spa Hub",
 			"module": "Ethiobiz Theme",
 			"json_path": "workspace/salon_and_spa_hub/salon_and_spa_hub.json"
+		},
+		{
+			"name": "DOBiz Subscription Management",
+			"label": "DOBiz Subscription Management",
+			"module": "Ethiobiz Theme",
+			"json_path": "workspace/dobiz_subscription/dobiz_subscription.json"
 		}
 	]
 
