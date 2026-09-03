@@ -1,7 +1,7 @@
 # EthioBiz Workspaces - Implementation & Permanence Verification
 
 ## Overview
-This document records the creation, configuration, and verification of the Desk Workspaces for **EthioBiz Ads**, **Salon & Spa Hub**, and **DOBiz Subscription Management** under the `bismillah_ethiobiz` app (`bismillah_ethiobiz/ethiobiz_theme/workspace/`).
+This document records the creation, configuration, and verification of the Desk Workspaces for **EthioBiz Ads**, **Salon & Spa Hub**, **DOBiz Subscription Management**, **BizRide**, **BizHome**, and **BizFix** under the `bismillah_ethiobiz` app (`bismillah_ethiobiz/ethiobiz_theme/workspace/`).
 
 ---
 
@@ -12,10 +12,19 @@ This document records the creation, configuration, and verification of the Desk 
 2. **Salon & Spa Hub Workspace**:
    - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/salon_and_spa_hub/salon_and_spa_hub.json`
    - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/salon_and_spa_hub/salon_and_spa_hub.py`
-3. **DOBiz Subscription Management Workspace** (NEW - Phase D):
+3. **DOBiz Subscription Management Workspace** (Phase D):
    - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/dobiz_subscription/dobiz_subscription.json`
    - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/dobiz_subscription/dobiz_subscription.py`
-4. **Migration / Installer Patch**:
+4. **BizRide Workspace** (Phase D - 2026-09-03):
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizride/bizride.json`
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizride/bizride.py`
+5. **BizHome Workspace** (Phase D - 2026-09-03):
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizhome/bizhome.json`
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizhome/bizhome.py`
+6. **BizFix Workspace** (Phase D - 2026-09-03):
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizfix/bizfix.json`
+   - Path: `bismillah_ethiobiz/ethiobiz_theme/workspace/bizfix/bizfix.py`
+7. **Migration / Installer Patch**:
    - Path: `bismillah_ethiobiz/ethiobiz_theme/patches/create_ethiobiz_workspaces.py`
 
 ---
@@ -64,7 +73,91 @@ The workspace supports pricing management for all 14 DOBiz industries:
 
 ---
 
-## 3. Permanence Strategy & Execution
+## 2. BizRide Workspace (Phase D - 2026-09-03)
+
+### Purpose
+Centralized workspace for delivery and dispatch management, fleet operations, and tracking.
+
+### Features
+- **Delivery Overview**: Active deliveries, today's rides, available drivers, monthly revenue
+- **Fleet Management**: Vehicle, Driver, Vehicle Log management
+- **Delivery Operations**: Delivery Trip, Delivery Note, Shipment, Route management
+- **Dispatch & Tracking**: Pickup, Delivery, Location, Tracking
+- **Billing & Payments**: Sales Invoice, Payment Entry, Delivery Charge, Pricing Rule
+- **Quick Access**: Direct link to BizRide website
+
+### Key Metrics
+- Active Deliveries count
+- Today's Rides count
+- Available Drivers count
+- Monthly Revenue (ETB)
+- Fleet status breakdown
+- Driver performance metrics
+
+### Access Control
+- Roles: System Manager, Administrator, Fleet Manager, Dispatcher, Delivery Manager
+- Public visibility enabled
+
+---
+
+## 3. BizHome Workspace (Phase D - 2026-09-03)
+
+### Purpose
+Centralized workspace for property management, real estate operations, and hotel management.
+
+### Features
+- **Property Overview**: Active properties, available units, pending applications, monthly revenue
+- **Property Management**: Property, Property Unit, Lease management
+- **Tenant Management**: Tenant, Tenant Ledger, Tenant Exit, Rent Agreement
+- **Hotel Operations**: Room, Room Booking, Folio, Guest management
+- **Billing & Revenue**: Sales Invoice, Payment Entry, Rent Invoice, Maintenance Invoice
+- **Maintenance & Services**: Maintenance Request, Maintenance Visit, Work Order, Service Ticket
+- **Quick Access**: Direct link to BizHome website
+
+### Key Metrics
+- Active Properties count
+- Available Units count
+- Pending Applications count
+- Monthly Revenue (ETB)
+- Occupancy rate calculation
+- Hotel room status breakdown
+- Maintenance request statistics
+
+### Access Control
+- Roles: System Manager, Administrator, Property Manager, Hotel Manager, Maintenance Manager
+- Public visibility enabled
+
+---
+
+## 4. BizFix Workspace (Phase D - 2026-09-03)
+
+### Purpose
+Centralized workspace for service provider management, service requests, and dispatch operations.
+
+### Features
+- **Service Overview**: Active providers, today's service requests, pending assignments, monthly revenue
+- **Service Providers**: Service Provider, Provider Profile, Provider Rating management
+- **Service Requests**: Service Request, Service Assignment, Service Appointment, Service Quote
+- **Service Categories**: Service Category, Service Package, Service Price, Service Template
+- **Billing & Payments**: Sales Invoice, Payment Entry, Service Invoice, Provider Payout
+- **Quick Access**: Direct link to BizFix website
+
+### Key Metrics
+- Active Providers count
+- Today's Service Requests count
+- Pending Assignments count
+- Monthly Revenue (ETB)
+- Provider performance metrics
+- Service category statistics
+- Request status breakdown
+
+### Access Control
+- Roles: System Manager, Administrator, Service Manager, Provider Manager, Dispatcher
+- Public visibility enabled
+
+---
+
+## 5. Permanence Strategy & Execution
 - **Standard Fixtures / File-backed Workspaces**: Placing standard JSON/Python files inside the app module ensures that running `bench migrate` or `bench --site [site] migrate` automatically synchronizes these Workspaces into the database (`tabWorkspace`), ensuring absolute permanence across container rebuilds, database restorations, and site updates.
 - **Roles & Permissions**: Configured with public visibility (`public: 1`) and standard access for `System Manager`, `Administrator`, and relevant domain roles.
 

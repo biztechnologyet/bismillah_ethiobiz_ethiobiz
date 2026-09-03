@@ -21,6 +21,24 @@ def execute():
 			"label": "DOBiz Subscription Management",
 			"module": "Ethiobiz Theme",
 			"json_path": "workspace/dobiz_subscription/dobiz_subscription.json"
+		},
+		{
+			"name": "BizRide",
+			"label": "BizRide",
+			"module": "Ethiobiz Theme",
+			"json_path": "workspace/bizride/bizride.json"
+		},
+		{
+			"name": "BizHome",
+			"label": "BizHome",
+			"module": "Ethiobiz Theme",
+			"json_path": "workspace/bizhome/bizhome.json"
+		},
+		{
+			"name": "BizFix",
+			"label": "BizFix",
+			"module": "Ethiobiz Theme",
+			"json_path": "workspace/bizfix/bizfix.json"
 		}
 	]
 
