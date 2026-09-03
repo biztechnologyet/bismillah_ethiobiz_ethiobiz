@@ -13,6 +13,7 @@ Directly interfaces with:
 import frappe
 from frappe import _
 from frappe.utils import today, add_days, getdate, flt, cint
+from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults
 
 # ==============================================================================
 # 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
@@ -356,7 +357,12 @@ def search_services(category=None, region=None, query=None,
 def book_service(service_id, booking_date=None, booking_time=None, customer_name=None,
                  customer_phone=None, practitioner=None, notes=None,
                  address=None, date=None, time_slot=None):
-    """Creates real BizService Booking and dispatches BizRide if requires_travel."""
+    """Creates real BizService Booking and dispatches BizRide if requires_travel.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
+    
+    # Require login and get customer
+    customer = require_authed_customer("Please log in to book services")
+    
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
@@ -364,6 +370,11 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
     b_date = booking_date or date or str(frappe.utils.now_datetime().date())
     b_time = booking_time or time_slot or "14:00"
     provider_user = None
+
+    # Get customer details from session
+    customer_defaults = session_contact_defaults()
+    customer_name = customer_name or customer_defaults.get("full_name") or "Valued Customer"
+    customer_phone = customer_phone or customer_defaults.get("phone") or "0911000000"
 
     # BISMALLAH (multi-company): resolve the booking company reliably. Prefer the
     # listing's own company; fall back to BizService Settings > Global Defaults >
@@ -389,6 +400,9 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
             company = None
     if not company:
         frappe.throw(_("No valid Company resolved for this service booking. Set the listing's Company or a default company."))
+    
+    # Validate company exists
+    company = resolve_booking_company(company, "service booking")
 
     # BISMALLAH (Phase 6.5): enforce the provider/service-wise custom time slot.
     # The chosen time must be in the resolved slot set (or rejected) so customers
@@ -412,6 +426,7 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
 
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
+        "customer": customer,  # BISMALLAH: Link to authenticated customer
         "customer_name": customer_name or frappe.session.user,
         "customer_phone": customer_phone or "0911000000",
         "service": service_id,

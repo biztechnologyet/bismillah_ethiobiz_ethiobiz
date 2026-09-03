@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var selectedService = null;
 
     initFixControls();
+    loadFixCategories();
     loadFixServices();
 
     function initFixControls() {
@@ -56,6 +57,73 @@ document.addEventListener("DOMContentLoaded", function() {
         if (confirmBtn) {
             confirmBtn.addEventListener("click", handleFixSubmit);
         }
+    }
+
+    function loadFixCategories() {
+        var categoryGrid = document.getElementById("fix-category-grid");
+        if (!categoryGrid) return;
+
+        // Keep "All Services" and load dynamic categories
+        var allServicesCard = categoryGrid.querySelector('[data-cat="all"]');
+        categoryGrid.innerHTML = "";
+        if (allServicesCard) categoryGrid.appendChild(allServicesCard);
+
+        fetch("/api/method/bismillah_ethiobiz.bizservice_api.get_categories")
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.message && data.message.categories) {
+                    data.message.categories.forEach(function(cat) {
+                        if (cat.category_name && cat.category_name !== "All Item Groups") {
+                            var card = document.createElement("div");
+                            card.className = "fix-cat-card";
+                            card.dataset.cat = cat.category_name;
+                            card.innerHTML = '<span class="cat-icon">🔧</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
+                            categoryGrid.appendChild(card);
+                        }
+                    });
+                    
+                    // Re-attach event listeners to new category cards
+                    document.querySelectorAll(".fix-cat-card").forEach(function(card) {
+                        card.addEventListener("click", function() {
+                            document.querySelectorAll(".fix-cat-card").forEach(function(c) { c.classList.remove("active"); });
+                            this.classList.add("active");
+                            currentCategory = this.dataset.cat;
+                            loadFixServices();
+                        });
+                    });
+                }
+            })
+            .catch(function(err) {
+                console.error("Failed to load categories:", err);
+                // Fallback to hardcoded categories if API fails
+                var fallbackCategories = [
+                    { cat: "Electrical & Power", icon: "⚡", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
+                    { cat: "Plumbing & Water", icon: "🚿", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
+                    { cat: "HVAC & Appliances", icon: "❄️", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
+                    { cat: "Auto Mechanics", icon: "🚗", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
+                    { cat: "IT & Security", icon: "💻", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
+                    { cat: "Facility Maintenance", icon: "🏢", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
+                    { cat: "Carpentry & Woodwork", icon: "🪵", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
+                    { cat: "Sanitation & Cleaning", icon: "🧹", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
+                ];
+                fallbackCategories.forEach(function(cat) {
+                    var card = document.createElement("div");
+                    card.className = "fix-cat-card";
+                    card.dataset.cat = cat.cat;
+                    card.innerHTML = '<span class="cat-icon">' + cat.icon + '</span><h4>' + cat.title + '</h4><p>' + cat.desc + '</p>';
+                    categoryGrid.appendChild(card);
+                });
+                
+                // Re-attach event listeners
+                document.querySelectorAll(".fix-cat-card").forEach(function(card) {
+                    card.addEventListener("click", function() {
+                        document.querySelectorAll(".fix-cat-card").forEach(function(c) { c.classList.remove("active"); });
+                        this.classList.add("active");
+                        currentCategory = this.dataset.cat;
+                        loadFixServices();
+                    });
+                });
+            });
     }
 
     function loadFixServices() {
