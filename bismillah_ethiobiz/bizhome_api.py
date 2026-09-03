@@ -2,6 +2,20 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint, today, add_days, get_datetime, now_datetime
 import json
+from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user
+
+
+def session_contact_defaults():
+    """Get contact defaults from current user session."""
+    user = frappe.session.user or ""
+    if user == "Guest":
+        return {}
+    
+    return {
+        "full_name": frappe.db.get_value("User", user, "full_name") or "",
+        "email": frappe.db.get_value("User", user, "email") or "",
+        "phone": frappe.db.get_value("User", user, "mobile_no") or frappe.db.get_value("User", user, "phone") or ""
+    }
 
 # Fallback Seed Properties if none exist in database
 SAMPLE_PROPERTIES = [
@@ -255,10 +269,9 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     Creates a confirmed BizBooking / Hotel Reservation entry.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
-    from bismillah_ethiobiz import ethiobiz_identity
     
     # Require login and get customer
-    customer = ethiobiz_identity.require_authed_customer("Please log in to book property stays")
+    customer = require_authed_customer("Please log in to book property stays")
     
     if not all([property_id, check_in, check_out]):
         frappe.throw(_("Property, check-in date, and check-out date are required"))
@@ -273,7 +286,10 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     rate_per_night = flt(prop.get("price", 1800.0))
     total_amount = rate_per_night * nights
 
-    customer_defaults = ethiobiz_identity.session_contact_defaults()
+    # Resolve property company (owning company)
+    property_company = resolve_booking_company("Property", property_id, "company")
+
+    customer_defaults = session_contact_defaults()
     user = customer_name or customer_defaults.get("full_name")
     phone = customer_phone or customer_defaults.get("phone") or "0911000000"
 
@@ -373,14 +389,21 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
         "message": f"Stay successfully reserved for {nights} night(s) at {prop.get('title')}!"
     }
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def request_property_lease(property_id, tenure_frequency="Monthly", start_date=None, duration_months=6, customer_name=None, customer_phone=None):
     """
     Submits a residential or commercial lease agreement application.
+    BISMALLAH: Enforces login, binds to customer and company.
     """
+    # Require login and get customer
+    customer = require_authed_customer("Please log in to submit lease applications")
+    
     if not property_id:
         frappe.throw(_("Property ID is required"))
 
+    # Resolve property company (owning company)
+    property_company = resolve_booking_company("Property", property_id, "company")
+    
     s_date = start_date or today()
     dur = cint(duration_months) or 6
     prop_res = get_property_details(property_id)
@@ -400,7 +423,9 @@ def request_property_lease(property_id, tenure_frequency="Monthly", start_date=N
         "monthly_rent": f"{monthly_rent:,.2f} ETB",
         "security_deposit": f"{deposit:,.2f} ETB",
         "total_commitment": f"{total_contract + deposit:,.2f} ETB",
-        "message": f"Lease application submitted for {prop.get('title')}. An agent will contact {customer_phone or 'you'} within 2 hours."
+        "company": property_company,
+        "customer": customer,
+        "message": f"Lease application submitted for {prop.get('title')}. An agent will contact you within 2 hours."
     }
 
 @frappe.whitelist(allow_guest=True)

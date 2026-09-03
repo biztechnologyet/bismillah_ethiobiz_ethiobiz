@@ -11,6 +11,7 @@ public-facing appointment booking backed by the Healthcare Desk module.
 import frappe
 from frappe import _
 from frappe.utils import today, now_datetime, getdate, flt, cint
+from ethiobiz_identity import require_authed_customer, resolve_booking_company
 
 
 @frappe.whitelist(allow_guest=True)
@@ -209,15 +210,19 @@ def book_clinical_appointment(doctor_id, patient_name=None, patient_phone=None,
     """
     if not doctor_id:
         frappe.throw("Doctor is required")
-    if not patient_name or not patient_phone:
-        frappe.throw("Patient Name and Phone Number are mandatory")
-
+    
+    # Require authenticated customer
+    customer = require_authed_customer("Please log in to book appointments")
+    
     if not frappe.db.exists("DocType", "Patient") or not frappe.db.exists("DocType", "Patient Appointment"):
         frappe.throw("Healthcare module not fully installed")
 
     date = date or today()
     slot = slot or "10:00"
 
+    # Resolve practitioner company (owning company)
+    practitioner_company = resolve_booking_company("Healthcare Practitioner", doctor_id, "company")
+    
     # Get or create Patient by phone (authoritative)
     patient = None
     if frappe.db.exists("Patient", {"mobile": patient_phone}):
@@ -232,13 +237,14 @@ def book_clinical_appointment(doctor_id, patient_name=None, patient_phone=None,
             "patient_name": patient_name,
             "mobile": patient_phone,
             "email": patient_email or "",
-            "sex": "Female" if "w/ro" in patient_name.lower() else "Male"
+            "sex": "Female" if "w/ro" in patient_name.lower() else "Male",
+            "customer": customer  # Link to authenticated customer
         })
         p_doc.insert(ignore_permissions=True)
         patient = p_doc.name
 
     fee = frappe.db.get_value("Healthcare Practitioner", doctor_id, "consultation_fee") or 500.0
-    comp = frappe.db.get_value("Healthcare Practitioner", doctor_id, "company") or "Biz Technology Solutions"
+    comp = practitioner_company
 
     appt = frappe.get_doc({
         "doctype": "Patient Appointment",
@@ -248,6 +254,7 @@ def book_clinical_appointment(doctor_id, patient_name=None, patient_phone=None,
         "appointment_time": slot,
         "appointment_type": consultation_type,
         "company": comp,
+        "customer": customer,  # Link to authenticated customer
         "paid_amount": fee,
         "notes": f"Symptoms: {symptoms or 'General Checkup'} | Booked for: {book_for}",
         "status": "Scheduled"

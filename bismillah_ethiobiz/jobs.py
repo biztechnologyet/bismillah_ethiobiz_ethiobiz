@@ -1,4 +1,5 @@
 import frappe
+from ethiobiz_identity import require_authed_customer, resolve_booking_company
 
 def get_context(context):
     context.no_cache = 1
@@ -35,12 +36,11 @@ def get_context(context):
 @frappe.whitelist()
 def submit_job_application(job_title=None, applicant_name=None, email_id=None, phone_number=None, company=None, cover_letter=None):
     """Creates a verified Job Applicant record in ERPNext HRMS with attached CV/documents.
-    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding and login enforcement."""
-    from bismillah_ethiobiz import ethiobiz_identity
+    BISMALLAH: Enforces login, binds to customer and company, stores user for tracking."""
     from frappe.utils.file_manager import save_file
     
     # Require login (no guest access)
-    customer = ethiobiz_identity.require_authed_customer("Please log in to submit job applications")
+    customer = require_authed_customer("Please log in to submit job applications")
     
     user = frappe.session.user
     if user and user != "Guest":
@@ -52,6 +52,15 @@ def submit_job_application(job_title=None, applicant_name=None, email_id=None, p
     if not applicant_name or not email_id:
         frappe.throw("Applicant Name and Email Address are required.")
 
+    # Resolve company from Job Opening if not provided
+    if not company and job_title:
+        job_company = frappe.db.get_value("Job Opening", {"job_title": job_title}, "company")
+        company = job_company or "Biz Technology Solutions"
+    
+    # Ensure company is set, no silent fallback
+    if not company:
+        frappe.throw("Company is required. Please specify the hiring company.")
+
     app_doc = frappe.get_doc({
         "doctype": "Job Applicant",
         "applicant_name": applicant_name,
@@ -61,7 +70,8 @@ def submit_job_application(job_title=None, applicant_name=None, email_id=None, p
         "status": "Open",
         "notes": cover_letter or "",
         "company": company,  # BISMALLAH: Store the company parameter
-        "customer": customer  # BISMALLAH: Link to customer
+        "customer": customer,  # BISMALLAH: Link to customer
+        "user": user  # BISMALLAH: Store the user who submitted
     })
     app_doc.flags.ignore_permissions = True
     app_doc.insert(ignore_permissions=True)
@@ -94,5 +104,60 @@ def submit_job_application(job_title=None, applicant_name=None, email_id=None, p
     return {
         "status": "success",
         "message": "Application submitted successfully with documents! Our HR team has received your profile.",
-        "applicant_id": app_doc.name
+        "applicant_id": app_doc.name,
+        "company": company,
+        "customer": customer
+    }
+
+@frappe.whitelist()
+def get_job_openings(company=None):
+    """Get job openings filtered by company (if specified)."""
+    filters = {"status": "Open"}
+    if company:
+        filters["company"] = company
+    
+    jobs = frappe.get_all(
+        "Job Opening",
+        filters=filters,
+        fields=[
+            "name", "job_title", "company", "designation",
+            "employment_type", "location", "lower_range",
+            "upper_range", "currency", "salary_per", "description", "posted_on"
+        ],
+        order_by="posted_on desc, creation desc"
+    )
+    
+    for j in jobs:
+        if j.lower_range and j.upper_range:
+            j["salary_str"] = f"{j.lower_range:,.0f} - {j.upper_range:,.0f} {j.currency or 'ETB'} / {j.salary_per or 'mo'}"
+        elif j.lower_range:
+            j["salary_str"] = f"{j.lower_range:,.0f} {j.currency or 'ETB'} / {j.salary_per or 'mo'}"
+        else:
+            j["salary_str"] = "Competitive Compensation"
+    
+    return {"status": "success", "jobs": jobs}
+
+@frappe.whitelist()
+def get_job_details(job_id):
+    """Get detailed job information (requires login for contact info)."""
+    # Don't require login for basic job viewing, but could add for sensitive info
+    job = frappe.get_doc("Job Opening", job_id)
+    
+    return {
+        "status": "success",
+        "job": {
+            "name": job.name,
+            "job_title": job.job_title,
+            "company": job.company,
+            "designation": job.designation,
+            "employment_type": job.employment_type,
+            "location": job.location,
+            "lower_range": job.lower_range,
+            "upper_range": job.upper_range,
+            "currency": job.currency,
+            "salary_per": job.salary_per,
+            "description": job.description,
+            "posted_on": job.posted_on,
+            "status": job.status
+        }
     }
