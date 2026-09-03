@@ -27,7 +27,7 @@ SAMPLE_PROPERTIES = [
     },
     {
         "name": "PROP-BMS-002",
-        "title": "OYO-Grade Boutique Hotel Deluxe Room",
+        "title": "Premium Boutique Hotel Deluxe Room",
         "property_type": "Hotel / Pension Room",
         "tenure": "Daily / Short Stay",
         "price": 1800.0,
@@ -248,12 +248,18 @@ def get_property_details(property_id):
 
     frappe.throw(_(f"Property {property_id} not found"))
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def book_property_stay(property_id, check_in, check_out, guests=1, customer_name=None, customer_phone=None, special_requests=None):
     """
-    OYO / Airbnb style daily stay booking.
+    Premium hotel / Airbnb style daily stay booking.
     Creates a confirmed BizBooking / Hotel Reservation entry.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to book property stays")
+    
     if not all([property_id, check_in, check_out]):
         frappe.throw(_("Property, check-in date, and check-out date are required"))
 
@@ -267,8 +273,9 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     rate_per_night = flt(prop.get("price", 1800.0))
     total_amount = rate_per_night * nights
 
-    user = customer_name or frappe.session.user
-    phone = customer_phone or "0911000000"
+    customer_defaults = ethiobiz_identity.session_contact_defaults()
+    user = customer_name or customer_defaults.get("full_name")
+    phone = customer_phone or customer_defaults.get("phone") or "0911000000"
 
     # Create BizBooking entry if DocType exists
     booking_id = f"STAY-{property_id}-{cint(now_datetime().timestamp())}"
@@ -296,6 +303,8 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
                     co = (frappe.db.get_single_value("BizService Settings", "company")
                           or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0])
                     if co:
+                        # BISMALLAH: Validate company before creating listing
+                        co = ethiobiz_identity.resolve_booking_company(co, "property stay listing")
                         try:
                             listing = frappe.get_doc({
                                 "doctype": "BizService Listing",

@@ -32,10 +32,15 @@ def get_context(context):
     context.companies = [{"name": k, "count": v} for k, v in company_counts.items()]
     return context
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def submit_job_application(job_title=None, applicant_name=None, email_id=None, phone_number=None, company=None, cover_letter=None):
-    """Creates a verified Job Applicant record in ERPNext HRMS with attached CV/documents."""
+    """Creates a verified Job Applicant record in ERPNext HRMS with attached CV/documents.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding and login enforcement."""
+    from bismillah_ethiobiz import ethiobiz_identity
     from frappe.utils.file_manager import save_file
+    
+    # Require login (no guest access)
+    customer = ethiobiz_identity.require_authed_customer("Please log in to submit job applications")
     
     user = frappe.session.user
     if user and user != "Guest":
@@ -54,7 +59,9 @@ def submit_job_application(job_title=None, applicant_name=None, email_id=None, p
         "phone_number": phone_number,
         "job_title": job_title,
         "status": "Open",
-        "notes": cover_letter or ""
+        "notes": cover_letter or "",
+        "company": company,  # BISMALLAH: Store the company parameter
+        "customer": customer  # BISMALLAH: Link to customer
     })
     app_doc.flags.ignore_permissions = True
     app_doc.insert(ignore_permissions=True)

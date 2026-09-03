@@ -318,7 +318,13 @@ def get_provider_portfolio(company=None):
 
 @frappe.whitelist()
 def update_booking_status(booking=None, status=None):
-    """Confirm / complete / cancel / no-show a BizService Booking (whitelisted)."""
+    """Confirm / complete / cancel / no-show a BizService Booking (whitelisted).
+    BISMALLAH: Integrated with ethiobiz_identity for proper access control."""
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login for status updates
+    ethiobiz_identity.require_login("Please log in to update booking status")
+    
     if not _has("BizService Booking"):
         frappe.throw("BizService Booking module not installed")
     if not booking or not frappe.db.exists("BizService Booking", booking):
@@ -345,7 +351,13 @@ def update_booking_status(booking=None, status=None):
 @frappe.whitelist()
 def submit_review(booking=None, rating=0, review=None):
     """Record a review; gated to Completed bookings when BizService Settings.enable.
-    Recomputes the listing average_rating."""
+    Recomputes the listing average_rating.
+    BISMALLAH: Integrated with ethiobiz_identity for proper access control."""
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login for reviews
+    ethiobiz_identity.require_login("Please log in to submit reviews")
+    
     if not _has("BizService Booking"):
         frappe.throw("BizService Booking module not installed")
     if not booking or not frappe.db.exists("BizService Booking", booking):

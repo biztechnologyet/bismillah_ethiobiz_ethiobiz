@@ -556,6 +556,28 @@
             .layout-side-section {
                 width: 85% !important;
                 max-width: 300px !important;
+                transform: translateX(-100%) !important; /* Hidden by default on mobile */
+            }
+            
+            /* Show sidebar when active */
+            body.sidebar-mobile-open .layout-side-section {
+                transform: translateX(0) !important;
+            }
+            
+            /* Overlay for mobile */
+            .ethio-mobile-overlay {
+                display: none !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                background: rgba(0,0,0,0.5) !important;
+                z-index: 1000 !important;
+            }
+            
+            body.sidebar-mobile-open .ethio-mobile-overlay {
+                display: block !important;
             }
             
             .layout-side-section .sidebar-menu,
@@ -574,11 +596,44 @@
                 text-overflow: ellipsis !important;
                 max-width: 100% !important;
                 display: block !important;
+                padding: 12px 8px !important; /* Larger touch targets */
+                font-size: 16px !important; /* Larger text for mobile */
             }
             
             .layout-side-section > * {
                 max-width: 100% !important;
                 overflow-x: hidden !important;
+            }
+            
+            /* Mobile hamburger button */
+            #ethio-mobile-hamburger {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 40px !important;
+                height: 40px !important;
+                margin-right: 12px !important;
+                cursor: pointer !important;
+                background: rgba(0,0,0,0.05) !important;
+                border: 1px solid rgba(0,0,0,0.1) !important;
+                border-radius: 8px !important;
+                color: var(--text-color) !important;
+            }
+            
+            #ethio-mobile-hamburger:hover {
+                background: rgba(0,0,0,0.1) !important;
+            }
+            
+            /* Hide desktop toggle on mobile */
+            #ethio-toggle-btn {
+                display: none !important;
+            }
+        }
+        
+        /* Desktop: hide mobile hamburger */
+        @media (min-width: 992px) {
+            #ethio-mobile-hamburger {
+                display: none !important;
             }
         }
     `;
@@ -592,8 +647,23 @@
     }
 
     function forceUI() {
-        // A. Toggle Button
+        // A. Mobile Hamburger Button (for mobile devices)
         const brand = document.querySelector('.navbar-brand');
+        if (brand && brand.parentElement && !document.getElementById('ethio-mobile-hamburger')) {
+            const mobileBtn = document.createElement('div');
+            mobileBtn.id = 'ethio-mobile-hamburger';
+            mobileBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+            mobileBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.body.classList.toggle('sidebar-mobile-open');
+                console.log('[EthioBiz] Mobile sidebar toggled');
+            };
+            brand.parentElement.insertBefore(mobileBtn, brand);
+            console.log('[EthioBiz] Mobile hamburger button injected');
+        }
+
+        // B. Desktop Toggle Button (for desktop)
         if (brand && brand.parentElement && !document.getElementById('ethio-toggle-btn')) {
             const btn = document.createElement('div');
             btn.id = 'ethio-toggle-btn';
@@ -604,10 +674,24 @@
                 document.body.classList.toggle('sidebar-collapsed');
             };
             brand.parentElement.insertBefore(btn, brand);
-            console.log('[EthioBiz] Toggle button injected');
+            console.log('[EthioBiz] Desktop toggle button injected');
+        }
+        
+        // C. Mobile Overlay (for closing sidebar when clicking outside)
+        if (!document.getElementById('ethio-mobile-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'ethio-mobile-overlay';
+            overlay.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.body.classList.remove('sidebar-mobile-open');
+                console.log('[EthioBiz] Mobile sidebar closed via overlay');
+            };
+            document.body.appendChild(overlay);
+            console.log('[EthioBiz] Mobile overlay injected');
         }
 
-        // B. Close Button
+        // D. Close Button (works for both desktop and mobile)
         const sidebar = document.querySelector('.layout-side-section');
         if (sidebar && !document.getElementById('ethio-sidebar-close')) {
             const closeBtn = document.createElement('div');
@@ -617,11 +701,13 @@
                 e.preventDefault();
                 e.stopPropagation();
                 document.body.classList.add('sidebar-collapsed');
+                document.body.classList.remove('sidebar-mobile-open');
+                console.log('[EthioBiz] Sidebar closed (both modes)');
             };
             sidebar.insertBefore(closeBtn, sidebar.firstChild);
             console.log('[EthioBiz] Close button injected');
         }
-        // C. Hide Dagu LMS Popup (Right Panel & Sidebar)
+        // E. Hide Dagu LMS Popup (Right Panel & Sidebar)
         // Right Panel
         const rightPanels = document.querySelectorAll('.fixed.right-0, .bg-surface-modal');
         rightPanels.forEach(el => {
@@ -646,7 +732,7 @@
             }
         });
 
-        // D. Hide Navbar Help Dropdown Third-Party Items (Frappe School, Support, Forum, Docs)
+        // F. Hide Navbar Help Dropdown Third-Party Items (Frappe School, Support, Forum, Docs)
         const helpDropdown = document.querySelector('.dropdown-help .dropdown-menu, #help-menu, .navbar-nav .dropdown-menu');
         if (helpDropdown) {
             const thirdPartyLabels = ['Frappe School', 'Frappe Support', 'User Forum', 'Documentation', 'Report an Issue'];

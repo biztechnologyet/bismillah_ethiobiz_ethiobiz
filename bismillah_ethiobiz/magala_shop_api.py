@@ -381,7 +381,13 @@ def get_regions():
 
 @frappe.whitelist()
 def submit_review(item_code, rating, review_text, review_title="Customer Review"):
-    """Submits verified product review and updates average product rating."""
+    """Submits verified product review and updates average product rating.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to submit reviews")
+    
     user = frappe.session.user
     if not frappe.db.exists("DocType", "Item Review"):
         frappe.throw("Review system not installed")

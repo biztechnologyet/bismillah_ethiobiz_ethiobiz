@@ -124,7 +124,13 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
                        book_for="Self", attachments=None):
     """
     Creates real Patient and Patient Appointment in Healthcare Desk.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to book appointments")
+    
     user = frappe.session.user
     if not patient_name and user != "Guest":
         patient_name = frappe.db.get_value("User", user, "full_name") or user
@@ -152,7 +158,10 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
 
     # Create Patient Appointment in Desk
     fee = frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0
-    comp = frappe.db.get_value("Healthcare Practitioner", practitioner, "company") or "Biz Technology Solutions"
+    comp = frappe.db.get_value("Healthcare Practitioner", practitioner, "company")
+    
+    # BISMALLAH: Validate company exists and resolve properly
+    comp = ethiobiz_identity.resolve_booking_company(comp, "practitioner")
 
     appt = frappe.get_doc({
         "doctype": "Patient Appointment",
@@ -163,8 +172,9 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
         "appointment_type": service_type,
         "company": comp,
         "paid_amount": fee,
-        "notes": f"Symptoms: {symptoms or 'General Checkup'} | Booked for: {book_for}",
-        "status": "Scheduled" if frappe.db.exists("DocType", "Patient Appointment") else "Open"
+        "notes": f"Symptoms: {symptoms or 'General Checkup'} | Booked for: {book_for} | Customer: {customer}",
+        "status": "Scheduled" if frappe.db.exists("DocType", "Patient Appointment") else "Open",
+        "customer": customer  # BISMALLAH: Link to customer
     })
     appt.insert(ignore_permissions=True)
 
@@ -243,7 +253,13 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
               special_requests=None, payment_method="Pay at Hotel"):
     """
     Creates real Room Booking, Guest Profile, and Folio in PropMS Desk.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to book rooms")
+    
     user = frappe.session.user
     if not guest_name and user != "Guest":
         guest_name = frappe.db.get_value("User", user, "full_name") or user
@@ -253,6 +269,9 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
     nights = max(1, frappe.utils.date_diff(check_out, check_in)) if check_in and check_out else 1
     rate = 2500.0
     total_amount = rate * nights * int(rooms)
+    
+    # BISMALLAH: Validate company exists
+    company = ethiobiz_identity.resolve_booking_company(company, "room booking")
 
     booking_id = None
     if frappe.db.exists("DocType", "Room Booking"):

@@ -649,6 +649,11 @@
                 <div class="dob-ind-btn" data-ind="Retail & Wholesale"><span class="dob-ind-icon">📦</span>Retail & Wholesale</div>
                 <div class="dob-ind-btn" data-ind="Non-Profit"><span class="dob-ind-icon">🏛️</span>Non-Profit & NGOs</div>
                 <div class="dob-ind-btn" data-ind="Professional Services"><span class="dob-ind-icon">💼</span>Professional Services</div>
+                <div class="dob-ind-btn" data-ind="Transportation"><span class="dob-ind-icon">🚚</span>Transportation & Fleet</div>
+                <div class="dob-ind-btn" data-ind="Agriculture"><span class="dob-ind-icon">🌾</span>Agriculture & Agribusiness</div>
+                <div class="dob-ind-btn" data-ind="Construction"><span class="dob-ind-icon">🏗️</span>Construction & Engineering</div>
+                <div class="dob-ind-btn" data-ind="Logistics"><span class="dob-ind-icon">📦</span>Logistics & Warehouse</div>
+                <div class="dob-ind-btn" data-ind="Government"><span class="dob-ind-icon">🏛️</span>Government & Public-Interest</div>
             </div>
         </div>
 
@@ -716,9 +721,33 @@
         <div class="dob-step-card">
             <div class="dob-step-header">
                 <div class="dob-step-num">3</div>
-                <h3 class="dob-step-title">Select Billing Term & Receive Instant Discounts</h3>
+                <h3 class="dob-step-title">Select Billing Term (1-12 Months) & Receive Instant Discounts</h3>
             </div>
-            <div class="dob-term-grid" id="dob-term-grid">
+            
+            <!-- Variable Month Selector -->
+            <div style="margin-bottom: 20px;">
+                <label class="dob-label" style="margin-bottom: 8px;">Select Subscription Term (Months): <span id="dob-month-display" style="color: #008080; font-weight: 900;">6</span></label>
+                <input type="range" id="dob-month-slider" min="1" max="12" value="6" step="1" 
+                       style="width: 100%; height: 8px; margin: 10px 0; accent-color: #008080;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748b;">
+                    <span>1 month</span>
+                    <span style="font-weight: 700; color: #008080;">6 months</span>
+                    <span>12 months</span>
+                </div>
+            </div>
+            
+            <!-- Term Discount Display -->
+            <div id="dob-term-discount-info" style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 16px; font-weight: 800; color: #008080; margin-bottom: 4px;">
+                    Your Discount: <span id="dob-discount-percent">10%</span> Off
+                </div>
+                <div style="font-size: 13px; color: #475569;">
+                    Longer terms = bigger savings! <span id="dob-savings-message">Save 5,700.00 ETB with 6-month term</span>
+                </div>
+            </div>
+            
+            <!-- Quick Term Selection Buttons (for convenience) -->
+            <div class="dob-term-grid" id="dob-term-grid" style="display: none;">
                 <div class="dob-term-btn" data-term="3" data-discount="0">
                     <span class="dob-term-name">3 Months</span>
                     <span class="dob-term-discount">Standard Term</span>
@@ -965,6 +994,54 @@
             });
         });
     }
+    
+    // ---------- Variable Month Slider (1-12 months) ----------
+    function bindMonthSlider() {
+        const slider = $('dob-month-slider');
+        const display = $('dob-month-display');
+        const discountPercent = $('dob-discount-percent');
+        const savingsMessage = $('dob-savings-message');
+        
+        if (slider) {
+            slider.addEventListener('input', function() {
+                const months = parseInt(this.value);
+                state.termMonths = months;
+                
+                // Calculate dynamic discount based on months
+                // 1-2 months: 0%
+                // 3-5 months: 5%
+                // 6-8 months: 10%
+                // 9-11 months: 15%
+                // 12 months: 20%
+                let discount = 0;
+                if (months >= 12) discount = 0.20;
+                else if (months >= 9) discount = 0.15;
+                else if (months >= 6) discount = 0.10;
+                else if (months >= 3) discount = 0.05;
+                else discount = 0;
+                
+                state.termPct = discount;
+                
+                // Update UI
+                if (display) display.textContent = months;
+                if (discountPercent) discountPercent.textContent = (discount * 100) + '%';
+                
+                // Calculate savings for display
+                const rawTotal = state.basePrice * months;
+                const savings = rawTotal * discount;
+                if (savingsMessage) {
+                    if (discount > 0) {
+                        savingsMessage.textContent = `Save ${fmt(savings)} ETB with ${months}-month term`;
+                    } else {
+                        savingsMessage.textContent = `Standard pricing for ${months} month(s)`;
+                    }
+                }
+                
+                resetCoupon();
+                recalc();
+            });
+        }
+    }
 
     // ---------- Live config from server (Item Price source of truth) ----------
     function loadConfig() {
@@ -972,7 +1049,10 @@
             .then(r => r.json())
             .then(res => { if (res.message) applyConfig(res.message); })
             .catch(() => { /* static fallback markup stays */ })
-            .finally(recalc);
+            .finally(() => {
+                bindMonthSlider(); // Initialize variable month slider
+                recalc();
+            });
     }
 
     function applyConfig(cfg) {

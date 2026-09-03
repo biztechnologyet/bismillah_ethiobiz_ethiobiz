@@ -20,7 +20,13 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
                      is_cod=False, cod_amount=0.0):
     """
     Creates an official BizRide Delivery order and starts the dispatch broadcast.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to request delivery")
+    
     if not frappe.db.exists("DocType", "BizRide Delivery"):
         frappe.throw("BizRide Delivery module not installed")
 
@@ -49,13 +55,22 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
     pickup_otp = str(frappe.generate_hash(length=4)).upper()
     delivery_otp = str(frappe.generate_hash(length=4)).upper()
 
+    # BISMALLAH: Validate and resolve company properly
+    seller_company = ethiobiz_identity.resolve_booking_company(seller_company, "delivery request")
+    
+    # Get customer details for buyer info
+    customer_defaults = ethiobiz_identity.session_contact_defaults()
+    buyer_name = buyer_name or customer_defaults.get("full_name") or "Valued Customer"
+    buyer_phone = buyer_phone or customer_defaults.get("phone") or "0911000000"
+
     delivery_doc = frappe.get_doc({
         "doctype": "BizRide Delivery",
         "order_reference": str(order_reference),
         "order_doctype": order_doctype,
-        "seller_company": seller_company or "Biz Technology Solutions",
-        "buyer_name": buyer_name or "Valued Customer",
-        "buyer_phone": buyer_phone or "0911000000",
+        "seller_company": seller_company,
+        "buyer_name": buyer_name,
+        "buyer_phone": buyer_phone,
+        "customer": customer,  # BISMALLAH: Link to customer
         "pickup_address": pickup_address or "Bole, Addis Ababa",
         "delivery_address": delivery_address or "Kazanchis, Addis Ababa",
         "pickup_latitude": pickup_lat,

@@ -3,7 +3,7 @@
 Bismallah EthioBiz BizHealth Clinical Booking APIs
 Bismillah Ar-Rahman Ar-Rahim
 
-Practo-grade clinical vertical: specialty discovery, doctor search with
+EthioBiz clinical vertical: specialty discovery, doctor search with
 ratings/fees/affiliations, schedule-aware slot computation, and full
 public-facing appointment booking backed by the Healthcare Desk module.
 """
