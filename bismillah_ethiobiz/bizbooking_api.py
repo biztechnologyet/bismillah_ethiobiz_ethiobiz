@@ -15,7 +15,7 @@ from frappe import _
 from frappe.utils import today, add_days, getdate, flt, cint
 
 # ==============================================================================
-# 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING (PRACTO-GRADE)
+# 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=True)
@@ -190,7 +190,7 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
 
 
 # ==============================================================================
-# 2. HOTEL & PROPERTY HOSPITALITY BOOKING (OYOROOMS-GRADE)
+# 2. HOTEL & PROPERTY HOSPITALITY BOOKING
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=True)
