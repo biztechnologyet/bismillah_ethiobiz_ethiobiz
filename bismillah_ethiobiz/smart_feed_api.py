@@ -364,7 +364,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "comments_count": 4,
                     "price": rate_str,
                     "created": r.creation,
-                    "action_url": f"/booking",
+                    "action_url": f"/bizservice",
                     "action_label": "Reserve Now ➔",
                     "is_booking": True
                 })

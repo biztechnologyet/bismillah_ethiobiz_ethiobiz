@@ -10,6 +10,8 @@
     let allListings = [];
     let currentCat = "all";
     let currentQuery = "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const deepProvider = urlParams.get("provider") || "";
 
     function getJSON(method, params) {
         const url = new URL(API + method, window.location.origin);
@@ -210,6 +212,17 @@
             (cats.categories || []).forEach(c => window.__bsCats[c.name] = c.category_name);
             allListings = allListings.map(s => Object.assign({}, s, { category_name: window.__bsCats[s.category] || s.category }));
             render();
+            // Deep-link: ?provider=<listing name> auto-opens that listing's booking
+            if (deepProvider) {
+                (function deepLink() {
+                    const match = allListings.find(l => l.name === deepProvider || (l.slug && l.slug === deepProvider));
+                    if (match) { window.__openBizServiceBooking(match.name); return; }
+                    const providerMatch = allListings.find(l =>
+                        (l.practitioners || []).some(p => (p.name || "") === deepProvider || (p.practitioner_name || "") === deepProvider)
+                    );
+                    if (providerMatch) window.__openBizServiceBooking(providerMatch.name);
+                })();
+            }
         });
 
         const modal = el("bs-modal");

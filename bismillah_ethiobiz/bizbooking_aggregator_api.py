@@ -89,7 +89,7 @@ def search_all_bookables(vertical=None, location=None, check_in=None,
                     "rating": 4.9,
                     "price": 2500.0,
                     "price_text": "2,500.00 ETB / night",
-                    "action_url": "/booking?type=hotel",
+                    "action_url": "/bizservice?type=hotel",
                     "action_label": "Reserve Room"
                 })
 
@@ -144,7 +144,7 @@ def search_all_bookables(vertical=None, location=None, check_in=None,
                     "rating": 4.9,
                     "price": rate,
                     "price_text": f"{rate:,.2f} ETB" if rate > 0 else "Free Appointment",
-                    "action_url": "/booking",
+                    "action_url": "/bizservice",
                     "action_label": "Reserve Now"
                 })
 

@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <div style="display:flex; gap:8px; margin-bottom:16px;">
                 <a href="tel:${comp.phone}" style="flex:1; text-align:center; background:#1FB6AE; color:#fff; padding:10px; border-radius:10px; font-weight:600; text-decoration:none;">📞 Call</a>
                 <a href="/shop?company=${encodeURIComponent(comp.id)}" style="flex:1; text-align:center; background:#f1f5f9; color:#1e293b; padding:10px; border-radius:10px; font-weight:600; text-decoration:none;">🛒 Shop</a>
-                <a href="/book?company=${encodeURIComponent(comp.id)}" style="flex:1; text-align:center; background:#f1f5f9; color:#1e293b; padding:10px; border-radius:10px; font-weight:600; text-decoration:none;">📅 Book</a>
+                <a href="/bizservice?provider=${encodeURIComponent(comp.id)}" style="flex:1; text-align:center; background:#f1f5f9; color:#1e293b; padding:10px; border-radius:10px; font-weight:600; text-decoration:none;">📅 Book</a>
             </div>
             <div style="background:#f8fafc; padding:12px; border-radius:10px; font-size:0.88rem;">
                 <div style="margin-bottom:6px;"><strong>📍 Location:</strong> ${comp.address}</div>
