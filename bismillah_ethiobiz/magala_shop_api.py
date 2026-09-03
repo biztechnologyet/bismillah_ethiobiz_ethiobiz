@@ -15,6 +15,7 @@ import json
 import math
 import frappe
 from frappe.utils import cint, flt, cstr
+from ethiobiz_identity import require_authed_customer
 
 @frappe.whitelist(allow_guest=True)
 def search_products(query="", category=None, company=None, region=None,
@@ -383,10 +384,9 @@ def get_regions():
 def submit_review(item_code, rating, review_text, review_title="Customer Review"):
     """Submits verified product review and updates average product rating.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
-    from bismillah_ethiobiz import ethiobiz_identity
     
     # Require login and get customer
-    customer = ethiobiz_identity.require_authed_customer("Please log in to submit reviews")
+    customer = require_authed_customer("Please log in to submit reviews")
     
     user = frappe.session.user
     if not frappe.db.exists("DocType", "Item Review"):
@@ -396,6 +396,7 @@ def submit_review(item_code, rating, review_text, review_title="Customer Review"
         "doctype": "Item Review",
         "item_code": item_code,
         "user": user,
+        "customer": customer,  # BISMALLAH: Link to customer
         "rating": flt(rating),
         "review_title": review_title,
         "comment": review_text,

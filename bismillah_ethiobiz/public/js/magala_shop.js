@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initSearch();
     initFilters();
     initCart();
+    loadCategories();
     loadProducts();
 
     // COLLAPSIBLE SIDEBAR
@@ -141,6 +142,57 @@ document.addEventListener("DOMContentLoaded", function() {
                 loadProducts();
             });
         }
+    }
+
+    // LOAD CATEGORIES DYNAMICALLY
+    function loadCategories() {
+        const categoryBar = document.getElementById("magala-category-bar");
+        if (!categoryBar) return;
+
+        fetch("/api/method/bismillah_ethiobiz.magala_shop_api.get_categories")
+            .then(res => res.json())
+            .then(data => {
+                if (data.message && data.message.status === "success" && data.message.categories) {
+                    // Clear existing categories except "All Categories"
+                    categoryBar.innerHTML = '<button class="cat-pill active" data-category="all">🌟 All Categories</button>';
+                    
+                    // Add top-level categories
+                    data.message.categories.forEach(cat => {
+                        if (cat.item_group && cat.item_group !== "All Item Groups") {
+                            const btn = document.createElement("button");
+                            btn.className = "cat-pill";
+                            btn.dataset.category = cat.item_group;
+                            btn.innerText = `${cat.item_group_name || cat.item_group} (${cat.product_count || 0})`;
+                            categoryBar.appendChild(btn);
+                        }
+                    });
+                    
+                    // Re-attach event listeners to new category pills
+                    const pills = document.querySelectorAll(".cat-pill");
+                    pills.forEach(pill => {
+                        pill.addEventListener("click", function() {
+                            pills.forEach(p => p.classList.remove("active"));
+                            this.classList.add("active");
+                            currentCategory = this.dataset.category;
+                            currentPage = 1;
+                            loadProducts();
+                        });
+                    });
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load categories:", err);
+                // Fallback to hardcoded categories if API fails
+                categoryBar.innerHTML = `
+                    <button class="cat-pill active" data-category="all">🌟 All Categories</button>
+                    <button class="cat-pill" data-category="Mobile Phones">📱 Mobile Phones</button>
+                    <button class="cat-pill" data-category="Computers & Laptops">💻 Computers & Laptops</button>
+                    <button class="cat-pill" data-category="Electronics">⚡ Electronics</button>
+                    <button class="cat-pill" data-category="Fashion & Apparel">👗 Fashion</button>
+                    <button class="cat-pill" data-category="Food & Groceries">🛒 Groceries</button>
+                    <button class="cat-pill" data-category="Health & Beauty">🩺 Health & Beauty</button>
+                `;
+            });
     }
 
     // DATA LOADER
