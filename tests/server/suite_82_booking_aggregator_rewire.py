@@ -170,15 +170,16 @@ try:
         chk("82.4 create booking (skip: no listing)", True)
 except Exception as _e: fl("82.4 create", str(_e)[:350])
 
-# 82.5 — /booking page HTTP 200 + JS wired to aggregator
+# 82.5 — /booking redirects to /bizservice (P1 merge); merged page wired to services portal
 try:
-    r = _req.get(BASE + "/booking", timeout=15, verify=False, allow_redirects=True)
-    chk("82.5 /booking HTTP 200", r.status_code == 200)
-    chk("82.5a page references bizbooking.js", "bizbooking.js" in r.text)
-    js = _req.get(BASE + "/assets/bismillah_ethiobiz/js/bizbooking.js", timeout=15, verify=False).text
-    chk("82.5b bizbooking.js calls search_all_bookables", "search_all_bookables" in js)
-    chk("82.5c bizbooking.js calls create_universal_booking", "create_universal_booking" in js)
-    chk("82.5d bizbooking.js has no hardcoded demo arrays", "Skylight Luxury Grand Suite" not in js)
+    r = _req.get(BASE + "/booking", timeout=15, verify=False, allow_redirects=False)
+    chk("82.5 /booking redirects", r.status_code in (301, 302))
+    chk("82.5a /booking -> /bizservice", "/bizservice" in str(r.headers.get("Location", "")))
+    page = _req.get(BASE + "/bizservice", timeout=15, verify=False, allow_redirects=True).text
+    chk("82.5b merged page references bizservices.js", "bizservices.js" in page)
+    js = _req.get(BASE + "/assets/bismillah_ethiobiz/js/bizservices.js", timeout=15, verify=False).text
+    chk("82.5c bizservices.js calls search_services", "search_services" in js)
+    chk("82.5d bizservices.js calls book_service", "book_service" in js)
 except Exception as _e: fl("82.5 booking page/js", str(_e)[:200])
 
 # Cleanup
