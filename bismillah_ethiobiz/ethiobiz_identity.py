@@ -98,15 +98,28 @@ def resolve_booking_company(owning_company, label="listing"):
 
 
 def session_contact_defaults():
-    """Name / phone / email from the logged-in User (empty strings if Guest)."""
-    user = frappe.session.user or "Guest"
+    """Get contact defaults from current user session."""
+    user = frappe.session.user or ""
     if user == "Guest":
-        return {"user": user, "full_name": "", "phone": "", "email": ""}
+        return {}
+    
     return {
-        "user": user,
-        "full_name": frappe.db.get_value("User", user, "full_name") or user,
-        "phone": frappe.db.get_value("User", user, "mobile_no")
-        or frappe.db.get_value("User", user, "phone")
-        or "",
-        "email": frappe.db.get_value("User", user, "email") or user,
+        "full_name": frappe.db.get_value("User", user, "full_name") or "",
+        "email": frappe.db.get_value("User", user, "email") or "",
+        "phone": frappe.db.get_value("User", user, "mobile_no") or frappe.db.get_value("User", user, "phone") or ""
     }
+
+def resolve_booking_company(owning_company, label="listing"):
+    """Return a real Company name. Throws if missing or not in Desk."""
+    company = (owning_company or "").strip() if owning_company else ""
+    if not company:
+        frappe.throw(
+            _("This {0} has no owning Company. Assign a Company in Desk before taking bookings.").format(
+                label
+            )
+        )
+    if not frappe.db.exists("Company", company):
+        frappe.throw(
+            _("Owning Company '{0}' on this {1} is not a valid Company.").format(company, label)
+        )
+    return company

@@ -2,20 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint, today, add_days, get_datetime, now_datetime
 import json
-from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user
-
-
-def session_contact_defaults():
-    """Get contact defaults from current user session."""
-    user = frappe.session.user or ""
-    if user == "Guest":
-        return {}
-    
-    return {
-        "full_name": frappe.db.get_value("User", user, "full_name") or "",
-        "email": frappe.db.get_value("User", user, "email") or "",
-        "phone": frappe.db.get_value("User", user, "mobile_no") or frappe.db.get_value("User", user, "phone") or ""
-    }
+from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults
 
 # Fallback Seed Properties if none exist in database
 SAMPLE_PROPERTIES = [
@@ -287,7 +274,18 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     total_amount = rate_per_night * nights
 
     # Resolve property company (owning company)
-    property_company = resolve_booking_company("Property", property_id, "company")
+    property_company = None
+    if property_id and frappe.db.exists("DocType", "Property"):
+        property_company = frappe.db.get_value("Property", property_id, "company")
+    if not property_company:
+        # Fall back to default company if Property DocType doesn't exist or no company set
+        property_company = frappe.db.get_single_value("BizService Settings", "company")
+        if not property_company:
+            property_company = (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0]
+    
+    # Validate company exists
+    if property_company:
+        property_company = resolve_booking_company(property_company, "property stay")
 
     customer_defaults = session_contact_defaults()
     user = customer_name or customer_defaults.get("full_name")
@@ -320,7 +318,7 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
                           or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0])
                     if co:
                         # BISMALLAH: Validate company before creating listing
-                        co = ethiobiz_identity.resolve_booking_company(co, "property stay listing")
+                        co = resolve_booking_company(co, "BizService Settings", "company")
                         try:
                             listing = frappe.get_doc({
                                 "doctype": "BizService Listing",
@@ -402,7 +400,18 @@ def request_property_lease(property_id, tenure_frequency="Monthly", start_date=N
         frappe.throw(_("Property ID is required"))
 
     # Resolve property company (owning company)
-    property_company = resolve_booking_company("Property", property_id, "company")
+    property_company = None
+    if property_id and frappe.db.exists("DocType", "Property"):
+        property_company = frappe.db.get_value("Property", property_id, "company")
+    if not property_company:
+        # Fall back to default company if Property DocType doesn't exist or no company set
+        property_company = frappe.db.get_single_value("BizService Settings", "company")
+        if not property_company:
+            property_company = (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0]
+    
+    # Validate company exists
+    if property_company:
+        property_company = resolve_booking_company(property_company, "property stay")
     
     s_date = start_date or today()
     dur = cint(duration_months) or 6

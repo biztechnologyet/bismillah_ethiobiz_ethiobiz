@@ -11,6 +11,7 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import now, flt, cint
+from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults
 
 @frappe.whitelist()
 def request_delivery(order_reference, order_doctype="Sales Order", seller_company=None,
@@ -22,13 +23,25 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
     Creates an official BizRide Delivery order and starts the dispatch broadcast.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
-    from bismillah_ethiobiz import ethiobiz_identity
     
     # Require login and get customer
-    customer = ethiobiz_identity.require_authed_customer("Please log in to request delivery")
+    customer = require_authed_customer("Please log in to request delivery")
     
     if not frappe.db.exists("DocType", "BizRide Delivery"):
         frappe.throw("BizRide Delivery module not installed")
+
+    # Resolve seller company from order if not provided
+    if not seller_company and order_reference:
+        order_company = frappe.db.get_value(order_doctype, order_reference, "company")
+        seller_company = order_company or "Biz Technology Solutions"
+    
+    # Ensure company is set, no silent fallback
+    if not seller_company:
+        frappe.throw("Seller company is required. Please specify the delivery provider company.")
+    
+    # Validate company exists
+    if not frappe.db.exists("Company", seller_company):
+        frappe.throw(f"Owning Company '{seller_company}' is not a valid Company.")
 
     pickup_lat = flt(pickup_lat) or 9.010
     pickup_lng = flt(pickup_lng) or 38.761
@@ -55,11 +68,8 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
     pickup_otp = str(frappe.generate_hash(length=4)).upper()
     delivery_otp = str(frappe.generate_hash(length=4)).upper()
 
-    # BISMALLAH: Validate and resolve company properly
-    seller_company = ethiobiz_identity.resolve_booking_company(seller_company, "delivery request")
-    
     # Get customer details for buyer info
-    customer_defaults = ethiobiz_identity.session_contact_defaults()
+    customer_defaults = session_contact_defaults()
     buyer_name = buyer_name or customer_defaults.get("full_name") or "Valued Customer"
     buyer_phone = buyer_phone or customer_defaults.get("phone") or "0911000000"
 
@@ -68,9 +78,9 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
         "order_reference": str(order_reference),
         "order_doctype": order_doctype,
         "seller_company": seller_company,
+        "customer": customer,  # BISMALLAH: Link to authenticated customer
         "buyer_name": buyer_name,
         "buyer_phone": buyer_phone,
-        "customer": customer,  # BISMALLAH: Link to customer
         "pickup_address": pickup_address or "Bole, Addis Ababa",
         "delivery_address": delivery_address or "Kazanchis, Addis Ababa",
         "pickup_latitude": pickup_lat,
@@ -98,7 +108,9 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
         "delivery_id": delivery_doc.name,
         "distance_km": distance_km,
         "delivery_fee": f"{delivery_fee:,.2f} ETB",
-        "estimated_mins": delivery_doc.estimated_duration_minutes
+        "estimated_mins": delivery_doc.estimated_duration_minutes,
+        "company": seller_company,
+        "customer": customer
     }
 
 
