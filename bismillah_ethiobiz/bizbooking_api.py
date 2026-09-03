@@ -306,7 +306,7 @@ def search_services(category=None, region=None, query=None,
     services = frappe.get_all(
         "BizService Listing",
         filters=filters,
-        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug", "practitioners"],
+        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug"],
         limit=limit
     )
 
@@ -315,6 +315,16 @@ def search_services(category=None, region=None, query=None,
         s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
         s["company_name"] = frappe.db.get_value("Company", s["company"], "company_name") or s["company"]
         s["rating"] = flt(s.get("average_rating") or 4.9)
+        # practitioners is a child table, not a column — load rows and attach
+        try:
+            s["practitioners"] = frappe.get_all(
+                "BizService Practitioner",
+                filters={"parent": s["name"]},
+                fields=["name", "practitioner_name", "role_title", "user", "phone", "is_active"],
+                order_by="idx",
+            )
+        except Exception:
+            s["practitioners"] = []
 
     return {
         "status": "success",
