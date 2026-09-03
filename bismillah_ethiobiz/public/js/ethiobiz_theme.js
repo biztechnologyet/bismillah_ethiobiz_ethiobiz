@@ -580,6 +580,42 @@
                 display: block !important;
             }
             
+            /* Unhide sidebar contents on mobile */
+            .layout-side-section .list-sidebar,
+            .layout-side-section .desk-sidebar,
+            .layout-side-section .form-sidebar,
+            .layout-side-section .overlay-sidebar,
+            .layout-side-section .sidebar-items,
+            .layout-side-section .module-sidebar-nav,
+            .layout-side-section .standard-sidebar,
+            .layout-side-section .hidden-xs,
+            .layout-side-section .hidden-sm {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                transform: none !important;
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                top: auto !important;
+                left: auto !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+
+            .layout-side-section .sidebar-item-label,
+            .layout-side-section .sidebar-label,
+            .layout-side-section a,
+            .layout-side-section span {
+                color: #F8F6F2 !important;
+            }
+            [data-theme="light"] .layout-side-section .sidebar-item-label,
+            [data-theme="light"] .layout-side-section .sidebar-label,
+            [data-theme="light"] .layout-side-section a,
+            [data-theme="light"] .layout-side-section span {
+                color: #0f172a !important;
+            }
+            
             .layout-side-section .sidebar-menu,
             .layout-side-section .desk-sidebar {
                 padding-left: 10px !important;

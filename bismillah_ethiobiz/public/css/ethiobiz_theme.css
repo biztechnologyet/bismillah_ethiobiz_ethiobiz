@@ -1,4 +1,4 @@
-/**
+﻿/**
  * EthioBiz Theme v2.3 - Copilot Glassmorphism & Sacred Atmosphere
  * P4-B: both-theme form correctness (T1 scoping / T2 dark reassertions / T3 input pairing)
  * Bismillah Ar-Rahman Ar-Rahim
@@ -85,7 +85,7 @@ body,
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ─── DARK THEME DEFAULTS (When data-theme != light) ─── */
+/* â”€â”€â”€ DARK THEME DEFAULTS (When data-theme != light) â”€â”€â”€ */
 :not([data-theme="light"]) .desk-page,
 :not([data-theme="light"]) .desk-body,
 :not([data-theme="light"]) .layout-main-section,
@@ -144,7 +144,7 @@ body,
     color: rgba(248, 246, 242, 0.65) !important;
 }
 
-/* ─── 3. LIGHT / WHITE THEME OVERRIDES (Full Contrast & Luminous Gradient) ─── */
+/* â”€â”€â”€ 3. LIGHT / WHITE THEME OVERRIDES (Full Contrast & Luminous Gradient) â”€â”€â”€ */
 [data-theme="light"] .desk-page,
 [data-theme="light"] .desk-body,
 [data-theme="light"] .page-container,
@@ -254,7 +254,7 @@ body,
 }
 
 /* 5. DESK INPUTS & CONTROLS (Round Copilot Style for Desk Only)
-   P4-B T3: split per theme — the old unscoped rule painted WHITE text on
+   P4-B T3: split per theme â€” the old unscoped rule painted WHITE text on
    translucent black even in LIGHT mode (white-on-white inputs). */
 body[data-route*="app"]:not([data-theme="light"]) input.form-control,
 body[data-route*="app"]:not([data-theme="light"]) .frappe-control .control-input {
@@ -344,7 +344,7 @@ div[data-path*="dobiz-payment"] .title {
     visibility: visible !important;
 }
 
-/* P4-B T1: doc/page + web-form titles — PUBLIC pages only */
+/* P4-B T1: doc/page + web-form titles â€” PUBLIC pages only */
 html:not([data-route*="app"]) .page-title,
 html:not([data-route*="app"]) .form-title {
     color: #072a2e !important;
@@ -355,7 +355,7 @@ html:not([data-route*="app"]) .form-title {
 
 /* ALL Form Labels in Web Forms
    P4-B T1: removed desk-leaking generic selectors (.frappe-control .control-label,
-   .form-group label/.control-label) — they forced near-black labels in DARK mode.
+   .form-group label/.control-label) â€” they forced near-black labels in DARK mode.
    They are re-added below, scoped to PUBLIC (non-desk) pages only. */
 .web-form-container label,
 .web-form-container .control-label,
@@ -508,9 +508,9 @@ div[data-path*="dobiz-payment"] .btn-primary {
     cursor: pointer !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PREMIUM WEBSITE NAVBAR & MENU BAR COLORING — MAXIMUM VISIBILITY & BEAUTY
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PREMIUM WEBSITE NAVBAR & MENU BAR COLORING â€” MAXIMUM VISIBILITY & BEAUTY
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .navbar,
 .web-navbar,
 body.website-page .navbar,
@@ -664,7 +664,7 @@ body.website-page .navbar .nav-link:hover,
     margin-bottom: 2rem;
 }
 
-/* ─── 9. BISMALLAH - HADEEDA CHAT WIDGET COMPREHENSIVE UI FIX ─── */
+/* â”€â”€â”€ 9. BISMALLAH - HADEEDA CHAT WIDGET COMPREHENSIVE UI FIX â”€â”€â”€ */
 
 /* Chat wrapper container */
 .chat-window-wrapper {
@@ -1044,116 +1044,12 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] textarea.form-control,
 [data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
     color: var(--text-color, #cdd6f4) !important;
-body[data-path] { background-attachment: fixed !important; }
-/* ===== END GLOBAL FOOTER FIX ===== */
-
-/* ===== P4-B: FULL-WIDTH DOC HEADERS, BUTTONS BELOW RIGHT-ALIGNED ===== */
-[data-route*="app"] .page-head .container {
-    max-width: 100% !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-[data-route*="app"] .page-head-content {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-}
-[data-route*="app"] .page-title,
-[data-route*="app"] .page-title.col-md-4,
-[data-route*="app"] .page-title.col-sm-6,
-[data-route*="app"] .page-title.col-xs-7 {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 0 0 100% !important;
-    -webkit-flex: 0 0 100% !important;
-}
-[data-route*="app"] .page-actions {
-    justify-content: flex-end !important;
-    margin-top: 4px !important;
-}
-
-/* ===== P4-C: COLLAPSIBLE FILTERS PANEL ===== */
-.filter-selector .filter-section {
-    border: 1px solid var(--border-color, #313244) !important;
-    border-radius: 8px !important;
-    padding: 0 !important;
-    margin-bottom: 12px !important;
-}
-.filter-selector .filter-section .filter-label {
-    cursor: pointer !important;
-    user-select: none !important;
-    padding: 10px 14px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    font-weight: 600 !important;
-}
-.filter-selector .filter-section .collapse-indicator {
-    font-size: 11px;
-    transition: transform .2s;
-}
-.filter-selector .filter-section.collapsed .collapse-indicator {
-    transform: rotate(-90deg);
-}
-.filter-selector .filter-section .filter-body {
-    overflow: hidden !important;
-    transition: max-height .25s ease;
-    max-height: 600px;
-}
-.filter-selector .filter-section.collapsed .filter-body {
-    max-height: 0 !important;
-}
-[data-theme="light"] .filter-selector .filter-section {
-    background: rgba(255,255,255,0.85) !important;
-    border-color: rgba(2,106,110,0.25) !important;
-}
-[data-theme="light"] .filter-selector .filter-section .filter-label {
-    color: #0f172a !important;
-}
-
-/* ===== P4-L: WEBSITE ACCOUNT-MENU CLEANUP ===== */
-.navbar .dropdown-menu a.dropdown-item[href="/apps"],
-.navbar .dropdown-menu a.dropdown-item[href*="/app/switch"],
-.navbar .dropdown-menu a.dropdown-item[href*="/app?type=switch"] {
-    display: none !important;
-}
-
-/* ===== P4-B T2 DARK-THEME FORM REASSERTIONS (2026-08-24) =====
-   Placed LAST so it wins the cascade. Guarantees desk-form field titles,
-   page titles and control text stay readable in dark mode regardless of
-   any earlier web-form leakage. */
-[data-theme="dark"] .frappe-control .control-label,
-[data-theme="dark"] .form-group label,
-[data-theme="dark"] .form-group .control-label {
-    color: var(--text-color, #cdd6f4) !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-[data-theme="dark"] .page-head .title-text,
-[data-theme="dark"] h3.title-text,
-[data-theme="dark"] .page-title {
-    color: #e2e8f0 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-[data-theme="dark"] .form-section .section-head,
-[data-theme="dark"] .section-head,
-[data-theme="dark"] .form-tabs-list .nav-link {
-    color: #cbd5e1 !important;
-}
-[data-theme="dark"] .control-label .reqd,
-[data-theme="dark"] label .reqd { color: #f87171 !important; }
-[data-theme="dark"] select,
-[data-theme="dark"] textarea.form-control,
-[data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
-    color: var(--text-color, #cdd6f4) !important;
 }
 [data-theme="dark"] .frappe-control .control-label.muted,
 [data-theme="dark"] .frappe-control .label-muted,
 [data-theme="dark"] .frappe-control .help-box { color: #94a3b8 !important; }
 
-/* Light-mode desk labels — explicit AA guarantee (pairs with T3 inputs) */
+/* Light-mode desk labels â€” explicit AA guarantee (pairs with T3 inputs) */
 [data-theme="light"] .frappe-control .control-label,
 [data-theme="light"] .form-group label {
     color: #0f172a !important;
@@ -1293,7 +1189,7 @@ body[data-path] { background-attachment: fixed !important; }
     -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* ─── LIGHT THEME: Chat Widget Text Fix ─── */
+/* â”€â”€â”€ LIGHT THEME: Chat Widget Text Fix â”€â”€â”€ */
 [data-theme="light"] .chat-window .chat-input,
 [data-theme="light"] .chat-window textarea.chat-input,
 [data-theme="light"] .chat-window .chat-inputs textarea,
@@ -1316,7 +1212,7 @@ html[data-theme="light"] .chat-window textarea::placeholder {
 }
 
 
-/* ─── Controls Container ─── */
+/* â”€â”€â”€ Controls Container â”€â”€â”€ */
 .chat-window .chat-inputs-controls,
 .chat-window [class*="chat-inputs-controls"] {
     display: flex !important;
@@ -1330,7 +1226,7 @@ html[data-theme="light"] .chat-window textarea::placeholder {
     opacity: 1 !important;
 }
 
-/* ─── Attach / File Button (with scoped attribute override) ─── */
+/* â”€â”€â”€ Attach / File Button (with scoped attribute override) â”€â”€â”€ */
 .chat-window .chat-input-file-button,
 .chat-window button.chat-input-file-button,
 .chat-window [data-test-id="chat-attach-file-button"],
@@ -1372,7 +1268,7 @@ button.chat-input-file-button[data-v-fb8d706b] {
     min-width: 18px !important;
 }
 
-/* ─── Send Button (with scoped attribute override) ─── */
+/* â”€â”€â”€ Send Button (with scoped attribute override) â”€â”€â”€ */
 .chat-window .chat-input-send-button,
 .chat-window button.chat-input-send-button,
 .chat-window button[class*="send-button"],
@@ -1426,7 +1322,7 @@ button.chat-input-send-button[data-v-fb8d706b] {
     min-width: 18px !important;
 }
 
-/* ─── LIGHT THEME: Buttons stay visible ─── */
+/* â”€â”€â”€ LIGHT THEME: Buttons stay visible â”€â”€â”€ */
 [data-theme="light"] .chat-window .chat-input-send-button,
 [data-theme="light"] .chat-input-file-button,
 html[data-theme="light"] .chat-window .chat-input-send-button,
@@ -1435,9 +1331,9 @@ html[data-theme="light"] .chat-window .chat-input-file-button {
     opacity: 1 !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   P5: BLOG & TIBEB PAGES — LUMINOUS LIGHT THEME & MAXIMUM READABILITY
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   P5: BLOG & TIBEB PAGES â€” LUMINOUS LIGHT THEME & MAXIMUM READABILITY
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body[data-path="list"],
 body[data-path*="blog"],
 body[data-route*="blog"],
@@ -1739,3 +1635,69 @@ div[data-doctype="Blog Post"] .card {
 
 
 
+
+/* ==========================================================================
+   MOBILE SIDEBAR FULL CONTROLS & CONTENT VISIBILITY GUARANTEE
+   ========================================================================== */
+@media (max-width: 991px) {
+    /* Ensure all sidebar contents & controls are visible in mobile drawer */
+    .layout-side-section .list-sidebar,
+    .layout-side-section .desk-sidebar,
+    .layout-side-section .form-sidebar,
+    .layout-side-section .overlay-sidebar,
+    .layout-side-section .sidebar-items,
+    .layout-side-section .module-sidebar-nav,
+    .layout-side-section .standard-sidebar,
+    .layout-side-section .sidebar-menu,
+    .layout-side-section .hidden-xs,
+    .layout-side-section .hidden-sm {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: none !important;
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        top: auto !important;
+        left: auto !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .layout-side-section .standard-sidebar-item,
+    .layout-side-section .sidebar-item,
+    .layout-side-section .sidebar-item-label,
+    .layout-side-section .sidebar-label,
+    .layout-side-section .sidebar-menu a,
+    .layout-side-section a {
+        display: flex !important;
+        align-items: center !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* High contrast text & icons in dark mode */
+    :not([data-theme="light"]) .layout-side-section,
+    :not([data-theme="light"]) .layout-side-section * {
+        --text-color: #F8F6F2;
+    }
+    :not([data-theme="light"]) .layout-side-section .sidebar-item-label,
+    :not([data-theme="light"]) .layout-side-section .sidebar-label,
+    :not([data-theme="light"]) .layout-side-section a,
+    :not([data-theme="light"]) .layout-side-section span {
+        color: #F8F6F2 !important;
+    }
+    :not([data-theme="light"]) .layout-side-section svg,
+    :not([data-theme="light"]) .layout-side-section .icon {
+        stroke: #F8F6F2 !important;
+        fill: #F8F6F2 !important;
+    }
+
+    /* High contrast text & icons in light mode */
+    [data-theme="light"] .layout-side-section .sidebar-item-label,
+    [data-theme="light"] .layout-side-section .sidebar-label,
+    [data-theme="light"] .layout-side-section a,
+    [data-theme="light"] .layout-side-section span {
+        color: #0f172a !important;
+    }
+}
