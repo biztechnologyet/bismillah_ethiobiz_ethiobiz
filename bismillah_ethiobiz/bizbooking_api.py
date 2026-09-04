@@ -121,43 +121,27 @@ def get_available_slots(practitioner, date=None, service_type="In-Clinic"):
     }
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
                        patient_name=None, patient_phone=None, symptoms=None,
                        book_for="Self", attachments=None):
     """
-    Creates real Patient and Patient Appointment in Healthcare Desk.
-    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
+    Creates real Patient, User, Customer and Patient Appointment in Healthcare Desk.
+    BISMALLAH: Fully registers User, Customer, and Patient per industry requirements.
     """
-    from bismillah_ethiobiz import ethiobiz_identity
+    try:
+        from bismillah_ethiobiz import ethiobiz_identity
+    except ImportError:
+        import ethiobiz_identity
     
-    # Require login and get customer
-    customer = ethiobiz_identity.require_authed_customer("Please log in to book appointments")
-    
-    user = frappe.session.user
-    if not patient_name and user != "Guest":
-        patient_name = frappe.db.get_value("User", user, "full_name") or user
-    if not patient_phone and user != "Guest":
-        patient_phone = frappe.db.get_value("User", user, "mobile_no") or "0911000000"
-
     if not patient_name or not patient_phone:
         frappe.throw("Patient Name and Phone Number are mandatory")
 
-    # Get or create Patient
-    patient = None
-    if frappe.db.exists("Patient", {"mobile": patient_phone}):
-        patient = frappe.db.get_value("Patient", {"mobile": patient_phone}, "name")
-    elif frappe.db.exists("Patient", {"patient_name": patient_name}):
-        patient = frappe.db.get_value("Patient", {"patient_name": patient_name}, "name")
-    else:
-        p_doc = frappe.get_doc({
-            "doctype": "Patient",
-            "patient_name": patient_name,
-            "mobile": patient_phone,
-            "sex": "Female" if "w/ro" in patient_name.lower() else "Male"
-        })
-        p_doc.insert(ignore_permissions=True)
-        patient = p_doc.name
+    # BISMALLAH: Resolve or register User, Customer and Patient
+    party = ethiobiz_identity.resolve_or_create_patient(patient_name, patient_phone)
+    customer = party["customer"]
+    patient = party["patient"]
+    user = party["user"]
 
     # Create Patient Appointment in Desk
     fee = frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0
