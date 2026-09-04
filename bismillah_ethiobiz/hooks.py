@@ -106,6 +106,7 @@ website_route_rules = [
     {"from_route": "/lms", "to_route": "lms"},
     {"from_route": "/lms/<path:app_path>", "to_route": "lms"},
     {"from_route": "/map", "to_route": "map"},
+    {"from_route": "/bizmap", "to_route": "map"},
     {"from_route": "/companies", "to_route": "map"},
     {"from_route": "/shop", "to_route": "shop"},
     {"from_route": "/bizhealth", "to_route": "bizhealth"},
@@ -113,6 +114,7 @@ website_route_rules = [
     {"from_route": "/bizride", "to_route": "bizride"},
     {"from_route": "/bizhome", "to_route": "bizhome"},
     {"from_route": "/bizservice", "to_route": "bizservice"},
+    {"from_route": "/bizservices", "to_route": "bizservice"},
 ]
 
 # ============================================

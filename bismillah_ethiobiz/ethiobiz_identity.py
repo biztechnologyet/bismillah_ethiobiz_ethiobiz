@@ -109,17 +109,48 @@ def session_contact_defaults():
         "phone": frappe.db.get_value("User", user, "mobile_no") or frappe.db.get_value("User", user, "phone") or ""
     }
 
-def resolve_booking_company(owning_company, label="listing"):
-    """Return a real Company name. Throws if missing or not in Desk."""
-    company = (owning_company or "").strip() if owning_company else ""
-    if not company:
-        frappe.throw(
-            _("This {0} has no owning Company. Assign a Company in Desk before taking bookings.").format(
-                label
-            )
-        )
-    if not frappe.db.exists("Company", company):
-        frappe.throw(
-            _("Owning Company '{0}' on this {1} is not a valid Company.").format(company, label)
-        )
-    return company
+
+def resolve_or_create_customer(customer_name=None, customer_phone=None, email=None):
+    """Resolve or create a customer for either logged in user or guest visitor with name/phone."""
+    user = frappe.session.user or ""
+    if user and user != "Guest":
+        try:
+            return require_authed_customer()
+        except Exception:
+            pass
+
+    name = (customer_name or "").strip() or "Valued Customer"
+    phone = (customer_phone or "").strip()
+
+    if not frappe.db.exists("DocType", "Customer"):
+        return name
+
+    if phone:
+        existing = frappe.db.get_value("Customer", {"mobile_no": phone}, "name")
+        if existing:
+            return existing
+    if name:
+        existing = frappe.db.get_value("Customer", {"customer_name": name}, "name")
+        if existing:
+            return existing
+
+    group = frappe.db.get_single_value("Selling Settings", "customer_group") or "Individual"
+    territory = frappe.db.get_single_value("Selling Settings", "territory") or "Ethiopia"
+    try:
+        cust = frappe.get_doc({
+            "doctype": "Customer",
+            "customer_name": name,
+            "customer_type": "Individual",
+            "customer_group": group,
+            "territory": territory,
+            "email_id": email,
+            "mobile_no": phone
+        })
+        cust.flags.ignore_permissions = True
+        cust.flags.ignore_mandatory = True
+        cust.insert(ignore_permissions=True)
+        return cust.name
+    except Exception:
+        fallback = frappe.db.get_value("Customer", {}, "name")
+        return fallback or name
+

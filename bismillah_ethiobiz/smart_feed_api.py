@@ -257,7 +257,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 4. SOURCE C: BizHealth Doctors & Clinics
-    if filter_type in ["all", "health", "doctors", "clinics"]:
+    if filter_type in ["all", "health", "doctors", "clinics", "bizhealth"]:
         if frappe.db.exists("DocType", "Healthcare Practitioner"):
             doc_query = {}
             if search:
@@ -295,7 +295,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 5. SOURCE D: BizFix Maintenance Services
-    if filter_type in ["all", "fix", "maintenance", "repair"]:
+    if filter_type in ["all", "fix", "bizfix", "maintenance", "repair", "services", "bizservices"]:
         if frappe.db.exists("DocType", "BizService Listing"):
             srv_query = {"is_active": 1}
             if search:
@@ -331,7 +331,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 6. SOURCE E: BizBooking (Hotels, Salons, Workspaces, Rentals)
-    if filter_type in ["all", "bookings", "booking", "hotels", "salons", "spaces", "rentals"]:
+    if filter_type in ["all", "services", "bizservices", "bookings", "booking", "hotels", "salons", "spaces", "rentals"]:
         if frappe.db.exists("DocType", "BizBooking Resource"):
             res_query = {"is_active": 1}
             if search:
@@ -510,7 +510,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
 
     # 11. SOURCE J: Walta Forum Discussions
     if filter_type in ["all", "forums", "forum", "walta", "discussions"]:
-        if frappe.db.exists("DocType", "Walta Forum Topic"):
+        if frappe.db.table_exists("Walta Forum Topic") or frappe.db.exists("DocType", "Walta Forum Topic"):
             try:
                 forum_cond = []
                 forum_vals = []
@@ -555,29 +555,32 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
 
     # 12. SOURCE K: Promoted Ad Campaigns (From Desk Ad Management)
     if filter_type in ["all", "products", "shop"]:
-        ads = get_ad_campaigns()
-        for ad in ads:
-            items.append({
-                "id": ad.get("name"),
-                "type": "ad",
-                "badge": "Sponsored 📢",
-                "badge_class": "badge-social",
-                "title": ad.get("campaign_name"),
-                "subtitle": f"🏢 {ad.get('company') or 'EthioBiz Partner'} • Sponsored",
-                "content": "Discover featured enterprise solutions and exclusive flash offers from verified partners.",
-                "category": "Sponsored",
-                "image": ad.get("creative_image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
-                "author": ad.get("company") or "EthioBiz Partner",
-                "author_name": ad.get("company") or "EthioBiz Partner",
-                "rating": 5.0,
-                "likes_count": 120,
-                "comments_count": 14,
-                "price": "Special Offer",
-                "created": now_datetime(),
-                "action_url": ad.get("click_url") or "/shop",
-                "action_label": "Learn More ➔",
-                "is_booking": False
-            })
+        try:
+            ads = get_ad_campaigns()
+            for ad in ads:
+                items.append({
+                    "id": ad.get("name"),
+                    "type": "ad",
+                    "badge": "Sponsored 📢",
+                    "badge_class": "badge-social",
+                    "title": ad.get("campaign_name"),
+                    "subtitle": f"🏢 {ad.get('company') or 'EthioBiz Partner'} • Sponsored",
+                    "content": "Discover featured enterprise solutions and exclusive flash offers from verified partners.",
+                    "category": "Sponsored",
+                    "image": ad.get("creative_image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "author": ad.get("company") or "EthioBiz Partner",
+                    "author_name": ad.get("company") or "EthioBiz Partner",
+                    "rating": 5.0,
+                    "likes_count": 120,
+                    "comments_count": 14,
+                    "price": "Special Offer",
+                    "created": now_datetime(),
+                    "action_url": ad.get("click_url") or "/shop",
+                    "action_label": "Learn More ➔",
+                    "is_booking": False
+                })
+        except Exception:
+            pass
 
     # 13. Apply Personalization Algorithm (Facebook/TikTok/LinkedIn/Amazon Hybrid Scorer)
     for it in items:
@@ -639,14 +642,23 @@ def get_ad_campaigns(slot=None):
     if slot:
         filters["slot"] = slot
 
-    ads = frappe.get_all(
-        "EthioBiz Ad Campaign",
-        filters=filters,
-        fields=["name", "campaign_name", "click_url", "creative_image", "alt_text", "company",
-                "impressions", "clicks", "promoted_listing", "target_vertical", "budget_etb", "campaign_url", "slot"],
-        limit=5,
-        order_by="modified desc"
-    )
+    desired_fields = [
+        "name", "campaign_name", "click_url", "creative_image", "alt_text", "company",
+        "impressions", "clicks", "promoted_listing", "target_vertical", "budget_etb", "campaign_url", "slot"
+    ]
+    fields = [f for f in desired_fields if frappe.db.has_column("EthioBiz Ad Campaign", f)]
+
+    try:
+        ads = frappe.get_all(
+            "EthioBiz Ad Campaign",
+            filters=filters,
+            fields=fields,
+            limit=5,
+            order_by="modified desc"
+        )
+    except Exception as e:
+        frappe.log_error(f"Error fetching ads: {e}")
+        return []
 
     # Increment impressions counter + decrement budget on each served impression
     for ad in ads:

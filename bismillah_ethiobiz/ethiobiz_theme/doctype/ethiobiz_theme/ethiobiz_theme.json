@@ -285,6 +285,18 @@
                        "fieldtype":  "Code",
                        "label":  "Custom CSS Overrides",
                        "options":  "CSS"
+                   },
+                   {
+                       "fieldname":  "section_floating_widget",
+                       "fieldtype":  "Section Break",
+                       "label":  "Website Floating Widget (Bottom-Left CTAs)"
+                   },
+                   {
+                       "fieldname":  "floating_action_items",
+                       "fieldtype":  "Table",
+                       "label":  "Floating Action Items",
+                       "options":  "EthioBiz Floating Action Item",
+                       "description":  "Manage dynamic call-to-actions displayed when clicking the bottom-left floating butterfly on the website."
                    }
                ],
     "index_loggable":  0,

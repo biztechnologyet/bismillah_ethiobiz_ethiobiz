@@ -282,9 +282,29 @@
                     --chat--toggle--hover--background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
                     --chat--toggle--active--background: #147974 !important;
                     --chat--toggle--color: #FFFFFF !important;
-                    --chat--window--right: 20px !important;
+                    --chat--window--right: 24px !important;
                     --chat--window--bottom: 84px !important;
                     --chat--window--z-index: 99999 !important;
+                }
+
+                .chat-window-wrapper {
+                    position: fixed !important;
+                    bottom: 24px !important;
+                    top: auto !important;
+                    right: 24px !important;
+                    left: auto !important;
+                    z-index: 99999 !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: flex-end !important;
+                    justify-content: flex-end !important;
+                    background: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    pointer-events: none !important;
+                }
+                .chat-window-wrapper > * {
+                    pointer-events: auto !important;
                 }
 
                 @keyframes hadeeda-toggle-enter {
@@ -307,7 +327,8 @@
                 .chat-window-wrapper .chat-window-toggle svg { display: none !important; }
 
                 .chat-window-wrapper .chat-window-toggle {
-                    width: auto !important; min-width: 56px !important; height: 56px !important;
+                    width: auto !important; min-width: 56px !important; max-width: 220px !important;
+                    height: 56px !important; min-height: 56px !important; max-height: 56px !important;
                     border-radius: 28px !important;
                     background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
                     color: #FFFFFF !important; padding: 0 1.1rem 0 0.6rem !important;

@@ -12,8 +12,10 @@ Directly interfaces with:
 
 import frappe
 from frappe import _
-from frappe.utils import today, add_days, getdate, flt, cint
-from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults
+try:
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer
+except ImportError:
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer
 
 # ==============================================================================
 # 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
@@ -353,15 +355,15 @@ def search_services(category=None, region=None, query=None,
     }
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def book_service(service_id, booking_date=None, booking_time=None, customer_name=None,
                  customer_phone=None, practitioner=None, notes=None,
                  address=None, date=None, time_slot=None):
     """Creates real BizService Booking and dispatches BizRide if requires_travel.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
     
-    # Require login and get customer
-    customer = require_authed_customer("Please log in to book services")
+    # Resolve customer (logged in or guest with contact info)
+    customer = resolve_or_create_customer(customer_name, customer_phone)
     
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")

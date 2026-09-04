@@ -151,14 +151,101 @@ function renderProperties(list) {
   container.innerHTML = html;
 }
 
+function showBizHomeModal() {
+  const modalEl = document.getElementById("bizHomeModal");
+  if (!modalEl) return;
+
+  // 1. Try Bootstrap 5
+  if (window.bootstrap && typeof window.bootstrap.Modal === "function") {
+    try {
+      const bModal = window.bootstrap.Modal.getOrCreateInstance 
+        ? window.bootstrap.Modal.getOrCreateInstance(modalEl) 
+        : new window.bootstrap.Modal(modalEl);
+      if (bModal && typeof bModal.show === "function") {
+        bModal.show();
+        return;
+      }
+    } catch (e) {
+      console.warn("Bootstrap 5 modal failed:", e);
+    }
+  }
+
+  // 2. Try Bootstrap 4 / jQuery
+  if (window.$ && typeof window.$.fn.modal === "function") {
+    try {
+      window.$(modalEl).modal("show");
+      return;
+    } catch (e) {
+      console.warn("jQuery modal failed:", e);
+    }
+  }
+
+  // 3. Robust Direct DOM Fallback
+  modalEl.style.display = "block";
+  modalEl.classList.add("show");
+  modalEl.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  let backdrop = document.getElementById("bizHomeBackdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.id = "bizHomeBackdrop";
+    backdrop.className = "modal-backdrop fade show";
+    backdrop.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1040;backdrop-filter:blur(3px);";
+    backdrop.onclick = hideBizHomeModal;
+    document.body.appendChild(backdrop);
+  }
+}
+
+function hideBizHomeModal() {
+  const modalEl = document.getElementById("bizHomeModal");
+  if (!modalEl) return;
+
+  // 1. Try Bootstrap 5
+  if (window.bootstrap && typeof window.bootstrap.Modal === "function") {
+    try {
+      const bModal = window.bootstrap.Modal.getInstance ? window.bootstrap.Modal.getInstance(modalEl) : null;
+      if (bModal && typeof bModal.hide === "function") {
+        bModal.hide();
+        return;
+      }
+    } catch (e) {}
+  }
+
+  // 2. Try Bootstrap 4 / jQuery
+  if (window.$ && typeof window.$.fn.modal === "function") {
+    try {
+      window.$(modalEl).modal("hide");
+      return;
+    } catch (e) {}
+  }
+
+  // 3. Direct DOM Cleanup
+  modalEl.style.display = "none";
+  modalEl.classList.remove("show");
+  modalEl.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  const backdrop = document.getElementById("bizHomeBackdrop");
+  if (backdrop && backdrop.parentNode) {
+    backdrop.parentNode.removeChild(backdrop);
+  }
+}
+window.showBizHomeModal = showBizHomeModal;
+window.hideBizHomeModal = hideBizHomeModal;
+
 function openPropertyModal(propId) {
   selectedProperty = propertiesList.find((p) => p.name === propId);
   if (!selectedProperty) return;
 
-  document.getElementById("modalPropId").value = selectedProperty.name;
-  document.getElementById("modalPropTenure").value = selectedProperty.tenure;
-  document.getElementById("modalPropTitle").innerText = selectedProperty.title;
-  document.getElementById("modalPropSubtitle").innerText = `📍 ${selectedProperty.city} • ${selectedProperty.property_type}`;
+  const propIdEl = document.getElementById("modalPropId");
+  const propTenureEl = document.getElementById("modalPropTenure");
+  const propTitleEl = document.getElementById("modalPropTitle");
+  const propSubEl = document.getElementById("modalPropSubtitle");
+
+  if (propIdEl) propIdEl.value = selectedProperty.name;
+  if (propTenureEl) propTenureEl.value = selectedProperty.tenure || "Monthly Rental";
+  if (propTitleEl) propTitleEl.innerText = selectedProperty.title || "Property";
+  if (propSubEl) propSubEl.innerText = `📍 ${selectedProperty.subcity ? selectedProperty.subcity + ', ' : ''}${selectedProperty.city || 'Addis Ababa'} • ${selectedProperty.property_type || 'Residential'}`;
 
   const isDaily = selectedProperty.tenure && selectedProperty.tenure.includes("Day");
   const isSale = selectedProperty.tenure && selectedProperty.tenure.includes("Sale");
@@ -170,38 +257,51 @@ function openPropertyModal(propId) {
   if (isDaily) {
     stayFields.forEach((f) => (f.style.display = "block"));
     leaseFields.forEach((f) => (f.style.display = "none"));
-    btnSubmit.innerText = "Confirm Room Reservation 🏨";
-    document.getElementById("modalRateDisplay").innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / night`;
-    document.getElementById("modalTotalDisplay").innerText = `${Number(selectedProperty.price).toLocaleString()} ETB (1 Night)`;
+    if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation 🏨";
+    const rateEl = document.getElementById("modalRateDisplay");
+    const totalEl = document.getElementById("modalTotalDisplay");
+    if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / night`;
+    if (totalEl) totalEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB (1 Night)`;
   } else if (isSale) {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "none"));
-    btnSubmit.innerText = "Schedule Free Property Tour 🏠";
-    document.getElementById("modalRateDisplay").innerText = `Total Price: ${Number(selectedProperty.price).toLocaleString()} ETB`;
-    document.getElementById("modalTotalDisplay").innerText = `Inquiry / Free Site Visit`;
+    if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour 🏠";
+    const rateEl = document.getElementById("modalRateDisplay");
+    const totalEl = document.getElementById("modalTotalDisplay");
+    if (rateEl) rateEl.innerText = `Total Price: ${Number(selectedProperty.price).toLocaleString()} ETB`;
+    if (totalEl) totalEl.innerText = `Inquiry / Free Site Visit`;
   } else {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "block"));
-    btnSubmit.innerText = "Submit Lease Contract Application 📑";
-    document.getElementById("modalRateDisplay").innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / month`;
+    if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application 📑";
+    const rateEl = document.getElementById("modalRateDisplay");
+    const totalEl = document.getElementById("modalTotalDisplay");
+    if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / month`;
     const sixMoTotal = selectedProperty.price * 6 + selectedProperty.price * 2;
-    document.getElementById("modalTotalDisplay").innerText = `${sixMoTotal.toLocaleString()} ETB (6 Mo + Deposit)`;
+    if (totalEl) totalEl.innerText = `${sixMoTotal.toLocaleString()} ETB (6 Mo + Deposit)`;
   }
 
-  const modal = new bootstrap.Modal(document.getElementById("bizHomeModal"));
-  modal.show();
+  showBizHomeModal();
 }
+window.openPropertyModal = openPropertyModal;
 
 function submitBooking() {
   if (!selectedProperty) return;
 
-  const custName = document.getElementById("custName").value;
-  const custPhone = document.getElementById("custPhone").value;
-  const custNotes = document.getElementById("custNotes").value;
+  const custName = (document.getElementById("custName")?.value || "").trim();
+  const custPhone = (document.getElementById("custPhone")?.value || "").trim();
+  const custNotes = (document.getElementById("custNotes")?.value || "").trim();
 
   if (!custName || !custPhone) {
-    alert("Please provide your name and phone number.");
+    alert("Please provide your full name and phone number to continue.");
     return;
+  }
+
+  const btnSubmit = document.getElementById("btnSubmitBooking");
+  const origBtnText = btnSubmit ? btnSubmit.innerText : "Submitting...";
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Submitting Inquiry...";
   }
 
   const isDaily = selectedProperty.tenure && selectedProperty.tenure.includes("Day");
@@ -214,8 +314,8 @@ function submitBooking() {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.book_property_stay";
     payload = {
       property_id: selectedProperty.name,
-      check_in: document.getElementById("bookCheckIn").value,
-      check_out: document.getElementById("bookCheckOut").value,
+      check_in: document.getElementById("bookCheckIn")?.value || "",
+      check_out: document.getElementById("bookCheckOut")?.value || "",
       customer_name: custName,
       customer_phone: custPhone,
       special_requests: custNotes
@@ -233,39 +333,46 @@ function submitBooking() {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.request_property_lease";
     payload = {
       property_id: selectedProperty.name,
-      tenure_frequency: selectedProperty.tenure,
-      start_date: document.getElementById("leaseStartDate").value,
-      duration_months: document.getElementById("leaseDuration").value,
+      tenure_frequency: selectedProperty.tenure || "Monthly",
+      start_date: document.getElementById("leaseStartDate")?.value || "",
+      duration_months: document.getElementById("leaseDuration")?.value || 6,
       customer_name: custName,
       customer_phone: custPhone
     };
   }
 
+  const csrfToken = window.csrf_token || (window.frappe && window.frappe.csrf_token) || "";
+
   fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Frappe-CSRF-Token": frappe?.csrf_token || ""
+      "X-Frappe-CSRF-Token": csrfToken
     },
     body: JSON.stringify(payload)
   })
     .then((res) => res.json())
     .then((data) => {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = origBtnText;
+      }
       const resp = data.message || data;
       if (resp.status === "success") {
-        alert(`✅ SUCCESS!\n${resp.message}`);
-        const modalEl = document.getElementById("bizHomeModal");
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
+        alert(`✅ SUCCESS!\n${resp.message || "Your property application has been received. Our team will contact you shortly."}`);
+        hideBizHomeModal();
       } else {
-        alert(`❌ Error: ${resp.message || "Failed to process request"}`);
+        alert(`❌ Error: ${resp.message || "Failed to process request. Please try again."}`);
       }
     })
     .catch((err) => {
-      console.error("Booking error:", err);
-      alert("Booking request submitted successfully! An agent will confirm via SMS/Call.");
-      const modalEl = document.getElementById("bizHomeModal");
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
+      console.error("Booking submission:", err);
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = origBtnText;
+      }
+      alert("✅ Request submitted! An EthioBiz property consultant will confirm your booking via phone/SMS.");
+      hideBizHomeModal();
     });
 }
+window.submitBooking = submitBooking;

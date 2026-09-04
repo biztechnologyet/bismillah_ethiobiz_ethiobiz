@@ -855,6 +855,22 @@
     if (document.body) {
         sidebarObserver.observe(document.body, { childList: true, subtree: true });
     }
+
+    // BISMALLAH: Auto-collapse workspace sidebar when clicked outside
+    document.addEventListener('click', function (e) {
+        const sidebar = document.querySelector('.layout-side-section, .desk-sidebar, .workspace-sidebar');
+        const toggleBtn = document.querySelector('.sidebar-toggle-btn, .navbar-sidebar-toggle, .toggle-sidebar, .page-head .page-title [data-action="toggle-sidebar"]');
+        
+        if (sidebar && !document.body.classList.contains('sidebar-collapsed')) {
+            if (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+                const mainSection = document.querySelector('.layout-main-section, .page-container, .main-section, .page-head');
+                if (mainSection && mainSection.contains(e.target)) {
+                    document.body.classList.add('sidebar-collapsed');
+                    sidebar.classList.remove('opened');
+                }
+            }
+        }
+    }, true);
 }
 
 if (typeof frappe !== 'undefined' && frappe.ready) {

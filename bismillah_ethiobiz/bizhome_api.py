@@ -2,7 +2,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint, today, add_days, get_datetime, now_datetime
 import json
-from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults
+try:
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer
+except ImportError:
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer
 
 # Fallback Seed Properties if none exist in database
 SAMPLE_PROPERTIES = [
@@ -249,7 +252,7 @@ def get_property_details(property_id):
 
     frappe.throw(_(f"Property {property_id} not found"))
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def book_property_stay(property_id, check_in, check_out, guests=1, customer_name=None, customer_phone=None, special_requests=None):
     """
     Premium hotel / Airbnb style daily stay booking.
@@ -257,8 +260,8 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
     
-    # Require login and get customer
-    customer = require_authed_customer("Please log in to book property stays")
+    # Resolve customer (logged in or guest with contact info)
+    customer = resolve_or_create_customer(customer_name, customer_phone)
     
     if not all([property_id, check_in, check_out]):
         frappe.throw(_("Property, check-in date, and check-out date are required"))
@@ -387,14 +390,14 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
         "message": f"Stay successfully reserved for {nights} night(s) at {prop.get('title')}!"
     }
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def request_property_lease(property_id, tenure_frequency="Monthly", start_date=None, duration_months=6, customer_name=None, customer_phone=None):
     """
     Submits a residential or commercial lease agreement application.
     BISMALLAH: Enforces login, binds to customer and company.
     """
-    # Require login and get customer
-    customer = require_authed_customer("Please log in to submit lease applications")
+    # Resolve customer (logged in or guest with contact info)
+    customer = resolve_or_create_customer(customer_name, customer_phone)
     
     if not property_id:
         frappe.throw(_("Property ID is required"))

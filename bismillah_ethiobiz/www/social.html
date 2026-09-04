@@ -234,10 +234,12 @@
         font-weight: 700;
     }
     .af-post-text {
-        font-size: 15px;
-        color: #334155;
-        line-height: 1.65;
+        font-size: 15.5px;
+        color: #1e293b;
+        line-height: 1.7;
         margin: 16px 0;
+        white-space: pre-line;
+        word-break: break-word;
     }
 
     /* Poll Widget */
@@ -1145,6 +1147,25 @@
         loadFeed();
     }
 
+    function formatAfochaPost(text) {
+        if (!text) return '';
+        if (text.indexOf('<p>') !== -1 || text.indexOf('<div>') !== -1) {
+            return text;
+        }
+        let escaped = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Auto-link URLs
+        escaped = escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#008080; font-weight:700; text-decoration:underline;">$1</a>');
+        
+        // Auto-link hashtags (supports English and Amharic script)
+        escaped = escaped.replace(/#([a-zA-Z0-9_\u1200-\u137F]+)/g, '<a href="/social?tag=$1" style="color:#0f766e; font-weight:700;">#$1</a>');
+        
+        return escaped;
+    }
+
     function loadFeed() {
         document.getElementById('afocha-main-feed-view').style.display = 'block';
         document.getElementById('afocha-single-post-view').style.display = 'none';
@@ -1194,7 +1215,7 @@
                             <span class="af-tag-badge">${p.category_tag}</span>
                         </div>
 
-                        <div class="af-post-text">${p.content}</div>
+                        <div class="af-post-text">${formatAfochaPost(p.content)}</div>
 
                         ${mediaHtml}
                         ${pollHtml}
@@ -1378,8 +1399,8 @@
                                 <span class="af-tag-badge" style="font-size: 12px; padding: 5px 14px;">${p.category_tag}</span>
                             </div>
 
-                            <div style="font-size: 17px; color: #1e293b; line-height: 1.7; margin-bottom: 20px;">
-                                ${p.content}
+                            <div style="font-size: 17px; color: #1e293b; line-height: 1.7; margin-bottom: 20px; white-space: pre-line; word-break: break-word;">
+                                ${formatAfochaPost(p.content)}
                             </div>
 
                             ${mediaHtml}
