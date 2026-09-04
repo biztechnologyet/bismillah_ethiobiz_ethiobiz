@@ -63,9 +63,9 @@ class BizServiceBooking(Document):
             if not frappe.db.exists("DocShare",
                                     {"share_doctype": self.doctype, "share_name": self.name,
                                      "user": self.practitioner_user}):
-                share_add(self.doctype, self.name, self.practitioner_user, read=1, write=1, submit=1)
+                share_add(self.doctype, self.name, self.practitioner_user, read=1, write=1, submit=1, flags={"ignore_share_permission": True})
         except Exception as e:
-            frappe.log_error(f"BizService provider share failed for {self.name}->{self.practitioner_user}: {e}", "BizService")
+            frappe.log_error(title="BizService Share", message=f"Share failed for {self.name}->{self.practitioner_user}: {e}")
 
     def set_total_amount(self):
         if self.items:

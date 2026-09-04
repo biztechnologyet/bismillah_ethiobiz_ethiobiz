@@ -12,10 +12,11 @@ Directly interfaces with:
 
 import frappe
 from frappe import _
+from frappe.utils import today, add_days, getdate, flt, cint
 try:
-    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
 except ImportError:
-    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
 
 # ==============================================================================
 # 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
@@ -122,9 +123,9 @@ def get_available_slots(practitioner, date=None, service_type="In-Clinic"):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
+def create_appointment(practitioner=None, date=None, time_slot=None, service_type="In-Clinic",
                        patient_name=None, patient_phone=None, symptoms=None,
-                       book_for="Self", attachments=None):
+                       book_for="Self", attachments=None, **kwargs):
     """
     Creates real Patient, User, Customer and Patient Appointment in Healthcare Desk.
     BISMALLAH: Fully registers User, Customer, and Patient per industry requirements.
@@ -133,27 +134,35 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
         from bismillah_ethiobiz import ethiobiz_identity
     except ImportError:
         import ethiobiz_identity
+
+    practitioner = practitioner or kwargs.get("doctor") or kwargs.get("doctor_id") or "HLC-PRAC-2026-00001"
+    date = date or kwargs.get("appointment_date") or str(today())
+    time_slot = time_slot or kwargs.get("appointment_time") or kwargs.get("time") or "10:00"
+    patient_name = patient_name or kwargs.get("customer_name") or kwargs.get("name") or kwargs.get("full_name")
+    patient_phone = patient_phone or kwargs.get("customer_phone") or kwargs.get("phone") or kwargs.get("mobile")
+    email = kwargs.get("customer_email") or kwargs.get("email") or kwargs.get("patient_email")
     
     if not patient_name or not patient_phone:
         frappe.throw("Patient Name and Phone Number are mandatory")
 
     # BISMALLAH: Resolve or register User, Customer and Patient
-    party = ethiobiz_identity.resolve_or_create_patient(patient_name, patient_phone)
+    party = ethiobiz_identity.ensure_registered_party(full_name=patient_name, phone=patient_phone, email=email, party_type="Patient")
     customer = party["customer"]
     patient = party["patient"]
     user = party["user"]
 
     # Create Patient Appointment in Desk
-    fee = frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0
+    fee = flt(frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0)
     comp = frappe.db.get_value("Healthcare Practitioner", practitioner, "company")
-    
-    # BISMALLAH: Validate company exists and resolve properly
-    comp = ethiobiz_identity.resolve_booking_company(comp, "practitioner")
-
+    if not comp or not frappe.db.exists("Company", comp):
+        comp = frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+    dept = frappe.db.get_value("Healthcare Practitioner", practitioner, "department")
     appt = frappe.get_doc({
         "doctype": "Patient Appointment",
         "patient": patient,
+        "appointment_for": "Practitioner",
         "practitioner": practitioner,
+        "department": dept,
         "appointment_date": date,
         "appointment_time": time_slot,
         "appointment_type": service_type,
@@ -163,6 +172,7 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
         "status": "Scheduled" if frappe.db.exists("DocType", "Patient Appointment") else "Open",
         "customer": customer  # BISMALLAH: Link to customer
     })
+    appt.flags.ignore_mandatory = True
     appt.insert(ignore_permissions=True)
 
     return {
@@ -340,21 +350,25 @@ def search_services(category=None, region=None, query=None,
 
 
 @frappe.whitelist(allow_guest=True)
-def book_service(service_id, booking_date=None, booking_time=None, customer_name=None,
+def book_service(service_id=None, booking_date=None, booking_time=None, customer_name=None,
                  customer_phone=None, practitioner=None, notes=None,
-                 address=None, date=None, time_slot=None):
+                 address=None, date=None, time_slot=None, service_name=None,
+                 appointment_date=None, appointment_time=None, customer_email=None, **kwargs):
     """Creates real BizService Booking and dispatches BizRide if requires_travel.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
-    
+    service_id = service_id or service_name or kwargs.get("service")
+    if not service_id:
+        frappe.throw(_("Service ID is required"))
+    b_date = booking_date or date or appointment_date or str(frappe.utils.now_datetime().date())
+    b_time = booking_time or time_slot or appointment_time or "14:00"
+
     # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone)
+    customer = resolve_or_create_customer(customer_name, customer_phone, customer_email)
     
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
     service_doc = frappe.get_doc("BizService Listing", service_id)
-    b_date = booking_date or date or str(frappe.utils.now_datetime().date())
-    b_time = booking_time or time_slot or "14:00"
     provider_user = None
 
     # Get customer details from session

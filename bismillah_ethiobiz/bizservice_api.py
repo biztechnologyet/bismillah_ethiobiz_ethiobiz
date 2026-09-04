@@ -233,15 +233,16 @@ def validate_time_slot(listing=None, date=None, time_slot=None, practitioner=Non
     if not req:
         return {"status": "success", "valid": True, "reason": "no-time-slot"}
     valid = req in slots
-    if valid and _has("BizService Booking"):
+    if _has("BizService Booking"):
         booked = frappe.get_all(
             "BizService Booking",
             filters={"service": listing, "booking_date": date,
-                     "booking_time": req, "status": ["not in", ["Cancelled", "No-Show"]]},
-            fields=["name"], limit=1
+                     "status": ["not in", ["Cancelled", "No-Show"]]},
+            pluck="booking_time"
         )
-        if booked:
-            valid = False
+        booked_set = set(cstr(b)[:5] for b in booked)
+        slots = [s for s in slots if s not in booked_set]
+        valid = req in slots
     return {"status": "success", "valid": valid, "valid_slots": slots, "reason": "ok" if valid else "slot-closed-or-off"}
 
 

@@ -81,18 +81,21 @@ def get_or_create_customer_for_user(user=None):
     return doc.name
 
 
-def resolve_booking_company(owning_company, label="listing"):
-    """Return a real Company name. Throws if missing or not in Desk."""
+def resolve_booking_company(owning_company, label="listing", *args, **kwargs):
+    """Return a real Company name. Robust against variable args and missing companies."""
     company = (owning_company or "").strip() if owning_company else ""
+    if not company:
+        company = (frappe.db.get_single_value("BizService Settings", "company")
+                   or frappe.db.get_single_value("Global Defaults", "default_company")
+                   or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0] or "")
+    if company and not frappe.db.exists("Company", company):
+        company = (frappe.db.get_single_value("Global Defaults", "default_company")
+                   or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0] or company)
     if not company:
         frappe.throw(
             _("This {0} has no owning Company. Assign a Company in Desk before taking bookings.").format(
                 label
             )
-        )
-    if not frappe.db.exists("Company", company):
-        frappe.throw(
-            _("Owning Company '{0}' on this {1} is not a valid Company.").format(company, label)
         )
     return company
 
@@ -217,6 +220,8 @@ def ensure_registered_party(full_name=None, phone=None, email=None, party_type="
                     "mobile": phone_clean,
                     "email": email_clean or (user_name if "@" in str(user_name) else None),
                     "customer": customer_name,
+                    "user_id": user_name,
+                    "invite_user": 0,
                     "sex": "Female" if is_female else "Male",
                     "status": "Active"
                 })

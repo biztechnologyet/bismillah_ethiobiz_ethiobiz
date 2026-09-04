@@ -253,15 +253,21 @@ def get_property_details(property_id):
     frappe.throw(_(f"Property {property_id} not found"))
 
 @frappe.whitelist(allow_guest=True)
-def book_property_stay(property_id, check_in, check_out, guests=1, customer_name=None, customer_phone=None, special_requests=None):
+def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1, customer_name=None, customer_phone=None, special_requests=None, **kwargs):
     """
     Premium hotel / Airbnb style daily stay booking.
     Creates a confirmed BizBooking / Hotel Reservation entry.
     BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
-    
+    property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
+    customer_name = customer_name or kwargs.get("name") or kwargs.get("full_name")
+    customer_phone = customer_phone or kwargs.get("phone") or kwargs.get("mobile")
+    check_in = check_in or kwargs.get("start_date") or kwargs.get("checkin")
+    check_out = check_out or kwargs.get("end_date") or kwargs.get("checkout")
+    email = kwargs.get("email") or kwargs.get("customer_email")
+
     # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone)
+    customer = resolve_or_create_customer(customer_name, customer_phone, email)
     
     if not all([property_id, check_in, check_out]):
         frappe.throw(_("Property, check-in date, and check-out date are required"))
@@ -321,7 +327,7 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
                           or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0])
                     if co:
                         # BISMALLAH: Validate company before creating listing
-                        co = resolve_booking_company(co, "BizService Settings", "company")
+                        co = resolve_booking_company(co, "BizService Settings")
                         try:
                             listing = frappe.get_doc({
                                 "doctype": "BizService Listing",
@@ -391,13 +397,20 @@ def book_property_stay(property_id, check_in, check_out, guests=1, customer_name
     }
 
 @frappe.whitelist(allow_guest=True)
-def request_property_lease(property_id, tenure_frequency="Monthly", start_date=None, duration_months=6, customer_name=None, customer_phone=None):
+def request_property_lease(property_id=None, tenure_frequency="Monthly", start_date=None, duration_months=6, customer_name=None, customer_phone=None, **kwargs):
     """
     Submits a residential or commercial lease agreement application.
-    BISMALLAH: Enforces login, binds to customer and company.
+    BISMALLAH: Enforces login/registration, binds to customer and company.
     """
+    property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
+    customer_name = customer_name or kwargs.get("applicant_name") or kwargs.get("name") or kwargs.get("full_name")
+    customer_phone = customer_phone or kwargs.get("applicant_phone") or kwargs.get("phone") or kwargs.get("mobile")
+    start_date = start_date or kwargs.get("proposed_start_date") or today()
+    duration_months = duration_months or kwargs.get("lease_duration_months") or 6
+    email = kwargs.get("email") or kwargs.get("customer_email") or kwargs.get("applicant_email")
+
     # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone)
+    customer = resolve_or_create_customer(customer_name, customer_phone, email)
     
     if not property_id:
         frappe.throw(_("Property ID is required"))
@@ -441,10 +454,17 @@ def request_property_lease(property_id, tenure_frequency="Monthly", start_date=N
     }
 
 @frappe.whitelist(allow_guest=True)
-def schedule_property_viewing(property_id, preferred_date, preferred_time="10:00 AM", customer_name=None, customer_phone=None):
+def schedule_property_viewing(property_id=None, preferred_date=None, preferred_time="10:00 AM", customer_name=None, customer_phone=None, **kwargs):
     """
     Schedules an in-person or virtual property tour with an assigned EthioBiz Real Estate agent.
     """
+    property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
+    preferred_date = preferred_date or kwargs.get("date") or kwargs.get("viewing_date") or today()
+    preferred_time = preferred_time or kwargs.get("time") or kwargs.get("viewing_time") or "10:00 AM"
+    customer_name = customer_name or kwargs.get("name") or kwargs.get("full_name")
+    customer_phone = customer_phone or kwargs.get("phone") or kwargs.get("mobile")
+    email = kwargs.get("email") or kwargs.get("customer_email")
+
     if not all([property_id, preferred_date]):
         frappe.throw(_("Property ID and preferred date are required"))
 
