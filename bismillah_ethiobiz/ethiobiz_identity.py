@@ -250,3 +250,79 @@ def resolve_or_create_patient(patient_name=None, patient_phone=None, email=None)
     """Resolve or register User + Customer + Patient, returning dict of all three."""
     return ensure_registered_party(full_name=patient_name, phone=patient_phone, email=email, party_type="Patient")
 
+
+@frappe.whitelist(allow_guest=True)
+def get_current_user_profile():
+    """Returns comprehensive logged-in user profile with auto-linking to Customer/Patient."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        return {
+            "status": "success",
+            "logged_in": False,
+            "user": "Guest",
+            "full_name": "",
+            "phone": "",
+            "email": "",
+            "address": "",
+            "customer": "",
+            "patient": ""
+        }
+
+    u_doc = frappe.get_doc("User", user)
+    full_name = u_doc.full_name or f"{u_doc.first_name or ''} {u_doc.last_name or ''}".strip() or user
+    phone = u_doc.mobile_no or u_doc.phone or ""
+    email = u_doc.email or ""
+
+    # Resolve ERPNext Customer
+    cust = None
+    if phone:
+        cust = frappe.db.get_value("Customer", {"mobile_no": phone}, "name")
+    if not cust and email:
+        cust = frappe.db.get_value("Customer", {"email_id": email}, "name")
+    if not cust and full_name:
+        cust = frappe.db.get_value("Customer", {"customer_name": full_name}, "name")
+
+    # If user has no customer yet, auto-ensure it!
+    if not cust and (full_name or phone or email):
+        try:
+            ensured = ensure_registered_party(full_name=full_name, phone=phone, email=email, party_type="Customer")
+            cust = ensured.get("customer")
+        except Exception:
+            pass
+
+    # Resolve Healthcare Patient
+    patient = None
+    if frappe.db.exists("DocType", "Patient"):
+        if phone:
+            patient = frappe.db.get_value("Patient", {"mobile": phone}, "name")
+        if not patient and email:
+            patient = frappe.db.get_value("Patient", {"email": email}, "name")
+        if not patient and full_name:
+            patient = frappe.db.get_value("Patient", {"patient_name": full_name}, "name")
+
+    # Resolve Saved Primary Address
+    address = ""
+    if cust:
+        try:
+            addr = frappe.get_all("Dynamic Link", filters={"link_doctype": "Customer", "link_name": cust, "parenttype": "Address"}, pluck="parent", limit=1)
+            if addr:
+                a_doc = frappe.get_doc("Address", addr[0])
+                address = f"{a_doc.address_line1 or ''}, {a_doc.city or ''}".strip(", ")
+        except Exception:
+            pass
+
+    return {
+        "status": "success",
+        "logged_in": True,
+        "user": user,
+        "full_name": full_name,
+        "first_name": u_doc.first_name or (full_name.split()[0] if full_name else ""),
+        "last_name": u_doc.last_name or (full_name.split()[-1] if len(full_name.split()) > 1 else ""),
+        "phone": phone,
+        "email": email,
+        "address": address or "Addis Ababa, Ethiopia",
+        "customer": cust or "",
+        "patient": patient or ""
+    }
+
+

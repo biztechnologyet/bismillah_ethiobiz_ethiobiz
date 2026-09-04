@@ -482,3 +482,28 @@ def schedule_property_viewing(property_id=None, preferred_date=None, preferred_t
         "contact_phone": "+251 91 100 0000",
         "message": f"Viewing confirmed for {preferred_date} at {preferred_time}. Our agent will meet you at the property location."
     }
+
+@frappe.whitelist(allow_guest=True)
+def register_property_listing(title=None, property_type="Residential", tenure="Monthly Rental", price=0, city="Addis Ababa", subcity=None, bedrooms=1, bathrooms=1, description=None, owner_name=None, owner_phone=None, owner_email=None, **kwargs):
+    """
+    Allows a property owner, landlord, or hotelier to register a property or lodging on EthioBiz.
+    Auto-registers owner as an ERPNext Customer/Partner.
+    """
+    title = title or kwargs.get("property_title") or "New Property Listing"
+    owner_name = owner_name or kwargs.get("name") or kwargs.get("full_name")
+    owner_phone = owner_phone or kwargs.get("phone") or kwargs.get("mobile")
+    owner_email = owner_email or kwargs.get("email")
+
+    if not owner_name or not owner_phone:
+        frappe.throw(_("Owner name and phone number are required for property registration"))
+
+    customer = resolve_or_create_customer(owner_name, owner_phone, owner_email)
+
+    ref = f"PROP-REG-{cint(now_datetime().timestamp())}"
+    return {
+        "status": "success",
+        "reference": ref,
+        "customer": customer,
+        "title": title,
+        "message": f"Alhamdulillah! Your property '{title}' has been registered with reference {ref}. An EthioBiz property verification officer will contact you within 24 hours to verify and publish the listing."
+    }

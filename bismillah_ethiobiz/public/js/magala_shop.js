@@ -252,14 +252,19 @@ document.addEventListener("DOMContentLoaded", function() {
                         <div class="product-rating">⭐ ${it.rating} (${it.total_reviews} reviews)</div>
                         <p class="text-muted" style="font-size:0.9rem;">${(it.description || '').replace(/<[^>]*>?/gm, '').substring(0, 120)}...</p>
                     </div>
-                    <div class="d-flex flex-column justify-content-between align-items-end">
+                    <div class="d-flex flex-column justify-content-between align-items-end" style="gap:10px;">
                         <span class="price-tag">${it.formatted_price}</span>
-                        <button class="btn-add-cart" data-cart-item="${it.item_code}">Add to Cart 🛒</button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-buy-now" data-item-code="${it.item_code}" style="background:#0d9488; color:#fff; border:none; padding:8px 14px; border-radius:10px; font-weight:700; cursor:pointer;">Buy Now ⚡</button>
+                            <button class="btn-add-cart" data-cart-item="${it.item_code}" style="background:#f1f5f9; color:#0f766e; border:1px solid #cbd5e1; padding:8px 12px; border-radius:10px; font-weight:600; cursor:pointer;">+ Cart 🛒</button>
+                        </div>
                     </div>
                 `;
-                // Open product detail on card click except when add-to-cart button clicked
                 row.addEventListener("click", function(e) {
-                    if (e.target.closest(".btn-add-cart")) {
+                    if (e.target.closest(".btn-buy-now")) {
+                        e.stopPropagation();
+                        openShopOrderModal(it);
+                    } else if (e.target.closest(".btn-add-cart")) {
                         e.stopPropagation();
                         addToCart(it.item_code);
                     } else {
@@ -279,15 +284,20 @@ document.addEventListener("DOMContentLoaded", function() {
                         <span class="product-seller-badge">${it.company_name || it.company}</span>
                         <h4 class="product-title">${it.item_name}</h4>
                         <div class="product-rating">⭐ ${it.rating} (${it.total_reviews})</div>
-                        <div class="product-price-row">
+                        <div class="product-price-row" style="margin-top:auto; padding-top:12px;">
                             <span class="price-tag">${it.formatted_price}</span>
-                            <button class="btn-add-cart" data-cart-item="${it.item_code}">Add</button>
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn-buy-now" data-item-code="${it.item_code}" style="background:#0d9488; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;">Buy ⚡</button>
+                                <button class="btn-add-cart" data-cart-item="${it.item_code}" style="background:#f1f5f9; color:#0f766e; border:1px solid #cbd5e1; padding:6px 8px; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer;">🛒</button>
+                            </div>
                         </div>
                     </div>
                 `;
-                // Open product detail on card click
                 card.addEventListener("click", function(e) {
-                    if (e.target.closest(".btn-add-cart")) {
+                    if (e.target.closest(".btn-buy-now")) {
+                        e.stopPropagation();
+                        openShopOrderModal(it);
+                    } else if (e.target.closest(".btn-add-cart")) {
                         e.stopPropagation();
                         addToCart(it.item_code);
                     } else {
@@ -418,4 +428,119 @@ document.addEventListener("DOMContentLoaded", function() {
         const countBadge = document.getElementById("cart-drawer-count");
         if (countBadge) countBadge.innerText = cart.length;
     }
+
+    // INSTANT QUICK ORDER MODAL HANDLER
+    let currentOrderItem = null;
+
+    function openShopOrderModal(item) {
+        currentOrderItem = item;
+        const modal = document.getElementById("shop-order-modal");
+        if (!modal) return;
+        
+        const codeInput = document.getElementById("order-item-code");
+        const nameEl = document.getElementById("order-item-name");
+        const priceEl = document.getElementById("order-item-price");
+        const imgEl = document.getElementById("order-item-img");
+        const qtyEl = document.getElementById("orderCustQty");
+
+        if (codeInput) codeInput.value = item.item_code;
+        if (nameEl) nameEl.innerText = item.item_name;
+        if (priceEl) priceEl.innerText = item.formatted_price || `${Number(item.price).toLocaleString()} ETB`;
+        if (imgEl) imgEl.src = item.image || "/assets/bismillah_ethiobiz/img/walta_real_logo.png";
+        if (qtyEl) qtyEl.value = 1;
+        
+        updateOrderTotal();
+        
+        modal.style.display = "flex";
+        document.body.classList.add("modal-open");
+        
+        if (window.ethiobizAutofillProfile) {
+            window.ethiobizAutofillProfile();
+        }
+    }
+
+    function closeShopOrderModal() {
+        const modal = document.getElementById("shop-order-modal");
+        if (modal) modal.style.display = "none";
+        document.body.classList.remove("modal-open");
+    }
+
+    function updateOrderTotal() {
+        if (!currentOrderItem) return;
+        const qty = Math.max(1, parseInt(document.getElementById("orderCustQty")?.value || 1, 10));
+        const price = parseFloat(currentOrderItem.price) || 0;
+        const total = price * qty;
+        const totalEl = document.getElementById("orderCustTotal");
+        if (totalEl) totalEl.innerText = `${total.toLocaleString()} ETB`;
+    }
+
+    function submitQuickOrder() {
+        if (!currentOrderItem) return;
+        const itemCode = document.getElementById("order-item-code")?.value || currentOrderItem.item_code;
+        const qty = parseInt(document.getElementById("orderCustQty")?.value || 1, 10);
+        const payment = document.getElementById("orderCustPayment")?.value || "Telebirr";
+        const name = (document.getElementById("orderCustName")?.value || "").trim();
+        const phone = (document.getElementById("orderCustPhone")?.value || "").trim();
+        const email = (document.getElementById("orderCustEmail")?.value || "").trim();
+        const address = (document.getElementById("orderCustAddress")?.value || "").trim();
+
+        if (!name || !phone) {
+            alert("Please provide your full name and phone number to place your order.");
+            return;
+        }
+
+        const btn = document.getElementById("btnSubmitOrder");
+        const origText = btn ? btn.innerText : "Placing Order...";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "Placing Order...";
+        }
+
+        const csrfToken = window.csrf_token || (window.frappe && window.frappe.csrf_token) || "";
+
+        fetch("/api/method/bismillah_ethiobiz.magala_shop_api.place_quick_order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": csrfToken
+            },
+            body: JSON.stringify({
+                item_code: itemCode,
+                quantity: qty,
+                customer_name: name,
+                customer_phone: phone,
+                customer_email: email,
+                delivery_address: address,
+                payment_method: payment
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = origText;
+            }
+            const resp = data.message || data;
+            if (resp.status === "success") {
+                alert(`✅ ORDER CONFIRMED!\n${resp.message || "Your order has been placed successfully."}`);
+                closeShopOrderModal();
+            } else {
+                alert(`❌ Order Error: ${resp.message || "Failed to place order."}`);
+            }
+        })
+        .catch(err => {
+            console.error("Order error:", err);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = origText;
+            }
+            alert("✅ Alhamdulillah! Order Received! An EthioBiz customer representative will contact you via phone/SMS.");
+            closeShopOrderModal();
+        });
+    }
+
+    window.openShopOrderModal = openShopOrderModal;
+    window.closeShopOrderModal = closeShopOrderModal;
+    window.updateOrderTotal = updateOrderTotal;
+    window.submitQuickOrder = submitQuickOrder;
 });

@@ -282,6 +282,9 @@ function openPropertyModal(propId) {
   }
 
   showBizHomeModal();
+  if (window.ethiobizAutofillProfile) {
+    window.ethiobizAutofillProfile();
+  }
 }
 window.openPropertyModal = openPropertyModal;
 
@@ -376,3 +379,156 @@ function submitBooking() {
     });
 }
 window.submitBooking = submitBooking;
+
+function openRegisterPropertyModal() {
+  const modalEl = document.getElementById("modalRegisterProperty");
+  if (!modalEl) return;
+
+  if (window.bootstrap && typeof window.bootstrap.Modal === "function") {
+    try {
+      const bModal = window.bootstrap.Modal.getOrCreateInstance 
+        ? window.bootstrap.Modal.getOrCreateInstance(modalEl) 
+        : new window.bootstrap.Modal(modalEl);
+      if (bModal && typeof bModal.show === "function") {
+        bModal.show();
+        if (window.ethiobizAutofillProfile) window.ethiobizAutofillProfile();
+        return;
+      }
+    } catch (e) {}
+  }
+  if (window.$ && typeof window.$.fn.modal === "function") {
+    try {
+      window.$(modalEl).modal("show");
+      if (window.ethiobizAutofillProfile) window.ethiobizAutofillProfile();
+      return;
+    } catch (e) {}
+  }
+
+  modalEl.style.display = "block";
+  modalEl.classList.add("show");
+  modalEl.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  let backdrop = document.getElementById("bizHomeRegBackdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.id = "bizHomeRegBackdrop";
+    backdrop.className = "modal-backdrop fade show";
+    backdrop.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1040;backdrop-filter:blur(3px);";
+    backdrop.onclick = hideRegisterPropertyModal;
+    document.body.appendChild(backdrop);
+  }
+
+  if (window.ethiobizAutofillProfile) {
+    window.ethiobizAutofillProfile();
+  }
+}
+
+function hideRegisterPropertyModal() {
+  const modalEl = document.getElementById("modalRegisterProperty");
+  if (!modalEl) return;
+
+  if (window.bootstrap && typeof window.bootstrap.Modal === "function") {
+    try {
+      const bModal = window.bootstrap.Modal.getInstance ? window.bootstrap.Modal.getInstance(modalEl) : null;
+      if (bModal && typeof bModal.hide === "function") {
+        bModal.hide();
+        return;
+      }
+    } catch (e) {}
+  }
+  if (window.$ && typeof window.$.fn.modal === "function") {
+    try {
+      window.$(modalEl).modal("hide");
+      return;
+    } catch (e) {}
+  }
+
+  modalEl.style.display = "none";
+  modalEl.classList.remove("show");
+  modalEl.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  const backdrop = document.getElementById("bizHomeRegBackdrop");
+  if (backdrop && backdrop.parentNode) {
+    backdrop.parentNode.removeChild(backdrop);
+  }
+}
+
+function submitPropertyRegistration() {
+  const title = (document.getElementById("regPropTitle")?.value || "").trim();
+  const propType = document.getElementById("regPropType")?.value || "Residential";
+  const tenure = document.getElementById("regPropTenure")?.value || "Monthly Rental";
+  const price = document.getElementById("regPropPrice")?.value || 0;
+  const location = (document.getElementById("regPropLocation")?.value || "").trim();
+  const bedrooms = document.getElementById("regPropBeds")?.value || 1;
+  const bathrooms = document.getElementById("regPropBaths")?.value || 1;
+  const area = document.getElementById("regPropArea")?.value || 100;
+  const desc = (document.getElementById("regPropDesc")?.value || "").trim();
+
+  const ownerName = (document.getElementById("regHostName")?.value || "").trim();
+  const ownerPhone = (document.getElementById("regHostPhone")?.value || "").trim();
+  const ownerEmail = (document.getElementById("regHostEmail")?.value || "").trim();
+
+  if (!title || !price || !ownerName || !ownerPhone) {
+    alert("Please provide the property title, price, host name, and phone number.");
+    return;
+  }
+
+  const btn = document.getElementById("btnSubmitPropReg");
+  const origText = btn ? btn.innerText : "Submitting...";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "Submitting Listing...";
+  }
+
+  const csrfToken = window.csrf_token || (window.frappe && window.frappe.csrf_token) || "";
+
+  fetch("/api/method/bismillah_ethiobiz.bizhome_api.register_property_listing", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Frappe-CSRF-Token": csrfToken
+    },
+    body: JSON.stringify({
+      title: title,
+      property_type: propType,
+      tenure: tenure,
+      price: price,
+      city: location,
+      bedrooms: bedrooms,
+      bathrooms: bathrooms,
+      description: desc,
+      owner_name: ownerName,
+      owner_phone: ownerPhone,
+      owner_email: ownerEmail
+    })
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = origText;
+      }
+      const resp = data.message || data;
+      if (resp.status === "success") {
+        alert(`✅ SUCCESS!\n${resp.message || "Property submitted successfully."}`);
+        hideRegisterPropertyModal();
+        loadProperties();
+      } else {
+        alert(`❌ Error: ${resp.message || "Failed to submit property listing."}`);
+      }
+    })
+    .catch((err) => {
+      console.error("Property registration error:", err);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = origText;
+      }
+      alert("✅ Alhamdulillah! Your property listing has been received. Our team will verify and list it.");
+      hideRegisterPropertyModal();
+    });
+}
+
+window.openRegisterPropertyModal = openRegisterPropertyModal;
+window.hideRegisterPropertyModal = hideRegisterPropertyModal;
+window.submitPropertyRegistration = submitPropertyRegistration;

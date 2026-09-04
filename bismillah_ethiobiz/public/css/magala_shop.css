@@ -1,23 +1,25 @@
-/* BISMALLAH ETHIOBIZ MAGALA SHOP RESPONSIVE GLASSMORPHISM CSS */
+/* BISMALLAH ETHIOBIZ MAGALA SHOP RESPONSIVE HIGH-CONTRAST CSS */
 :root {
-    --magala-primary: #1FB6AE;
-    --magala-primary-hover: #179b94;
-    --magala-bg-card: rgba(255, 255, 255, 0.12);
-    --magala-border: rgba(255, 255, 255, 0.18);
-    --magala-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    --magala-text-dark: #1e293b;
+    --magala-primary: #0d9488;
+    --magala-primary-hover: #0f766e;
+    --magala-bg-card: #ffffff;
+    --magala-border: #e2e8f0;
+    --magala-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+    --magala-text-dark: #0f172a;
     --magala-text-muted: #64748b;
 }
 
 .magala-shop-container {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 20px 16px;
+    background: #f8fafc;
+    min-height: 85vh;
 }
 
 /* SEARCH HERO */
 .magala-search-hero {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     position: relative;
 }
 
@@ -25,19 +27,18 @@
     display: flex;
     gap: 12px;
     align-items: center;
-    background: var(--magala-bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--magala-border);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 16px;
-    padding: 10px 16px;
-    box-shadow: var(--magala-shadow);
+    padding: 12px 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 .search-input-wrapper {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .search-input-wrapper input {
@@ -46,16 +47,16 @@
     background: transparent;
     font-size: 1.05rem;
     outline: none;
-    color: inherit;
+    color: #0f172a;
 }
 
 .btn-geo {
-    background: rgba(31, 182, 174, 0.15);
+    background: rgba(13, 148, 136, 0.12);
     color: var(--magala-primary);
     border: 1px solid var(--magala-primary);
     padding: 8px 16px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -67,25 +68,27 @@
 /* VIEW TOGGLE */
 .magala-view-toggle {
     display: flex;
-    background: rgba(0,0,0,0.06);
+    background: #f1f5f9;
     border-radius: 12px;
     padding: 4px;
     gap: 4px;
+    border: 1px solid #e2e8f0;
 }
 
 .view-btn {
     border: none;
     background: transparent;
-    padding: 6px 12px;
+    padding: 7px 14px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    color: #475569;
     transition: all 0.2s;
 }
 .view-btn.active {
     background: var(--magala-primary);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(31, 182, 174, 0.3);
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
 }
 
 /* CATEGORY BAR */
@@ -94,27 +97,29 @@
     gap: 10px;
     overflow-x: auto;
     padding-bottom: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     scrollbar-width: none;
 }
 .magala-category-bar::-webkit-scrollbar { display: none; }
 
 .cat-pill {
     white-space: nowrap;
-    border: 1px solid var(--magala-border);
-    background: var(--magala-bg-card);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
-    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    padding: 8px 18px;
+    border-radius: 22px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.92rem;
+    font-weight: 600;
     transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 .cat-pill.active, .cat-pill:hover {
     background: var(--magala-primary);
     color: #fff;
     border-color: var(--magala-primary);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
 /* LAYOUT & COLLAPSIBLE SIDEBAR */
@@ -188,12 +193,11 @@
 
 /* SIDEBAR FILTER CARD */
 .filter-card {
-    background: var(--magala-bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--magala-border);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
-    padding: 20px;
-    box-shadow: var(--magala-shadow);
+    padding: 22px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 .filter-header {
     display: flex;
@@ -201,12 +205,20 @@
     align-items: center;
     margin-bottom: 16px;
 }
+.filter-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
 .filter-group {
     margin-bottom: 20px;
 }
 .filter-title {
     display: block;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #334155;
     margin-bottom: 8px;
 }
 .price-inputs {
@@ -216,10 +228,12 @@
 }
 .price-inputs input {
     width: 100%;
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.15);
-    background: rgba(255,255,255,0.7);
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 0.95rem;
 }
 
 /* RESULTS BAR */
@@ -227,12 +241,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 .btn-open-map-portal {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--magala-primary);
     text-decoration: none;
+    font-size: 0.92rem;
 }
 
 /* PRODUCT GRID VIEW */
@@ -244,19 +259,20 @@
 
 /* PRODUCT CARD */
 .product-card {
-    background: var(--magala-bg-card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--magala-border);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     position: relative;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 .product-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+    border-color: #0d9488;
 }
 
 .product-img-wrapper {
@@ -335,13 +351,18 @@
 }
 .product-list-row {
     display: grid;
-    grid-template-columns: 180px 1fr 220px;
-    gap: 16px;
-    background: var(--magala-bg-card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--magala-border);
+    grid-template-columns: 180px 1fr 240px;
+    gap: 18px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s;
+}
+.product-list-row:hover {
+    border-color: #0d9488;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 @media (max-width: 768px) {
     .product-list-row {

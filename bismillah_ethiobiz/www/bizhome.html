@@ -133,6 +133,12 @@
       <button class="tenure-btn" onclick="setTenure('Annual Lease')">📑 Annual Commercial Lease</button>
       <button class="tenure-btn" onclick="setTenure('For Sale')">🏷️ For Sale</button>
     </div>
+
+    <div class="mt-4">
+      <button type="button" class="btn btn-warning rounded-pill px-4 py-2 font-weight-bold shadow-sm" onclick="openRegisterPropertyModal()" style="background: #f59e0b; border: none; color: #0f172a; font-size: 14px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);">
+        ✨ + List / Register Your Property (Landlords & Hosts)
+      </button>
+    </div>
   </div>
 
   <!-- Search & Filter Bar -->
@@ -235,19 +241,27 @@
             </select>
           </div>
 
-          <!-- Customer Info -->
+          <!-- Customer / Tenant Registration Info -->
           <div class="col-md-6">
-            <label class="form-label font-weight-bold small">👤 Full Name</label>
-            <input type="text" id="custName" class="form-control rounded-pill" placeholder="e.g. Abebe Kebede">
+            <label class="form-label font-weight-bold small">👤 Full Name *</label>
+            <input type="text" id="custName" class="form-control rounded-pill" placeholder="e.g. Abebe Kebede" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label font-weight-bold small">📱 Phone Number</label>
-            <input type="text" id="custPhone" class="form-control rounded-pill" placeholder="0911000000">
+            <label class="form-label font-weight-bold small">📱 Phone Number *</label>
+            <input type="text" id="custPhone" class="form-control rounded-pill" placeholder="0911000000" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label font-weight-bold small">✉️ Email Address</label>
+            <input type="email" id="custEmail" class="form-control rounded-pill" placeholder="name@example.com">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label font-weight-bold small">📍 Current City / Residential Location</label>
+            <input type="text" id="custAddress" class="form-control rounded-pill" placeholder="e.g. Bole, Addis Ababa">
           </div>
 
           <div class="col-12">
-            <label class="form-label font-weight-bold small">📝 Special Inquiries / Requests</label>
-            <textarea id="custNotes" class="form-control rounded-3" rows="2" placeholder="Airport pickup, specific floor, viewing preference..."></textarea>
+            <label class="form-label font-weight-bold small">📝 Special Inquiries / Requests / Tenant Background</label>
+            <textarea id="custNotes" class="form-control rounded-3" rows="2" placeholder="Airport pickup, move-in timeline, workplace, specific floor, viewing preference..."></textarea>
           </div>
 
           <!-- Pricing Breakdown Box -->
@@ -273,7 +287,100 @@
   </div>
 </div>
 
-<script src="/assets/bismillah_ethiobiz/js/bizhome.js?v=2.1.0"></script>
+<!-- Landlord / Host Property Registration Modal -->
+<div class="modal fade" id="modalRegisterProperty" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #093a3e, #0d9488); color: #ffffff; border-radius: 16px 16px 0 0; padding: 20px 24px;">
+        <div>
+          <h5 class="modal-title font-weight-bold" style="color: #ffffff;">🏡 List / Register Your Property</h5>
+          <p class="small mb-0 opacity-90">Publish your hotel room, villa, apartment, or commercial space across EthioBiz</p>
+        </div>
+        <button type="button" class="close btn-close" onclick="hideRegisterPropertyModal()" style="font-size: 28px; line-height: 1; border: none; background: transparent; color: #ffffff; cursor: pointer;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label font-weight-bold small">🏷️ Property Title *</label>
+            <input type="text" id="regPropTitle" class="form-control rounded-pill" placeholder="e.g. Modern 3-Bedroom Furnished Apartment in Bole" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">🏛️ Property Type *</label>
+            <select id="regPropType" class="form-select rounded-pill">
+              <option value="Apartment / Condominium">Apartment / Condominium</option>
+              <option value="Villa / Residential">Villa / Residential</option>
+              <option value="Hotel / Pension Room">Hotel / Pension Room</option>
+              <option value="Commercial / Office">Commercial / Office</option>
+              <option value="Land / Plot">Land / Plot</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">📑 Listing Category (Tenure) *</label>
+            <select id="regPropTenure" class="form-select rounded-pill">
+              <option value="Monthly Rental">Monthly Rental</option>
+              <option value="Daily / Short Stay">Daily / Short Stay (Hotel/Airbnb)</option>
+              <option value="Annual Lease">Annual Commercial Lease</option>
+              <option value="For Sale">For Sale</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">💰 Price (ETB) *</label>
+            <input type="number" id="regPropPrice" class="form-control rounded-pill" placeholder="e.g. 35000" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">📍 City & Subcity *</label>
+            <input type="text" id="regPropLocation" class="form-control rounded-pill" placeholder="e.g. Addis Ababa, Bole Atlas" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">🛏️ Bedrooms</label>
+            <input type="number" id="regPropBeds" class="form-control rounded-pill" placeholder="e.g. 3" value="2">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">🚿 Bathrooms</label>
+            <input type="number" id="regPropBaths" class="form-control rounded-pill" placeholder="e.g. 2" value="2">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">📐 Area (m²)</label>
+            <input type="number" id="regPropArea" class="form-control rounded-pill" placeholder="e.g. 140" value="120">
+          </div>
+
+          <!-- Owner / Host Identity (Auto-filled) -->
+          <div class="col-12 mt-3 pt-3 border-top">
+            <h6 class="font-weight-bold text-teal" style="color: #0f766e;">👤 Owner / Host Verification Details</h6>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">Host Full Name *</label>
+            <input type="text" id="regHostName" class="form-control rounded-pill" placeholder="Your full legal name" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">Host Phone Number *</label>
+            <input type="text" id="regHostPhone" class="form-control rounded-pill" placeholder="09xxxxxxxx" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label font-weight-bold small">Host Email</label>
+            <input type="email" id="regHostEmail" class="form-control rounded-pill" placeholder="host@example.com">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label font-weight-bold small">📝 Property Description & Amenities</label>
+            <textarea id="regPropDesc" class="form-control rounded-3" rows="3" placeholder="WiFi, backup generator, water reservoir, 24/7 security, parking spaces, kitchen amenities..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-4" onclick="hideRegisterPropertyModal()">Cancel</button>
+        <button type="button" class="btn btn-primary rounded-pill px-5" id="btnSubmitPropReg" onclick="submitPropertyRegistration()" style="background: #008080; border-color: #008080;">Submit Property Listing ➔</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizhome.js?v=2.2.0"></script>
 <script>
   // Close modal when clicking outside dialog or pressing Escape
   document.addEventListener("DOMContentLoaded", function() {
@@ -283,8 +390,17 @@
         if (e.target === this) hideBizHomeModal();
       });
     }
+    var regModalEl = document.getElementById("modalRegisterProperty");
+    if (regModalEl) {
+      regModalEl.addEventListener("click", function(e) {
+        if (e.target === this) hideRegisterPropertyModal();
+      });
+    }
     document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape") hideBizHomeModal();
+      if (e.key === "Escape") {
+        hideBizHomeModal();
+        hideRegisterPropertyModal();
+      }
     });
   });
 </script>
