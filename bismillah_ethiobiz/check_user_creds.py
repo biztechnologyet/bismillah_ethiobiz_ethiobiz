@@ -16,12 +16,14 @@ def run():
         print("WEBHOOK RESP:", r.status_code, r.text[:300])
     except Exception as e:
         print("WEBHOOK ERR:", e)
-    try:
-        from frappe.utils.password import get_decrypted_password
-        pwd = get_decrypted_password("HADEEDA Settings", "HADEEDA Settings", "service_auth_token", raise_exception=False)
-        print("TOKEN:", pwd)
-    except Exception as e:
-        print("TOKEN ERR:", e)
+    todo = frappe.db.get_value("ToDo", "33sjrj7bco", ["name", "description", "status"], as_dict=True)
+    print("TODO:", todo)
+    
+    wi = frappe.db.get_value("Website Item", "WEB-ITM-0137", ["name", "item_code", "website_image", "thumbnail"], as_dict=True)
+    print("WEBSITE ITEM:", wi)
+    
+    files = frappe.db.sql("select file_url, attached_to_doctype, attached_to_name from tabFile where attached_to_name in ('WEB-ITM-0137', 'PROD-YIRGACHEFFE-COFFEE-03')", as_dict=True)
+    print("ATTACHED FILES:", files)
 
 if __name__ == "__main__":
     run()
