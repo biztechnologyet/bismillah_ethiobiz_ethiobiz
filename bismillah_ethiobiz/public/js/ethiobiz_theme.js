@@ -871,6 +871,45 @@
             }
         }
     }, true);
+
+    // BISMALLAH: Form Title Auto-Size Collapsible Toggle
+    function initTitleToggle() {
+        const titleAreas = document.querySelectorAll('.page-head .title-area, .page-head .page-title');
+        titleAreas.forEach(area => {
+            const titleText = area.querySelector('.title-text');
+            if (!titleText || area.querySelector('.eb-title-toggle-btn')) return;
+
+            // Only attach if title text is reasonably long or truncated
+            const textContent = (titleText.textContent || '').trim();
+            if (textContent.length > 35 || titleText.scrollWidth > titleText.clientWidth) {
+                const toggle = document.createElement('span');
+                toggle.className = 'eb-title-toggle-btn';
+                toggle.title = 'Click to expand or collapse full title';
+                toggle.innerHTML = '<span>↔</span><span>Expand</span>';
+
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    area.classList.toggle('eb-title-expanded');
+                    const isExp = area.classList.contains('eb-title-expanded');
+                    toggle.innerHTML = isExp ? '<span>▲</span><span>Collapse</span>' : '<span>↔</span><span>Expand</span>';
+                });
+
+                titleText.addEventListener('click', function () {
+                    area.classList.toggle('eb-title-expanded');
+                    const isExp = area.classList.contains('eb-title-expanded');
+                    toggle.innerHTML = isExp ? '<span>▲</span><span>Collapse</span>' : '<span>↔</span><span>Expand</span>';
+                });
+
+                titleText.parentNode.insertBefore(toggle, titleText.nextSibling);
+            }
+        });
+    }
+
+    $(document).on('page-change form_refresh', function () {
+        setTimeout(initTitleToggle, 300);
+        setTimeout(initTitleToggle, 800);
+    });
 }
 
 if (typeof frappe !== 'undefined' && frappe.ready) {

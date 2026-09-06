@@ -449,14 +449,43 @@ document.addEventListener("DOMContentLoaded", function() {
         if (imgEl) imgEl.src = item.image || "/assets/bismillah_ethiobiz/img/walta_real_logo.png";
         if (qtyEl) qtyEl.value = 1;
         
+        // Reset B2B section
+        const b2bToggle = document.getElementById("b2bToggle");
+        const b2bSelector = document.getElementById("b2b-company-selector");
+        if (b2bToggle) b2bToggle.checked = false;
+        if (b2bSelector) b2bSelector.style.display = "none";
+        
         updateOrderTotal();
         
         modal.style.display = "flex";
         document.body.classList.add("modal-open");
         
+        // Auto-fill profile from logged-in user
         if (window.ethiobizAutofillProfile) {
             window.ethiobizAutofillProfile();
         }
+        
+        // Populate profile card display
+        setTimeout(function() {
+            var prof = window.ETHIOBIZ_USER_PROFILE || {};
+            var nameVal = document.getElementById("orderCustName")?.value || prof.full_name || prof.user || "Guest User";
+            var phoneVal = document.getElementById("orderCustPhone")?.value || prof.phone || "—";
+            var emailVal = document.getElementById("orderCustEmail")?.value || prof.email || "—";
+            var nameDisp = document.getElementById("shop-profile-name");
+            var phoneDisp = document.getElementById("shop-profile-phone");
+            var emailDisp = document.getElementById("shop-profile-email");
+            var initialsDisp = document.getElementById("shop-profile-initials");
+            if (nameDisp) nameDisp.innerText = nameVal;
+            if (phoneDisp) phoneDisp.innerText = "📱 " + phoneVal;
+            if (emailDisp) emailDisp.innerText = "✉️ " + emailVal;
+            if (initialsDisp) {
+                var parts = nameVal.split(" ");
+                initialsDisp.innerText = parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : nameVal.substring(0, 2).toUpperCase();
+            }
+        }, 300);
+        
+        // Load B2B buyer companies
+        loadBuyerCompanies();
     }
 
     function closeShopOrderModal() {
@@ -511,7 +540,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 customer_phone: phone,
                 customer_email: email,
                 delivery_address: address,
-                payment_method: payment
+                payment_method: payment,
+                is_company_purchase: document.getElementById("b2bToggle")?.checked ? 1 : 0,
+                buyer_company: document.getElementById("b2bToggle")?.checked ? (document.getElementById("b2bBuyerCompany")?.value || "") : ""
             })
         })
         .then(r => r.json())
@@ -522,7 +553,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             const resp = data.message || data;
             if (resp.status === "success") {
-                alert(`✅ ORDER CONFIRMED!\n${resp.message || "Your order has been placed successfully."}`);
+                var b2bInfo = resp.purchase_order ? `\nPurchase Order: ${resp.purchase_order}` : "";
+                alert(`✅ ORDER CONFIRMED!\n${resp.message || "Your order has been placed successfully."}${b2bInfo}`);
                 closeShopOrderModal();
             } else {
                 alert(`❌ Order Error: ${resp.message || "Failed to place order."}`);
@@ -543,4 +575,34 @@ document.addEventListener("DOMContentLoaded", function() {
     window.closeShopOrderModal = closeShopOrderModal;
     window.updateOrderTotal = updateOrderTotal;
     window.submitQuickOrder = submitQuickOrder;
+
+    // B2B Section Toggle
+    function toggleB2BSection() {
+        var selector = document.getElementById("b2b-company-selector");
+        var toggle = document.getElementById("b2bToggle");
+        if (selector) selector.style.display = toggle && toggle.checked ? "block" : "none";
+    }
+    
+    function loadBuyerCompanies() {
+        fetch("/api/method/bismillah_ethiobiz.magala_shop_api.get_user_buyer_companies")
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var comps = (data.message && data.message.companies) || [];
+                var sel = document.getElementById("b2bBuyerCompany");
+                if (!sel) return;
+                sel.innerHTML = '<option value="">-- Select Company --</option>';
+                comps.forEach(function(c) {
+                    var opt = document.createElement("option");
+                    opt.value = c.name;
+                    opt.textContent = c.company_name || c.name;
+                    sel.appendChild(opt);
+                });
+            })
+            .catch(function(err) {
+                console.error("Failed to load buyer companies:", err);
+            });
+    }
+
+    window.toggleB2BSection = toggleB2BSection;
+    window.loadBuyerCompanies = loadBuyerCompanies;
 });

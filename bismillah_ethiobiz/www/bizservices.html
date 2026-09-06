@@ -41,6 +41,33 @@
       <input type="hidden" id="bs-book-service">
       <div id="bs-book-result"></div>
 
+      <!-- Client Verified Profile Top Card -->
+      <div class="ethiobiz-profile-top-slot" style="margin-bottom: 14px;">
+        <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(2, 132, 199, 0.06)); border: 1px solid rgba(13, 148, 136, 0.25); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="ethiobiz-user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: #0d9488; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;">
+              👤
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 13.5px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                <span class="ethiobiz-user-name">EthioBiz Member</span>
+                <span style="color: #0d9488; font-size: 12px;" title="Verified Profile">✓</span>
+              </div>
+              <div class="ethiobiz-user-meta" style="font-size: 11.5px; color: #64748b; margin-top: 1px;">
+                Verified Client Profile
+              </div>
+            </div>
+          </div>
+          <span style="background: #0d9488; color: #ffffff; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 16px; white-space: nowrap;">
+            Verified ✓
+          </span>
+        </div>
+      </div>
+
+      <!-- Hidden Client Inputs (Bound to Logged-in Profile) -->
+      <input type="hidden" id="bs-name">
+      <input type="hidden" id="bs-phone">
+
       <label>Date</label>
       <input type="date" id="bs-date">
 
@@ -52,12 +79,6 @@
       <label>Time Slot</label>
       <select id="bs-slot-select"><option value="">Select a time…</option></select>
       <div id="bs-avail-note" style="font-size:0.78rem;color:#64748b;margin-top:4px;"></div>
-
-      <label>Full Name</label>
-      <input type="text" id="bs-name" placeholder="Your name">
-
-      <label>Phone</label>
-      <input type="tel" id="bs-phone" placeholder="09xxxxxxxx">
 
       <label>Address (for home dispatch)</label>
       <textarea id="bs-address" rows="2" placeholder="Area / landmark"></textarea>

@@ -31,7 +31,7 @@
         if (viewType !== 'List' && viewType !== 'query-report' && viewType !== 'Report') return;
 
         const doctype = curRoute[1] || 'default';
-        const filterSections = document.querySelectorAll('.standard-filter-section, .list-filters, .filter-section');
+        const filterSections = document.querySelectorAll('.standard-filter-section, .list-filters, .filter-section, .page-form .custom-actions, .report-filter-area, .frappe-list-filters');
 
         filterSections.forEach(section => {
             if (section.dataset.ebCollapsibleInit) return;

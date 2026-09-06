@@ -142,12 +142,36 @@
       });
     }
 
-    // 5. INJECT PROFILE BANNER IN MODALS IF NOT PRESENT
+    // 5. UPDATE EMBEDDED TOP PROFILE CARDS
+    const fullName = p.full_name || p.user || "EthioBiz Member";
+    const initials = fullName
+      .split(" ")
+      .map((w) => w[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "👤";
+    const metaParts = [];
+    if (p.phone) metaParts.push("📞 " + p.phone);
+    if (p.email) metaParts.push("✉️ " + p.email);
+    const metaStr = metaParts.join(" • ") || "Verified Profile";
+
+    container.querySelectorAll(".ethiobiz-user-name").forEach((el) => {
+      el.innerText = fullName;
+    });
+    container.querySelectorAll(".ethiobiz-user-meta").forEach((el) => {
+      el.innerText = metaStr;
+    });
+    container.querySelectorAll(".ethiobiz-user-avatar").forEach((el) => {
+      el.innerText = initials;
+    });
+
+    // 6. INJECT PROFILE BANNER IN MODALS ONLY IF NO TOP PROFILE CARD EXISTS
     const modalBodies = container.querySelectorAll(
       ".modal-body, .bs-modal-box, #booking-modal-card, .home-booking-modal-body, #modal-booking-form-area"
     );
     modalBodies.forEach((body) => {
-      if (!body.querySelector(".ethiobiz-autofill-banner")) {
+      if (!body.querySelector(".ethiobiz-autofill-banner") && !body.querySelector(".ethiobiz-user-profile-top-card")) {
         const banner = document.createElement("div");
         banner.className = "ethiobiz-autofill-banner";
         banner.style.cssText =

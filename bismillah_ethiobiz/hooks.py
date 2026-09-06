@@ -139,6 +139,15 @@ on_session_creation = [
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
 
 # ============================================
+# SCHEDULER EVENTS
+# ============================================
+scheduler_events = {
+    "daily": [
+        "bismillah_ethiobiz.event_notification.send_event_digest"
+    ]
+}
+
+# ============================================
 # DOC EVENTS
 # ============================================
 

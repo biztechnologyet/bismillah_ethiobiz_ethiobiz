@@ -1575,47 +1575,94 @@ div[data-doctype="Blog Post"] .card {
     gap: 12px !important;
 }
 
-/* Row 1: Full-Width Title with status badge */
-.page-head .title-area {
+/* Row 1: Full-Width Title with status badge - Single Line by default with auto-size expansion */
+.page-head .title-area,
+.page-head .page-title {
     display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
     flex: 1 1 100% !important;
     gap: 12px !important;
+    position: relative !important;
 }
 
-.page-head .title-area .title-text {
-    font-size: 1.5rem !important;
+.page-head .title-area .title-text,
+.page-head .page-title .title-text {
+    font-size: 1.35rem !important;
     font-weight: 800 !important;
     color: #0f172a !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: calc(100% - 130px) !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    line-height: 1.3 !important;
+}
+
+/* Expanded state for long titles */
+.page-head .title-area.eb-title-expanded .title-text,
+.page-head .page-title.eb-title-expanded .title-text {
     white-space: normal !important;
     word-break: break-word !important;
-    line-height: 1.3 !important;
-    text-overflow: unset !important;
     overflow: visible !important;
     max-width: 100% !important;
+    background: rgba(0, 128, 128, 0.05) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0, 128, 128, 0.2) !important;
+}
+
+/* Expand / Collapse toggle pill */
+.eb-title-toggle-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #008080 !important;
+    background: rgba(0, 128, 128, 0.08) !important;
+    border: 1px solid rgba(0, 128, 128, 0.25) !important;
+    border-radius: 12px !important;
+    padding: 3px 8px !important;
+    cursor: pointer !important;
+    margin-left: 8px !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+}
+
+.eb-title-toggle-btn:hover {
+    background: rgba(0, 128, 128, 0.16) !important;
+    color: #072a2e !important;
 }
 
 .page-head .indicator-pill,
 .page-head .status-pill,
 .page-head .indicator {
     margin-left: 8px !important;
+    flex-shrink: 0 !important;
 }
 
 /* Row 2: Action buttons placed underneath the title bar */
 .page-head .page-actions {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: flex-end !important;
     width: 100% !important;
     flex-wrap: wrap !important;
-    gap: 10px !important;
-    padding-top: 4px !important;
+    gap: 8px !important;
+    padding-top: 6px !important;
+    margin-top: 4px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    z-index: 10 !important;
 }
 
 .page-head .page-actions .btn {
     border-radius: 8px !important;
     font-weight: 600 !important;
+    font-size: 13px !important;
 }
 
 /* Page content below buttons */

@@ -234,18 +234,36 @@ document.addEventListener("DOMContentLoaded", function() {
                 '</div>' +
             '</div>';
         document.getElementById("fix-booking-modal").style.display = "flex";
+        if (window.ethiobizAutofillProfile) {
+            window.ethiobizAutofillProfile();
+        }
     }
 
     function handleFixSubmit() {
         if (!selectedService) return;
-        var name = document.getElementById("fix-contact-name").value.trim();
-        var phone = document.getElementById("fix-contact-phone").value.trim();
-        var address = document.getElementById("fix-address").value.trim();
-        var desc = document.getElementById("fix-fault-desc").value.trim();
-        var urgency = document.querySelector('input[name="fix_urgency"]:checked').value;
+        var name = (document.getElementById("fix-contact-name") ? document.getElementById("fix-contact-name").value : "").trim();
+        var phone = (document.getElementById("fix-contact-phone") ? document.getElementById("fix-contact-phone").value : "").trim();
+        var address = (document.getElementById("fix-address") ? document.getElementById("fix-address").value : "").trim();
+        var desc = (document.getElementById("fix-fault-desc") ? document.getElementById("fix-fault-desc").value : "").trim();
+        var urgency = document.querySelector('input[name="fix_urgency"]:checked') ? document.querySelector('input[name="fix_urgency"]:checked').value : "Emergency";
 
-        if (!name || !phone || !address) {
-            alert("Please enter contact name, phone number, and service address.");
+        // Fallback to logged-in user profile if inputs were not populated
+        if (!name && window.ETHIOBIZ_USER_PROFILE) {
+            name = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!phone && window.ETHIOBIZ_USER_PROFILE) {
+            phone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+        }
+        if (!address && window.ETHIOBIZ_USER_PROFILE && window.ETHIOBIZ_USER_PROFILE.address) {
+            address = window.ETHIOBIZ_USER_PROFILE.address;
+        }
+
+        if (!name || !phone) {
+            alert("Please sign in or ensure your verified contact phone number is active.");
+            return;
+        }
+        if (!address) {
+            alert("Please enter the service location address for technician dispatch.");
             return;
         }
 

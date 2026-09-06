@@ -86,6 +86,29 @@
         <div class="modal-body-custom">
             <div class="doc-summary-badge" id="modal-doc-summary"></div>
             
+            <!-- Patient Verified Profile Top Card -->
+            <div class="ethiobiz-profile-top-slot mb-3">
+                <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(13, 148, 136, 0.06)); border: 1px solid rgba(16, 185, 129, 0.28); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="ethiobiz-user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                            👤
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                <span class="ethiobiz-user-name">EthioBiz Patient</span>
+                                <span style="color: #059669; font-size: 13px;" title="Verified Profile">✓</span>
+                            </div>
+                            <div class="ethiobiz-user-meta" style="font-size: 12px; color: #64748b; margin-top: 1px;">
+                                Verified Patient Profile
+                            </div>
+                        </div>
+                    </div>
+                    <span style="background: #059669; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
+                        Verified Patient ✓
+                    </span>
+                </div>
+            </div>
+
             <div class="form-group mb-3">
                 <label class="form-label font-weight-bold">Consultation Mode:</label>
                 <div class="consult-mode-selector">
@@ -119,21 +142,10 @@
                 </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label class="form-label font-weight-bold">Patient Full Name:</label>
-                <input type="text" id="book-patient-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Phone Number:</label>
-                    <input type="text" id="book-patient-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
-                </div>
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Email (Optional):</label>
-                    <input type="email" id="book-patient-email" class="form-control-custom" placeholder="e.g. name@email.com" />
-                </div>
-            </div>
+            <!-- Hidden Patient Inputs (Bound to Logged-in Profile) -->
+            <input type="hidden" id="book-patient-name" />
+            <input type="hidden" id="book-patient-phone" />
+            <input type="hidden" id="book-patient-email" />
 
             <div class="form-group mb-4">
                 <label class="form-label font-weight-bold">Symptoms / Reason for Consultation:</label>

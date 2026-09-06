@@ -57,6 +57,31 @@
                        "label":  "Webhook Auth Header Value (optional)"
                    },
                    {
+                       "fieldname":  "api_credentials_section",
+                       "fieldtype":  "Section Break",
+                       "label":  "API & HADEEDA Service Credentials"
+                   },
+                   {
+                       "fieldname":  "enable_service_token_auth",
+                       "fieldtype":  "Check",
+                       "label":  "Enable Service Token Authentication for HADEEDA",
+                       "default":  "1"
+                   },
+                   {
+                       "fieldname":  "service_auth_token",
+                       "fieldtype":  "Password",
+                       "label":  "HADEEDA Service Auth Secret Token",
+                       "description":  "Custom secret token used by external workflows/services to authenticate with get_user_credentials via Bearer token or X-Hadeeda-Token header"
+                   },
+                   {
+                       "fieldname":  "default_service_user",
+                       "fieldtype":  "Link",
+                       "options":  "User",
+                       "label":  "Default Service User",
+                       "default":  "Administrator",
+                       "description":  "Default user proxy for HADEEDA automated actions"
+                   },
+                   {
                        "fieldname":  "chat_widget_section",
                        "fieldtype":  "Section Break",
                        "label":  "Chat Widget Customization"

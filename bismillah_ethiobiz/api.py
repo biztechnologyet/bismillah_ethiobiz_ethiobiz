@@ -422,21 +422,41 @@ def chat_webhook_proxy():
         return WerkzeugResponse(body, status=200, content_type="application/json")
 
 
-@frappe.whitelist(methods=["POST"])
+@frappe.whitelist(methods=["POST", "GET"], allow_guest=True)
 def get_user_credentials(username=None, telegram_username=None):
     """Return a user's API key + DECRYPTED API secret and profile as raw JSON.
 
     Replaces the n8n erpNext 'Get user' node which reads the api_secret Password
     field and gets the encrypted blob. This endpoint decrypts server-side via
-    get_decrypted_password so CIO can authenticate. Authenticated callers only.
+    get_decrypted_password so CIO can authenticate.
+    Supports session authentication OR HADEEDA Settings service token.
     """
     frappe.flags.ignore_csrf = True
     from werkzeug.wrappers import Response as WerkzeugResponse
 
     caller = frappe.session.user
-    if not caller or caller == "Guest":
+    settings = _get_hadeeda_settings()
+
+    # Check for service token header authorization
+    req_auth = frappe.get_request_header("Authorization") or ""
+    custom_token = frappe.get_request_header("X-Hadeeda-Token") or ""
+    bearer_token = ""
+    if req_auth.lower().startswith("bearer "):
+        bearer_token = req_auth[7:].strip()
+
+    token_to_verify = custom_token or bearer_token
+    configured_token = ""
+    if getattr(settings, "enable_service_token_auth", 1):
+        try:
+            configured_token = get_decrypted_password("HADEEDA Settings", "HADEEDA Settings", "service_auth_token", raise_exception=False)
+        except Exception:
+            configured_token = getattr(settings, "service_auth_token", "") or ""
+
+    is_token_authenticated = bool(configured_token and token_to_verify and token_to_verify == configured_token)
+
+    if not is_token_authenticated and (not caller or caller == "Guest"):
         return WerkzeugResponse(
-            json.dumps({"error": "Authentication required"}),
+            json.dumps({"error": "Authentication required. Provide active session or valid service token."}),
             status=401, content_type="application/json"
         )
 

@@ -291,12 +291,28 @@ window.openPropertyModal = openPropertyModal;
 function submitBooking() {
   if (!selectedProperty) return;
 
-  const custName = (document.getElementById("custName")?.value || "").trim();
-  const custPhone = (document.getElementById("custPhone")?.value || "").trim();
+  let custName = (document.getElementById("custName")?.value || "").trim();
+  let custPhone = (document.getElementById("custPhone")?.value || "").trim();
+  let custEmail = (document.getElementById("custEmail")?.value || "").trim();
+  let custAddress = (document.getElementById("custAddress")?.value || "").trim();
   const custNotes = (document.getElementById("custNotes")?.value || "").trim();
 
+  // Fallback to logged-in user profile if inputs were not populated
+  if (!custName && window.ETHIOBIZ_USER_PROFILE) {
+    custName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+  }
+  if (!custPhone && window.ETHIOBIZ_USER_PROFILE) {
+    custPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+  }
+  if (!custEmail && window.ETHIOBIZ_USER_PROFILE) {
+    custEmail = window.ETHIOBIZ_USER_PROFILE.email || "";
+  }
+  if (!custAddress && window.ETHIOBIZ_USER_PROFILE) {
+    custAddress = window.ETHIOBIZ_USER_PROFILE.address || "";
+  }
+
   if (!custName || !custPhone) {
-    alert("Please provide your full name and phone number to continue.");
+    alert("Please sign in or ensure your verified account phone number is active.");
     return;
   }
 
@@ -321,6 +337,7 @@ function submitBooking() {
       check_out: document.getElementById("bookCheckOut")?.value || "",
       customer_name: custName,
       customer_phone: custPhone,
+      customer_email: custEmail,
       special_requests: custNotes
     };
   } else if (isSale) {
@@ -330,7 +347,8 @@ function submitBooking() {
       preferred_date: new Date().toISOString().split("T")[0],
       preferred_time: "10:00 AM",
       customer_name: custName,
-      customer_phone: custPhone
+      customer_phone: custPhone,
+      customer_email: custEmail
     };
   } else {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.request_property_lease";
@@ -340,7 +358,8 @@ function submitBooking() {
       start_date: document.getElementById("leaseStartDate")?.value || "",
       duration_months: document.getElementById("leaseDuration")?.value || 6,
       customer_name: custName,
-      customer_phone: custPhone
+      customer_phone: custPhone,
+      customer_email: custEmail
     };
   }
 
@@ -465,9 +484,20 @@ function submitPropertyRegistration() {
   const area = document.getElementById("regPropArea")?.value || 100;
   const desc = (document.getElementById("regPropDesc")?.value || "").trim();
 
-  const ownerName = (document.getElementById("regHostName")?.value || "").trim();
-  const ownerPhone = (document.getElementById("regHostPhone")?.value || "").trim();
-  const ownerEmail = (document.getElementById("regHostEmail")?.value || "").trim();
+  let ownerName = (document.getElementById("regHostName")?.value || "").trim();
+  let ownerPhone = (document.getElementById("regHostPhone")?.value || "").trim();
+  let ownerEmail = (document.getElementById("regHostEmail")?.value || "").trim();
+
+  // Fallback to logged-in user profile if inputs were not populated
+  if (!ownerName && window.ETHIOBIZ_USER_PROFILE) {
+    ownerName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+  }
+  if (!ownerPhone && window.ETHIOBIZ_USER_PROFILE) {
+    ownerPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+  }
+  if (!ownerEmail && window.ETHIOBIZ_USER_PROFILE) {
+    ownerEmail = window.ETHIOBIZ_USER_PROFILE.email || "";
+  }
 
   if (!title || !price || !ownerName || !ownerPhone) {
     alert("Please provide the property title, price, host name, and phone number.");

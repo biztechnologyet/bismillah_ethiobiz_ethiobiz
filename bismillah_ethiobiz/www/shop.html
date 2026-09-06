@@ -170,6 +170,20 @@
 
             <input type="hidden" id="order-item-code" />
 
+            <!-- Verified User Profile Card -->
+            <div id="shop-profile-card" style="background:linear-gradient(135deg,#f0fdfa 0%,#ecfdf5 100%); border:1.5px solid #99f6e4; border-radius:14px; padding:14px 16px; margin-bottom:16px; display:flex; align-items:center; gap:14px;">
+                <div style="width:44px; height:44px; border-radius:50%; background:#0d9488; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#fff; font-weight:800;" id="shop-profile-initials">👤</div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:700; color:#0f172a; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="shop-profile-name">Loading profile...</div>
+                    <div style="font-size:0.8rem; color:#475569;" id="shop-profile-phone">—</div>
+                    <div style="font-size:0.75rem; color:#64748b;" id="shop-profile-email">—</div>
+                </div>
+                <span style="background:#d1fae5; color:#065f46; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px;">✓ Verified</span>
+            </div>
+            <input type="hidden" id="orderCustName" />
+            <input type="hidden" id="orderCustPhone" />
+            <input type="hidden" id="orderCustEmail" />
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
                 <div>
                     <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Quantity</label>
@@ -185,19 +199,18 @@
                 </div>
             </div>
 
-            <div style="margin-bottom:14px;">
-                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Full Name *</label>
-                <input type="text" id="orderCustName" placeholder="Your full name" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" required />
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-                <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Phone Number *</label>
-                    <input type="tel" id="orderCustPhone" placeholder="09xxxxxxxx" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" required />
-                </div>
-                <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Email (Optional)</label>
-                    <input type="email" id="orderCustEmail" placeholder="your@email.com" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" />
+            <!-- B2B Company Purchase Toggle -->
+            <div id="b2b-purchase-section" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:14px;">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:0;">
+                    <input type="checkbox" id="b2bToggle" onchange="toggleB2BSection()" style="width:18px; height:18px; accent-color:#0d9488;" />
+                    <span style="font-size:0.88rem; font-weight:700; color:#334155;">🏢 Purchase on Behalf of a Company (B2B)</span>
+                </label>
+                <div id="b2b-company-selector" style="display:none; margin-top:12px;">
+                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Select Buyer Company</label>
+                    <select id="b2bBuyerCompany" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem; background:#fff;">
+                        <option value="">-- Loading companies... --</option>
+                    </select>
+                    <p style="font-size:0.72rem; color:#64748b; margin:6px 0 0;">Purchase Order will be auto-created in selected buyer company, linked to the seller's Sales Order.</p>
                 </div>
             </div>
 
@@ -215,7 +228,7 @@
                 Confirm & Place Order ➔
             </button>
             <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin:10px 0 0;">
-                🔒 Secure checkout. Logged-in profile automatically updated.
+                🔒 Secure checkout. Logged-in profile automatically verified.
             </p>
         </div>
     </div>

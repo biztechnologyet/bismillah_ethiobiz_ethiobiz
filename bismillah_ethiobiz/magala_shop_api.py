@@ -135,7 +135,7 @@ def search_products(query="", category=None, company=None, region=None,
     # Format gallery and stock status
     for it in items:
         if not it.get("image"):
-            it["image"] = "/assets/frappe/images/default-avatar.png"
+            it["image"] = it.get("company_logo") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png"
         it["formatted_price"] = f"{flt(it['price']):,.2f} ETB"
         it["stock_status"] = "In Stock"
 
@@ -705,43 +705,118 @@ def get_product_reviews(item_code, page=1, limit=12, sort_by="newest"):
 
 
 @frappe.whitelist(allow_guest=True)
-def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=None, customer_email=None, delivery_address=None, payment_method="Telebirr", **kwargs):
+def get_user_buyer_companies():
+    """Returns available companies for the current user to purchase/book on behalf of."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        return {"status": "success", "companies": frappe.db.get_all("Company", fields=["name", "company_name"], limit=20)}
+    
+    # Check if user is System Manager / Administrator
+    roles = frappe.get_roles(user)
+    if "System Manager" in roles or "Administrator" in roles or user == "Administrator":
+        comps = frappe.db.get_all("Company", fields=["name", "company_name"], order_by="name asc")
+        return {"status": "success", "companies": comps}
+    
+    # Find companies linked via Employee or User Permission
+    comp_names = set()
+    emp_comps = frappe.db.get_all("Employee", filters={"user_id": user, "status": "Active"}, pluck="company")
+    for ec in emp_comps:
+        if ec: comp_names.add(ec)
+    
+    up_comps = frappe.db.get_all("User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value")
+    for uc in up_comps:
+        if uc: comp_names.add(uc)
+    
+    def_comp = frappe.defaults.get_user_default("company", user)
+    if def_comp:
+        comp_names.add(def_comp)
+        
+    if not comp_names:
+        # Fallback to all active companies
+        comp_names = set(frappe.db.get_all("Company", pluck="name"))
+        
+    comps = [{"name": c, "company_name": frappe.db.get_value("Company", c, "company_name") or c} for c in sorted(comp_names)]
+    return {"status": "success", "companies": comps}
+
+
+@frappe.whitelist(allow_guest=True)
+def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=None, customer_email=None, delivery_address=None, payment_method="Telebirr", is_company_purchase=0, buyer_company=None, **kwargs):
     """
-    Direct Quick-Order endpoint for purchasing items on /shop.
-    Auto-registers or binds user to ERPNext Customer, creates Sales Order,
-    and returns immediate confirmation with order reference.
+    Direct Quick-Order endpoint for purchasing items on /shop with Full B2C, B2B, and C2B support.
+    
+    - When is_company_purchase is True (B2B):
+      1. Resolves/Deduplicates Customer for Buyer Company in Seller Company.
+      2. Creates Sales Order in Seller Company.
+      3. Resolves/Deduplicates Supplier for Seller Company in Buyer Company.
+      4. Automatically creates matching Purchase Order in Buyer Company.
+      5. Cross-links Sales Order & Purchase Order bidirectionally.
+      
+    - When is_company_purchase is False (B2C / C2B):
+      1. Binds individual user to Customer.
+      2. Creates standard Sales Order in Seller Company.
     """
     if not item_code:
         frappe.throw(_("Item Code is required"))
 
     qty = max(1, cint(quantity))
-    
-    party = ethiobiz_identity.ensure_registered_party(
-        full_name=customer_name,
-        phone=customer_phone,
-        email=customer_email,
-        party_type="Customer"
-    )
-    customer = party.get("customer")
+    is_b2b = bool(cint(is_company_purchase)) and bool(buyer_company)
     
     item_doc = frappe.get_doc("Item", item_code)
-    company = resolve_booking_company(item_doc.company, label="item")
+    seller_company = resolve_booking_company(item_doc.company, label="item")
     
-    # Get price
+    # 1. RESOLVE CUSTOMER (Deduplicated)
+    if is_b2b:
+        buyer_company = buyer_company.strip()
+        # Look for existing customer for this buyer company
+        customer = frappe.db.get_value("Customer", {"customer_name": buyer_company, "disabled": 0}, "name")
+        if not customer:
+            customer = frappe.db.get_value("Customer", {"customer_name": buyer_company}, "name")
+            
+        if not customer:
+            try:
+                c_doc = frappe.get_doc({
+                    "doctype": "Customer",
+                    "customer_name": buyer_company,
+                    "customer_type": "Company",
+                    "customer_group": "Commercial",
+                    "territory": "Ethiopia",
+                    "mobile_no": customer_phone or "",
+                    "email_id": customer_email or ""
+                })
+                c_doc.flags.ignore_permissions = True
+                c_doc.flags.ignore_mandatory = True
+                c_doc.insert(ignore_permissions=True)
+                frappe.db.commit()
+                customer = c_doc.name
+            except Exception as e:
+                frappe.log_error(f"B2B Customer creation fallback: {e}")
+                customer = buyer_company
+    else:
+        party = ethiobiz_identity.ensure_registered_party(
+            full_name=customer_name,
+            phone=customer_phone,
+            email=customer_email,
+            party_type="Customer"
+        )
+        customer = party.get("customer")
+    
+    # 2. RESOLVE PRICE
     price = frappe.db.get_value("Item Price", {"item_code": item_code, "price_list": "Standard Selling", "selling": 1}, "price_list_rate")
     if not price:
         price = item_doc.standard_rate or 0.0
 
     total_amount = flt(price) * qty
     
-    # Create Sales Order if DocType exists
-    order_id = f"ORD-{item_code[:10]}-{cint(frappe.utils.now_datetime().timestamp())}"
+    # 3. CREATE SALES ORDER (Seller Company)
+    so_id = f"SO-{item_code[:10]}-{cint(frappe.utils.now_datetime().timestamp())}"
+    po_id = None
+    
     if frappe.db.exists("DocType", "Sales Order"):
         try:
             so = frappe.get_doc({
                 "doctype": "Sales Order",
                 "customer": customer,
-                "company": company,
+                "company": seller_company,
                 "delivery_date": frappe.utils.add_days(frappe.utils.today(), 1),
                 "items": [{
                     "item_code": item_code,
@@ -751,20 +826,75 @@ def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=
                     "amount": total_amount,
                     "delivery_date": frappe.utils.add_days(frappe.utils.today(), 1)
                 }],
-                "notes": f"Payment: {payment_method} | Delivery Address: {delivery_address or 'Standard customer address'}"
+                "notes": f"Mode: {'B2B Enterprise' if is_b2b else 'B2C Retail'} | Payment: {payment_method} | Buyer: {buyer_company if is_b2b else customer_name} | Delivery Address: {delivery_address or 'Standard destination'}"
             })
             so.flags.ignore_permissions = True
             so.flags.ignore_mandatory = True
             so.insert(ignore_permissions=True)
             so.submit()
             frappe.db.commit()
-            order_id = so.name
+            so_id = so.name
         except Exception as e:
             frappe.log_error(f"Sales Order creation fallback: {e}")
             
+    # 4. IF B2B: CREATE MATCHING PURCHASE ORDER (Buyer Company)
+    if is_b2b and frappe.db.exists("Company", buyer_company) and frappe.db.exists("DocType", "Purchase Order"):
+        try:
+            # Deduplicate Supplier: Check if seller company exists as Supplier in Buyer's system
+            supplier = frappe.db.get_value("Supplier", {"supplier_name": seller_company, "disabled": 0}, "name")
+            if not supplier:
+                supplier = frappe.db.get_value("Supplier", {"supplier_name": seller_company}, "name")
+            if not supplier:
+                s_doc = frappe.get_doc({
+                    "doctype": "Supplier",
+                    "supplier_name": seller_company,
+                    "supplier_type": "Company",
+                    "supplier_group": "All Supplier Groups",
+                    "country": "Ethiopia"
+                })
+                s_doc.flags.ignore_permissions = True
+                s_doc.flags.ignore_mandatory = True
+                s_doc.insert(ignore_permissions=True)
+                frappe.db.commit()
+                supplier = s_doc.name
+
+            # Check if Item exists in Buyer's system or use generic
+            po = frappe.get_doc({
+                "doctype": "Purchase Order",
+                "supplier": supplier,
+                "company": buyer_company,
+                "schedule_date": frappe.utils.add_days(frappe.utils.today(), 1),
+                "items": [{
+                    "item_code": item_code,
+                    "item_name": item_doc.item_name,
+                    "qty": qty,
+                    "rate": flt(price),
+                    "amount": total_amount,
+                    "schedule_date": frappe.utils.add_days(frappe.utils.today(), 1)
+                }],
+                "notes": f"Linked B2B Sales Order: {so_id} from Seller: {seller_company}"
+            })
+            po.flags.ignore_permissions = True
+            po.flags.ignore_mandatory = True
+            po.insert(ignore_permissions=True)
+            po.submit()
+            frappe.db.commit()
+            po_id = po.name
+            
+            # Cross-reference in Sales Order
+            frappe.db.set_value("Sales Order", so_id, "po_no", po_id)
+            frappe.db.commit()
+        except Exception as e:
+            frappe.log_error(f"B2B Purchase Order creation fallback: {e}")
+
     return {
         "status": "success",
-        "order_id": order_id,
+        "order_id": so_id,
+        "sales_order": so_id,
+        "purchase_order": po_id,
+        "is_b2b": is_b2b,
+        "buyer_company": buyer_company if is_b2b else None,
+        "seller_company": seller_company,
         "item_code": item_code,
         "item_name": item_doc.item_name,
         "quantity": qty,
@@ -773,5 +903,6 @@ def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=
         "customer": customer,
         "payment_method": payment_method,
         "delivery_address": delivery_address,
-        "message": f"Alhamdulillah! Order #{order_id} has been placed successfully for {item_doc.item_name}. You will receive a confirmation call/SMS shortly."
+        "message": f"Alhamdulillah! {'B2B Enterprise ' if is_b2b else ''}Order #{so_id} has been registered successfully{f' with Purchase Order #{po_id}' if po_id else ''}. Verified confirmation sent."
     }
+

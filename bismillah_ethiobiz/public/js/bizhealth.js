@@ -187,19 +187,35 @@ document.addEventListener("DOMContentLoaded", function() {
                 '</div>' +
             '</div>';
         document.getElementById("health-booking-modal").style.display = "flex";
+        if (window.ethiobizAutofillProfile) {
+            window.ethiobizAutofillProfile();
+        }
     }
 
     function handleBookingSubmit() {
         if (!selectedDoctor) return;
-        var patientName = document.getElementById("book-patient-name").value.trim();
-        var patientPhone = document.getElementById("book-patient-phone").value.trim();
+        var patientName = (document.getElementById("book-patient-name") ? document.getElementById("book-patient-name").value : "").trim();
+        var patientPhone = (document.getElementById("book-patient-phone") ? document.getElementById("book-patient-phone").value : "").trim();
+        var patientEmail = (document.getElementById("book-patient-email") ? document.getElementById("book-patient-email").value : "").trim();
+
+        // Fallback to logged-in user profile if inputs were not populated
+        if (!patientName && window.ETHIOBIZ_USER_PROFILE) {
+            patientName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!patientPhone && window.ETHIOBIZ_USER_PROFILE) {
+            patientPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+        }
+        if (!patientEmail && window.ETHIOBIZ_USER_PROFILE) {
+            patientEmail = window.ETHIOBIZ_USER_PROFILE.email || "";
+        }
+
         var appDate = document.getElementById("book-appointment-date").value;
         var appTime = document.getElementById("book-time-slot").value;
         var symptoms = document.getElementById("book-symptoms").value.trim();
         var consultMode = document.querySelector('input[name="consult_mode"]:checked').value;
 
         if (!patientName || !patientPhone) {
-            alert("Please enter patient name and phone number.");
+            alert("Please sign in or ensure your verified patient profile phone number is active.");
             return;
         }
         if (!appDate) {
@@ -221,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 time_slot: appTime,
                 patient_name: patientName,
                 patient_phone: patientPhone,
+                patient_email: patientEmail,
                 symptoms: symptoms,
                 consultation_mode: consultMode
             })

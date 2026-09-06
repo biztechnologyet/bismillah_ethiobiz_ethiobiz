@@ -70,6 +70,33 @@
         <div class="modal-body-custom">
             <div class="doc-summary-badge" id="modal-fix-summary" style="background:#fffbeb; border-color:#fde68a; color:#92400e;"></div>
             
+            <!-- User Verified Profile Top Card -->
+            <div class="ethiobiz-profile-top-slot mb-3">
+                <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(217, 119, 6, 0.06)); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="ethiobiz-user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #d97706; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                            👤
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                <span class="ethiobiz-user-name">EthioBiz Member</span>
+                                <span style="color: #d97706; font-size: 13px;" title="Verified Profile">✓</span>
+                            </div>
+                            <div class="ethiobiz-user-meta" style="font-size: 12px; color: #64748b; margin-top: 1px;">
+                                Verified Contact Profile
+                            </div>
+                        </div>
+                    </div>
+                    <span style="background: #d97706; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
+                        Verified Contact ✓
+                    </span>
+                </div>
+            </div>
+
+            <!-- Hidden Contact Inputs (Bound to Logged-in Profile) -->
+            <input type="hidden" id="fix-contact-name" />
+            <input type="hidden" id="fix-contact-phone" />
+
             <div class="form-group mb-3">
                 <label class="form-label font-weight-bold">Dispatch Urgency:</label>
                 <div class="consult-mode-selector">
@@ -81,17 +108,6 @@
             <div class="form-group mb-3">
                 <label class="form-label font-weight-bold">Service Address / Location:</label>
                 <input type="text" id="fix-address" class="form-control-custom" placeholder="e.g. Bole Medhanialem, House 102, Addis Ababa" />
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Contact Name:</label>
-                    <input type="text" id="fix-contact-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
-                </div>
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Phone Number:</label>
-                    <input type="text" id="fix-contact-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
-                </div>
             </div>
 
             <div class="form-group mb-4">

@@ -149,13 +149,22 @@
 
     function submitBooking() {
         const serviceId = el("bs-book-service").value;
+        let custName = el("bs-name") ? el("bs-name").value : "";
+        let custPhone = el("bs-phone") ? el("bs-phone").value : "";
+        // Fallback to logged-in user profile
+        if (!custName && window.ETHIOBIZ_USER_PROFILE) {
+            custName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!custPhone && window.ETHIOBIZ_USER_PROFILE) {
+            custPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+        }
         const payload = {
             service_id: serviceId,
             booking_date: el("bs-date").value,
             booking_time: el("bs-slot-select").value,
             practitioner: el("bs-provider") ? el("bs-provider").value || undefined : undefined,
-            customer_name: el("bs-name").value,
-            customer_phone: el("bs-phone").value,
+            customer_name: custName,
+            customer_phone: custPhone,
             address: el("bs-address").value,
             notes: el("bs-notes").value
         };

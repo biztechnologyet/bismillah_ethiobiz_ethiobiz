@@ -3,9 +3,19 @@ from frappe.desk.doctype.event.event import send_event_digest as original_send_e
 
 
 def send_event_digest():
+    """
+    Bismallah Ar-Rahman Ar-Rahim
+    EthioBiz Event Daily Digest Engine:
+    Strictly scopes daily event notifications ONLY to:
+      1. Event Owner (Creator)
+      2. Explicitly linked participants in 'Event Participants' (reference_doctype='User')
+    
+    GUARANTEES:
+      - Private events (event_type == 'Private') NEVER reach any other user.
+      - Public events are NOT broadcast to all users unless they are participants.
+    """
     from frappe.desk.doctype.event.event import get_events, get_enabled_system_users, is_email_notifications_enabled_for_type
     from frappe.utils import getdate, format_datetime
-
 
     today = getdate()
 
@@ -34,7 +44,20 @@ def send_event_digest():
 
         user_events = {p.parent for p in participants if p.reference_docname == user.name}
 
-        filtered = [e for e in events if e.owner == user.name or e.name in user_events]
+        # Strict isolation: Only owner OR explicit participant
+        filtered = []
+        for e in events:
+            is_owner = (e.owner == user.name)
+            is_participant = (e.name in user_events)
+
+            # If event is private, strictly owner or participant
+            if e.get("event_type") == "Private":
+                if is_owner or is_participant:
+                    filtered.append(e)
+            else:
+                # Even for Public events, user must be owner or participant
+                if is_owner or is_participant:
+                    filtered.append(e)
 
         if not filtered:
             continue

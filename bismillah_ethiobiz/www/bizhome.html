@@ -216,6 +216,35 @@
           <input type="hidden" id="modalPropId">
           <input type="hidden" id="modalPropTenure">
 
+          <!-- Logged-in User Profile Top Card -->
+          <div class="col-12 ethiobiz-profile-top-slot mb-1">
+            <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(2, 132, 199, 0.06)); border: 1px solid rgba(13, 148, 136, 0.25); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="ethiobiz-user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #0d9488; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                  👤
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                    <span class="ethiobiz-user-name">EthioBiz Member</span>
+                    <span style="color: #0d9488; font-size: 13px;" title="Verified Profile">✓</span>
+                  </div>
+                  <div class="ethiobiz-user-meta" style="font-size: 12px; color: #64748b; margin-top: 1px;">
+                    Verified Applicant Profile
+                  </div>
+                </div>
+              </div>
+              <span style="background: #0d9488; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
+                Verified Account ✓
+              </span>
+            </div>
+          </div>
+
+          <!-- Hidden Customer Inputs (Bound to Logged-in Profile) -->
+          <input type="hidden" id="custName">
+          <input type="hidden" id="custPhone">
+          <input type="hidden" id="custEmail">
+          <input type="hidden" id="custAddress">
+
           <!-- Stay Specific (Check-in/Check-out) -->
           <div class="col-md-6 stay-field">
             <label class="form-label font-weight-bold small">📅 Check-In Date</label>
@@ -241,26 +270,8 @@
             </select>
           </div>
 
-          <!-- Customer / Tenant Registration Info -->
-          <div class="col-md-6">
-            <label class="form-label font-weight-bold small">👤 Full Name *</label>
-            <input type="text" id="custName" class="form-control rounded-pill" placeholder="e.g. Abebe Kebede" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label font-weight-bold small">📱 Phone Number *</label>
-            <input type="text" id="custPhone" class="form-control rounded-pill" placeholder="0911000000" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label font-weight-bold small">✉️ Email Address</label>
-            <input type="email" id="custEmail" class="form-control rounded-pill" placeholder="name@example.com">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label font-weight-bold small">📍 Current City / Residential Location</label>
-            <input type="text" id="custAddress" class="form-control rounded-pill" placeholder="e.g. Bole, Addis Ababa">
-          </div>
-
           <div class="col-12">
-            <label class="form-label font-weight-bold small">📝 Special Inquiries / Requests / Tenant Background</label>
+            <label class="form-label font-weight-bold small">📝 Special Inquiries / Requests / Move-in Timeline</label>
             <textarea id="custNotes" class="form-control rounded-3" rows="2" placeholder="Airport pickup, move-in timeline, workplace, specific floor, viewing preference..."></textarea>
           </div>
 
@@ -302,6 +313,34 @@
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
+          <!-- Owner / Host Identity Card -->
+          <div class="col-12 mb-1">
+            <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(2, 132, 199, 0.06)); border: 1px solid rgba(13, 148, 136, 0.25); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="ethiobiz-user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #0d9488; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                  👤
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                    <span class="ethiobiz-user-name">EthioBiz Member</span>
+                    <span style="color: #0d9488; font-size: 13px;" title="Verified Profile">✓</span>
+                  </div>
+                  <div class="ethiobiz-user-meta" style="font-size: 12px; color: #64748b; margin-top: 1px;">
+                    Verified Host / Landlord Profile
+                  </div>
+                </div>
+              </div>
+              <span style="background: #0d9488; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
+                Verified Host ✓
+              </span>
+            </div>
+          </div>
+
+          <!-- Hidden Host Inputs (Bound to Logged-in Profile) -->
+          <input type="hidden" id="regHostName">
+          <input type="hidden" id="regHostPhone">
+          <input type="hidden" id="regHostEmail">
+
           <div class="col-md-8">
             <label class="form-label font-weight-bold small">🏷️ Property Title *</label>
             <input type="text" id="regPropTitle" class="form-control rounded-pill" placeholder="e.g. Modern 3-Bedroom Furnished Apartment in Bole" required>
@@ -346,23 +385,6 @@
           <div class="col-md-4">
             <label class="form-label font-weight-bold small">📐 Area (m²)</label>
             <input type="number" id="regPropArea" class="form-control rounded-pill" placeholder="e.g. 140" value="120">
-          </div>
-
-          <!-- Owner / Host Identity (Auto-filled) -->
-          <div class="col-12 mt-3 pt-3 border-top">
-            <h6 class="font-weight-bold text-teal" style="color: #0f766e;">👤 Owner / Host Verification Details</h6>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label font-weight-bold small">Host Full Name *</label>
-            <input type="text" id="regHostName" class="form-control rounded-pill" placeholder="Your full legal name" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label font-weight-bold small">Host Phone Number *</label>
-            <input type="text" id="regHostPhone" class="form-control rounded-pill" placeholder="09xxxxxxxx" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label font-weight-bold small">Host Email</label>
-            <input type="email" id="regHostEmail" class="form-control rounded-pill" placeholder="host@example.com">
           </div>
 
           <div class="col-12">
