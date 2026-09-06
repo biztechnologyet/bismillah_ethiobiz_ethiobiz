@@ -353,6 +353,14 @@ def chat_webhook_proxy():
         except Exception as e:
             frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
 
+    # Ensure message text is present across all standard keys for n8n
+    chat_text = payload.get("chatInput") or payload.get("message") or payload.get("text") or payload.get("prompt") or ""
+    if chat_text:
+        payload["chatInput"] = chat_text
+        payload["message"] = chat_text
+        payload["text"] = chat_text
+        payload["prompt"] = chat_text
+
     # Route to guest webhook if caller is Guest and guest webhook is configured
     if not user or user == "Guest":
         webhook_url = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
@@ -365,10 +373,11 @@ def chat_webhook_proxy():
             status=500, content_type="application/json"
         )
 
-
     headers = {"Content-Type": "application/json"}
     if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
-        headers[settings.webhook_auth_header] = settings.get_password("webhook_auth_value")
+        hdr_name = settings.webhook_auth_header.strip()
+        if "@" not in hdr_name and " " not in hdr_name:
+            headers[hdr_name] = settings.get_password("webhook_auth_value")
 
     try:
         resp = requests.post(
@@ -423,7 +432,7 @@ def chat_webhook_proxy():
 
 
 @frappe.whitelist(methods=["POST", "GET"], allow_guest=True)
-def get_user_credentials(username=None, telegram_username=None):
+def get_user_credentials(username=None, telegram_username=None, **kwargs):
     """Return a user's API key + DECRYPTED API secret and profile as raw JSON.
 
     Replaces the n8n erpNext 'Get user' node which reads the api_secret Password
@@ -436,6 +445,22 @@ def get_user_credentials(username=None, telegram_username=None):
 
     caller = frappe.session.user
     settings = _get_hadeeda_settings()
+
+    # Parse input from kwargs, form_dict, or raw JSON body
+    if not telegram_username:
+        telegram_username = frappe.form_dict.get("telegram_username") or kwargs.get("telegram_username")
+    if not username:
+        username = frappe.form_dict.get("username") or kwargs.get("username")
+
+    try:
+        raw_body = frappe.request.get_data(as_text=True)
+        if raw_body and raw_body.strip():
+            parsed = json.loads(raw_body)
+            if isinstance(parsed, dict):
+                telegram_username = telegram_username or parsed.get("telegram_username")
+                username = username or parsed.get("username")
+    except Exception:
+        pass
 
     # Check for service token header authorization
     req_auth = frappe.get_request_header("Authorization") or ""
@@ -453,10 +478,11 @@ def get_user_credentials(username=None, telegram_username=None):
             configured_token = getattr(settings, "service_auth_token", "") or ""
 
     is_token_authenticated = bool(configured_token and token_to_verify and token_to_verify == configured_token)
+    is_authenticated = is_token_authenticated or (caller and caller != "Guest")
 
-    if not is_token_authenticated and (not caller or caller == "Guest"):
+    if not is_authenticated:
         return WerkzeugResponse(
-            json.dumps({"error": "Authentication required. Provide active session or valid service token."}),
+            json.dumps({"error": "Authentication required. Provide active session, ERPNext API key, or valid service token."}),
             status=401, content_type="application/json"
         )
 
