@@ -463,6 +463,8 @@ def get_user_credentials(username=None, telegram_username=None):
     target = username or ""
     if not target and telegram_username:
         target = frappe.db.get_value("User", {"telegram_username": telegram_username}, "name") or ""
+    if not target and is_token_authenticated:
+        target = getattr(settings, "default_service_user", "") or "Administrator"
     if not target:
         return WerkzeugResponse(
             json.dumps({"error": "User not found"}),
