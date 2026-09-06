@@ -9,10 +9,13 @@ def run():
     # Check HADEEDA settings
     settings = frappe.get_single("HADEEDA Settings")
     print("HADEEDA SETTINGS:", settings.enable_service_token_auth, getattr(settings, "default_service_user", None))
-    print("CHAT WEBHOOK:", settings.chat_webhook_url)
-    print("GUEST WEBHOOK:", getattr(settings, "chat_webhook_url_guest", None))
-    print("INLINE WEBHOOK:", settings.inline_webhook_url)
-    print("AUTH HEADER:", settings.webhook_auth_header)
+    import requests
+    print("Testing webhook:", settings.chat_webhook_url)
+    try:
+        r = requests.post(settings.chat_webhook_url, json={"action": "sendMessage", "chatInput": "test message", "sessionId": "test"}, timeout=15)
+        print("WEBHOOK RESP:", r.status_code, r.text[:300])
+    except Exception as e:
+        print("WEBHOOK ERR:", e)
     try:
         from frappe.utils.password import get_decrypted_password
         pwd = get_decrypted_password("HADEEDA Settings", "HADEEDA Settings", "service_auth_token", raise_exception=False)
