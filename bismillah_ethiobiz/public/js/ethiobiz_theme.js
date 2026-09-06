@@ -874,32 +874,46 @@
 
     // BISMALLAH: Form Title Auto-Size Collapsible Toggle
     function initTitleToggle() {
-        const titleAreas = document.querySelectorAll('.page-head .title-area, .page-head .page-title');
-        titleAreas.forEach(area => {
-            const titleText = area.querySelector('.title-text');
-            if (!titleText || area.querySelector('.eb-title-toggle-btn')) return;
+        const titleElements = document.querySelectorAll('.page-head .title-text');
+        titleElements.forEach(titleText => {
+            const area = titleText.closest('.title-area') || titleText.closest('.page-title');
+            if (!area) return;
+            if (area.querySelector('.eb-title-toggle-btn')) return;
 
-            // Only attach if title text is reasonably long or truncated
+            // Enforce single-line default immediately
+            if (!area.classList.contains('eb-title-expanded')) {
+                titleText.style.whiteSpace = 'nowrap';
+                titleText.style.overflow = 'hidden';
+                titleText.style.textOverflow = 'ellipsis';
+            }
+
             const textContent = (titleText.textContent || '').trim();
-            if (textContent.length > 35 || titleText.scrollWidth > titleText.clientWidth) {
+            if (textContent.length > 30 || titleText.scrollWidth > titleText.clientWidth) {
                 const toggle = document.createElement('span');
                 toggle.className = 'eb-title-toggle-btn';
                 toggle.title = 'Click to expand or collapse full title';
                 toggle.innerHTML = '<span>↔</span><span>Expand</span>';
 
-                toggle.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    area.classList.toggle('eb-title-expanded');
-                    const isExp = area.classList.contains('eb-title-expanded');
-                    toggle.innerHTML = isExp ? '<span>▲</span><span>Collapse</span>' : '<span>↔</span><span>Expand</span>';
-                });
+                function toggleState(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    const isExp = area.classList.toggle('eb-title-expanded');
+                    if (isExp) {
+                        titleText.style.whiteSpace = 'normal';
+                        titleText.style.overflow = 'visible';
+                        toggle.innerHTML = '<span>▲</span><span>Collapse</span>';
+                    } else {
+                        titleText.style.whiteSpace = 'nowrap';
+                        titleText.style.overflow = 'hidden';
+                        titleText.style.textOverflow = 'ellipsis';
+                        toggle.innerHTML = '<span>↔</span><span>Expand</span>';
+                    }
+                }
 
-                titleText.addEventListener('click', function () {
-                    area.classList.toggle('eb-title-expanded');
-                    const isExp = area.classList.contains('eb-title-expanded');
-                    toggle.innerHTML = isExp ? '<span>▲</span><span>Collapse</span>' : '<span>↔</span><span>Expand</span>';
-                });
+                toggle.addEventListener('click', toggleState);
+                titleText.addEventListener('click', toggleState);
 
                 titleText.parentNode.insertBefore(toggle, titleText.nextSibling);
             }

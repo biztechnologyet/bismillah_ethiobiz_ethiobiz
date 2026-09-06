@@ -181,7 +181,6 @@
                 <span style="background:#d1fae5; color:#065f46; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px;">✓ Verified</span>
             </div>
             <input type="hidden" id="orderCustName" />
-            <input type="hidden" id="orderCustPhone" />
             <input type="hidden" id="orderCustEmail" />
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
@@ -197,6 +196,11 @@
                         <option value="Cash on Delivery">💵 Cash on Delivery</option>
                     </select>
                 </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Contact / Delivery Phone *</label>
+                <input type="tel" id="orderCustPhone" placeholder="09xxxxxxxx" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" />
             </div>
 
             <!-- B2B Company Purchase Toggle -->

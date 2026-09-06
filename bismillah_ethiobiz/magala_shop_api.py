@@ -706,37 +706,65 @@ def get_product_reviews(item_code, page=1, limit=12, sort_by="newest"):
 
 @frappe.whitelist(allow_guest=True)
 def get_user_buyer_companies():
-    """Returns available companies for the current user to purchase/book on behalf of."""
+    """Returns ONLY the permitted company or companies of the logged in user."""
     user = frappe.session.user
     if not user or user == "Guest":
-        return {"status": "success", "companies": frappe.db.get_all("Company", fields=["name", "company_name"], limit=20)}
-    
-    # Check if user is System Manager / Administrator
-    roles = frappe.get_roles(user)
-    if "System Manager" in roles or "Administrator" in roles or user == "Administrator":
-        comps = frappe.db.get_all("Company", fields=["name", "company_name"], order_by="name asc")
-        return {"status": "success", "companies": comps}
-    
-    # Find companies linked via Employee or User Permission
-    comp_names = set()
-    emp_comps = frappe.db.get_all("Employee", filters={"user_id": user, "status": "Active"}, pluck="company")
-    for ec in emp_comps:
-        if ec: comp_names.add(ec)
-    
-    up_comps = frappe.db.get_all("User Permission", filters={"user": user, "allow": "Company"}, pluck="for_value")
-    for uc in up_comps:
-        if uc: comp_names.add(uc)
-    
+        return {"status": "success", "companies": []}
+
+    permitted = []
+
+    # 1. User Permissions for Company
+    up_records = frappe.db.get_all(
+        "User Permission",
+        filters={"user": user, "allow": "Company"},
+        pluck="for_value"
+    )
+    for c in up_records:
+        if c and c not in permitted:
+            permitted.append(c)
+
+    try:
+        user_perms = frappe.defaults.get_user_permissions(user) or {}
+        for p in user_perms.get("Company", []):
+            c_doc = p.get("doc")
+            if c_doc and c_doc not in permitted:
+                permitted.append(c_doc)
+    except Exception:
+        pass
+
+    # 2. Check Employee record of logged in user
+    emp_comps = frappe.db.get_all(
+        "Employee",
+        filters={"user_id": user, "status": "Active"},
+        pluck="company"
+    )
+    for c in emp_comps:
+        if c and c not in permitted:
+            permitted.append(c)
+
+    # 3. Check User's assigned company field
+    user_company = frappe.db.get_value("User", user, "company")
+    if user_company and user_company not in permitted:
+        permitted.append(user_company)
+
+    # 4. Check user default company
     def_comp = frappe.defaults.get_user_default("company", user)
-    if def_comp:
-        comp_names.add(def_comp)
-        
-    if not comp_names:
-        # Fallback to all active companies
-        comp_names = set(frappe.db.get_all("Company", pluck="name"))
-        
-    comps = [{"name": c, "company_name": frappe.db.get_value("Company", c, "company_name") or c} for c in sorted(comp_names)]
-    return {"status": "success", "companies": comps}
+    if def_comp and def_comp not in permitted:
+        permitted.append(def_comp)
+
+    # 5. If Administrator or System Manager and NO specific permitted company found:
+    if not permitted:
+        roles = frappe.get_roles(user)
+        if "System Manager" in roles or "Administrator" in roles or user == "Administrator":
+            permitted = frappe.db.get_all("Company", pluck="name", order_by="name asc")
+
+    valid_companies = []
+    for c_name in permitted:
+        row = frappe.db.get_value("Company", c_name, ["name", "company_name"], as_dict=True)
+        if row:
+            valid_companies.append(row)
+
+    return {"status": "success", "companies": valid_companies}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -760,7 +788,23 @@ def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=
 
     qty = max(1, cint(quantity))
     is_b2b = bool(cint(is_company_purchase)) and bool(buyer_company)
-    
+
+    # Auto-resolve customer name and phone from logged-in user if not provided
+    user = frappe.session.user
+    if (not customer_name or not customer_name.strip()) and user and user != "Guest":
+        customer_name = frappe.db.get_value("User", user, "full_name") or user
+    if not customer_name:
+        customer_name = "EthioBiz Customer"
+
+    if (not customer_phone or not customer_phone.strip()) and user and user != "Guest":
+        customer_phone = (
+            frappe.db.get_value("User", user, "mobile_no")
+            or frappe.db.get_value("User", user, "phone")
+            or ""
+        )
+    if not customer_phone:
+        customer_phone = "0900000000"
+
     item_doc = frappe.get_doc("Item", item_code)
     seller_company = resolve_booking_company(item_doc.company, label="item")
     

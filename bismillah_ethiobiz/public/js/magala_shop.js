@@ -465,24 +465,39 @@ document.addEventListener("DOMContentLoaded", function() {
             window.ethiobizAutofillProfile();
         }
         
-        // Populate profile card display
+        // Populate profile card display and hidden inputs from logged-in user
         setTimeout(function() {
             var prof = window.ETHIOBIZ_USER_PROFILE || {};
-            var nameVal = document.getElementById("orderCustName")?.value || prof.full_name || prof.user || "Guest User";
-            var phoneVal = document.getElementById("orderCustPhone")?.value || prof.phone || "—";
-            var emailVal = document.getElementById("orderCustEmail")?.value || prof.email || "—";
+            var nameVal = prof.full_name || prof.user || (window.frappe && window.frappe.session && window.frappe.session.user_fullname) || (window.frappe && window.frappe.session && window.frappe.session.user) || "";
+            if (!nameVal || nameVal === "Guest") {
+                nameVal = document.getElementById("orderCustName")?.value || "EthioBiz Member";
+            }
+            if (document.getElementById("orderCustName")) {
+                document.getElementById("orderCustName").value = nameVal;
+            }
+
+            var phoneVal = prof.phone || document.getElementById("orderCustPhone")?.value || "";
+            if (document.getElementById("orderCustPhone") && phoneVal) {
+                document.getElementById("orderCustPhone").value = phoneVal;
+            }
+
+            var emailVal = prof.email || document.getElementById("orderCustEmail")?.value || "";
+            if (document.getElementById("orderCustEmail") && emailVal) {
+                document.getElementById("orderCustEmail").value = emailVal;
+            }
+
             var nameDisp = document.getElementById("shop-profile-name");
             var phoneDisp = document.getElementById("shop-profile-phone");
             var emailDisp = document.getElementById("shop-profile-email");
             var initialsDisp = document.getElementById("shop-profile-initials");
             if (nameDisp) nameDisp.innerText = nameVal;
-            if (phoneDisp) phoneDisp.innerText = "📱 " + phoneVal;
-            if (emailDisp) emailDisp.innerText = "✉️ " + emailVal;
+            if (phoneDisp) phoneDisp.innerText = phoneVal ? "📱 " + phoneVal : "📱 Not set";
+            if (emailDisp) emailDisp.innerText = emailVal ? "✉️ " + emailVal : "";
             if (initialsDisp) {
-                var parts = nameVal.split(" ");
+                var parts = nameVal.split(" ").filter(Boolean);
                 initialsDisp.innerText = parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : nameVal.substring(0, 2).toUpperCase();
             }
-        }, 300);
+        }, 150);
         
         // Load B2B buyer companies
         loadBuyerCompanies();
@@ -508,13 +523,43 @@ document.addEventListener("DOMContentLoaded", function() {
         const itemCode = document.getElementById("order-item-code")?.value || currentOrderItem.item_code;
         const qty = parseInt(document.getElementById("orderCustQty")?.value || 1, 10);
         const payment = document.getElementById("orderCustPayment")?.value || "Telebirr";
-        const name = (document.getElementById("orderCustName")?.value || "").trim();
-        const phone = (document.getElementById("orderCustPhone")?.value || "").trim();
-        const email = (document.getElementById("orderCustEmail")?.value || "").trim();
+        let name = (document.getElementById("orderCustName")?.value || "").trim();
+        let phone = (document.getElementById("orderCustPhone")?.value || "").trim();
+        let email = (document.getElementById("orderCustEmail")?.value || "").trim();
         const address = (document.getElementById("orderCustAddress")?.value || "").trim();
 
-        if (!name || !phone) {
-            alert("Please provide your full name and phone number to place your order.");
+        // ALWAYS ensure full name is taken from logged-in user
+        if (!name && window.ETHIOBIZ_USER_PROFILE) {
+            name = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!name && window.frappe && window.frappe.session && window.frappe.session.user !== "Guest") {
+            name = window.frappe.session.user_fullname || window.frappe.session.user || "";
+        }
+        if (!name) {
+            name = "EthioBiz Member";
+        }
+
+        // Check phone fallback
+        if (!phone && window.ETHIOBIZ_USER_PROFILE && window.ETHIOBIZ_USER_PROFILE.phone) {
+            phone = window.ETHIOBIZ_USER_PROFILE.phone;
+        }
+
+        if (!phone) {
+            phone = prompt("Please provide your delivery contact phone number (e.g. 09xxxxxxxx):");
+            if (!phone || !phone.trim()) {
+                alert("A contact phone number is required for order delivery.");
+                return;
+            }
+            phone = phone.trim();
+            if (document.getElementById("orderCustPhone")) {
+                document.getElementById("orderCustPhone").value = phone;
+            }
+        }
+
+        const isB2B = document.getElementById("b2bToggle")?.checked ? 1 : 0;
+        const buyerCompany = isB2B ? (document.getElementById("b2bBuyerCompany")?.value || "") : "";
+        if (isB2B && !buyerCompany) {
+            alert("Please select the permitted company on whose behalf you are placing this order.");
             return;
         }
 
@@ -541,8 +586,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 customer_email: email,
                 delivery_address: address,
                 payment_method: payment,
-                is_company_purchase: document.getElementById("b2bToggle")?.checked ? 1 : 0,
-                buyer_company: document.getElementById("b2bToggle")?.checked ? (document.getElementById("b2bBuyerCompany")?.value || "") : ""
+                is_company_purchase: isB2B,
+                buyer_company: buyerCompany
             })
         })
         .then(r => r.json())
@@ -584,22 +629,32 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function loadBuyerCompanies() {
+        var sel = document.getElementById("b2bBuyerCompany");
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Loading permitted companies... --</option>';
+
         fetch("/api/method/bismillah_ethiobiz.magala_shop_api.get_user_buyer_companies")
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var comps = (data.message && data.message.companies) || [];
-                var sel = document.getElementById("b2bBuyerCompany");
-                if (!sel) return;
-                sel.innerHTML = '<option value="">-- Select Company --</option>';
+                if (!comps.length) {
+                    sel.innerHTML = '<option value="">-- No permitted companies found --</option>';
+                    return;
+                }
+                sel.innerHTML = '<option value="">-- Select Permitted Company --</option>';
                 comps.forEach(function(c) {
                     var opt = document.createElement("option");
                     opt.value = c.name;
                     opt.textContent = c.company_name || c.name;
                     sel.appendChild(opt);
                 });
+                if (comps.length === 1) {
+                    sel.value = comps[0].name;
+                }
             })
             .catch(function(err) {
                 console.error("Failed to load buyer companies:", err);
+                sel.innerHTML = '<option value="">-- Failed to load companies --</option>';
             });
     }
 
