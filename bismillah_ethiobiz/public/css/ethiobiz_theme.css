@@ -1548,6 +1548,19 @@ div[data-doctype="Blog Post"] .card {
 /* ==========================================================================
    DESK TITLE BAR: CLEAN RESPONSIVE SINGLE LINE (DOCUMENT FORMS ONLY)
    ========================================================================== */
+body[data-route^="Form"] .page-head,
+[data-page-route^="Form"] .page-head,
+.form-page .page-head,
+.page-head.eb-doc-head {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+}
+
+body[data-route^="Form"] .page-head .page-head-content,
+[data-page-route^="Form"] .page-head .page-head-content,
+.form-page .page-head .page-head-content,
 .page-head.eb-doc-head .page-head-content {
     display: flex !important;
     flex-direction: column !important;
@@ -1556,20 +1569,32 @@ div[data-doctype="Blog Post"] .card {
     max-width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    padding: 10px 16px 6px !important;
-    gap: 6px !important;
+    padding: 8px 16px 6px !important;
+    gap: 4px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
+body[data-route^="Form"] .page-head .page-title,
+[data-page-route^="Form"] .page-head .page-title,
+.form-page .page-head .page-title,
 .page-head.eb-doc-head .page-title {
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    flex: 1 1 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
+    float: none !important;
 }
 
+body[data-route^="Form"] .page-head .title-area,
+[data-page-route^="Form"] .page-head .title-area,
+.form-page .page-head .title-area,
 .page-head.eb-doc-head .title-area {
     display: flex !important;
     align-items: center !important;
@@ -1582,6 +1607,12 @@ div[data-doctype="Blog Post"] .card {
     overflow: hidden !important;
 }
 
+body[data-route^="Form"] .page-head .title-area > div,
+body[data-route^="Form"] .page-head .title-area .flex,
+[data-page-route^="Form"] .page-head .title-area > div,
+[data-page-route^="Form"] .page-head .title-area .flex,
+.form-page .page-head .title-area > div,
+.form-page .page-head .title-area .flex,
 .page-head.eb-doc-head .title-area > div,
 .page-head.eb-doc-head .title-area .flex {
     display: flex !important;
@@ -1594,6 +1625,9 @@ div[data-doctype="Blog Post"] .card {
     overflow: hidden !important;
 }
 
+body[data-route^="Form"] .page-head .title-text,
+[data-page-route^="Form"] .page-head .title-text,
+.form-page .page-head .title-text,
 .page-head.eb-doc-head .title-text {
     font-size: 1.35rem !important;
     font-weight: 800 !important;
@@ -1603,8 +1637,8 @@ div[data-doctype="Blog Post"] .card {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    flex: 1 1 auto !important;
-    max-width: calc(100% - 75px) !important;
+    flex: 0 1 auto !important;
+    max-width: calc(100% - 95px) !important;
     min-width: 0 !important;
     display: inline-block !important;
     cursor: default !important;
@@ -1615,18 +1649,78 @@ div[data-doctype="Blog Post"] .card {
     box-sizing: border-box !important;
 }
 
+[data-theme="dark"] body[data-route^="Form"] .page-head .title-text,
+[data-theme="dark"] [data-page-route^="Form"] .page-head .title-text,
+[data-theme="dark"] .form-page .page-head .title-text,
+[data-theme="dark"] .page-head.eb-doc-head .title-text {
+    color: #F8F6F2 !important;
+}
+
+/* Tier 2: Dedicated Actions Row in Document Forms */
+body[data-route^="Form"] .page-head .page-actions,
+[data-page-route^="Form"] .page-head .page-actions,
+.form-page .page-head .page-actions,
+.page-head.eb-doc-head .page-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+    padding-top: 6px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+    flex-wrap: wrap !important;
+    float: none !important;
+    z-index: 10 !important;
+}
+
+[data-theme="dark"] body[data-route^="Form"] .page-head .page-actions,
+[data-theme="dark"] [data-page-route^="Form"] .page-head .page-actions,
+[data-theme="dark"] .form-page .page-head .page-actions,
+[data-theme="dark"] .page-head.eb-doc-head .page-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Mobile responsive sizing */
 @media (max-width: 768px) {
+    body[data-route^="Form"] .page-head .title-text,
+    [data-page-route^="Form"] .page-head .title-text,
+    .form-page .page-head .title-text,
     .page-head.eb-doc-head .title-text {
-        font-size: 1.05rem !important;
-        max-width: calc(100% - 70px) !important;
+        font-size: 1.1rem !important;
+        max-width: calc(100% - 85px) !important;
     }
+    body[data-route^="Form"] .page-head .page-head-content,
+    [data-page-route^="Form"] .page-head .page-head-content,
+    .form-page .page-head .page-head-content,
     .page-head.eb-doc-head .page-head-content {
-        padding: 8px 10px 4px !important;
+        padding: 6px 10px 4px !important;
+    }
+    body[data-route^="Form"] .page-head .page-actions,
+    [data-page-route^="Form"] .page-head .page-actions,
+    .form-page .page-head .page-actions,
+    .page-head.eb-doc-head .page-actions {
+        justify-content: flex-start !important;
+        gap: 6px !important;
+    }
+    body[data-route^="Form"] .page-head .page-actions .btn,
+    [data-page-route^="Form"] .page-head .page-actions .btn,
+    .form-page .page-head .page-actions .btn,
+    .page-head.eb-doc-head .page-actions .btn {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
     }
 }
 
 /* When expanded, show full wrapped title in a clean readable card */
+body[data-route^="Form"] .page-head .title-area.eb-title-expanded,
+body[data-route^="Form"] .page-head .page-title.eb-title-expanded,
+[data-page-route^="Form"] .page-head .title-area.eb-title-expanded,
+[data-page-route^="Form"] .page-head .page-title.eb-title-expanded,
+.form-page .page-head .title-area.eb-title-expanded,
+.form-page .page-head .page-title.eb-title-expanded,
 .page-head.eb-doc-head .title-area.eb-title-expanded,
 .page-head.eb-doc-head .page-title.eb-title-expanded,
 .eb-title-expanded {
@@ -1634,6 +1728,9 @@ div[data-doctype="Blog Post"] .card {
     overflow: visible !important;
 }
 
+body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
+[data-page-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
+.form-page .page-head .title-area.eb-title-expanded .title-text,
 .page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
 .eb-title-expanded .title-text {
     white-space: normal !important;
@@ -1656,6 +1753,9 @@ div[data-doctype="Blog Post"] .card {
     box-sizing: border-box !important;
 }
 
+[data-theme="dark"] body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
+[data-theme="dark"] [data-page-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
+[data-theme="dark"] .form-page .page-head .title-area.eb-title-expanded .title-text,
 [data-theme="dark"] .page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
 [data-theme="dark"] .eb-title-expanded .title-text {
     background: #18222d !important;
@@ -1709,7 +1809,7 @@ div[data-doctype="Blog Post"] .card {
 }
 
 /* Non-document headers: Preserve natural row layout, no squishing */
-.page-head:not(.eb-doc-head) .page-title {
+body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-title {
     width: auto !important;
     max-width: none !important;
     flex: 0 1 auto !important;
@@ -1717,14 +1817,14 @@ div[data-doctype="Blog Post"] .card {
     align-items: center !important;
 }
 
-.page-head:not(.eb-doc-head) .title-area {
+body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-area {
     width: auto !important;
     max-width: none !important;
     display: flex !important;
     align-items: center !important;
 }
 
-.page-head:not(.eb-doc-head) .title-text {
+body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-text {
     max-width: none !important;
     width: auto !important;
     white-space: nowrap !important;
@@ -1734,7 +1834,7 @@ div[data-doctype="Blog Post"] .card {
     flex: 0 1 auto !important;
 }
 
-.page-head:not(.eb-doc-head) .eb-title-toggle-btn {
+body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .eb-title-toggle-btn {
     display: none !important;
 }
 
@@ -1746,12 +1846,16 @@ div[data-doctype="Blog Post"] .card {
     vertical-align: middle !important;
 }
 
-/* Action buttons in Desk header */
-.page-head .page-actions {
+/* Action buttons in non-document Desk headers (List View, Workspace) */
+body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-actions {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
     flex-wrap: nowrap !important;
+    width: auto !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
     gap: 8px !important;
     z-index: 10 !important;
 }

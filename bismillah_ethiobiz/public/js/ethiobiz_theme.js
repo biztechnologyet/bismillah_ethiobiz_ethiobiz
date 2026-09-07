@@ -873,10 +873,45 @@
     }, true);
 
     function isDocView() {
+        // 1. Check frappe router standard route
+        if (typeof frappe !== 'undefined' && frappe.get_route) {
+            const r = frappe.get_route();
+            if (r && r[0] === 'Form') return true;
+            if (r && (r[0] === 'List' || r[0] === 'Workspaces' || r[0] === 'Tree' || r[0] === 'query-report' || r[0] === 'dashboard-view')) return false;
+        }
+
+        // 2. Check frappe get_route_str
+        if (typeof frappe !== 'undefined' && frappe.get_route_str) {
+            const rs = frappe.get_route_str();
+            if (rs && rs.indexOf('Form/') === 0) return true;
+            if (rs && (rs.indexOf('List/') === 0 || rs.indexOf('Workspaces/') === 0)) return false;
+        }
+
+        // 3. Check body data-route attribute
+        const bodyRoute = document.body ? document.body.getAttribute('data-route') : '';
+        if (bodyRoute && bodyRoute.indexOf('Form/') === 0) return true;
+        if (bodyRoute && (bodyRoute.indexOf('List/') === 0 || bodyRoute.indexOf('Workspaces/') === 0)) return false;
+
+        // 4. Check window location pathname / hash
+        const path = (window.location.pathname || '') + (window.location.hash || '');
+        const cleanPath = path.replace(/^[#/]+/, '');
+        const segments = cleanPath.split('/').filter(Boolean);
+        // Desk format: /app/:doctype/:name  e.g. ['app', 'todo', 'h44qvre6j']
+        if (segments.length >= 3 && segments[0] === 'app') {
+            const seg2 = segments[2].toLowerCase();
+            if (seg2 !== 'view' && seg2 !== 'list' && seg2 !== 'report' && seg2 !== 'dashboard') {
+                return true;
+            }
+        }
+
+        // 5. Check cur_frm
         if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.docname) return true;
-        const route = (typeof frappe !== 'undefined' && frappe.get_route) ? frappe.get_route() : [];
-        if (route && route[0] === 'app' && route.length === 3 && route[2] !== 'view') return true;
-        if (document.querySelector('.form-page:not(.hide), .form-container:not(.hide)')) return true;
+
+        // 6. Check DOM for form actions / layout
+        if (document.querySelector('.page-container[data-page-route^="Form"], .form-page:not(.hide), .form-layout, .page-head [data-label="Save"], .page-head .primary-action, .form-tabs-list')) {
+            if (!document.querySelector('.frappe-list, .workspace-page, .report-view')) return true;
+        }
+
         return false;
     }
 
@@ -913,7 +948,10 @@
                 titleText.style.setProperty('white-space', 'nowrap', 'important');
                 titleText.style.setProperty('overflow', 'hidden', 'important');
                 titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
+                titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
+                titleText.style.setProperty('min-width', '0', 'important');
+                titleText.style.setProperty('visibility', 'visible', 'important');
+                titleText.style.setProperty('opacity', '1', 'important');
                 titleText.style.setProperty('cursor', 'default', 'important');
             }
 
@@ -925,7 +963,7 @@
                     titleText.style.setProperty('white-space', 'nowrap', 'important');
                     titleText.style.setProperty('overflow', 'hidden', 'important');
                     titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                    titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
+                    titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
                 } else {
                     existingBtn.innerHTML = '<span class="eb-arrow">▲</span>';
                     existingBtn.title = 'Collapse';
@@ -964,7 +1002,7 @@
                         titleText.style.setProperty('white-space', 'nowrap', 'important');
                         titleText.style.setProperty('overflow', 'hidden', 'important');
                         titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                        titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
+                        titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
                         toggle.innerHTML = '<span class="eb-arrow">↔</span>';
                         toggle.title = 'Expand';
                     }
