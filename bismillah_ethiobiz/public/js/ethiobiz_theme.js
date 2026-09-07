@@ -872,10 +872,38 @@
         }
     }, true);
 
-    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed full-width)
+    function isDocView() {
+        if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.docname) return true;
+        const route = (typeof frappe !== 'undefined' && frappe.get_route) ? frappe.get_route() : [];
+        if (route && route[0] === 'app' && route.length === 3 && route[2] !== 'view') return true;
+        if (document.querySelector('.form-page:not(.hide), .form-container:not(.hide)')) return true;
+        return false;
+    }
+
+    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed full-width, arrow only)
     function initTitleToggle() {
+        if (!isDocView()) {
+            // Remove any expand/collapse buttons from List views, Workspaces, Reports
+            document.querySelectorAll('.eb-title-toggle-btn').forEach(b => b.remove());
+            document.querySelectorAll('.title-area, .page-title').forEach(el => {
+                el.classList.remove('eb-title-expanded');
+                delete el.dataset.ebExpanded;
+            });
+            document.querySelectorAll('.page-head:not(.eb-doc-head) .title-text').forEach(t => {
+                t.style.removeProperty('max-width');
+                t.style.removeProperty('white-space');
+                t.style.removeProperty('overflow');
+                t.style.removeProperty('text-overflow');
+                t.style.removeProperty('word-break');
+            });
+            return;
+        }
+
         const titleElements = document.querySelectorAll('.page-head .title-text');
         titleElements.forEach(titleText => {
+            const head = titleText.closest('.page-head');
+            if (head) head.classList.add('eb-doc-head');
+
             const area = titleText.closest('.title-area') || titleText.closest('.page-title');
             if (!area) return;
 
@@ -885,33 +913,37 @@
                 titleText.style.setProperty('white-space', 'nowrap', 'important');
                 titleText.style.setProperty('overflow', 'hidden', 'important');
                 titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
+                titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
                 titleText.style.setProperty('cursor', 'default', 'important');
             }
 
             if (area.querySelector('.eb-title-toggle-btn')) {
                 const existingBtn = area.querySelector('.eb-title-toggle-btn');
                 if (!area.classList.contains('eb-title-expanded')) {
-                    existingBtn.innerHTML = '<span>↔</span><span>Expand</span>';
+                    existingBtn.innerHTML = '<span class="eb-arrow">↔</span>';
+                    existingBtn.title = 'Expand';
                     titleText.style.setProperty('white-space', 'nowrap', 'important');
                     titleText.style.setProperty('overflow', 'hidden', 'important');
                     titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                    titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
+                    titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
                 } else {
-                    existingBtn.innerHTML = '<span>▲</span><span>Collapse</span>';
+                    existingBtn.innerHTML = '<span class="eb-arrow">▲</span>';
+                    existingBtn.title = 'Collapse';
                     titleText.style.setProperty('white-space', 'normal', 'important');
                     titleText.style.setProperty('word-break', 'break-word', 'important');
-                    titleText.style.setProperty('overflow', 'visible', 'important');
+                    titleText.style.setProperty('overflow-y', 'auto', 'important');
+                    titleText.style.setProperty('max-width', '100%', 'important');
                 }
                 return;
             }
 
             const textContent = (titleText.textContent || '').trim();
-            if (textContent.length > 25 || titleText.scrollWidth > titleText.clientWidth) {
+            // Only add toggle button for long titles in document forms
+            if (textContent.length > 25) {
                 const toggle = document.createElement('span');
                 toggle.className = 'eb-title-toggle-btn';
-                toggle.title = 'Click to expand or collapse full title';
-                toggle.innerHTML = '<span>↔</span><span>Expand</span>';
+                toggle.title = 'Expand';
+                toggle.innerHTML = '<span class="eb-arrow">↔</span>';
 
                 function toggleState(e) {
                     if (e) {
@@ -923,15 +955,18 @@
                         area.dataset.ebExpanded = '1';
                         titleText.style.setProperty('white-space', 'normal', 'important');
                         titleText.style.setProperty('word-break', 'break-word', 'important');
-                        titleText.style.setProperty('overflow', 'visible', 'important');
-                        toggle.innerHTML = '<span>▲</span><span>Collapse</span>';
+                        titleText.style.setProperty('overflow-y', 'auto', 'important');
+                        titleText.style.setProperty('max-width', '100%', 'important');
+                        toggle.innerHTML = '<span class="eb-arrow">▲</span>';
+                        toggle.title = 'Collapse';
                     } else {
                         delete area.dataset.ebExpanded;
                         titleText.style.setProperty('white-space', 'nowrap', 'important');
                         titleText.style.setProperty('overflow', 'hidden', 'important');
                         titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                        titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
-                        toggle.innerHTML = '<span>↔</span><span>Expand</span>';
+                        titleText.style.setProperty('max-width', 'calc(100% - 75px)', 'important');
+                        toggle.innerHTML = '<span class="eb-arrow">↔</span>';
+                        toggle.title = 'Expand';
                     }
                 }
 

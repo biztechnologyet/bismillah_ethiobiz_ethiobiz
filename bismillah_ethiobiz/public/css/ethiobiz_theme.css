@@ -1546,76 +1546,117 @@ div[data-doctype="Blog Post"] .card {
 }
 
 /* ==========================================================================
-   DESK TITLE BAR: CLEAN SINGLE LINE WITH EXPAND / COLLAPSE
+   DESK TITLE BAR: CLEAN RESPONSIVE SINGLE LINE (DOCUMENT FORMS ONLY)
    ========================================================================== */
-.page-head .page-title {
+.page-head.eb-doc-head .page-head-content {
     display: flex !important;
-    align-items: center !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
-    min-width: 0 !important;
-    overflow: visible !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 10px 16px 6px !important;
+    gap: 6px !important;
 }
 
-.page-head .title-area {
+.page-head.eb-doc-head .page-title {
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.page-head.eb-doc-head .title-area {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
     position: relative !important;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
-.page-head .title-text,
-.page-head .title-area .title-text {
+.page-head.eb-doc-head .title-area > div,
+.page-head.eb-doc-head .title-area .flex {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.page-head.eb-doc-head .title-text {
     font-size: 1.35rem !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     letter-spacing: -0.3px !important;
-    line-height: 1.4 !important;
+    line-height: 1.3 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    flex: 0 1 auto !important;
-    max-width: calc(100% - 190px) !important;
+    flex: 1 1 auto !important;
+    max-width: calc(100% - 75px) !important;
     min-width: 0 !important;
     display: inline-block !important;
     cursor: default !important;
-    margin: 0 8px 0 0 !important;
+    margin: 0 6px 0 0 !important;
     padding: 0 !important;
     visibility: visible !important;
     opacity: 1 !important;
+    box-sizing: border-box !important;
+}
+
+/* Mobile responsive sizing */
+@media (max-width: 768px) {
+    .page-head.eb-doc-head .title-text {
+        font-size: 1.05rem !important;
+        max-width: calc(100% - 70px) !important;
+    }
+    .page-head.eb-doc-head .page-head-content {
+        padding: 8px 10px 4px !important;
+    }
 }
 
 /* When expanded, show full wrapped title in a clean readable card */
-.page-head .title-area.eb-title-expanded,
-.page-head .page-title.eb-title-expanded,
+.page-head.eb-doc-head .title-area.eb-title-expanded,
+.page-head.eb-doc-head .page-title.eb-title-expanded,
 .eb-title-expanded {
     flex-wrap: wrap !important;
+    overflow: visible !important;
 }
 
-.page-head .title-area.eb-title-expanded .title-text,
+.page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
 .eb-title-expanded .title-text {
     white-space: normal !important;
     word-break: break-word !important;
     overflow-y: auto !important;
-    max-height: 260px !important;
+    max-height: 240px !important;
     width: 100% !important;
     max-width: 100% !important;
+    flex: 1 1 100% !important;
     background: #ffffff !important;
     color: #0f172a !important;
-    padding: 10px 14px !important;
-    margin: 6px 0 8px 0 !important;
-    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    margin: 6px 0 6px 0 !important;
+    border-radius: 8px !important;
     border: 1.5px solid #008080 !important;
     box-shadow: 0 4px 16px rgba(0, 128, 128, 0.15) !important;
     display: block !important;
     position: relative !important;
     z-index: 50 !important;
+    box-sizing: border-box !important;
 }
 
-[data-theme="dark"] .page-head .title-area.eb-title-expanded .title-text,
+[data-theme="dark"] .page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
 [data-theme="dark"] .eb-title-expanded .title-text {
     background: #18222d !important;
     color: #F8F6F2 !important;
@@ -1623,30 +1664,78 @@ div[data-doctype="Blog Post"] .card {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Expand / Collapse toggle button */
+/* Arrow-only Expand / Collapse button */
 .eb-title-toggle-btn {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    font-size: 11px !important;
+    justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     color: #008080 !important;
     background: rgba(0, 128, 128, 0.08) !important;
-    border: 1px solid rgba(0, 128, 128, 0.25) !important;
-    border-radius: 12px !important;
-    padding: 2px 8px !important;
+    border: 1.5px solid rgba(0, 128, 128, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 0 !important;
     cursor: pointer !important;
-    margin-left: 6px !important;
-    margin-right: 6px !important;
+    margin: 0 4px !important;
     user-select: none !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    height: 22px !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
 }
 
 .eb-title-toggle-btn:hover {
-    background: rgba(0, 128, 128, 0.18) !important;
-    color: #072a2e !important;
+    background: #008080 !important;
+    color: #ffffff !important;
+    border-color: #008080 !important;
+    transform: scale(1.08) !important;
+}
+
+[data-theme="dark"] .eb-title-toggle-btn {
+    color: #1FB6AE !important;
+    background: rgba(31, 182, 174, 0.12) !important;
+    border-color: rgba(31, 182, 174, 0.35) !important;
+}
+
+[data-theme="dark"] .eb-title-toggle-btn:hover {
+    background: #1FB6AE !important;
+    color: #0E1A1A !important;
+}
+
+/* Non-document headers: Preserve natural row layout, no squishing */
+.page-head:not(.eb-doc-head) .page-title {
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.page-head:not(.eb-doc-head) .title-area {
+    width: auto !important;
+    max-width: none !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.page-head:not(.eb-doc-head) .title-text {
+    max-width: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    display: inline-block !important;
+    flex: 0 1 auto !important;
+}
+
+.page-head:not(.eb-doc-head) .eb-title-toggle-btn {
+    display: none !important;
 }
 
 .page-head .indicator-pill,
