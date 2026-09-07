@@ -431,10 +431,15 @@ def chat_webhook_proxy():
         )
 
     headers = {"Content-Type": "application/json"}
-    if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
+    try:
+        auth_val = settings.get_password("webhook_auth_value", raise_exception=False)
+    except Exception:
+        auth_val = None
+
+    if settings.webhook_auth_header and auth_val:
         hdr_name = settings.webhook_auth_header.strip()
         if "@" not in hdr_name and " " not in hdr_name:
-            headers[hdr_name] = settings.get_password("webhook_auth_value")
+            headers[hdr_name] = auth_val
 
     try:
         resp = requests.post(
@@ -638,10 +643,15 @@ def chat_inline(prompt, context=None):
         frappe.throw("Inline AI webhook URL is not configured", frappe.DoesNotExistError)
 
     headers = {"Content-Type": "application/json"}
-    if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
+    try:
+        auth_val = settings.get_password("webhook_auth_value", raise_exception=False)
+    except Exception:
+        auth_val = None
+
+    if settings.webhook_auth_header and auth_val:
         hdr_name = settings.webhook_auth_header.strip()
         if "@" not in hdr_name and " " not in hdr_name:
-            headers[hdr_name] = settings.get_password("webhook_auth_value")
+            headers[hdr_name] = auth_val
 
     try:
         resp = requests.post(
