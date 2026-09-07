@@ -1800,17 +1800,12 @@ div[data-doctype="Blog Post"] .card {
     flex-shrink: 0 !important;
 }
 
-/* Tier 2: Dedicated Actions Row Below Title, Aligned to Right */
+/* Actions Row Aligned to Right */
 .page-head .page-actions {
-    width: 100% !important;
-    max-width: 100% !important;
-    display: flex !important;
+    display: inline-flex !important;
     justify-content: flex-end !important;
     align-items: center !important;
     gap: 8px !important;
-    margin-top: 4px !important;
-    padding: 6px 0 0 0 !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .page-head .page-actions .standard-actions {
