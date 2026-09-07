@@ -1578,7 +1578,7 @@ div[data-doctype="Blog Post"] .card {
     max-width: min(50vw, 650px) !important;
     min-width: 0 !important;
     display: inline-block !important;
-    cursor: pointer !important;
+    cursor: default !important;
     margin: 0 8px 0 0 !important;
     padding: 0 !important;
     visibility: visible !important;

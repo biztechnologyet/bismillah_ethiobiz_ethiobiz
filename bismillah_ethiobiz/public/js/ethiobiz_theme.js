@@ -872,23 +872,34 @@
         }
     }, true);
 
-    // BISMALLAH: Form Title Auto-Size Collapsible Toggle
+    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed)
     function initTitleToggle() {
         const titleElements = document.querySelectorAll('.page-head .title-text');
         titleElements.forEach(titleText => {
             const area = titleText.closest('.title-area') || titleText.closest('.page-title');
             if (!area) return;
-            if (area.querySelector('.eb-title-toggle-btn')) return;
 
-            // Enforce single-line default immediately
-            if (!area.classList.contains('eb-title-expanded')) {
-                titleText.style.whiteSpace = 'nowrap';
-                titleText.style.overflow = 'hidden';
-                titleText.style.textOverflow = 'ellipsis';
+            // Enforce collapsed single-line default immediately
+            if (!area.dataset.ebExpanded) {
+                area.classList.remove('eb-title-expanded');
+                titleText.style.setProperty('white-space', 'nowrap', 'important');
+                titleText.style.setProperty('overflow', 'hidden', 'important');
+                titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+                titleText.style.setProperty('cursor', 'default', 'important');
+            }
+
+            if (area.querySelector('.eb-title-toggle-btn')) {
+                const existingBtn = area.querySelector('.eb-title-toggle-btn');
+                if (!area.classList.contains('eb-title-expanded')) {
+                    existingBtn.innerHTML = '<span>↔</span><span>Expand</span>';
+                } else {
+                    existingBtn.innerHTML = '<span>▲</span><span>Collapse</span>';
+                }
+                return;
             }
 
             const textContent = (titleText.textContent || '').trim();
-            if (textContent.length > 30 || titleText.scrollWidth > titleText.clientWidth) {
+            if (textContent.length > 25 || titleText.scrollWidth > titleText.clientWidth) {
                 const toggle = document.createElement('span');
                 toggle.className = 'eb-title-toggle-btn';
                 toggle.title = 'Click to expand or collapse full title';
@@ -901,19 +912,21 @@
                     }
                     const isExp = area.classList.toggle('eb-title-expanded');
                     if (isExp) {
-                        titleText.style.whiteSpace = 'normal';
-                        titleText.style.overflow = 'visible';
+                        area.dataset.ebExpanded = '1';
+                        titleText.style.setProperty('white-space', 'normal', 'important');
+                        titleText.style.setProperty('overflow', 'visible', 'important');
                         toggle.innerHTML = '<span>▲</span><span>Collapse</span>';
                     } else {
-                        titleText.style.whiteSpace = 'nowrap';
-                        titleText.style.overflow = 'hidden';
-                        titleText.style.textOverflow = 'ellipsis';
+                        delete area.dataset.ebExpanded;
+                        titleText.style.setProperty('white-space', 'nowrap', 'important');
+                        titleText.style.setProperty('overflow', 'hidden', 'important');
+                        titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
                         toggle.innerHTML = '<span>↔</span><span>Expand</span>';
                     }
                 }
 
+                // ONLY expand or collapse when clicking the toggle button
                 toggle.addEventListener('click', toggleState);
-                titleText.addEventListener('click', toggleState);
 
                 titleText.parentNode.insertBefore(toggle, titleText.nextSibling);
             }

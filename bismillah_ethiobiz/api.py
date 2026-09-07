@@ -2,7 +2,35 @@ import frappe
 import requests
 import json
 import re
+import uuid
 from frappe.utils.password import get_decrypted_password
+
+
+def _normalize_field_context(fc):
+    """Ensure field_context is always a valid JSON string with doctype, docname, field.
+    Prevents n8n Chat_Constants JSON.parse() syntax errors.
+    """
+    default_fc = {"doctype": "", "docname": "", "field": ""}
+    if not fc:
+        return json.dumps(default_fc)
+    if isinstance(fc, dict):
+        return json.dumps({
+            "doctype": fc.get("doctype") or "",
+            "docname": fc.get("docname") or "",
+            "field": fc.get("field") or ""
+        })
+    if isinstance(fc, str):
+        try:
+            parsed = json.loads(fc)
+            if isinstance(parsed, dict):
+                return json.dumps({
+                    "doctype": parsed.get("doctype") or "",
+                    "docname": parsed.get("docname") or "",
+                    "field": parsed.get("field") or ""
+                })
+        except Exception:
+            pass
+    return json.dumps(default_fc)
 
 
 def _get_hadeeda_settings():
@@ -325,14 +353,17 @@ def chat_webhook_proxy():
     if not user and isinstance(payload.get("metadata"), dict):
         user = payload["metadata"].get("username") or payload["metadata"].get("user_id")
 
+    metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+
     if user and user != "Guest" and frappe.db.exists("User", user):
         try:
             api_key, api_secret = _get_user_api_credentials(user)
             company = frappe.defaults.get_user_default("company", user) or ""
             full_name = frappe.db.get_value("User", user, "full_name") or user
             department, designation = _get_user_department_designation(user)
+            industry, religion = _get_user_industry_religion(user)
+            ub, ci = _get_user_behaviour_and_company_industry(user, company)
 
-            metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
             metadata["username"] = user
             metadata["user_id"] = user
             metadata["full_name"] = full_name
@@ -340,18 +371,44 @@ def chat_webhook_proxy():
             metadata["department"] = department
             metadata["designation"] = designation
             metadata["language"] = _get_user_language(user)
-            industry, religion = _get_user_industry_religion(user)
             metadata["industry"] = industry
             metadata["religion"] = religion
-            ub, ci = _get_user_behaviour_and_company_industry(user, company)
             metadata["user_behaviour"] = ub
             metadata["company_industry"] = ci
             metadata["source"] = "widget"
             metadata["api_key"] = api_key or ""
             metadata["api_secret"] = api_secret or ""
-            payload["metadata"] = metadata
         except Exception as e:
             frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
+    else:
+        # Defaults for Guest to prevent n8n Chat_Constants from throwing
+        metadata.setdefault("username", "Guest")
+        metadata.setdefault("user_id", "Guest")
+        metadata.setdefault("full_name", "Valued Guest")
+        metadata.setdefault("company", "EthioBiz")
+        metadata.setdefault("department", "")
+        metadata.setdefault("designation", "")
+        metadata.setdefault("language", settings.default_language or "en")
+        metadata.setdefault("industry", "")
+        metadata.setdefault("religion", "")
+        metadata.setdefault("user_behaviour", "")
+        metadata.setdefault("company_industry", "")
+        metadata.setdefault("source", "widget")
+        metadata.setdefault("api_key", "")
+        metadata.setdefault("api_secret", "")
+
+    # Ensure full_name is never empty for .split(' ')[0]
+    if not metadata.get("full_name"):
+        metadata["full_name"] = "Valued Guest"
+
+    # Always ensure field_context is a valid JSON string
+    field_ctx = metadata.get("field_context") or payload.get("context") or {}
+    metadata["field_context"] = _normalize_field_context(field_ctx)
+    payload["metadata"] = metadata
+
+    # Ensure sessionId exists
+    if not payload.get("sessionId"):
+        payload["sessionId"] = str(uuid.uuid4())
 
     # Ensure message text is present across all standard keys for n8n
     chat_text = payload.get("chatInput") or payload.get("message") or payload.get("text") or payload.get("prompt") or ""
@@ -569,17 +626,22 @@ def chat_inline(prompt, context=None):
             "language": _get_user_language(user) if not is_guest else (settings.default_language or "en"),
             "api_key": api_key or "",
             "api_secret": api_secret or "",
-            "field_context": context or "",
+            "field_context": _normalize_field_context(context),
             "document_content": document_content,
         }
     }
+    payload["message"] = chat_input
+    payload["text"] = chat_input
+    payload["prompt"] = chat_input
 
     if not inline_url:
         frappe.throw("Inline AI webhook URL is not configured", frappe.DoesNotExistError)
 
     headers = {"Content-Type": "application/json"}
     if settings.webhook_auth_header and settings.get_password("webhook_auth_value"):
-        headers[settings.webhook_auth_header] = settings.get_password("webhook_auth_value")
+        hdr_name = settings.webhook_auth_header.strip()
+        if "@" not in hdr_name and " " not in hdr_name:
+            headers[hdr_name] = settings.get_password("webhook_auth_value")
 
     try:
         resp = requests.post(
