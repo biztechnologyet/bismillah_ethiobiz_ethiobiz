@@ -1549,16 +1549,18 @@ div[data-doctype="Blog Post"] .card {
    DESK TITLE BAR: CLEAN SINGLE LINE WITH EXPAND / COLLAPSE
    ========================================================================== */
 .page-head .page-title {
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
-    max-width: calc(100% - 240px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     overflow: visible !important;
 }
 
 .page-head .title-area {
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
+    width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     position: relative !important;
@@ -1575,7 +1577,8 @@ div[data-doctype="Blog Post"] .card {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: min(50vw, 650px) !important;
+    flex: 0 1 auto !important;
+    max-width: calc(100% - 190px) !important;
     min-width: 0 !important;
     display: inline-block !important;
     cursor: default !important;
@@ -1585,18 +1588,39 @@ div[data-doctype="Blog Post"] .card {
     opacity: 1 !important;
 }
 
-/* When expanded, show full wrapped title */
+/* When expanded, show full wrapped title in a clean readable card */
+.page-head .title-area.eb-title-expanded,
+.page-head .page-title.eb-title-expanded,
+.eb-title-expanded {
+    flex-wrap: wrap !important;
+}
+
 .page-head .title-area.eb-title-expanded .title-text,
 .eb-title-expanded .title-text {
     white-space: normal !important;
     word-break: break-word !important;
-    overflow: visible !important;
-    max-width: 80vw !important;
-    background: rgba(0, 128, 128, 0.05) !important;
-    padding: 6px 10px !important;
-    border-radius: 8px !important;
-    border: 1px solid rgba(0, 128, 128, 0.2) !important;
+    overflow-y: auto !important;
+    max-height: 260px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    padding: 10px 14px !important;
+    margin: 6px 0 8px 0 !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #008080 !important;
+    box-shadow: 0 4px 16px rgba(0, 128, 128, 0.15) !important;
     display: block !important;
+    position: relative !important;
+    z-index: 50 !important;
+}
+
+[data-theme="dark"] .page-head .title-area.eb-title-expanded .title-text,
+[data-theme="dark"] .eb-title-expanded .title-text {
+    background: #18222d !important;
+    color: #F8F6F2 !important;
+    border-color: #1FB6AE !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Expand / Collapse toggle button */

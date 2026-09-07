@@ -872,7 +872,7 @@
         }
     }, true);
 
-    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed)
+    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed full-width)
     function initTitleToggle() {
         const titleElements = document.querySelectorAll('.page-head .title-text');
         titleElements.forEach(titleText => {
@@ -885,6 +885,7 @@
                 titleText.style.setProperty('white-space', 'nowrap', 'important');
                 titleText.style.setProperty('overflow', 'hidden', 'important');
                 titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+                titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
                 titleText.style.setProperty('cursor', 'default', 'important');
             }
 
@@ -892,8 +893,15 @@
                 const existingBtn = area.querySelector('.eb-title-toggle-btn');
                 if (!area.classList.contains('eb-title-expanded')) {
                     existingBtn.innerHTML = '<span>↔</span><span>Expand</span>';
+                    titleText.style.setProperty('white-space', 'nowrap', 'important');
+                    titleText.style.setProperty('overflow', 'hidden', 'important');
+                    titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+                    titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
                 } else {
                     existingBtn.innerHTML = '<span>▲</span><span>Collapse</span>';
+                    titleText.style.setProperty('white-space', 'normal', 'important');
+                    titleText.style.setProperty('word-break', 'break-word', 'important');
+                    titleText.style.setProperty('overflow', 'visible', 'important');
                 }
                 return;
             }
@@ -914,6 +922,7 @@
                     if (isExp) {
                         area.dataset.ebExpanded = '1';
                         titleText.style.setProperty('white-space', 'normal', 'important');
+                        titleText.style.setProperty('word-break', 'break-word', 'important');
                         titleText.style.setProperty('overflow', 'visible', 'important');
                         toggle.innerHTML = '<span>▲</span><span>Collapse</span>';
                     } else {
@@ -921,6 +930,7 @@
                         titleText.style.setProperty('white-space', 'nowrap', 'important');
                         titleText.style.setProperty('overflow', 'hidden', 'important');
                         titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+                        titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
                         toggle.innerHTML = '<span>↔</span><span>Expand</span>';
                     }
                 }
@@ -933,7 +943,18 @@
         });
     }
 
-    $(document).on('page-change form_refresh', function () {
+    window.initTitleToggle = initTitleToggle;
+
+    // Reset expanded state on document/page change so new doc always opens collapsed
+    $(document).on('page-change router:change', function () {
+        document.querySelectorAll('.title-area, .page-title').forEach(function(el) {
+            delete el.dataset.ebExpanded;
+            el.classList.remove('eb-title-expanded');
+        });
+    });
+
+    $(document).on('page-change form-refresh form_refresh router:change', function () {
+        setTimeout(initTitleToggle, 100);
         setTimeout(initTitleToggle, 300);
         setTimeout(initTitleToggle, 800);
     });

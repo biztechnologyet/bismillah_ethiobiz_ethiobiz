@@ -30,9 +30,20 @@ frappe.ui.force_vertical_layout = function () {
 
             const titleText = title.querySelector('.title-text');
             if (titleText) {
-                titleText.style.setProperty('white-space', 'normal', 'important');
-                titleText.style.setProperty('word-break', 'break-word', 'important');
-                titleText.style.setProperty('font-size', '1.4rem', 'important');
+                const area = titleText.closest('.title-area') || title.querySelector('.title-area') || title;
+                const isExpanded = area.classList.contains('eb-title-expanded') || !!area.dataset.ebExpanded;
+
+                if (isExpanded) {
+                    titleText.style.setProperty('white-space', 'normal', 'important');
+                    titleText.style.setProperty('word-break', 'break-word', 'important');
+                    titleText.style.setProperty('overflow', 'visible', 'important');
+                } else {
+                    titleText.style.setProperty('white-space', 'nowrap', 'important');
+                    titleText.style.setProperty('overflow', 'hidden', 'important');
+                    titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+                    titleText.style.setProperty('max-width', 'calc(100% - 190px)', 'important');
+                }
+                titleText.style.setProperty('font-size', '1.35rem', 'important');
                 titleText.style.setProperty('font-weight', '800', 'important');
                 titleText.style.setProperty('line-height', '1.3', 'important');
             }
@@ -58,6 +69,10 @@ frappe.ui.force_vertical_layout = function () {
             title.parentElement.style.width = '100%';
         }
     });
+
+    if (window.initTitleToggle) {
+        window.initTitleToggle();
+    }
 };
 
 // Run on page events
