@@ -1555,11 +1555,13 @@ body[data-route^="Form"] .page-head,
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
     height: auto !important;
     min-height: 82px !important;
     top: var(--navbar-height) !important;
     position: sticky !important;
+    z-index: 25 !important;
 }
 
 body[data-route^="Form"] .page-head .page-head-content,
@@ -1572,13 +1574,14 @@ body[data-route^="Form"] .page-head .page-head-content,
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     padding: 8px 16px 6px !important;
     gap: 4px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     height: auto !important;
     min-height: auto !important;
+    position: relative !important;
 }
 
 body[data-route^="Form"] .page-head .page-title,
@@ -1679,7 +1682,9 @@ body[data-route^="Form"] .page-head .page-actions,
     border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
     flex-wrap: wrap !important;
     float: none !important;
-    z-index: 10 !important;
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 26 !important;
 }
 
 [data-theme="dark"] body[data-route^="Form"] .page-head .page-actions,
@@ -1689,8 +1694,45 @@ body[data-route^="Form"] .page-head .page-actions,
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Ensure dropdown menus (such as ... Menu) render in front of tabs and all page content */
+.page-head .dropdown-menu,
+.page-actions .dropdown-menu,
+.menu-btn-group .dropdown-menu,
+.custom-btn-group .dropdown-menu {
+    z-index: 1050 !important;
+    position: absolute !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="dark"] .page-head .dropdown-menu,
+[data-theme="dark"] .page-actions .dropdown-menu,
+[data-theme="dark"] .menu-btn-group .dropdown-menu,
+[data-theme="dark"] .custom-btn-group .dropdown-menu {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
 /* Mobile responsive sizing */
 @media (max-width: 768px) {
+    body[data-route^="Form"] .page-head,
+    [data-page-route^="Form"] .page-head,
+    .form-page .page-head,
+    .page-head.eb-doc-head,
+    .page-head {
+        z-index: 30 !important;
+        overflow: visible !important;
+    }
+    body[data-route^="Form"] .page-head .page-head-content,
+    [data-page-route^="Form"] .page-head .page-head-content,
+    .form-page .page-head .page-head-content,
+    .page-head.eb-doc-head .page-head-content {
+        overflow: visible !important;
+        padding: 6px 10px 4px !important;
+    }
     body[data-route^="Form"] .page-head .title-text,
     [data-page-route^="Form"] .page-head .title-text,
     .form-page .page-head .title-text,
@@ -1698,18 +1740,15 @@ body[data-route^="Form"] .page-head .page-actions,
         font-size: 1.1rem !important;
         max-width: calc(100% - 85px) !important;
     }
-    body[data-route^="Form"] .page-head .page-head-content,
-    [data-page-route^="Form"] .page-head .page-head-content,
-    .form-page .page-head .page-head-content,
-    .page-head.eb-doc-head .page-head-content {
-        padding: 6px 10px 4px !important;
-    }
     body[data-route^="Form"] .page-head .page-actions,
     [data-page-route^="Form"] .page-head .page-actions,
     .form-page .page-head .page-actions,
     .page-head.eb-doc-head .page-actions {
         justify-content: flex-start !important;
         gap: 6px !important;
+        position: relative !important;
+        overflow: visible !important;
+        z-index: 31 !important;
     }
     body[data-route^="Form"] .page-head .page-actions .btn,
     [data-page-route^="Form"] .page-head .page-actions .btn,
@@ -1717,6 +1756,14 @@ body[data-route^="Form"] .page-head .page-actions,
     .page-head.eb-doc-head .page-actions .btn {
         padding: 4px 8px !important;
         font-size: 12px !important;
+    }
+    .page-actions .dropdown-menu,
+    .menu-btn-group .dropdown-menu,
+    .custom-btn-group .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+        z-index: 1050 !important;
+        max-width: 90vw !important;
     }
 }
 
