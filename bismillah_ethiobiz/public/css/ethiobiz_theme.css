@@ -1556,6 +1556,10 @@ body[data-route^="Form"] .page-head,
     max-width: 100% !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 82px !important;
+    top: var(--navbar-height) !important;
+    position: sticky !important;
 }
 
 body[data-route^="Form"] .page-head .page-head-content,
@@ -1573,6 +1577,8 @@ body[data-route^="Form"] .page-head .page-head-content,
     gap: 4px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
 }
 
 body[data-route^="Form"] .page-head .page-title,
