@@ -1006,6 +1006,9 @@
                         toggle.innerHTML = '<span class="eb-arrow">↔</span>';
                         toggle.title = 'Expand';
                     }
+                    if (window.updateDocTabsStickyTop) {
+                        setTimeout(window.updateDocTabsStickyTop, 50);
+                    }
                 }
 
                 // ONLY expand or collapse when clicking the toggle button

@@ -1878,6 +1878,141 @@ body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-actions {
 }
 
 /* ==========================================================================
+   CREATIVE STICKY DOCUMENT TABS (LOCKED BELOW ACTION BUTTONS)
+   ========================================================================== */
+body[data-route^="Form"] .layout-main-section.frappe-card,
+[data-page-route^="Form"] .layout-main-section.frappe-card,
+.form-page .layout-main-section.frappe-card {
+    overflow: visible !important;
+}
+
+body[data-route^="Form"] .layout-main-section-wrapper,
+[data-page-route^="Form"] .layout-main-section-wrapper,
+.form-page .layout-main-section-wrapper {
+    overflow: visible !important;
+}
+
+body[data-route^="Form"] .form-tabs-list,
+[data-page-route^="Form"] .form-tabs-list,
+.form-page .form-tabs-list,
+.form-tabs-list,
+.form-tabs-sticky-up,
+.form-tabs-sticky-down {
+    position: sticky !important;
+    top: var(--eb-tabs-sticky-top, 134px) !important;
+    z-index: 5 !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.07) !important;
+    transition: top 0.12s ease, box-shadow 0.2s ease !important;
+    padding: 2px 8px 0 8px !important;
+    margin-bottom: 8px !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .form-tabs,
+[data-page-route^="Form"] .form-tabs-list .form-tabs,
+.form-tabs-list .form-tabs {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    gap: 4px !important;
+    border-bottom: none !important;
+    padding: 0 8px !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .form-tabs::-webkit-scrollbar,
+.form-tabs-list .form-tabs::-webkit-scrollbar {
+    display: none !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .nav-item,
+[data-page-route^="Form"] .form-tabs-list .nav-item,
+.form-tabs-list .nav-item {
+    white-space: nowrap !important;
+    list-style: none !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .nav-item .nav-link,
+[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link,
+.form-tabs-list .nav-item .nav-link {
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    padding: 10px 16px !important;
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+    border: none !important;
+    border-bottom: 2.5px solid transparent !important;
+    background: transparent !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
+[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
+.form-tabs-list .nav-item .nav-link:hover {
+    color: #0f172a !important;
+    background: rgba(13, 148, 136, 0.08) !important;
+}
+
+body[data-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
+[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
+.form-tabs-list .nav-item .nav-link.active {
+    color: #0d9488 !important;
+    font-weight: 700 !important;
+    background: rgba(13, 148, 136, 0.06) !important;
+    border-bottom: 2.5px solid #0d9488 !important;
+}
+
+/* Ensure document content cleanly passes behind sticky tabs */
+body[data-route^="Form"] .form-tab-content,
+[data-page-route^="Form"] .form-tab-content,
+.form-tab-content {
+    scroll-margin-top: calc(var(--eb-tabs-sticky-top, 134px) + 56px) !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] body[data-route^="Form"] .form-tabs-list,
+[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list,
+[data-theme="dark"] .form-tabs-list {
+    background: rgba(22, 27, 38, 0.96) !important;
+    border-bottom: 1.5px solid #334155 !important;
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link,
+[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link,
+[data-theme="dark"] .form-tabs-list .nav-item .nav-link {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
+[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
+[data-theme="dark"] .form-tabs-list .nav-item .nav-link:hover {
+    color: #f8fafc !important;
+    background: rgba(45, 212, 191, 0.12) !important;
+}
+
+[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
+[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
+[data-theme="dark"] .form-tabs-list .nav-item .nav-link.active {
+    color: #2dd4bf !important;
+    border-bottom: 2.5px solid #2dd4bf !important;
+    background: rgba(45, 212, 191, 0.08) !important;
+}
+
+/* ==========================================================================
    PORTAL & WEBPAGE PAGINATION (PREV & NEXT BUTTONS FIX)
    ========================================================================== */
 .pagination,

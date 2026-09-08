@@ -170,7 +170,39 @@ frappe.ui.force_vertical_layout = function () {
     if (window.initTitleToggle) {
         window.initTitleToggle();
     }
+
+    if (window.updateDocTabsStickyTop) {
+        window.updateDocTabsStickyTop();
+    }
 };
+
+// Calculate and dynamically lock form tabs below action buttons
+function updateDocTabsStickyTop() {
+    var isDoc = false;
+    try {
+        if (window.cur_frm && window.cur_frm.doc && window.cur_frm.docname) isDoc = true;
+        var r = (window.frappe && frappe.get_route) ? frappe.get_route() : [];
+        if (r && r[0] === 'Form') isDoc = true;
+        var dr = document.body ? (document.body.getAttribute('data-route') || '') : '';
+        if (dr.startsWith('Form')) isDoc = true;
+        if (window.location.pathname.includes('/Form/') || window.location.hash.includes('Form/')) isDoc = true;
+    } catch(e) {}
+
+    if (!isDoc) return;
+
+    var pageHead = document.querySelector('.page-head.eb-doc-head') || document.querySelector('.page-head');
+    if (!pageHead) return;
+
+    var navbar = document.querySelector('.navbar');
+    var navbarHeight = navbar ? navbar.offsetHeight : 48;
+    var headHeight = pageHead.offsetHeight || 84;
+    var stickyTop = navbarHeight + headHeight;
+
+    document.documentElement.style.setProperty('--eb-tabs-sticky-top', stickyTop + 'px');
+}
+
+window.updateDocTabsStickyTop = updateDocTabsStickyTop;
+window.addEventListener('resize', updateDocTabsStickyTop);
 
 // Run on page events
 $(document).on('page-change form-refresh form_refresh router:change', function () {
@@ -178,11 +210,14 @@ $(document).on('page-change form-refresh form_refresh router:change', function (
     setTimeout(frappe.ui.force_vertical_layout, 150);
     setTimeout(frappe.ui.force_vertical_layout, 600);
     setTimeout(frappe.ui.force_vertical_layout, 1500);
+    setTimeout(updateDocTabsStickyTop, 200);
+    setTimeout(updateDocTabsStickyTop, 700);
 });
 
 // Run immediately
 if (typeof frappe !== 'undefined' && frappe.ui) {
     if (!document.querySelector('.web-form')) {
         frappe.ui.force_vertical_layout();
+        setTimeout(updateDocTabsStickyTop, 100);
     }
 }
