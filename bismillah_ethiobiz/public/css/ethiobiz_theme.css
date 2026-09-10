@@ -2419,3 +2419,28 @@ body[data-route*="app"] .form-tabs-list .nav-link {
     opacity: 1 !important;
     visibility: visible !important;
 }
+
+/* ===== BISMALLAH 2026-09-10: Legible labels & edit-tool controls in dark mode ===== */
+[data-theme="dark"] body label,
+[data-theme="dark"] body .control-label,
+[data-theme="dark"] body label.control-label,
+[data-theme="dark"] body .form-section .section-head,
+[data-theme="dark"] body .field-group .label,
+[data-theme="dark"] body .frappe-control .label-area,
+[data-theme="dark"] body .section-head .section-title,
+[data-theme="dark"] body .section-head .section-head-label,
+[data-theme="dark"] body .editable-form label,
+[data-theme="dark"] body .static-area label,
+[data-theme="dark"] body .ql-toolbar button,
+[data-theme="dark"] body .ql-toolbar .ql-picker-label,
+[data-theme="dark"] body .ql-formats,
+[data-theme="dark"] body .ce-toolbar__settings-btn,
+[data-theme="dark"] body .ce-block__settings-button,
+[data-theme="dark"] body .desk-sidebar-item-label {
+    color: #e2e8f0 !important;
+}
+[data-theme="dark"] body label .text-muted,
+[data-theme="dark"] body .control-label .text-muted,
+[data-theme="dark"] body .form-section .section-head .text-muted {
+    color: #94a3b8 !important;
+}

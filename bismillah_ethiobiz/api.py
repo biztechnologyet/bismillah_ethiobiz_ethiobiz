@@ -694,6 +694,7 @@ def get_theme_settings():
             "favicon": getattr(theme, "favicon", "") or "",
             "website_icon": getattr(theme, "website_icon", "") or "",
             "desk_icon": getattr(theme, "desk_icon", "") or "",
+            "dark_label_color": getattr(theme, "dark_label_color", "") or "",
             "enable_background_images": has_bg,
             "enable_desk_bg_image": has_bg and bool(getattr(theme, "enable_desk_bg_image", 0)),
             "custom_desk_bg_image": getattr(theme, "custom_desk_bg_image", "") or "",

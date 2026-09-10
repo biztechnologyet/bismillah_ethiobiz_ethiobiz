@@ -98,6 +98,14 @@
         }
     };
 
+    // BISMALLAH (2026-09-10): custom icons from EthioBiz Theme Settings override
+    // the pillar/default logo. The default (fallback) logo is used ONLY when no
+    // custom icon is set, so updateLogo never reverts a configured icon.
+    let ethiobizCustomIcons = { website: '', desk: '' };
+
+    // BISMALLAH (2026-09-10): optional dark-mode label color from Theme Settings.
+    let ethiobizDarkLabelColor = '';
+
     class BrandManager {
         constructor() {
             this.currentPillar = BRAND_CONFIG.default;
@@ -294,10 +302,17 @@
 
         updateLogo(src, alt) {
             const selectors = ['.navbar-brand img', '.app-logo', '#navbar-logo'];
+            const isDesk = !!(document.body &&
+                (document.body.classList.contains('desk-page') ||
+                 document.querySelector('.desk-sidebar') ||
+                 document.querySelector('.layout-side-section')));
+            // BISMALLAH: a configured Theme icon wins over the pillar/default logo.
+            const custom = isDesk ? ethiobizCustomIcons.desk : ethiobizCustomIcons.website;
+            const effectiveSrc = custom || src;
             selectors.forEach(sel => {
                 document.querySelectorAll(sel).forEach(img => {
                     if (img.closest('.pillar-icon, .sub-icon, .detail-logo, .footer-brand, .legacy-image, .hero-logo, .loader-logo, .pillar-card, .sub-system-card, .final-cta, .detail-image, .hero-content, .ethiobiz-landing, #loading-screen')) return;
-                    img.src = src;
+                    img.src = effectiveSrc;
                     img.alt = alt;
                     img.style.maxHeight = '35px';
                 });
@@ -435,6 +450,9 @@
         if (!s) s = window.__ethiobizThemeSettings || {};
         var websiteIcon = s.website_icon || s.favicon || '';
         var deskIcon = s.desk_icon || '';
+        // BISMALLAH: remember configured icons so updateLogo keeps them.
+        ethiobizCustomIcons.website = websiteIcon;
+        ethiobizCustomIcons.desk = deskIcon;
         var isDesk = !!(document.body &&
             (document.body.classList.contains('desk-page') ||
              document.querySelector('.desk-sidebar') ||
@@ -472,10 +490,38 @@
 
     window.EthioBizBrandManager = new BrandManager();
 
+    // ─── Optional dark-mode label color from Theme Settings ───────────────
+    function applyThemeDarkLabel(s) {
+        if (!s) s = window.__ethiobizThemeSettings || {};
+        ethiobizDarkLabelColor = s.dark_label_color || '';
+        if (!document.head || !document.body) return;
+        const BUILDERSEL = [
+            '.control-label', 'label.control-label', '.form-section .section-head',
+            '.field-group .label', '.frappe-control .label-area',
+            '.section-head .section-title', '.page-head .title-text',
+            '.form-section .section-head .section-head-label',
+            '.ql-toolbar button, .ql-toolbar .ql-picker-label',
+            '.ce-toolbar__actions, .ce-block__settings-button',
+            '.desk-sidebar .desk-sidebar-item-label, .desk-sidebar-item-label'
+        ].join(',\n');
+        let styleEl = document.getElementById('ethiobiz-label-styles');
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'ethiobiz-label-styles';
+            document.head.appendChild(styleEl);
+        }
+        if (ethiobizDarkLabelColor) {
+            styleEl.textContent = `[data-theme="dark"] body ${BUILDERSEL} { color: ${ethiobizDarkLabelColor} !important; }\n[data-theme="dark"] body ${BUILDERSEL} .text-muted { color: ${ethiobizDarkLabelColor} !important; }`;
+        } else {
+            styleEl.textContent = '';
+        }
+    }
+
     // Fetch settings first, then init so updateBackground has correct flags
     fetchAndCacheThemeSettings(function(s) {
         window.EthioBizBrandManager.init();
         applyThemeIcons(s);
+        applyThemeDarkLabel(s);
     });
 
     // Desk content mounts asynchronously — retry icon override briefly

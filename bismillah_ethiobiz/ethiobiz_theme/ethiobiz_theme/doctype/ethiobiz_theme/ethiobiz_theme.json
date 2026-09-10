@@ -64,6 +64,33 @@
             "default": "Powered by Biz Technology Solutions"
         },
         {
+            "fieldname": "section_icons",
+            "fieldtype": "Section Break",
+            "label": "Icons & Desk Branding"
+        },
+        {
+            "fieldname": "website_icon",
+            "fieldtype": "Attach Image",
+            "label": "Website Icon",
+            "description": "Shown in the website navbar and as the browser-tab favicon. Leave empty to keep the default EthioBiz icon."
+        },
+        {
+            "fieldname": "column_break_icons",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "desk_icon",
+            "fieldtype": "Attach Image",
+            "label": "Desk Icon",
+            "description": "Shown at the top-left of the Desk (main brand icon). Leave empty to keep the default EthioBiz icon."
+        },
+        {
+            "fieldname": "dark_label_color",
+            "fieldtype": "Color",
+            "label": "Dark Mode Label Color",
+            "description": "Color for labels and edit-tool controls when dark mode is ON. Leave empty for automatic light labels."
+        },
+        {
             "fieldname": "section_backgrounds",
             "fieldtype": "Section Break",
             "label": "Atmospheric Background & Engine"
@@ -285,6 +312,18 @@
             "fieldtype": "Code",
             "label": "Custom CSS Overrides",
             "options": "CSS"
+        },
+        {
+            "fieldname": "section_floating_widget",
+            "fieldtype": "Section Break",
+            "label": "Website Floating Widget (Bottom-Left CTAs)"
+        },
+        {
+            "fieldname": "floating_action_items",
+            "fieldtype": "Table",
+            "label": "Floating Action Items",
+            "options": "EthioBiz Floating Action Item",
+            "description": "Manage dynamic call-to-actions displayed when clicking the bottom-left floating butterfly on the website."
         }
     ],
     "index_loggable": 0,
