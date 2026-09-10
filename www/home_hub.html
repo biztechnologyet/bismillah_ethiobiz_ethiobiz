@@ -1,0 +1,238 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz.et — Ethiopia's Enterprise Cloud & Digital Super-Ecosystem{% endblock %}
+
+{% block header %}
+<style>
+    .ethio-hero {
+        background: linear-gradient(135deg, #093a3e 0%, #008080 60%, #0284c7 100%);
+        color: #ffffff;
+        padding: 60px 20px 50px 20px;
+        border-radius: 20px;
+        margin-bottom: 35px;
+        box-shadow: 0 10px 30px rgba(0,128,128,0.25);
+    }
+    .hero-search-box {
+        max-width: 650px;
+        margin: 25px auto 0 auto;
+        position: relative;
+    }
+    .hero-search-input {
+        height: 54px;
+        border-radius: 30px;
+        padding-left: 24px;
+        padding-right: 140px;
+        font-size: 16px;
+        border: none;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .hero-search-btn {
+        position: absolute;
+        right: 6px;
+        top: 6px;
+        height: 42px;
+        border-radius: 25px;
+        background: #008080;
+        color: white;
+        border: none;
+        padding: 0 24px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+    .hero-search-btn:hover {
+        background: #0f766e;
+    }
+    .service-module-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px 20px;
+        text-align: center;
+        transition: all 0.25s ease;
+        text-decoration: none !important;
+        display: block;
+        height: 100%;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    }
+    .service-module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,128,128,0.12);
+        border-color: #008080;
+    }
+    .service-icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #f0fdfa;
+        color: #008080;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px auto;
+    }
+    .section-title-wrap {
+        margin-bottom: 24px;
+    }
+    .section-title-wrap h3 {
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+    .pulse-post-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container my-4">
+    <!-- Hero Banner & Unified Search -->
+    <div class="ethio-hero text-center">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-weight-bold mb-3">🇪🇹 ETHIOPIA'S CLOUD SUPER-ECOSYSTEM</span>
+        <h1 class="display-4 font-weight-bold mb-3">One Platform. All of Ethiopian Business.</h1>
+        <p class="lead mb-0 text-white-50" style="font-size: 18px;">E-Commerce • Service Bookings • Hotel & Real Estate PMS • Social Community • Learning & ERP</p>
+        
+        <div class="hero-search-box">
+            <input type="text" class="form-control hero-search-input" id="omni-search" placeholder="Search products, hotel rooms, doctors, salons, courses...">
+            <button class="hero-search-btn" onclick="executeSearch()">Explore</button>
+        </div>
+    </div>
+
+    <!-- Core Hub Portals Grid -->
+    <div class="section-title-wrap text-center">
+        <h3>🚀 Explore EthioBiz Super-Hubs</h3>
+        <p class="text-muted">Direct access to all business verticals, marketplaces, and operational suites.</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- 1. MagalaShop -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/shop" class="service-module-card">
+                <div class="service-icon-circle">🛍️</div>
+                <h5 class="font-weight-bold text-dark mb-1">MagalaShop</h5>
+                <p class="text-muted mb-0 small">E-commerce marketplace, retail shopping cart, & instant Telebirr delivery.</p>
+            </a>
+        </div>
+
+        <!-- 2. Map View -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/map" class="service-module-card">
+                <div class="service-icon-circle">🗺️</div>
+                <h5 class="font-weight-bold text-dark mb-1">Business Map</h5>
+                <p class="text-muted mb-0 small">Interactive GPS map of verified companies, restaurants, & hotels across Ethiopia.</p>
+            </a>
+        </div>
+
+        <!-- 3. BizBooking -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/book" class="service-module-card">
+                <div class="service-icon-circle">⚡</div>
+                <h5 class="font-weight-bold text-dark mb-1">BizBooking</h5>
+                <p class="text-muted mb-0 small">Unified reservation engine for Hotels, Salons, Medical Clinics, & Viewings.</p>
+            </a>
+        </div>
+
+        <!-- 4. AFOCHA Social -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/afocha" class="service-module-card">
+                <div class="service-icon-circle">🌟</div>
+                <h5 class="font-weight-bold text-dark mb-1">AFOCHA Social</h5>
+                <p class="text-muted mb-0 small">Community network, verified business stories, reviews, and market updates.</p>
+            </a>
+        </div>
+
+        <!-- 5. Dagu LMS -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/courses" class="service-module-card">
+                <div class="service-icon-circle">🎓</div>
+                <h5 class="font-weight-bold text-dark mb-1">Dagu Academy</h5>
+                <p class="text-muted mb-0 small">Enterprise courses, certified vocational training, and career certifications.</p>
+            </a>
+        </div>
+
+        <!-- 6. DOBiz Enterprise ERP -->
+        <div class="col-6 col-md-4 col-lg-4">
+            <a href="/app" class="service-module-card">
+                <div class="service-icon-circle">💼</div>
+                <h5 class="font-weight-bold text-dark mb-1">DOBiz Cloud ERP</h5>
+                <p class="text-muted mb-0 small">Accounting, HR Payroll, Inventory, Hotel PMS, CRM, & POS Desk portal.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Social Pulse Section -->
+    <div class="row mb-5">
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="font-weight-bold mb-0">🌟 Live AFOCHA Community Pulse</h4>
+                <a href="/afocha" class="btn btn-outline-secondary btn-sm rounded-pill">View All Posts &rarr;</a>
+            </div>
+            <div id="home-social-pulse">
+                <div class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary"></div> Loading live updates...</div>
+            </div>
+        </div>
+
+        <!-- Quick Booking Widget -->
+        <div class="col-lg-5">
+            <div class="p-4 bg-light rounded-4 border">
+                <h4 class="font-weight-bold mb-2">⚡ Quick BizBooking</h4>
+                <p class="text-muted small mb-3">Book appointments and reserve assets instantly.</p>
+                <div class="d-grid gap-2">
+                    <a href="/book" class="btn btn-outline-dark text-start py-2 px-3 font-weight-bold rounded-3">🏨 Reserve a Hotel Room</a>
+                    <a href="/book" class="btn btn-outline-dark text-start py-2 px-3 font-weight-bold rounded-3">✂️ Book Salon Chair or Stylist</a>
+                    <a href="/book" class="btn btn-outline-dark text-start py-2 px-3 font-weight-bold rounded-3">🏥 Schedule Doctor Appointment</a>
+                    <a href="/book" class="btn btn-outline-dark text-start py-2 px-3 font-weight-bold rounded-3">🏢 Schedule Real Estate Viewing</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function executeSearch() {
+    const q = document.getElementById('omni-search').value.trim();
+    if (q) {
+        window.location.href = '/shop?search=' + encodeURIComponent(q);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Load top 3 social posts
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed?limit=3')
+        .then(res => res.json())
+        .then(res => {
+            const container = document.getElementById('home-social-pulse');
+            container.innerHTML = '';
+            const posts = res.message ? res.message.posts : [];
+            if (!posts || posts.length === 0) {
+                container.innerHTML = '<p class="text-muted">No posts available.</p>';
+                return;
+            }
+
+            posts.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'pulse-post-card';
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="font-weight-bold text-dark">${p.author_name} ${p.is_verified ? '<span class="text-primary">✓</span>' : ''}</span>
+                        <span class="badge bg-light text-dark">${p.category_tag}</span>
+                    </div>
+                    <p class="mb-2 text-dark small">${p.content.length > 120 ? p.content.substring(0, 120) + '...' : p.content}</p>
+                    <div class="d-flex gap-3 text-muted small">
+                        <span>❤️ ${p.likes_count || 0} Likes</span>
+                        <span>💬 ${p.comments_count || 0} Comments</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(err => console.error(err));
+});
+</script>
+{% endblock %}

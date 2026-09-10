@@ -1,0 +1,14 @@
+{
+  "name": "EthioBiz Ads Settings",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "issingle": 1,
+  "fields": [
+    {"fieldname": "ads_enabled", "fieldtype": "Check", "label": "Enable Ads System", "default": 1},
+    {"fieldname": "house_ad_image", "fieldtype": "Attach Image", "label": "Default House Ad Image"},
+    {"fieldname": "house_ad_url", "fieldtype": "Data", "label": "Default House Ad URL", "options": "URL"},
+    {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company"},
+    {"fieldname": "impression_rate_limit", "fieldtype": "Int", "label": "Max Impressions per IP/hour", "default": 100}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1}]
+}

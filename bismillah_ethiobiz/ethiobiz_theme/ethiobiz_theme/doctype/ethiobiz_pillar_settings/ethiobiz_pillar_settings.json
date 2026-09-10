@@ -1,0 +1,41 @@
+{
+    "name": "EthioBiz Pillar Settings",
+    "module": "EthioBiz Theme",
+    "custom": 1,
+    "docstatus": 0,
+    "doctype": "DocType",
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "pillar_name",
+            "fieldtype": "Data",
+            "label": "Pillar Name",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "workspaces",
+            "fieldtype": "Small Text",
+            "label": "Associated Workspaces",
+            "description": "Comma separated list of Workspaces that trigger this pillar (e.g. Selling, CRM, My Custom Workspace)"
+        },
+        {
+            "fieldname": "primary_color",
+            "fieldtype": "Color",
+            "label": "Primary Color",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "supporting_color",
+            "fieldtype": "Color",
+            "label": "Supporting Color"
+        },
+        {
+            "fieldname": "pillar_logo",
+            "fieldtype": "Attach Image",
+            "label": "Pillar Logo"
+        }
+    ],
+    "permissions": []
+}

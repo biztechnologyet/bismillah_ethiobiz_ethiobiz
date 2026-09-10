@@ -1,0 +1,22 @@
+[
+ {
+  "doctype_or_field": "DocField",
+  "doc_type": "Employee",
+  "field_name": "passport_detail",
+  "property": "label",
+  "property_type": "Data",
+  "value": "ID Detail",
+  "doctype": "Property Setter",
+  "name": "Employee-passport_detail-label"
+ },
+ {
+  "doctype_or_field": "DocField",
+  "doc_type": "Employee",
+  "field_name": "insurance_section",
+  "property": "hidden",
+  "property_type": "Check",
+  "value": "1",
+  "doctype": "Property Setter",
+  "name": "Employee-insurance_section-hidden"
+ }
+]

@@ -1,0 +1,11 @@
+{
+  "name": "Salon Appointment Service",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "istable": 1,
+  "fields": [
+    {"fieldname": "salon_service", "fieldtype": "Link", "label": "Service", "options": "Salon Service", "reqd": 1, "in_list_view": 1},
+    {"fieldname": "amount", "fieldtype": "Currency", "label": "Amount (ETB)", "in_list_view": 1, "read_only": 1}
+  ],
+  "permissions": []
+}

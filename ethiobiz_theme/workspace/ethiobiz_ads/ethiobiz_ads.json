@@ -1,0 +1,79 @@
+ {
+  "charts": [],
+  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"EthioBiz Ads Overview\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ads Settings\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ad Campaign\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ad Slot\",\"col\":4}},{\"type\":\"header\",\"data\":{\"text\":\"Campaign Management\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ad Campaign\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EthioBiz Ad Slot\",\"col\":4}},{\"type\":\"header\",\"data\":{\"text\":\"Number Cards\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Ad Campaigns\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Available Ad Slots\",\"col\":4}}]",
+  "creation": "2026-08-27 10:00:00.000000",
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "idx": 0,
+  "label": "EthioBiz Ads",
+  "links": [
+   {
+    "label": "EthioBiz Ads Settings",
+    "link_to": "EthioBiz Ads Settings",
+    "link_type": "DocType",
+    "type": "Link"
+   },
+   {
+    "label": "EthioBiz Ad Campaign",
+    "link_to": "EthioBiz Ad Campaign",
+    "link_type": "DocType",
+    "type": "Link"
+   },
+   {
+    "label": "EthioBiz Ad Slot",
+    "link_to": "EthioBiz Ad Slot",
+    "link_type": "DocType",
+    "type": "Link"
+   }
+  ],
+  "modified": "2026-08-27 12:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Ethiobiz Theme",
+  "name": "EthioBiz Ads",
+  "owner": "Administrator",
+  "public": 1,
+  "quick_lists": [
+   {
+    "document_type": "EthioBiz Ad Campaign",
+    "label": "EthioBiz Ad Campaigns"
+   },
+   {
+    "document_type": "EthioBiz Ad Slot",
+    "label": "EthioBiz Ad Slots"
+   }
+  ],
+  "roles": [
+   {
+    "role": "System Manager"
+   },
+   {
+    "role": "Administrator"
+   }
+  ],
+  "shortcuts": [
+   {
+    "label": "EthioBiz Ads Settings",
+    "link_to": "EthioBiz Ads Settings",
+    "type": "DocType"
+   },
+   {
+    "label": "EthioBiz Ad Campaign",
+    "link_to": "EthioBiz Ad Campaign",
+    "type": "DocType"
+   },
+   {
+    "label": "EthioBiz Ad Slot",
+    "link_to": "EthioBiz Ad Slot",
+    "type": "DocType"
+   }
+  ],
+  "number_cards": [
+   {
+    "number_card_name": "Active Ad Campaigns"
+   },
+   {
+    "number_card_name": "Available Ad Slots"
+   }
+  ],
+  "title": "EthioBiz Ads"
+ }

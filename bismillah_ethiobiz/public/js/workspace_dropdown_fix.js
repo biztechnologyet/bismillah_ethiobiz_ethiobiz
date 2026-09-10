@@ -36,6 +36,67 @@
         document.querySelectorAll('.sidebar-item, .standard-sidebar-item').forEach(item => {
             item.style.setProperty('overflow', 'visible', 'important');
         });
+
+        repositionMobileDropdowns();
+    }
+
+    // MOBILE DROPDOWN REPOSITION (additive, 2026-09-10)
+    // On mobile (<768px) Bootstrap/Popper places some desk menus off-screen or
+    // mis-aligned, so this pins every open menu below its toggle button,
+    // right-aligned and clamped inside the viewport. Desktop is untouched.
+    function repositionMobileDropdowns() {
+        if (window.innerWidth > 768) return;
+        var vw = document.documentElement.clientWidth || window.innerWidth;
+        var vh = document.documentElement.clientHeight || window.innerHeight;
+        var PAD = 8;
+
+        document.querySelectorAll('.dropdown-menu.show').forEach(function (menu) {
+            if (menu.closest('.navbar')) return;
+
+            var toggle = (function () {
+                var grp = menu.closest('.menu-btn-group, .actions-btn-group, .dropdown, .btn-group');
+                if (grp) {
+                    var t = grp.querySelector('[data-toggle="dropdown"]') || grp.querySelector('button, .btn');
+                    if (t) return t;
+                }
+                var prev = menu.previousElementSibling;
+                if (prev && prev.matches('button, .btn')) return prev;
+                return null;
+            })();
+            if (!toggle) return;
+
+            var tr = toggle.getBoundingClientRect();
+            var mr = menu.getBoundingClientRect();
+            var menuW = Math.min(mr.width, vw - PAD * 2);
+            var menuH = mr.height;
+
+            if (menuW < mr.width) {
+                menu.style.setProperty('max-width', menuW + 'px', 'important');
+            }
+
+            var rightAlign = menu.classList.contains('dropdown-menu-right') || (tr.left + menuW > vw - PAD);
+            var left = rightAlign ? Math.max(PAD, tr.right - menuW) : Math.max(PAD, tr.left);
+            left = Math.min(left, vw - menuW - PAD);
+
+            var top = tr.bottom + 6;
+            if (top + menuH > vh - PAD) {
+                top = Math.max(PAD, tr.top - menuH - 6);
+            }
+
+            var op = menu.offsetParent;
+            if (op) {
+                var or = op.getBoundingClientRect();
+                menu.style.setProperty('top', Math.round(top - or.top) + 'px', 'important');
+                menu.style.setProperty('left', Math.round(left - or.left) + 'px', 'important');
+            } else {
+                menu.style.setProperty('top', Math.round(top + window.scrollY) + 'px', 'important');
+                menu.style.setProperty('left', Math.round(left + window.scrollX) + 'px', 'important');
+            }
+
+            menu.style.setProperty('position', 'absolute', 'important');
+            menu.style.setProperty('transform', 'none', 'important');
+            menu.style.setProperty('will-change', 'auto', 'important');
+        });
     }
 
     // Run on DOM ready

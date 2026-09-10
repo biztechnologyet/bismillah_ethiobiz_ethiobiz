@@ -1,0 +1,266 @@
+{% extends "templates/web.html" %}
+
+{% block title %}DOBiz Subscription Payment & Verification | EthioBiz{% endblock %}
+
+{% block head_include %}
+<style>
+    /* Entire Page Fixed Seamless Gradient */
+    html, body, #page-container, .page-content, main, .main-section, .web-page-container {
+        background: radial-gradient(circle at 15% 15%, rgba(13, 148, 136, 0.4) 0%, rgba(7, 42, 46, 0.95) 45%, #031c1f 100%), linear-gradient(180deg, #072a2e 0%, #031c1f 100%) !important;
+        background-attachment: fixed !important;
+        min-height: 100vh !important;
+        color: #0f172a;
+    }
+
+    .dob-pay-container {
+        max-width: 720px;
+        margin: 40px auto 80px auto;
+        padding: 0 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .dob-pay-card {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 24px;
+        padding: 36px 28px;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+    .dob-pay-header {
+        text-align: center;
+        margin-bottom: 22px;
+    }
+    .dob-pay-title {
+        font-size: 24px !important;
+        font-weight: 900 !important;
+        color: #072a2e !important;
+        margin-bottom: 6px;
+    }
+    .dob-pay-subtitle {
+        font-size: 14.5px !important;
+        color: #475569 !important;
+    }
+    .dob-spam-notice {
+        background: #fffbeb !important;
+        border: 1.5px solid #fde68a !important;
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #92400e !important;
+        font-size: 13px !important;
+    }
+    .dob-bank-box {
+        background: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 24px;
+    }
+    .dob-bank-title {
+        font-size: 13.5px !important;
+        font-weight: 900 !important;
+        color: #008080 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+    .dob-bank-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13.5px !important;
+        padding: 8px 0;
+        border-bottom: 1px dashed #cbd5e1;
+    }
+    .dob-bank-row:last-child { border-bottom: none; }
+    .dob-bank-row span {
+        color: #1e293b !important;
+        font-weight: 700;
+    }
+    .dob-bank-row strong {
+        font-family: monospace !important;
+        font-size: 15.5px !important;
+        color: #008080 !important;
+        font-weight: 900;
+    }
+    .dob-pay-form-group {
+        margin-bottom: 16px;
+    }
+    .dob-pay-label {
+        font-size: 13.5px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        display: block;
+        margin-bottom: 6px;
+    }
+    .dob-pay-input {
+        width: 100%;
+        height: 46px;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 14.5px !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+        outline: none;
+        box-sizing: border-box;
+        transition: all 0.2s;
+    }
+    .dob-pay-input:focus {
+        border-color: #008080 !important;
+        box-shadow: 0 0 0 3px rgba(0,128,128,0.18) !important;
+    }
+    .dob-pay-btn {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%) !important;
+        color: #ffffff !important;
+        border: none;
+        width: 100%;
+        padding: 15px;
+        border-radius: 22px;
+        font-size: 16px !important;
+        font-weight: 900 !important;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 16px rgba(0,128,128,0.3);
+        margin-top: 10px;
+    }
+    .dob-pay-btn:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%) !important;
+    }
+    #dob-pay-success {
+        display: none;
+        text-align: center;
+        padding: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="dob-pay-container">
+    <div class="dob-pay-card">
+        <div class="dob-pay-header">
+            <div style="font-size: 40px; margin-bottom: 8px;">💳</div>
+            <h1 class="dob-pay-title">Submit Subscription Payment Slip</h1>
+            <p class="dob-pay-subtitle">Upload your bank receipt to verify your DOBiz Enterprise account settlement.</p>
+        </div>
+
+        <div class="dob-spam-notice">
+            <span style="font-size: 18px;">📬</span>
+            <span><strong>Check Spam Folder:</strong> Your updated credentials will be dispatched to your email. If you don't see it, check your <strong>Spam / Junk folder</strong>.</span>
+        </div>
+
+        <div class="dob-bank-box">
+            <div class="dob-bank-title">Verified Settlement Accounts (Account Holder: Hadi Awad)</div>
+            <div class="dob-bank-row">
+                <span>Commercial Bank of Ethiopia (CBE)</span>
+                <strong>1000236131606</strong>
+            </div>
+            <div class="dob-bank-row">
+                <span>Telebirr SuperApp</span>
+                <strong>+251 98 676 7576</strong>
+            </div>
+            <div class="dob-bank-row">
+                <span>Bank of Abyssinia (BoA)</span>
+                <strong>94784891</strong>
+            </div>
+        </div>
+
+        <form id="dob-payment-form">
+            <div class="dob-pay-form-group">
+                <label class="dob-pay-label">Signup Reference Token *</label>
+                <input type="text" class="dob-pay-input" id="dob-pay-token" placeholder="e.g. DOB-2026-AB12CD" required>
+            </div>
+
+            <div class="dob-pay-form-group">
+                <label class="dob-pay-label">Bank Transaction Reference / Slip ID *</label>
+                <input type="text" class="dob-pay-input" id="dob-pay-ref" placeholder="e.g. FT2608129038" required>
+            </div>
+
+            <div class="dob-pay-form-group">
+                <label class="dob-pay-label">Settlement Bank Channel *</label>
+                <select class="dob-pay-input" id="dob-pay-bank">
+                    <option value="Commercial Bank of Ethiopia">Commercial Bank of Ethiopia (CBE - 1000236131606)</option>
+                    <option value="Telebirr">Telebirr (+251986767576)</option>
+                    <option value="Bank of Abyssinia">Bank of Abyssinia (BoA - 94784891)</option>
+                    <option value="Other">Other Bank Channel</option>
+                </select>
+            </div>
+
+            <button type="submit" class="dob-pay-btn" id="dob-pay-submit-btn">Submit Proof For Verification &rarr;</button>
+        </form>
+
+        <div id="dob-pay-success">
+            <div style="font-size: 48px; margin-bottom: 8px;">✅</div>
+            <h2 style="color: #008080; font-size: 22px; font-weight: 800;">Receipt Submitted Successfully!</h2>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Your settlement slip has been logged. Your enterprise account has been verified.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <a href="/login" class="dob-pay-btn" style="display: inline-block; text-decoration: none; padding: 10px 24px; font-size: 13.5px; width: auto;">Proceed to Login &rarr;</a>
+                <a href="https://ethiobiz.et/lms/courses/dobiz-smart-erp-system-user-guide" target="_blank" class="dob-pay-btn" style="background: #072a2e !important; display: inline-block; text-decoration: none; padding: 10px 24px; font-size: 13.5px; width: auto;">User Guide & Tutorials</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Read ?ref=... parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('ref');
+    if (token) {
+        const tokenInput = document.getElementById('dob-pay-token');
+        if (tokenInput) tokenInput.value = token;
+    }
+
+    const form = document.getElementById('dob-payment-form');
+    const submitBtn = document.getElementById('dob-pay-submit-btn');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const tokenVal = document.getElementById('dob-pay-token').value.trim();
+            const refVal = document.getElementById('dob-pay-ref').value.trim();
+            const bankVal = document.getElementById('dob-pay-bank').value;
+
+            if (!tokenVal || !refVal) {
+                alert('Please enter your Signup Reference and Bank Transaction ID.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying Settlement...';
+
+            fetch('/api/method/bizmarketing.api.dobiz_signup_api.upload_payment_proof', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    signup_ref: tokenVal,
+                    payment_ref: refVal,
+                    bank_name: bankVal
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Proof For Verification →';
+
+                if (res.message && res.message.success) {
+                    form.style.display = 'none';
+                    document.getElementById('dob-pay-success').style.display = 'block';
+                } else {
+                    alert(res.exc || (res.message && res.message.error) || 'Could not verify reference token.');
+                }
+            })
+            .catch(err => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Proof For Verification →';
+                console.error(err);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    }
+})();
+</script>
+{% endblock %}

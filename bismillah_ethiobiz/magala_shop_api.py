@@ -99,7 +99,7 @@ def search_products(query="", category=None, company=None, region=None,
             item.item_group,
             item.company,
             item.description,
-            COALESCE(wi.website_image, wi.thumbnail, item.image) as image,
+            item.image,
             item.product_video_url,
             COALESCE(item.average_product_rating, 5.0) as rating,
             COALESCE(item.total_product_reviews, 0) as total_reviews,
@@ -110,7 +110,6 @@ def search_products(query="", category=None, company=None, region=None,
             c.longitude as seller_lng,
             c.location_address as seller_address
         FROM `tabItem` item
-        LEFT JOIN `tabWebsite Item` wi ON wi.item_code = item.name
         LEFT JOIN `tabItem Group` ig ON ig.name = item.item_group
         LEFT JOIN `tabItem Price` ip ON ip.item_code = item.name AND ip.price_list = 'Standard Selling' AND ip.selling = 1
         LEFT JOIN `tabCompany` c ON c.name = item.company
@@ -127,7 +126,6 @@ def search_products(query="", category=None, company=None, region=None,
     count_sql = f"""
         SELECT COUNT(*)
         FROM `tabItem` item
-        LEFT JOIN `tabWebsite Item` wi ON wi.item_code = item.name
         LEFT JOIN `tabItem Group` ig ON ig.name = item.item_group
         LEFT JOIN `tabItem Price` ip ON ip.item_code = item.name AND ip.price_list = 'Standard Selling' AND ip.selling = 1
         WHERE {where_sql}
@@ -136,11 +134,6 @@ def search_products(query="", category=None, company=None, region=None,
 
     # Format gallery and stock status
     for it in items:
-        if not it.get("image"):
-            # Check attached files for this item or website item
-            attached = frappe.db.get_value("File", {"attached_to_name": it["item_code"], "is_private": 0}, "file_url")
-            if attached:
-                it["image"] = attached
         if not it.get("image"):
             it["image"] = it.get("company_logo") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png"
         it["formatted_price"] = f"{flt(it['price']):,.2f} ETB"

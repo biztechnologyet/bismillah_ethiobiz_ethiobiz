@@ -1,0 +1,84 @@
+{% extends "templates/web.html" %}
+
+{% block title %}EthioBiz Ride — On-Demand Hyperlocal Delivery, Courier & Logistics{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=3.0.0" />
+
+<div class="vertical-portal-wrapper">
+    <div class="ride-layout-grid">
+        <!-- LEFT DISPATCH & FARE ESTIMATOR SIDEBAR -->
+        <aside class="ride-planner-card">
+            <span class="hero-badge">🚚 BizRide Express Logistics</span>
+            <h2 class="font-weight-bold mb-2">Book Fast Courier & Rides</h2>
+            <p class="text-muted mb-4" style="font-size:0.9rem;">Instant dispatch to nearby Bajaj, Motorcycle, Car, or Truck couriers across Ethiopia.</p>
+
+            <!-- TRIP FORM -->
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold">📍 Pickup Location:</label>
+                <div class="d-flex gap-2">
+                    <input type="text" id="ride-pickup-input" class="form-control-custom" value="Bole Medhanialem, Addis Ababa" />
+                    <button id="btn-ride-gps" class="btn-geo-action" title="Use GPS">📍 GPS</button>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label font-weight-bold">🏁 Delivery Destination:</label>
+                <input type="text" id="ride-drop-input" class="form-control-custom" value="Kazanchis Commercial Hub, Addis Ababa" />
+            </div>
+
+            <!-- VEHICLE FLEET TIERS -->
+            <label class="form-label font-weight-bold mb-2">Select Vehicle Type:</label>
+            <div class="vehicle-tier-list">
+                <div class="vehicle-tier-card active" data-vehicle="Motorbike">
+                    <span class="v-icon">🏍️</span>
+                    <div class="v-info">
+                        <strong>Motorcycle Courier</strong>
+                        <span>Fastest for documents & food (15 mins)</span>
+                    </div>
+                    <span class="v-price" id="price-motorbike">60.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Bajaj">
+                    <span class="v-icon">🛺</span>
+                    <div class="v-info">
+                        <strong>Bajaj Express</strong>
+                        <span>Affordable short distance (20 mins)</span>
+                    </div>
+                    <span class="v-price" id="price-bajaj">50.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Car">
+                    <span class="v-icon">🚗</span>
+                    <div class="v-info">
+                        <strong>Standard Car / Van</strong>
+                        <span>Comfort rides & fragile parcels</span>
+                    </div>
+                    <span class="v-price" id="price-car">100.00 ETB</span>
+                </div>
+                <div class="vehicle-tier-card" data-vehicle="Truck">
+                    <span class="v-icon">🚚</span>
+                    <div class="v-info">
+                        <strong>Pickup / Cargo Truck</strong>
+                        <span>Heavy appliances, furniture & bulk</span>
+                    </div>
+                    <span class="v-price" id="price-truck">250.00 ETB</span>
+                </div>
+            </div>
+
+            <button id="btn-request-ride" class="btn-vertical-primary w-100 py-3 mt-4">🚀 Request Instant Dispatch</button>
+            
+            <div id="ride-status-box" class="ride-status-box" style="display:none; margin-top:16px;">
+                <!-- Live trip broadcast & OTP details -->
+            </div>
+        </aside>
+
+        <!-- RIGHT LEAFLET ROUTE MAP CANVAS -->
+        <main class="ride-map-container">
+            <div id="bizride-leaflet-map" class="ride-leaflet-map"></div>
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizride.js?v=3.0.0"></script>
+{% endblock %}

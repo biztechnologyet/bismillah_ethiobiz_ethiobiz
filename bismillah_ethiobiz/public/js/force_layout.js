@@ -99,7 +99,7 @@ frappe.ui.force_vertical_layout = function () {
             headContent.style.setProperty('width', '100%', 'important');
             headContent.style.setProperty('max-width', '100%', 'important');
             headContent.style.setProperty('box-sizing', 'border-box', 'important');
-            headContent.style.setProperty('overflow', 'hidden', 'important');
+            headContent.style.setProperty('overflow', 'visible', 'important');
             headContent.style.setProperty('gap', '4px', 'important');
             headContent.style.setProperty('padding', '8px 16px 6px', 'important');
         }

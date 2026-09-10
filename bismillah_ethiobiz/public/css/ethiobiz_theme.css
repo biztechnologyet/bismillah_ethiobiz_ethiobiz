@@ -2344,4 +2344,62 @@ body[data-route^="Form"] .form-tab-content,
 
 body.sidebar-opened .workspace-sidebar-backdrop {
     display: block;
+}/* ==========================================================================
+   PERMANENT DROPDOWN-LAYER FIX (applied 2026-09-10, additive-only)
+   Goal: any "..." overflow menu paints ABOVE page content below it.
+   Scope: stacking/layer + overflow-visible only. It touches NO existing rule,
+   so the title bar, header layout, spacing and tabs keep rendering exactly
+   as before. Backups: ethiobiz.et --with-files (2026-09-10 16:51) + this
+   file .bak.20260910.
+   ========================================================================== */
+
+:root {
+    --eb-z-content: 1;
+    --eb-z-header: 1000;
+    --eb-z-actions: 1001;
+    --eb-z-dropdown: 1200;
+}
+
+.page-head {
+    position: sticky !important;
+    z-index: var(--eb-z-header) !important;
+    overflow: visible !important;
+}
+
+.page-head .page-actions,
+.page-head .page-secondary-actions {
+    position: relative !important;
+    z-index: var(--eb-z-actions) !important;
+    overflow: visible !important;
+}
+
+.page-container .page-body,
+.page-body,
+.layout-main,
+.layout-main-section,
+.page-form,
+.standard-filter-section,
+.frappe-list {
+    position: relative !important;
+    z-index: var(--eb-z-content) !important;
+}
+
+.frappe-list .list-toolbar,
+.frappe-list .list-header,
+.frappe-list .list-row-actions,
+.frappe-list .list-row .row-actions {
+    position: relative !important;
+    z-index: var(--eb-z-actions) !important;
+    overflow: visible !important;
+}
+
+.dropdown-menu {
+    z-index: var(--eb-z-dropdown) !important;
+}
+
+.page-head,
+.page-head .page-head-content,
+.page-actions,
+.btn-group {
+    overflow: visible !important;
 }

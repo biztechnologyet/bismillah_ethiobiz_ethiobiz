@@ -1,0 +1,116 @@
+ {
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Salon & Spa Hub Overview\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Settings\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Appointment\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Service\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Stylist\",\"col\":4}},{\"type\":\"header\",\"data\":{\"text\":\"Operations\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Stylist Service\",\"col\":4}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salon Appointment Service\",\"col\":4}},{\"type\":\"header\",\"data\":{\"text\":\"Number Cards\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Total Appointments\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Stylists\",\"col\":4}}]",
+ "creation": "2026-08-27 10:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "Salon & Spa Hub",
+ "links": [
+  {
+   "label": "Salon Settings",
+   "link_to": "Salon Settings",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Salon Appointment",
+   "link_to": "Salon Appointment",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Salon Service",
+   "link_to": "Salon Service",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Salon Stylist",
+   "link_to": "Salon Stylist",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Salon Stylist Service",
+   "link_to": "Salon Stylist Service",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Salon Appointment Service",
+   "link_to": "Salon Appointment Service",
+   "link_type": "DocType",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-27 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "Salon & Spa Hub",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Salon Appointment",
+   "label": "Salon Appointments"
+  },
+  {
+   "document_type": "Salon Service",
+   "label": "Salon Services"
+  },
+  {
+   "document_type": "Salon Stylist",
+   "label": "Salon Stylists"
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  }
+ ],
+ "shortcuts": [
+  {
+   "label": "Salon Settings",
+   "link_to": "Salon Settings",
+   "type": "DocType"
+  },
+  {
+   "label": "Salon Appointment",
+   "link_to": "Salon Appointment",
+   "type": "DocType"
+  },
+  {
+   "label": "Salon Service",
+   "link_to": "Salon Service",
+   "type": "DocType"
+  },
+  {
+   "label": "Salon Stylist",
+   "link_to": "Salon Stylist",
+   "type": "DocType"
+  },
+  {
+   "label": "Salon Stylist Service",
+   "link_to": "Salon Stylist Service",
+   "type": "DocType"
+  },
+  {
+   "label": "Salon Appointment Service",
+   "link_to": "Salon Appointment Service",
+   "type": "DocType"
+  }
+ ],
+ "number_cards": [
+  {
+   "number_card_name": "Total Appointments"
+  },
+  {
+   "number_card_name": "Active Stylists"
+  }
+ ],
+ "title": "Salon & Spa Hub"
+}

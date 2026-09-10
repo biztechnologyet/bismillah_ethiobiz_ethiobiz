@@ -1,0 +1,70 @@
+{
+ "name": "Letter Log",
+ "module": "Letter Module",
+ "custom": 1,
+ "docstatus": 0,
+ "doctype": "DocType",
+ "fields": [
+  {
+   "fieldname": "letter_type",
+   "fieldtype": "Select",
+   "label": "Letter Type",
+   "options": "Inbound\nOutbound",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "default": "Today",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sender_recipient",
+   "fieldtype": "Data",
+   "label": "Sender / Recipient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
+  },
+  {
+   "fieldname": "letter_image",
+   "fieldtype": "Attach Image",
+   "label": "Letter Image"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Biz Service Administrator",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

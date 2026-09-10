@@ -1,0 +1,1454 @@
+{% extends "templates/web.html" %}
+
+{% block title %}AFOCHA Social & Business Pulse | EthioBiz{% endblock %}
+
+{% block head_include %}
+<style>
+    :root {
+        --af-teal: #008080;
+        --af-teal-dark: #072a2e;
+        --af-teal-light: #0d9488;
+        --af-gold: #f59e0b;
+        --af-blue: #0284c7;
+        --af-bg: #f8fafc;
+        --af-card-bg: #ffffff;
+        --af-border: #e2e8f0;
+        --af-text: #0f172a;
+        --af-text-muted: #64748b;
+    }
+
+    .afocha-container {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 25px 15px 60px 15px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Hero Banner */
+    .afocha-hero {
+        background: linear-gradient(135deg, #072a2e 0%, #008080 45%, #0284c7 100%);
+        color: #ffffff;
+        padding: 40px 24px;
+        border-radius: 28px;
+        margin-bottom: 28px;
+        text-align: center;
+        box-shadow: 0 14px 40px rgba(0,128,128,0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .afocha-hero-badge {
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 18px;
+        border-radius: 20px;
+        display: inline-block;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+    .afocha-hero h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    /* Custom Form Controls */
+    .af-input {
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        font-size: 14px;
+        color: #0f172a;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+    .af-input:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+    }
+    .af-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        font-size: 15px;
+        color: #0f172a;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        resize: vertical;
+        outline: none;
+        font-family: inherit;
+    }
+    .af-textarea:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+    }
+    .af-btn-primary {
+        background: linear-gradient(135deg, #008080 0%, #0d9488 100%);
+        color: #ffffff !important;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px rgba(0,128,128,0.3);
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .af-btn-primary:hover {
+        background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%);
+        transform: translateY(-1px);
+    }
+    .af-btn-outline {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .af-btn-outline:hover {
+        border-color: #008080;
+        color: #008080;
+        background: #f0fdfa;
+    }
+
+    /* Guest Banner */
+    .guest-auth-prompt {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 24px;
+        padding: 30px 24px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Composer Card */
+    .afocha-composer {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.04);
+    }
+    .composer-user-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 12px 18px;
+        margin-bottom: 16px;
+    }
+    .composer-user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .composer-tabs-row {
+        display: flex;
+        gap: 8px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 12px;
+    }
+    .composer-tab {
+        padding: 7px 16px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .composer-tab.active {
+        background: #008080;
+        color: #ffffff;
+        border-color: #008080;
+    }
+
+    /* Feed Post Card */
+    .af-post-card {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        transition: all 0.25s ease;
+    }
+    .af-post-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+        border-color: #cbd5e1;
+    }
+    .af-avatar-img {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0,128,128,0.2);
+    }
+    .af-author-name {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .af-author-meta {
+        font-size: 12px;
+        color: #64748b;
+        margin: 2px 0 0 0;
+    }
+    .af-tag-badge {
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #ccfbf1;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .af-post-text {
+        font-size: 15px;
+        color: #334155;
+        line-height: 1.65;
+        margin: 16px 0;
+    }
+
+    /* Poll Widget */
+    .af-poll-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px;
+        margin: 16px 0;
+    }
+    .af-poll-option {
+        width: 100%;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 12px 18px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .af-poll-option:hover {
+        border-color: #008080;
+        background: #f0fdfa;
+    }
+    .af-poll-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background: rgba(0, 128, 128, 0.18);
+        z-index: 1;
+        transition: width 0.4s ease;
+    }
+    .af-poll-text-row {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    /* 2-COLUMN SPLIT FULL-PAGE POST VIEW */
+    .af-split-wrapper {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 26px;
+        align-items: start;
+        margin-top: 15px;
+    }
+    .af-left-post-col {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 26px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+    }
+    .af-right-comments-col {
+        background: #ffffff;
+        border: 1px solid var(--af-border);
+        border-radius: 26px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .af-comments-scrollable {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 6px;
+        margin-bottom: 16px;
+        max-height: 52vh;
+    }
+    .af-comment-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+    .af-comment-author {
+        font-weight: 800;
+        font-size: 13px;
+        color: #0f172a;
+    }
+    .af-comment-time {
+        font-size: 11px;
+        color: #64748b;
+    }
+    .af-comment-body {
+        font-size: 13px;
+        color: #334155;
+        margin-top: 4px;
+        line-height: 1.5;
+    }
+
+    /* ═══ IMAGE UPLOAD ZONE ═══ */
+    .af-upload-zone {
+        border: 2px dashed #94a3b8;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        background: #ffffff;
+        position: relative;
+    }
+    .af-upload-zone:hover, .af-upload-zone.drag-over {
+        border-color: #008080;
+        background: #f0fdfa;
+        transform: translateY(-1px);
+    }
+    .af-upload-zone .upload-icon {
+        font-size: 36px;
+        margin-bottom: 6px;
+    }
+    .af-upload-zone .upload-label {
+        font-weight: 700;
+        font-size: 14px;
+        color: #0f172a;
+    }
+    .af-upload-zone .upload-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    .af-upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .af-upload-progress {
+        margin-top: 10px;
+        height: 6px;
+        border-radius: 6px;
+        background: #e2e8f0;
+        overflow: hidden;
+        display: none;
+    }
+    .af-upload-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #008080, #0d9488);
+        border-radius: 6px;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* Image Preview */
+    .af-image-preview-box {
+        display: none;
+        margin-top: 12px;
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid #008080;
+        background: #f0fdfa;
+    }
+    .af-image-preview-box img {
+        width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    .af-image-preview-box .preview-remove-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .af-image-preview-box .preview-remove-btn:hover {
+        background: rgba(220, 38, 38, 0.85);
+    }
+    .af-image-preview-box .preview-url-badge {
+        background: rgba(0,128,128,0.85);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Browse Gallery Button */
+    .af-btn-browse-gallery {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff !important;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3);
+    }
+    .af-btn-browse-gallery:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(2, 132, 199, 0.4);
+    }
+
+    /* ═══ GALLERY MODAL ═══ */
+    .af-gallery-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .af-gallery-overlay.visible {
+        display: flex;
+    }
+    .af-gallery-modal {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 720px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        animation: gallerySlideUp 0.3s ease;
+    }
+    @keyframes gallerySlideUp {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .af-gallery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .af-gallery-header h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .af-gallery-close-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .af-gallery-close-btn:hover {
+        background: #fecaca;
+        border-color: #ef4444;
+        color: #dc2626;
+    }
+    .af-gallery-body {
+        padding: 18px 24px;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+    .af-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    @media (max-width: 520px) {
+        .af-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .af-gallery-thumb {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        aspect-ratio: 1;
+    }
+    .af-gallery-thumb:hover {
+        border-color: #008080;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.2);
+    }
+    .af-gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .af-gallery-thumb .thumb-name {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.65));
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 16px 8px 6px 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .af-gallery-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+    .af-gallery-empty .empty-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    .af-gallery-loading {
+        text-align: center;
+        padding: 40px;
+        color: #64748b;
+    }
+
+    @media (max-width: 860px) {
+        .af-split-wrapper {
+            grid-template-columns: 1fr;
+        }
+        .af-right-comments-col {
+            position: static;
+            max-height: none;
+        }
+        .af-comments-scrollable {
+            max-height: 400px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="afocha-container">
+    <!-- SINGLE POST 2-COLUMN FULL-PAGE VIEW -->
+    <div id="afocha-single-post-view" style="display: none;">
+        <!-- Injected via JS -->
+    </div>
+
+    <!-- MAIN FEED & COMPOSER VIEW -->
+    <div id="afocha-main-feed-view">
+        <!-- HERO BANNER -->
+        <div class="afocha-hero">
+            <div class="afocha-hero-badge">🌟 አፎቻ • LOVE OF THE HEART & COMMUNITY</div>
+            <h2>Ethiopia's Verified Business & Social Network</h2>
+            <p style="opacity: 0.9; max-width: 680px; margin: 0 auto; font-size: 15px;">
+                Share company updates, launch interactive community polls, discover verified enterprises, and engage in real time.
+            </p>
+        </div>
+
+        <!-- GUEST LOGIN PROMPT (FOR NON-LOGGED IN USERS) -->
+        <div id="composer-guest-prompt" class="guest-auth-prompt" style="display: none;">
+            <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
+            <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 6px;">Sign in to Share Updates & Polls</h4>
+            <p style="color: #64748b; font-size: 14px; max-width: 500px; margin: 0 auto 16px auto;">
+                Only verified, authenticated users can publish stories and launch interactive polls on Afocha Social.
+            </p>
+            <a href="/login?redirect-to=/social" class="af-btn-primary">
+                🔑 Sign In / Register &rarr;
+            </a>
+        </div>
+
+        <!-- AUTHENTICATED USER COMPOSER -->
+        <div class="afocha-composer" id="composer-auth-panel" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span style="font-weight: 800; font-size: 16px; color: #0f172a;">✨ Share a Story or Launch a Poll</span>
+                <div class="composer-tabs-row mb-0">
+                    <button class="composer-tab active" data-tab="text">✍️ Story</button>
+                    <button class="composer-tab" data-tab="media">🖼️ Media</button>
+                    <button class="composer-tab" data-tab="poll">📊 Poll</button>
+                </div>
+            </div>
+
+            <!-- LOGGED IN USER IDENTITY BANNER (AUTOMATICALLY SET & LOCKED) -->
+            <div class="composer-user-banner" id="composer-user-banner">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="composer-user-avatar-img" src="/assets/frappe/images/default-avatar.png" class="composer-user-avatar" alt="Avatar">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="composer-user-fullname" style="font-weight: 800; font-size: 15px; color: #0f172a;">Loading...</span>
+                            <span id="composer-user-verified-badge" style="color: #008080; font-weight: 800;">✓</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b;">
+                            <span id="composer-user-company" style="font-weight: 700; color: #0284c7;">EthioBiz Enterprise</span> • <span id="composer-user-handle">@ethiobiz</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY SELECTION (EDITABLE BY USER) -->
+                <div style="min-width: 190px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #475569; display: block; margin-bottom: 2px;">Topic / Category:</label>
+                    <select id="post-category" class="af-input" style="font-weight: 700; padding: 6px 12px; font-size: 13px;">
+                        <option value="Business & Trade">💼 Business & Trade</option>
+                        <option value="Tech & Innovation">🚀 Tech & Innovation</option>
+                        <option value="Food & Dining">☕ Food & Dining</option>
+                        <option value="Real Estate & Living">🏠 Real Estate</option>
+                        <option value="Jobs & Career">🎯 Jobs & Career</option>
+                        <option value="Community & Events">🌟 Community</option>
+                    </select>
+                </div>
+            </div>
+
+            <textarea id="post-content" class="af-textarea mb-3" rows="3" placeholder="What's happening in your business or community today?..."></textarea>
+
+            <!-- Media Section: Upload + Gallery + Preview -->
+            <div id="composer-media-section" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
+                <!-- Upload Dropzone -->
+                <div class="af-upload-zone" id="upload-dropzone">
+                    <input type="file" id="upload-file-input" accept="image/*">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-label">Drag & Drop or Click to Upload Image</div>
+                    <div class="upload-hint">JPG, PNG, GIF, WEBP • Max 5 MB</div>
+                    <div class="af-upload-progress" id="upload-progress-bar">
+                        <div class="af-upload-progress-fill" id="upload-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Row -->
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap;">
+                    <button type="button" class="af-btn-browse-gallery" id="btn-open-gallery">🖼️ Browse My Uploads</button>
+                    <span style="color: #94a3b8; font-size: 12px; font-weight: 600;">— or paste URL below —</span>
+                </div>
+
+                <!-- Manual URL Fallback -->
+                <input type="text" id="post-image-url" class="af-input mt-2" placeholder="Image URL (e.g. /files/photo.jpg or https://...)" style="margin-top: 10px;">
+
+                <!-- Image Preview -->
+                <div class="af-image-preview-box" id="image-preview-box">
+                    <button type="button" class="preview-remove-btn" id="btn-remove-preview" title="Remove image">✕</button>
+                    <img id="image-preview-img" src="" alt="Preview">
+                    <div class="preview-url-badge" id="image-preview-url-badge"></div>
+                </div>
+
+                <!-- Video URL -->
+                <input type="text" id="post-video-url" class="af-input" placeholder="YouTube or MP4 Video URL" style="margin-top: 10px;">
+            </div>
+
+            <!-- Poll Section -->
+            <div id="composer-poll-section" style="display: none; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 14px;">
+                <label style="font-weight: 800; font-size: 13px; color: #0f172a; margin-bottom: 6px; display: block;">📊 Community Poll Question:</label>
+                <input type="text" id="poll-question-input" class="af-input mb-2" placeholder="Ask a question (e.g. Which Ethiopian coffee roast is your favorite?)">
+                <div id="poll-options-container">
+                    <input type="text" class="af-input mb-2 poll-opt-val" placeholder="Option 1">
+                    <input type="text" class="af-input mb-2 poll-opt-val" placeholder="Option 2">
+                </div>
+                <button type="button" id="btn-add-poll-opt" class="af-btn-outline" style="font-size: 11px; padding: 4px 12px;">+ Add Option</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; pt-2;">
+                <small style="color: #64748b; font-size: 12px;">Instant publishing across EthioBiz community network</small>
+                <button id="btn-submit-post" class="af-btn-primary">Publish Post &rarr;</button>
+            </div>
+        </div>
+
+        <!-- STREAM CONTAINER -->
+        <div id="afocha-feed-stream">
+            <div style="text-align: center; padding: 40px; color: #64748b;">
+                <div class="spinner-border spinner-border-sm text-primary"></div><span style="margin-left: 8px;">Loading stories...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ IMAGE GALLERY MODAL ═══ -->
+<div class="af-gallery-overlay" id="gallery-overlay">
+    <div class="af-gallery-modal">
+        <div class="af-gallery-header">
+            <h3>🖼️ My Uploaded Images</h3>
+            <button type="button" class="af-gallery-close-btn" id="btn-close-gallery">✕</button>
+        </div>
+        <div class="af-gallery-body" id="gallery-body">
+            <div class="af-gallery-loading">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+                <span style="margin-left: 8px;">Loading your images...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let activeComposerTab = "text";
+    let loggedUser = null;
+
+    // Load logged-in user profile
+    fetch('/api/method/bismillah_ethiobiz.afocha_api.get_logged_user_info')
+        .then(r => r.json())
+        .then(res => {
+            if (res.message) {
+                loggedUser = res.message;
+                if (loggedUser.is_logged_in) {
+                    document.getElementById('composer-auth-panel').style.display = 'block';
+                    document.getElementById('composer-guest-prompt').style.display = 'none';
+
+                    document.getElementById('composer-user-avatar-img').src = loggedUser.user_image || '/assets/frappe/images/default-avatar.png';
+                    document.getElementById('composer-user-fullname').innerText = loggedUser.full_name;
+                    document.getElementById('composer-user-company').innerText = loggedUser.company || 'EthioBiz Enterprise';
+                    document.getElementById('composer-user-handle').innerText = loggedUser.handle;
+                    document.getElementById('composer-user-verified-badge').style.display = loggedUser.is_verified ? 'inline' : 'none';
+                } else {
+                    document.getElementById('composer-auth-panel').style.display = 'none';
+                    document.getElementById('composer-guest-prompt').style.display = 'block';
+                }
+            }
+        });
+
+    // Tab switching
+    document.querySelectorAll('.composer-tab').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.composer-tab').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeComposerTab = this.getAttribute('data-tab');
+
+            document.getElementById('composer-media-section').style.display = (activeComposerTab === 'media') ? 'block' : 'none';
+            document.getElementById('composer-poll-section').style.display = (activeComposerTab === 'poll') ? 'block' : 'none';
+        });
+    });
+
+    // Add poll option
+    const btnAddPollOpt = document.getElementById('btn-add-poll-opt');
+    if (btnAddPollOpt) {
+        btnAddPollOpt.addEventListener('click', function() {
+            const container = document.getElementById('poll-options-container');
+            const count = container.querySelectorAll('.poll-opt-val').length;
+            if (count < 4) {
+                const inp = document.createElement('input');
+                inp.type = 'text';
+                inp.className = 'af-input mb-2 poll-opt-val';
+                inp.placeholder = 'Option ' + (count + 1);
+                container.appendChild(inp);
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  IMAGE UPLOAD, GALLERY BROWSER & PREVIEW SYSTEM
+    // ═══════════════════════════════════════════════════════════════
+
+    // Helper: Set image preview
+    function setImagePreview(url) {
+        const previewBox = document.getElementById('image-preview-box');
+        const previewImg = document.getElementById('image-preview-img');
+        const previewBadge = document.getElementById('image-preview-url-badge');
+        const urlInput = document.getElementById('post-image-url');
+
+        if (url) {
+            previewImg.src = url;
+            previewBadge.textContent = url;
+            previewBox.style.display = 'block';
+            urlInput.value = url;
+        } else {
+            previewImg.src = '';
+            previewBadge.textContent = '';
+            previewBox.style.display = 'none';
+            urlInput.value = '';
+        }
+    }
+
+    // Remove preview button
+    const btnRemovePreview = document.getElementById('btn-remove-preview');
+    if (btnRemovePreview) {
+        btnRemovePreview.addEventListener('click', function(e) {
+            e.stopPropagation();
+            setImagePreview('');
+        });
+    }
+
+    // URL input manual change → update preview
+    const postImageUrlInput = document.getElementById('post-image-url');
+    if (postImageUrlInput) {
+        postImageUrlInput.addEventListener('change', function() {
+            const val = this.value.trim();
+            if (val) {
+                setImagePreview(val);
+            }
+        });
+    }
+
+    // ── FILE UPLOAD via Frappe API ──
+    const uploadDropzone = document.getElementById('upload-dropzone');
+    const uploadFileInput = document.getElementById('upload-file-input');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const uploadProgressFill = document.getElementById('upload-progress-fill');
+
+    if (uploadDropzone) {
+        // Drag & Drop visual feedback
+        uploadDropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+        uploadDropzone.addEventListener('dragleave', function() {
+            this.classList.remove('drag-over');
+        });
+        uploadDropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+    }
+
+    if (uploadFileInput) {
+        uploadFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFileUpload(this.files[0]);
+            }
+        });
+    }
+
+    function handleFileUpload(file) {
+        // Validate
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select an image file (JPG, PNG, GIF, WEBP).');
+            return;
+        }
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_SIZE) {
+            alert('File size exceeds 5MB limit (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please compress or resize the image.');
+            return;
+        }
+
+        // Show progress
+        uploadProgressBar.style.display = 'block';
+        uploadProgressFill.style.width = '10%';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/method/bismillah_ethiobiz.afocha_api.upload_post_image', true);
+
+        // Get CSRF token
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfCookie = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
+        const csrfToken = csrfMeta ? csrfMeta.content : (csrfCookie || (window.frappe && frappe.csrf_token));
+        if (csrfToken) {
+            xhr.setRequestHeader('X-Frappe-CSRF-Token', csrfToken);
+        }
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                uploadProgressFill.style.width = pct + '%';
+            }
+        });
+
+        xhr.addEventListener('load', function() {
+            uploadProgressFill.style.width = '100%';
+            setTimeout(function() {
+                uploadProgressBar.style.display = 'none';
+                uploadProgressFill.style.width = '0%';
+            }, 600);
+
+            try {
+                const resp = JSON.parse(xhr.responseText);
+                // P5: Handle nested response from custom endpoint
+                const msg = resp.message || resp;
+                const fileUrl = msg.file_url || (msg.message && msg.message.file_url);
+                if (fileUrl) {
+                    setImagePreview(fileUrl);
+                } else {
+                    console.error('Upload response:', resp);
+                    alert('Upload completed but no file URL returned. Please try again.');
+                }
+            } catch (err) {
+                console.error('Upload parse error:', err);
+                alert('Upload failed. Please try again.');
+            }
+
+            // Reset file input
+            if (uploadFileInput) uploadFileInput.value = '';
+        });
+
+        xhr.addEventListener('error', function() {
+            uploadProgressBar.style.display = 'none';
+            uploadProgressFill.style.width = '0%';
+            alert('Upload failed. Please check your connection and try again.');
+            if (uploadFileInput) uploadFileInput.value = '';
+        });
+
+        xhr.send(formData);
+    }
+
+    // ── GALLERY BROWSER ──
+    const galleryOverlay = document.getElementById('gallery-overlay');
+    const galleryBody = document.getElementById('gallery-body');
+    const btnOpenGallery = document.getElementById('btn-open-gallery');
+    const btnCloseGallery = document.getElementById('btn-close-gallery');
+
+    if (btnOpenGallery) {
+        btnOpenGallery.addEventListener('click', function() {
+            galleryOverlay.classList.add('visible');
+            loadGalleryImages();
+        });
+    }
+
+    if (btnCloseGallery) {
+        btnCloseGallery.addEventListener('click', function() {
+            galleryOverlay.classList.remove('visible');
+        });
+    }
+
+    // Close on overlay background click
+    if (galleryOverlay) {
+        galleryOverlay.addEventListener('click', function(e) {
+            if (e.target === galleryOverlay) {
+                galleryOverlay.classList.remove('visible');
+            }
+        });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && galleryOverlay && galleryOverlay.classList.contains('visible')) {
+            galleryOverlay.classList.remove('visible');
+        }
+    });
+
+    function loadGalleryImages() {
+        galleryBody.innerHTML = '<div class="af-gallery-loading"><div class="spinner-border spinner-border-sm text-primary"></div><span style="margin-left: 8px;">Loading your images...</span></div>';
+
+        // Fetch image files from Frappe File doctype (public images)
+        const params = new URLSearchParams({
+            doctype: 'File',
+            fields: JSON.stringify(['name', 'file_name', 'file_url', 'creation']),
+            filters: JSON.stringify([
+                ['is_private', '=', 0],
+                ['file_url', 'like', '%.jpg'],
+            ]),
+            or_filters: JSON.stringify([
+                ['file_url', 'like', '%.jpg'],
+                ['file_url', 'like', '%.jpeg'],
+                ['file_url', 'like', '%.png'],
+                ['file_url', 'like', '%.gif'],
+                ['file_url', 'like', '%.webp'],
+            ]),
+            order_by: 'creation desc',
+            limit_page_length: '60'
+        });
+
+        // Use a broader approach: fetch all public image files
+        fetch('/api/method/frappe.client.get_list?' + new URLSearchParams({
+            doctype: 'File',
+            fields: JSON.stringify(['name', 'file_name', 'file_url', 'creation']),
+            filters: JSON.stringify([['is_private', '=', 0]]),
+            order_by: 'creation desc',
+            limit_page_length: '100'
+        }))
+        .then(r => r.json())
+        .then(res => {
+            const allFiles = (res.message || []);
+            // Filter to image extensions on the client side
+            const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+            const images = allFiles.filter(f => {
+                if (!f.file_url) return false;
+                const url = f.file_url.toLowerCase();
+                return imageExts.some(ext => url.endsWith(ext));
+            });
+
+            if (!images.length) {
+                galleryBody.innerHTML = `
+                    <div class="af-gallery-empty">
+                        <div class="empty-icon">📭</div>
+                        <div style="font-weight: 700; font-size: 15px; color: #0f172a; margin-bottom: 4px;">No Images Yet</div>
+                        <div style="font-size: 13px;">Upload your first image using the dropzone above!</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let gridHtml = '<div class="af-gallery-grid">';
+            images.forEach(img => {
+                const displayName = img.file_name || img.file_url.split('/').pop();
+                gridHtml += `
+                    <div class="af-gallery-thumb" data-url="${img.file_url}" title="${displayName}">
+                        <img src="${img.file_url}" alt="${displayName}" loading="lazy" onerror="this.parentElement.style.display='none'">
+                        <div class="thumb-name">${displayName}</div>
+                    </div>
+                `;
+            });
+            gridHtml += '</div>';
+            galleryBody.innerHTML = gridHtml;
+
+            // Bind click to select
+            galleryBody.querySelectorAll('.af-gallery-thumb').forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    const selectedUrl = this.getAttribute('data-url');
+                    setImagePreview(selectedUrl);
+                    galleryOverlay.classList.remove('visible');
+                });
+            });
+        })
+        .catch(err => {
+            console.error('Gallery load error:', err);
+            galleryBody.innerHTML = `
+                <div class="af-gallery-empty">
+                    <div class="empty-icon">⚠️</div>
+                    <div style="font-weight: 700; color: #0f172a;">Could not load gallery</div>
+                    <div style="font-size: 13px;">Please try again later.</div>
+                </div>
+            `;
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+
+    // Submit post
+    document.getElementById('btn-submit-post').addEventListener('click', function() {
+        if (!loggedUser || !loggedUser.is_logged_in) {
+            window.location.href = '/login?redirect-to=/social';
+            return;
+        }
+
+        const category = document.getElementById('post-category').value;
+        const content = document.getElementById('post-content').value.trim();
+        const image = document.getElementById('post-image-url').value.trim();
+        const video = document.getElementById('post-video-url').value.trim();
+
+        if (!content) {
+            alert('Please write your post story.');
+            return;
+        }
+
+        let isPoll = 0;
+        let pollQ = null;
+        let pollOpts = null;
+
+        if (activeComposerTab === 'poll') {
+            pollQ = document.getElementById('poll-question-input').value.trim();
+            const optInputs = document.querySelectorAll('.poll-opt-val');
+            const opts = [];
+            optInputs.forEach(i => { if (i.value.trim()) opts.push(i.value.trim()); });
+            if (pollQ && opts.length >= 2) {
+                isPoll = 1;
+                pollOpts = JSON.stringify(opts);
+            }
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerText = 'Publishing...';
+
+        ebPostForm('bismillah_ethiobiz.afocha_api.create_social_post', {
+            category_tag: category,
+            content: content,
+            post_image: image,
+            video_url: video,
+            is_poll: isPoll,
+            poll_question: pollQ || '',
+            poll_options: pollOpts || ''
+        })
+        .then(res => {
+            btn.disabled = false;
+            btn.innerText = 'Publish Post →';
+            if (!res || res.exc) return;
+            document.getElementById('post-content').value = '';
+            document.getElementById('post-video-url').value = '';
+            setImagePreview('');
+            loadFeed();
+        });
+    });
+
+    // Check URL for ?post=AFO-...
+    const urlParams = new URLSearchParams(window.location.search);
+    const singlePostId = urlParams.get('post');
+
+    if (singlePostId) {
+        loadSinglePost(singlePostId);
+    } else {
+        loadFeed();
+    }
+
+    function loadFeed() {
+        document.getElementById('afocha-main-feed-view').style.display = 'block';
+        document.getElementById('afocha-single-post-view').style.display = 'none';
+
+        fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed')
+            .then(r => r.json())
+            .then(res => {
+                const stream = document.getElementById('afocha-feed-stream');
+                stream.innerHTML = '';
+                const posts = (res.message && res.message.posts) ? res.message.posts : [];
+
+                if (!posts.length) {
+                    stream.innerHTML = '<div style="text-align: center; padding: 50px; background: white; border-radius: 20px; border: 1px solid #e2e8f0; color: #64748b;">No stories yet. Be the first to publish!</div>';
+                    return;
+                }
+
+                posts.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'af-post-card';
+                    card.id = 'post-node-' + p.name;
+
+                    let mediaHtml = '';
+                    if (p.post_image) {
+                        mediaHtml += `<div style="margin: 14px 0; border-radius: 18px; overflow: hidden;"><img src="${p.post_image}" style="max-height: 420px; width: 100%; object-fit: cover;"></div>`;
+                    }
+                    if (p.video_url) {
+                        mediaHtml += `<div style="margin: 14px 0; border-radius: 18px; overflow: hidden;"><iframe src="${p.video_url}" style="width: 100%; height: 320px; border: none;"></iframe></div>`;
+                    }
+
+                    let pollHtml = '';
+                    if (p.is_poll && p.poll_data) {
+                        pollHtml = renderPollWidget(p.name, p.poll_data);
+                    }
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${p.author_image || '/assets/frappe/images/default-avatar.png'}" class="af-avatar-img" alt="Avatar" onerror="this.src='/assets/frappe/images/default-avatar.png'">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <h4 class="af-author-name">${p.author_name}</h4>
+                                        ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
+                                    </div>
+                                    <p class="af-author-meta">${p.company ? p.company + ' • ' : ''}${p.author_handle} • ${p.post_date.split(' ')[0]}</p>
+                                </div>
+                            </div>
+                            <span class="af-tag-badge">${p.category_tag}</span>
+                        </div>
+
+                        <div class="af-post-text">${p.content}</div>
+
+                        ${mediaHtml}
+                        ${pollHtml}
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+                            <div style="display: flex; gap: 10px;">
+                                <button class="af-btn-outline btn-like-post" data-id="${p.name}">
+                                    ❤️ <span class="like-cnt">${p.likes_count}</span>
+                                </button>
+                                <a href="/social?post=${p.name}" class="af-btn-outline">
+                                    💬 <span>${p.comments_count} Comments</span>
+                                </a>
+                            </div>
+                            <button class="af-btn-outline btn-share-post" data-url="https://ethiobiz.et/social?post=${p.name}">
+                                🔗 Share
+                            </button>
+                        </div>
+                    `;
+                    stream.appendChild(card);
+                });
+
+                bindFeedEvents();
+            });
+    }
+
+    function renderPollWidget(postId, pollData) {
+        let optsHtml = '';
+        pollData.options.forEach(opt => {
+            optsHtml += `
+                <div class="af-poll-option" data-post="${postId}" data-opt="${opt.index}">
+                    <div class="af-poll-fill" style="width: ${opt.percentage}%;"></div>
+                    <div class="af-poll-text-row">
+                        <span>${opt.text}</span>
+                        <span><b>${opt.percentage}%</b> (${opt.votes})</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        return `
+            <div class="af-poll-box" id="poll-box-${postId}">
+                <div style="font-weight: 800; font-size: 15px; color: #0f172a; margin-bottom: 10px;">📊 ${pollData.question || 'Community Poll'}</div>
+                ${optsHtml}
+                <div style="color: #64748b; font-size: 12px; margin-top: 6px;">Total votes: ${pollData.total_votes}</div>
+            </div>
+        `;
+    }
+
+    function bindFeedEvents() {
+        document.querySelectorAll('.btn-like-post').forEach(b => {
+            b.addEventListener('click', function() {
+                const pid = this.getAttribute('data-id');
+                const cntSpan = this.querySelector('.like-cnt');
+                ebFetch('/api/method/bismillah_ethiobiz.afocha_api.like_social_post?post_id=' + pid)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.message) cntSpan.innerText = res.message.likes_count;
+                        else ebToast('Like failed — please log in first.');
+                    })
+                    .catch(() => {});
+            });
+        });
+
+        document.querySelectorAll('.af-poll-option').forEach(b => {
+            b.addEventListener('click', function() {
+                const pid = this.getAttribute('data-post');
+                const optIdx = this.getAttribute('data-opt');
+                ebFetch('/api/method/bismillah_ethiobiz.afocha_api.vote_poll?post_id=' + pid + '&option_index=' + optIdx)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.message && res.message.poll_data) {
+                            const container = document.getElementById('poll-box-' + pid);
+                            if (container) {
+                                container.outerHTML = renderPollWidget(pid, res.message.poll_data);
+                                bindFeedEvents();
+                            }
+                        }
+                    });
+            });
+        });
+
+        document.querySelectorAll('.btn-share-post').forEach(b => {
+            b.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                if (navigator.share) {
+                    navigator.share({ title: 'EthioBiz AFOCHA Story', url: url });
+                } else {
+                    navigator.clipboard.writeText(url);
+                    alert('Post link copied to clipboard: ' + url);
+                }
+            });
+        });
+    }
+
+    // 2-COLUMN SPLIT VIEW FOR FULL POST & RIGHT-SIDE COMMENTING
+    function loadSinglePost(postId) {
+        document.getElementById('afocha-main-feed-view').style.display = 'none';
+        const singleView = document.getElementById('afocha-single-post-view');
+        singleView.style.display = 'block';
+        singleView.innerHTML = '<div style="text-align: center; padding: 60px;"><div class="spinner-border text-primary"></div><div style="margin-top: 10px; color: #64748b;">Loading full story...</div></div>';
+
+        fetch('/api/method/bismillah_ethiobiz.afocha_api.get_social_feed?post_id=' + encodeURIComponent(postId))
+            .then(r => r.json())
+            .then(res => {
+                if (!res.message || !res.message.post) {
+                    singleView.innerHTML = '<div style="text-align: center; padding: 50px;">Post not found. <a href="/social" class="af-btn-outline">Return to feed</a></div>';
+                    return;
+                }
+
+                const p = res.message.post;
+                const comments = res.message.comments || [];
+
+                let mediaHtml = '';
+                if (p.post_image) {
+                    mediaHtml += `<div style="margin: 18px 0; border-radius: 20px; overflow: hidden;"><img src="${p.post_image}" style="max-height: 500px; width: 100%; object-fit: cover;"></div>`;
+                }
+                if (p.video_url) {
+                    mediaHtml += `<div style="margin: 18px 0; border-radius: 20px; overflow: hidden;"><iframe src="${p.video_url}" style="width: 100%; height: 360px; border: none;"></iframe></div>`;
+                }
+
+                let pollHtml = '';
+                if (p.is_poll && p.poll_data) {
+                    pollHtml = renderPollWidget(p.name, p.poll_data);
+                }
+
+                let commentsListHtml = '';
+                comments.forEach(c => {
+                    commentsListHtml += `
+                        <div class="af-comment-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <img src="${c.author_image || '/assets/frappe/images/default-avatar.png'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                    <span class="af-comment-author">${c.author_name}</span>
+                                </div>
+                                <span class="af-comment-time">${c.comment_date.split(' ')[0]}</span>
+                            </div>
+                            <div class="af-comment-body">${c.comment_text}</div>
+                        </div>
+                    `;
+                });
+
+                let commentComposerHtml = '';
+                if (loggedUser && loggedUser.is_logged_in) {
+                    commentComposerHtml = `
+                        <div style="border-top: 1px solid #f1f5f9; padding-top: 14px;">
+                            <textarea id="cmt-text" class="af-textarea mb-2" rows="2" placeholder="Write a comment as ${loggedUser.full_name}..." style="font-size: 13px;"></textarea>
+                            <button id="btn-submit-comment" class="af-btn-primary" style="width: 100%; padding: 10px; font-size: 13px;">
+                                Post Comment &rarr;
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    commentComposerHtml = `
+                        <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; text-align: center;">
+                            <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Sign in to join the conversation.</p>
+                            <a href="/login?redirect-to=/social?post=${p.name}" class="af-btn-primary" style="font-size: 12px; padding: 6px 16px;">🔑 Log In to Comment</a>
+                        </div>
+                    `;
+                }
+
+                singleView.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <a href="/social" class="af-btn-outline" style="font-weight: 700;">&larr; Back to Community Feed</a>
+                    </div>
+
+                    <!-- 2-COLUMN SPLIT VIEW -->
+                    <div class="af-split-wrapper">
+                        <!-- LEFT COLUMN: POST STORY & MEDIA -->
+                        <div class="af-left-post-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <img src="${p.author_image || '/assets/frappe/images/default-avatar.png'}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 12px rgba(0,128,128,0.2);" alt="Avatar">
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0;">${p.author_name}</h3>
+                                            ${p.is_verified ? '<span title="Verified" style="color: #008080; font-weight: 800;">✓</span>' : ''}
+                                        </div>
+                                        <p class="af-author-meta">${p.company ? p.company + ' • ' : ''}${p.author_handle} • ${p.post_date}</p>
+                                    </div>
+                                </div>
+                                <span class="af-tag-badge" style="font-size: 12px; padding: 5px 14px;">${p.category_tag}</span>
+                            </div>
+
+                            <div style="font-size: 17px; color: #1e293b; line-height: 1.7; margin-bottom: 20px;">
+                                ${p.content}
+                            </div>
+
+                            ${mediaHtml}
+                            ${pollHtml}
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 18px; border-top: 1px solid #f1f5f9; margin-top: 20px;">
+                                <div style="display: flex; gap: 12px;">
+                                    <button class="af-btn-outline btn-like-post" data-id="${p.name}">
+                                        ❤️ <span class="like-cnt">${p.likes_count}</span>
+                                    </button>
+                                    <span class="af-btn-outline" style="background: #f8fafc; cursor: default;">
+                                        💬 <span>${p.comments_count} Comments</span>
+                                    </span>
+                                </div>
+                                <button class="af-btn-outline btn-share-post" data-url="https://ethiobiz.et/social?post=${p.name}">
+                                    🔗 Share Post
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: COMMENTS & LIVE COMMENTING -->
+                        <div class="af-right-comments-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                                <h4 style="font-weight: 800; font-size: 16px; color: #0f172a; margin: 0;">💬 Discussion (${comments.length})</h4>
+                                <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">Live Feed</span>
+                            </div>
+
+                            <!-- Scrollable Comments -->
+                            <div class="af-comments-scrollable" id="comments-list-stream">
+                                ${commentsListHtml || '<div style="text-align: center; padding: 30px; color: #64748b; font-size: 13px;">No comments yet. Share your thoughts!</div>'}
+                            </div>
+
+                            <!-- Comment Input Form (Docked at Bottom of Right Column) -->
+                            ${commentComposerHtml}
+                        </div>
+                    </div>
+                `;
+
+                bindFeedEvents();
+
+                const btnCmt = document.getElementById('btn-submit-comment');
+                if (btnCmt) {
+                    btnCmt.addEventListener('click', function() {
+                        const text = document.getElementById('cmt-text').value.trim();
+
+                        if (!text) {
+                            alert('Please write your comment.');
+                            return;
+                        }
+
+                        btnCmt.disabled = true;
+                        btnCmt.innerText = 'Posting...';
+
+                        ebPostForm('bismillah_ethiobiz.afocha_api.add_post_comment', {
+                            post_id: p.name,
+                            comment_text: text
+                        })
+                        .then(res => {
+                            btnCmt.disabled = false;
+                            btnCmt.innerText = 'Comment';
+                            if (res && !res.exc) {
+                                document.getElementById('cmt-text').value = '';
+                                loadSinglePost(p.name);
+                            }
+                        });
+                    });
+                }
+            });
+    }
+})();
+</script>
+{% endblock %}

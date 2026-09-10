@@ -1,0 +1,112 @@
+{
+ "doctype": "DocType",
+ "name": "DOBiz PWA Settings",
+ "module": "EthioBiz Theme",
+ "custom": 1,
+ "issingle": 1,
+ "fields": [
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable PWA",
+   "default": "1"
+  },
+  {
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "label": "App Name",
+   "default": "DOBiz Smart ERP - EthioBiz"
+  },
+  {
+   "fieldname": "short_name",
+   "fieldtype": "Data",
+   "label": "Short Name",
+   "default": "DOBiz"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "default": "Rooted in Ethiopia. Built for Humanity."
+  },
+  {
+   "fieldname": "theme_color",
+   "fieldtype": "Data",
+   "label": "Theme Color",
+   "default": "#1FB6AE"
+  },
+  {
+   "fieldname": "background_color",
+   "fieldtype": "Data",
+   "label": "Background Color",
+   "default": "#0E1A1A"
+  },
+  {
+   "fieldname": "start_url",
+   "fieldtype": "Data",
+   "label": "Start URL",
+   "default": "/app/dobiz"
+  },
+  {
+   "fieldname": "display",
+   "fieldtype": "Select",
+   "label": "Display Mode",
+   "options": "standalone\nminimal-ui\nbrowser",
+   "default": "standalone"
+  },
+  {
+   "fieldname": "icon_192",
+   "fieldtype": "Attach Image",
+   "label": "Icon 192x192"
+  },
+  {
+   "fieldname": "icon_512",
+   "fieldtype": "Attach Image",
+   "label": "Icon 512x512"
+  },
+  {
+   "fieldname": "icon_maskable",
+   "fieldtype": "Attach Image",
+   "label": "Icon 512x512 Maskable"
+  },
+  {
+   "fieldname": "offline_title",
+   "fieldtype": "Data",
+   "label": "Offline Title",
+   "default": "You are offline"
+  },
+  {
+   "fieldname": "offline_message",
+   "fieldtype": "Small Text",
+   "label": "Offline Message",
+   "default": "Reconnect to continue using DOBiz"
+  },
+  {
+   "fieldname": "install_prompt_enabled",
+   "fieldtype": "Check",
+   "label": "Show Install DOBiz Button",
+   "default": "1"
+  },
+  {
+   "fieldname": "cache_version",
+   "fieldtype": "Data",
+   "label": "Cache Version",
+   "default": "1",
+   "description": "Bump this value to force a service worker refresh"
+  },
+  {
+   "fieldname": "last_updated_on",
+   "fieldtype": "Datetime",
+   "label": "Last Updated On"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ]
+}

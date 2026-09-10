@@ -1,0 +1,15 @@
+{
+  "name": "BizBooking Resource",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:RES-{####}",
+  "title_field": "resource_name",
+  "fields": [
+    {"fieldname": "resource_name", "fieldtype": "Data", "label": "Resource Name", "reqd": 1},
+    {"fieldname": "resource_type", "fieldtype": "Select", "label": "Type", "options": "Room\nEquipment\nTable\nVenue"},
+    {"fieldname": "capacity", "fieldtype": "Int", "label": "Capacity", "default": 1},
+    {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

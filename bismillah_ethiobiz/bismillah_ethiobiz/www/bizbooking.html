@@ -1,0 +1,239 @@
+{% extends "templates/web.html" %}
+
+{% block title %}BizBooking — Instant Online Service & Asset Reservations{% endblock %}
+
+{% block header %}
+<style>
+    .booking-hero {
+        background: linear-gradient(135deg, #0f766e 0%, #008080 50%, #0369a1 100%);
+        color: white;
+        padding: 40px 20px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0,128,128,0.2);
+    }
+    .vertical-tab-card {
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .vertical-tab-card.active, .vertical-tab-card:hover {
+        border-color: #008080;
+        background: #f0fdfa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,128,128,0.15);
+    }
+    .vertical-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+    .booking-form-box {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+    }
+    .btn-book-now {
+        background: #008080;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        padding: 12px 28px;
+        border-radius: 30px;
+        border: none;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+    .btn-book-now:hover {
+        background: #0f766e;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container my-4">
+    <div class="booking-hero text-center">
+        <h1 class="display-5 font-weight-bold mb-2">⚡ BizBooking Super-App</h1>
+        <p class="lead mb-0">The unified reservation portal for Hotels, Salons, Medical Clinics, Real Estate, & Consultations in Ethiopia.</p>
+    </div>
+
+    <!-- Verticals Selection Grid -->
+    <div class="row g-3 mb-4" id="booking-verticals">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="vertical-tab-card active" data-type="Hotel Room & Guesthouse">
+                <div class="vertical-icon">🏨</div>
+                <h6 class="mb-0 font-weight-bold">Hotels</h6>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="vertical-tab-card" data-type="Salon Chair & Beauty">
+                <div class="vertical-icon">✂️</div>
+                <h6 class="mb-0 font-weight-bold">Salons</h6>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="vertical-tab-card" data-type="Medical Clinic & Doctor">
+                <div class="vertical-icon">🏥</div>
+                <h6 class="mb-0 font-weight-bold">Clinics</h6>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="vertical-tab-card" data-type="Property Viewing & Real Estate">
+                <div class="vertical-icon">🏢</div>
+                <h6 class="mb-0 font-weight-bold">Real Estate</h6>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="vertical-tab-card" data-type="Professional Consultation">
+                <div class="vertical-icon">💼</div>
+                <h6 class="mb-0 font-weight-bold">Consulting</h6>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="/map" class="text-decoration-none">
+                <div class="vertical-tab-card">
+                    <div class="vertical-icon">🗺️</div>
+                    <h6 class="mb-0 font-weight-bold">Map View</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Booking Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="booking-form-box">
+                <h4 class="mb-3 font-weight-bold" id="form-heading">🏨 Reserve Hotel Room or Guesthouse</h4>
+                <p class="text-muted mb-4" id="form-subheading">Select your preferred date, provider, and enter your contact details for instant confirmation.</p>
+
+                <form id="bizbooking-form">
+                    <input type="hidden" id="selected-booking-type" value="Hotel Room & Guesthouse">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Business / Provider</label>
+                            <select class="form-select" id="company-select" required>
+                                <option value="Biz Technology Solutions">EthioBiz Hub (Main)</option>
+                                <option value="Kistet Engineering & Trading">Kistet Properties</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Reservation Date</label>
+                            <input type="date" class="form-control" id="booking-date" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Time Slot / Arrival</label>
+                            <select class="form-select" id="slot-select">
+                                <option value="09:00:00">09:00 AM - 10:00 AM</option>
+                                <option value="11:00:00">11:00 AM - 12:00 PM</option>
+                                <option value="14:00:00" selected>02:00 PM (Standard Check-in)</option>
+                                <option value="16:00:00">04:00 PM - 05:00 PM</option>
+                                <option value="18:00:00">06:00 PM - 07:00 PM</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Party / Guests Count</label>
+                            <input type="number" class="form-control" id="person-count" value="1" min="1" max="20" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Your Full Name</label>
+                            <input type="text" class="form-control" id="customer-name" placeholder="Abebe Kebede" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">Phone Number (Telebirr / SMS)</label>
+                            <input type="tel" class="form-control" id="customer-phone" placeholder="0911234567" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Special Requests / Preferences</label>
+                        <textarea class="form-control" id="special-requests" rows="2" placeholder="e.g. Quiet room, extra towels, specific stylist preference..."></textarea>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn-book-now">
+                            ✨ Confirm & Submit Booking
+                        </button>
+                    </div>
+                </form>
+
+                <div id="booking-success-alert" class="alert alert-success mt-4 d-none">
+                    <h5 class="alert-heading">🎉 Booking Submitted Successfully!</h5>
+                    <p class="mb-0" id="booking-success-msg">Your reservation has been recorded. Our automated system will notify the provider immediately.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default date to today
+    document.getElementById('booking-date').valueAsDate = new Date();
+
+    // Tab switcher
+    document.querySelectorAll('.vertical-tab-card').forEach(card => {
+        card.addEventListener('click', function() {
+            if (!this.getAttribute('data-type')) return;
+            document.querySelectorAll('.vertical-tab-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const type = this.getAttribute('data-type');
+            document.getElementById('selected-booking-type').value = type;
+            document.getElementById('form-heading').innerText = '✨ Reserve: ' + type;
+        });
+    });
+
+    // Form submit
+    document.getElementById('bizbooking-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const payload = {
+            doctype: "BizBooking Entry",
+            company: document.getElementById('company-select').value,
+            booking_type: document.getElementById('selected-booking-type').value,
+            booking_date: document.getElementById('booking-date').value,
+            slot_start_time: document.getElementById('slot-select').value,
+            number_of_persons: parseInt(document.getElementById('person-count').value),
+            customer_name: document.getElementById('customer-name').value,
+            customer_phone: document.getElementById('customer-phone').value,
+            special_requests: document.getElementById('special-requests').value,
+            channel: "Web Portal",
+            booking_status: "Confirmed"
+        };
+
+        fetch('/api/resource/BizBooking Entry', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            const alertBox = document.getElementById('booking-success-alert');
+            alertBox.classList.remove('d-none');
+            document.getElementById('booking-success-msg').innerHTML = 
+                `Booking Reference: <b>${data.data ? data.data.name : 'Confirmed'}</b><br>Provider: <b>${payload.company}</b><br>Date: <b>${payload.booking_date}</b>`;
+            document.getElementById('bizbooking-form').reset();
+            document.getElementById('booking-date').valueAsDate = new Date();
+        })
+        .catch(err => {
+            alert('Error creating booking. Please verify your connection.');
+        });
+    });
+});
+</script>
+{% endblock %}

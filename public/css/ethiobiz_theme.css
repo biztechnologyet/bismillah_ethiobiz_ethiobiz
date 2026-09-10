@@ -1,0 +1,1741 @@
+/**
+ * EthioBiz Theme v2.3 - Copilot Glassmorphism & Sacred Atmosphere
+ * P4-B: both-theme form correctness (T1 scoping / T2 dark reassertions / T3 input pairing)
+ * Bismillah Ar-Rahman Ar-Rahim
+ */
+
+/* 1. ATMOSPHERE ROOT VARIABLES & LAYER */
+:root {
+    --ethiobiz-atmosphere-dark: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(31, 182, 174, 0.18) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 85% 105%, rgba(46, 58, 140, 0.22) 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 50% 50%, rgba(20, 121, 116, 0.08) 0%, transparent 50%), linear-gradient(135deg, #0A1118 0%, #0D1B1E 40%, #0E1A1A 70%, #081014 100%);
+    --ethiobiz-atmosphere-bright: radial-gradient(ellipse 90% 70% at 15% 10%, rgba(31, 182, 174, 0.18) 0%, rgba(13, 148, 136, 0.08) 35%, transparent 70%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(99, 102, 241, 0.12) 0%, rgba(59, 130, 246, 0.06) 40%, transparent 70%), linear-gradient(145deg, #f8fafc 0%, #f0fdfa 30%, #f1f5f9 60%, #e2e8f0 100%);
+    --ethiobiz-website-atmosphere: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(31, 182, 174, 0.16) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 90% 90%, rgba(46, 58, 140, 0.18) 0%, transparent 60%), linear-gradient(135deg, #090E14 0%, #0D161B 40%, #0A1215 100%);
+    --ethiobiz-glass-blur: 16px;
+    --ethiobiz-bg-images-enabled: 0;
+}
+
+#ethiobiz-atmosphere {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+    background: var(--ethiobiz-atmosphere-dark) !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    transform: translateZ(0) !important;
+    will-change: transform;
+    transition: background 0.8s ease-in-out;
+}
+
+[data-theme="light"] #ethiobiz-atmosphere,
+html[data-theme="light"] #ethiobiz-atmosphere,
+body.light-theme #ethiobiz-atmosphere,
+[data-theme="light"] body {
+    background: var(--ethiobiz-atmosphere-bright) !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+html, body {
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Website Atmosphere */
+body.website-page,
+.website-wrapper,
+#page-container.website-view {
+    background: var(--ethiobiz-website-atmosphere) !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+/* 2. CORE FRAPPE OVERRIDES - Glass Transparency */
+body,
+#app,
+.desk-page,
+.desk-body,
+.page-container,
+.layout-main-section,
+.layout-main-section-wrapper,
+.layout-main,
+.page-head,
+.page-body,
+.workspace-page,
+.form-page,
+.content,
+#page-container,
+.page-card-container,
+.widget-group,
+.standard-sidebar-section {
+    background: transparent !important;
+    background-color: transparent !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ─── DARK THEME DEFAULTS (When data-theme != light) ─── */
+:not([data-theme="light"]) .desk-page,
+:not([data-theme="light"]) .desk-body,
+:not([data-theme="light"]) .layout-main-section,
+:not([data-theme="light"]) .workspace-page,
+:not([data-theme="light"]) .widget-group {
+    color: #F8F6F2 !important;
+}
+
+:not([data-theme="light"]) .navbar {
+    background: rgba(14, 26, 26, 0.75) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:not([data-theme="light"]) .navbar-brand .app-name {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #F8F6F2 !important;
+}
+
+:not([data-theme="light"]) .layout-side-section {
+    background: rgba(14, 26, 26, 0.45) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+:not([data-theme="light"]) .glass-panel,
+:not([data-theme="light"]) .card,
+:not([data-theme="light"]) .shortcut-widget-box,
+:not([data-theme="light"]) .widget,
+:not([data-theme="light"]) .number-card-widget,
+:not([data-theme="light"]) .onboarding-widget-box {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+:not([data-theme="light"]) body[data-route*="app"] h1,
+:not([data-theme="light"]) body[data-route*="app"] h2,
+:not([data-theme="light"]) body[data-route*="app"] h3,
+:not([data-theme="light"]) body[data-route*="app"] h4,
+:not([data-theme="light"]) body[data-route*="app"] h5,
+:not([data-theme="light"]) body[data-route*="app"] h6,
+:not([data-theme="light"]) body[data-route*="app"] .widget-title {
+    color: #F8F6F2 !important;
+}
+
+:not([data-theme="light"]) body[data-route*="app"] .text-muted,
+:not([data-theme="light"]) body[data-route*="app"] .widget-subtitle {
+    color: rgba(248, 246, 242, 0.65) !important;
+}
+
+/* ─── 3. LIGHT / WHITE THEME OVERRIDES (Full Contrast & Luminous Gradient) ─── */
+[data-theme="light"] .desk-page,
+[data-theme="light"] .desk-body,
+[data-theme="light"] .page-container,
+[data-theme="light"] .layout-main-section,
+[data-theme="light"] .workspace-page,
+[data-theme="light"] .widget-group,
+[data-theme="light"] .layout-main {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .glass-panel,
+[data-theme="light"] .card,
+[data-theme="light"] .widget,
+[data-theme="light"] .shortcut-widget-box,
+[data-theme="light"] .number-card-widget,
+[data-theme="light"] .quick-list-widget,
+[data-theme="light"] .onboarding-widget-box,
+[data-theme="light"] .dashboard-widget-box,
+[data-theme="light"] .custom-actions,
+[data-theme="light"] .widget.quick-list-widget-box {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(0, 128, 128, 0.07) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] .widget-title,
+[data-theme="light"] .title,
+[data-theme="light"] .page-head h1,
+[data-theme="light"] .page-head .title-text {
+    color: #072a2e !important;
+    font-weight: 800 !important;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] span:not(.badge):not(.indicator),
+[data-theme="light"] .list-item,
+[data-theme="light"] .list-row,
+[data-theme="light"] .list-row-col,
+[data-theme="light"] .grid-row,
+[data-theme="light"] a:not(.btn),
+[data-theme="light"] .item-title,
+[data-theme="light"] .field-value,
+[data-theme="light"] .ellipsis,
+[data-theme="light"] .list-item__content {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .text-muted,
+[data-theme="light"] .widget-subtitle,
+[data-theme="light"] .sub-heading,
+[data-theme="light"] .comment-header,
+[data-theme="light"] .text-extra-muted,
+[data-theme="light"] .time-ago {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .quick-list-widget .list-item-container,
+[data-theme="light"] .quick-list-widget .list-row,
+[data-theme="light"] .list-row-container {
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #0f172a !important;
+}
+[data-theme="light"] .quick-list-widget .list-item-container:hover,
+[data-theme="light"] .list-row:hover {
+    background: #f0fdfa !important;
+}
+
+[data-theme="light"] .layout-side-section,
+[data-theme="light"] .desk-sidebar {
+    background: rgba(248, 250, 252, 0.9) !important;
+    backdrop-filter: blur(14px) !important;
+    border-right: 1px solid #cbd5e1 !important;
+}
+[data-theme="light"] .sidebar-item-label,
+[data-theme="light"] .desk-sidebar a,
+[data-theme="light"] .standard-sidebar-item {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+[data-theme="light"] .standard-sidebar-item.selected,
+[data-theme="light"] .sidebar-item.selected {
+    background: #008080 !important;
+    color: #ffffff !important;
+}
+[data-theme="light"] .standard-sidebar-item.selected .sidebar-item-label,
+[data-theme="light"] .sidebar-item.selected .sidebar-item-label {
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(0, 128, 128, 0.15) !important;
+}
+[data-theme="light"] .navbar-brand .app-name,
+[data-theme="light"] .navbar .nav-link {
+    color: #072a2e !important;
+    font-weight: 700 !important;
+}
+
+/* 5. DESK INPUTS & CONTROLS (Round Copilot Style for Desk Only)
+   P4-B T3: split per theme — the old unscoped rule painted WHITE text on
+   translucent black even in LIGHT mode (white-on-white inputs). */
+body[data-route*="app"]:not([data-theme="light"]) input.form-control,
+body[data-route*="app"]:not([data-theme="light"]) .frappe-control .control-input {
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    border-radius: 50px !important;
+    padding-left: 20px !important;
+}
+
+body[data-route*="app"][data-theme="light"] input.form-control,
+body[data-route*="app"][data-theme="light"] .frappe-control .control-input {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(2, 106, 110, 0.35) !important;
+    color: #072a2e !important;
+    border-radius: 50px !important;
+    padding-left: 20px !important;
+}
+
+body[data-route*="app"] input.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.18) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 5.1 WEB FORMS & WEBSITE PORTAL CONTROLS (Crisp High-Contrast Typography & Inputs) */
+body.website-page,
+.website-wrapper,
+#page-container.website-view,
+.web-form-page,
+.page-dobiz-payment,
+[data-path*="dobiz-payment"],
+[data-path*="dobiz-signup"],
+[data-doctype="Web Form"] {
+    background: radial-gradient(circle at 15% 15%, rgba(13, 148, 136, 0.4) 0%, rgba(7, 42, 46, 0.95) 45%, #031c1f 100%), linear-gradient(180deg, #072a2e 0%, #031c1f 100%) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+    color: #0f172a;
+}
+
+/* Card Container for all Web Forms */
+.web-form-container,
+.web-form-wrapper,
+.web-form,
+.standard-web-form,
+.web-form-body,
+.form-page .card,
+.web-form-container .card,
+.web-form-wrapper .card,
+.standard-web-form .card,
+.dob-signup-card,
+.dob-pay-card,
+div[data-doctype="Web Form"] .card,
+div[data-path*="dobiz-payment"] .web-form-container,
+div[data-path*="dobiz-payment"] .card {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
+    padding: 36px 32px !important;
+    color: #0f172a !important;
+}
+
+/* Headings in Web Forms & Website Pages */
+.web-form-container h1,
+.web-form-container h2,
+.web-form-container h3,
+.web-form-container h4,
+.web-form-wrapper h1,
+.web-form-wrapper h2,
+.web-form-wrapper h3,
+.standard-web-form h1,
+.standard-web-form h2,
+.web-form-header h1,
+.web-form-title,
+.web-page-container h1,
+.web-page-container h2,
+.dob-signup-title,
+.dob-pay-title,
+div[data-path*="dobiz-payment"] h1,
+div[data-path*="dobiz-payment"] .form-title,
+div[data-path*="dobiz-payment"] .title {
+    color: #072a2e !important;
+    font-weight: 900 !important;
+    font-size: 24px !important;
+    margin-bottom: 18px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* P4-B T1: doc/page + web-form titles — PUBLIC pages only */
+html:not([data-route*="app"]) .page-title,
+html:not([data-route*="app"]) .form-title {
+    color: #072a2e !important;
+    font-weight: 900 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ALL Form Labels in Web Forms
+   P4-B T1: removed desk-leaking generic selectors (.frappe-control .control-label,
+   .form-group label/.control-label) — they forced near-black labels in DARK mode.
+   They are re-added below, scoped to PUBLIC (non-desk) pages only. */
+.web-form-container label,
+.web-form-container .control-label,
+.web-form-wrapper label,
+.web-form-wrapper .control-label,
+.standard-web-form label,
+.standard-web-form .control-label,
+.web-form label,
+.web-form .control-label,
+.dob-signup-container label,
+.dob-pay-container label,
+div[data-path*="dobiz-payment"] label,
+div[data-path*="dobiz-payment"] .control-label {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    opacity: 1 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+    visibility: visible !important;
+}
+
+html:not([data-route*="app"]) .frappe-control .control-label,
+html:not([data-route*="app"]) .form-group label,
+html:not([data-route*="app"]) .form-group .control-label {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    opacity: 1 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+    visibility: visible !important;
+}
+
+/* Required Indicator */
+.web-form-container .reqd,
+.standard-web-form .reqd,
+.control-label .reqd,
+label .reqd {
+    color: #dc2626 !important;
+    font-weight: 900 !important;
+}
+
+/* ALL Input Fields in Web Forms */
+.web-form-container input,
+.web-form-container select,
+.web-form-container textarea,
+.web-form-container input.form-control,
+.web-form-container select.form-control,
+.web-form-container textarea.form-control,
+.web-form-wrapper input,
+.web-form-wrapper select,
+.web-form-wrapper textarea,
+.standard-web-form input,
+.standard-web-form select,
+.standard-web-form textarea,
+.standard-web-form input.form-control,
+.standard-web-form select.form-control,
+.standard-web-form textarea.form-control,
+.web-form input,
+.web-form select,
+.web-form textarea,
+.web-form input.form-control,
+.web-form select.form-control,
+.web-form textarea.form-control,
+.web-form-container .control-input input,
+.web-form-container .control-input select,
+.web-form-container .control-input textarea,
+.dob-signup-container input,
+.dob-signup-container select,
+.dob-signup-container textarea,
+.dob-pay-container input,
+.dob-pay-container select,
+.dob-pay-container textarea,
+div[data-path*="dobiz-payment"] input,
+div[data-path*="dobiz-payment"] select,
+div[data-path*="dobiz-payment"] textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    font-size: 14.5px !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.web-form-container input:focus,
+.web-form-container select:focus,
+.web-form-container textarea:focus,
+.standard-web-form input:focus,
+.standard-web-form select:focus,
+.standard-web-form textarea:focus,
+.dob-signup-container input:focus,
+.dob-signup-container select:focus,
+.dob-pay-container input:focus,
+.dob-pay-container select:focus,
+div[data-path*="dobiz-payment"] input:focus,
+div[data-path*="dobiz-payment"] select:focus {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #008080 !important;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.2) !important;
+}
+
+/* Readonly / Disabled inputs */
+.web-form-container input[readonly],
+.web-form-container input[disabled],
+.web-form-container .like-disabled-input,
+.standard-web-form input[readonly],
+.standard-web-form input[disabled],
+.standard-web-form .like-disabled-input,
+div[data-path*="dobiz-payment"] input[readonly],
+div[data-path*="dobiz-payment"] .like-disabled-input {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-weight: 600 !important;
+}
+
+/* Help Text / Text Muted in Web Forms */
+.web-form-container .help-box,
+.web-form-container .text-muted,
+.web-form-container .form-text,
+.standard-web-form .help-box,
+.standard-web-form .text-muted,
+.standard-web-form .form-text {
+    color: #475569 !important;
+    font-size: 12.5px !important;
+}
+
+/* Web Form Action Buttons */
+.web-form-container .btn-primary,
+.standard-web-form .btn-primary,
+.web-form-footer .btn-primary,
+.web-form-actions .btn-primary,
+div[data-path*="dobiz-payment"] .btn-primary {
+    background: linear-gradient(135deg, #008080 0%, #0d9488 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 24px !important;
+    font-weight: 800 !important;
+    padding: 12px 28px !important;
+    font-size: 15px !important;
+    box-shadow: 0 4px 16px rgba(0, 128, 128, 0.3) !important;
+    cursor: pointer !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM WEBSITE NAVBAR & MENU BAR COLORING — MAXIMUM VISIBILITY & BEAUTY
+   ═══════════════════════════════════════════════════════════════════════════ */
+.navbar,
+.web-navbar,
+body.website-page .navbar,
+.website-wrapper .navbar,
+div[data-path*="dobiz-payment"] .navbar,
+div[data-path*="dobiz-signup"] .navbar {
+    background: rgba(7, 42, 46, 0.96) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-bottom: 1.5px solid rgba(31, 182, 174, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Brand & Logo Text */
+.navbar-brand,
+.navbar-brand .app-name,
+body.website-page .navbar-brand .app-name {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 17px !important;
+    letter-spacing: -0.3px !important;
+}
+
+/* All Menu Links in Navbar */
+.navbar .nav-link,
+.navbar-nav .nav-link,
+.web-navbar .nav-link,
+body.website-page .navbar .nav-link,
+.website-wrapper .navbar .nav-link,
+.navbar-nav a.nav-link {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+    font-size: 14.5px !important;
+    padding: 8px 16px !important;
+    border-radius: 12px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Menu Hover & Active State */
+.navbar .nav-link:hover,
+.navbar-nav .nav-link:hover,
+.web-navbar .nav-link:hover,
+body.website-page .navbar .nav-link:hover,
+.navbar .nav-link.active,
+.navbar-nav .nav-link.active {
+    color: #5eead4 !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    transform: translateY(-1px) !important;
+    text-shadow: 0 0 12px rgba(94, 234, 212, 0.6) !important;
+}
+
+/* Navbar Dropdown Menus */
+.navbar .dropdown-menu {
+    background: #072a2e !important;
+    border: 1px solid rgba(31, 182, 174, 0.4) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
+    padding: 8px !important;
+}
+
+.navbar .dropdown-item {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    transition: background 0.15s ease !important;
+}
+
+.navbar .dropdown-item:hover {
+    background: rgba(31, 182, 174, 0.25) !important;
+    color: #5eead4 !important;
+}
+
+/* Navbar Action Buttons (Contact Us, Cart, Login) */
+.navbar a[href*="contact"],
+.navbar .btn-contact {
+    background: linear-gradient(135deg, #0d9488 0%, #008080 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-radius: 20px !important;
+    padding: 7px 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 2px 10px rgba(0, 128, 128, 0.3) !important;
+}
+
+.navbar a[href*="contact"]:hover {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(0, 128, 128, 0.5) !important;
+}
+
+.navbar a[href*="cart"],
+.navbar .cart-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-radius: 20px !important;
+    padding: 7px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.navbar a[href*="cart"]:hover {
+    background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;
+    transform: translateY(-1px) !important;
+} 
+
+.web-form-container .btn-primary:hover,
+.standard-web-form .btn-primary:hover,
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0d9488 0%, #072a2e 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(0, 128, 128, 0.4) !important;
+}
+
+.web-form-container .btn-default,
+.standard-web-form .btn-default,
+.web-form-footer .btn-default {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 24px !important;
+    padding: 10px 20px !important;
+}
+
+/* 7. SCROLLBARS */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* 8. WORKSPACE SPECIFICS */
+.widget-group {
+    margin-bottom: 2rem;
+}
+
+/* ─── 9. BISMALLAH - HADEEDA CHAT WIDGET COMPREHENSIVE UI FIX ─── */
+
+/* Chat wrapper container */
+.chat-window-wrapper {
+    z-index: 99999 !important;
+    position: fixed !important;
+    bottom: var(--chat--spacing, 1rem) !important;
+    right: var(--chat--spacing, 1rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+}
+
+/* Chat window - dynamic height so footer is never pushed out */
+.chat-window-wrapper .chat-window,
+.chat-window {
+    height: min(580px, calc(100vh - 100px)) !important;
+    max-height: calc(100vh - 90px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: rgba(13, 17, 23, 0.82) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(31, 182, 174, 0.35) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 24px rgba(31,182,174,0.18) !important;
+}
+
+/* Layout container inside window */
+.chat-layout,
+.chat-window .chat-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+/* Messages body - scrollable */
+.chat-layout .chat-body,
+.chat-body,
+.chat-messages-list {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    background: rgba(13, 17, 23, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Chat Footer - fixed height, flex shrink 0, fully visible */
+.chat-layout .chat-footer,
+.chat-footer,
+.chat-window-wrapper .chat-footer,
+[class*="chat-footer"] {
+    flex: 0 0 auto !important;
+    background: rgba(13, 17, 23, 0.95) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: none !important;
+    border-top: 1px solid rgba(255,255,255,0.08) !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: 54px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Container pill wrapping textarea and buttons */
+.chat-window-wrapper .chat-inputs,
+.chat-window-wrapper .chat-input-wrapper,
+.chat-inputs,
+.chat-input-wrapper,
+[class*="chat-inputs"],
+[class*="chat-input-wrapper"] {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 24px !important;
+    padding: 3px 6px 3px 12px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow: visible !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+
+.chat-inputs:focus-within,
+.chat-input-wrapper:focus-within,
+[class*="chat-inputs"]:focus-within,
+[class*="chat-input-wrapper"]:focus-within {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #1FB6AE !important;
+    box-shadow: 0 0 0 2px rgba(31, 182, 174, 0.3) !important;
+}
+
+/* Textarea input field */
+.chat-window-wrapper .chat-input,
+.chat-window-wrapper textarea.chat-input,
+.chat-window-wrapper input.chat-input,
+.chat-input,
+textarea.chat-input,
+input.chat-input,
+.chat-inputs textarea,
+.chat-inputs input,
+[class*="chat-input"]:not(button):not([class*="send"]):not([class*="upload"]) {
+    flex: 1 1 0% !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    outline: none !important;
+    padding: 6px 4px !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    box-shadow: none !important;
+    resize: none !important;
+    overflow-y: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+}
+
+.chat-input:focus,
+textarea.chat-input:focus,
+input.chat-input:focus {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.chat-input::placeholder,
+textarea.chat-input::placeholder,
+[class*="chat-input"]::placeholder {
+    color: rgba(255,255,255,0.5) !important;
+    font-style: italic !important;
+}
+
+/* Controls wrapper */
+.chat-inputs-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* File Upload / Attachment Button */
+.chat-window-wrapper .chat-footer button:not(.chat-input-send-button),
+.chat-window-wrapper .chat-file-upload-button,
+.chat-footer button:not(.chat-input-send-button),
+.chat-file-upload-button,
+button[class*="file-upload"] {
+    flex: 0 0 32px !important;
+    flex-shrink: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    background: rgba(255,255,255,0.1) !important;
+    color: rgba(255,255,255,0.7) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+.chat-footer button:not(.chat-input-send-button):hover,
+.chat-file-upload-button:hover,
+button[class*="file-upload"]:hover {
+    background: rgba(31,182,174,0.25) !important;
+    color: #1FB6AE !important;
+    border-color: #1FB6AE !important;
+    transform: scale(1.08) !important;
+}
+
+.chat-footer button:not(.chat-input-send-button) svg,
+.chat-file-upload-button svg,
+button[class*="file-upload"] svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Send Button - Crisp, Round, Fully Visible */
+.chat-window-wrapper .chat-input-send-button,
+.chat-window-wrapper button.chat-input-send-button,
+.chat-input-send-button,
+button.chat-input-send-button,
+button[class*="send-button"] {
+    flex: 0 0 34px !important;
+    flex-shrink: 0 !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(31,182,174,0.4) !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+.chat-input-send-button:hover,
+button.chat-input-send-button:hover {
+    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 3px 12px rgba(31,182,174,0.6) !important;
+}
+
+.chat-input-send-button:disabled,
+button.chat-input-send-button:disabled {
+    background: rgba(255,255,255,0.15) !important;
+    color: rgba(255,255,255,0.3) !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.chat-input-send-button svg,
+button.chat-input-send-button svg,
+button[class*="send-button"] svg {
+    width: 15px !important;
+    height: 15px !important;
+}
+
+.chat-powered-by {
+    display: none !important;
+}
+/* ===== GLOBAL FOOTER CORRECTNESS FIX (2026-08-24) =====
+   Neutralises bootstrap's html,body{height:100%} so the flex-column
+   body stretches to full content height and .web-footer{margin-top:auto}
+   lands at max(content_end, viewport_bottom) -- never mid-page,
+   never overlapping forms, flush with the true bottom. */
+html { height: auto !important; }
+body {
+    height: auto !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.web-footer {
+    position: static !important;
+    margin-top: auto !important;
+}
+body[data-path] { background-attachment: fixed !important; }
+/* ===== END GLOBAL FOOTER FIX ===== */
+
+/* ===== P4-B: FULL-WIDTH DOC HEADERS, BUTTONS BELOW RIGHT-ALIGNED ===== */
+[data-route*="app"] .page-head .container {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+[data-route*="app"] .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+[data-route*="app"] .page-title,
+[data-route*="app"] .page-title.col-md-4,
+[data-route*="app"] .page-title.col-sm-6,
+[data-route*="app"] .page-title.col-xs-7 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    -webkit-flex: 0 0 100% !important;
+}
+[data-route*="app"] .page-actions {
+    justify-content: flex-end !important;
+    margin-top: 4px !important;
+}
+
+/* ===== P4-C: COLLAPSIBLE FILTERS PANEL ===== */
+.filter-selector .filter-section {
+    border: 1px solid var(--border-color, #313244) !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+}
+.filter-selector .filter-section .filter-label {
+    cursor: pointer !important;
+    user-select: none !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+}
+.filter-selector .filter-section .collapse-indicator {
+    font-size: 11px;
+    transition: transform .2s;
+}
+.filter-selector .filter-section.collapsed .collapse-indicator {
+    transform: rotate(-90deg);
+}
+.filter-selector .filter-section .filter-body {
+    overflow: hidden !important;
+    transition: max-height .25s ease;
+    max-height: 600px;
+}
+.filter-selector .filter-section.collapsed .filter-body {
+    max-height: 0 !important;
+}
+[data-theme="light"] .filter-selector .filter-section {
+    background: rgba(255,255,255,0.85) !important;
+    border-color: rgba(2,106,110,0.25) !important;
+}
+[data-theme="light"] .filter-selector .filter-section .filter-label {
+    color: #0f172a !important;
+}
+
+/* ===== P4-L: WEBSITE ACCOUNT-MENU CLEANUP ===== */
+.navbar .dropdown-menu a.dropdown-item[href="/apps"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app/switch"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app?type=switch"] {
+    display: none !important;
+}
+
+/* ===== P4-B T2 DARK-THEME FORM REASSERTIONS (2026-08-24) =====
+   Placed LAST so it wins the cascade. Guarantees desk-form field titles,
+   page titles and control text stay readable in dark mode regardless of
+   any earlier web-form leakage. */
+[data-theme="dark"] .frappe-control .control-label,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .form-group .control-label {
+    color: var(--text-color, #cdd6f4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .page-head .title-text,
+[data-theme="dark"] h3.title-text,
+[data-theme="dark"] .page-title {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .form-section .section-head,
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .form-tabs-list .nav-link {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .control-label .reqd,
+[data-theme="dark"] label .reqd { color: #f87171 !important; }
+[data-theme="dark"] select,
+[data-theme="dark"] textarea.form-control,
+[data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
+    color: var(--text-color, #cdd6f4) !important;
+body[data-path] { background-attachment: fixed !important; }
+/* ===== END GLOBAL FOOTER FIX ===== */
+
+/* ===== P4-B: FULL-WIDTH DOC HEADERS, BUTTONS BELOW RIGHT-ALIGNED ===== */
+[data-route*="app"] .page-head .container {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+[data-route*="app"] .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+[data-route*="app"] .page-title,
+[data-route*="app"] .page-title.col-md-4,
+[data-route*="app"] .page-title.col-sm-6,
+[data-route*="app"] .page-title.col-xs-7 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    -webkit-flex: 0 0 100% !important;
+}
+[data-route*="app"] .page-actions {
+    justify-content: flex-end !important;
+    margin-top: 4px !important;
+}
+
+/* ===== P4-C: COLLAPSIBLE FILTERS PANEL ===== */
+.filter-selector .filter-section {
+    border: 1px solid var(--border-color, #313244) !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+}
+.filter-selector .filter-section .filter-label {
+    cursor: pointer !important;
+    user-select: none !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+}
+.filter-selector .filter-section .collapse-indicator {
+    font-size: 11px;
+    transition: transform .2s;
+}
+.filter-selector .filter-section.collapsed .collapse-indicator {
+    transform: rotate(-90deg);
+}
+.filter-selector .filter-section .filter-body {
+    overflow: hidden !important;
+    transition: max-height .25s ease;
+    max-height: 600px;
+}
+.filter-selector .filter-section.collapsed .filter-body {
+    max-height: 0 !important;
+}
+[data-theme="light"] .filter-selector .filter-section {
+    background: rgba(255,255,255,0.85) !important;
+    border-color: rgba(2,106,110,0.25) !important;
+}
+[data-theme="light"] .filter-selector .filter-section .filter-label {
+    color: #0f172a !important;
+}
+
+/* ===== P4-L: WEBSITE ACCOUNT-MENU CLEANUP ===== */
+.navbar .dropdown-menu a.dropdown-item[href="/apps"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app/switch"],
+.navbar .dropdown-menu a.dropdown-item[href*="/app?type=switch"] {
+    display: none !important;
+}
+
+/* ===== P4-B T2 DARK-THEME FORM REASSERTIONS (2026-08-24) =====
+   Placed LAST so it wins the cascade. Guarantees desk-form field titles,
+   page titles and control text stay readable in dark mode regardless of
+   any earlier web-form leakage. */
+[data-theme="dark"] .frappe-control .control-label,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .form-group .control-label {
+    color: var(--text-color, #cdd6f4) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .page-head .title-text,
+[data-theme="dark"] h3.title-text,
+[data-theme="dark"] .page-title {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+[data-theme="dark"] .form-section .section-head,
+[data-theme="dark"] .section-head,
+[data-theme="dark"] .form-tabs-list .nav-link {
+    color: #cbd5e1 !important;
+}
+[data-theme="dark"] .control-label .reqd,
+[data-theme="dark"] label .reqd { color: #f87171 !important; }
+[data-theme="dark"] select,
+[data-theme="dark"] textarea.form-control,
+[data-theme="dark"] input.form-control:not(.input-sm):not(.input-xs) {
+    color: var(--text-color, #cdd6f4) !important;
+}
+[data-theme="dark"] .frappe-control .control-label.muted,
+[data-theme="dark"] .frappe-control .label-muted,
+[data-theme="dark"] .frappe-control .help-box { color: #94a3b8 !important; }
+
+/* Light-mode desk labels — explicit AA guarantee (pairs with T3 inputs) */
+[data-theme="light"] .frappe-control .control-label,
+[data-theme="light"] .form-group label {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+/* ===== END P4-B T2 ===== */
+
+/* ==========================================================================
+   HADEEDA BIZAI CHAT WIDGET ENHANCEMENTS (FULL-WIDTH, FULL-CONTENT, RESIZABLE)
+   ========================================================================== */
+.chat-window,
+[class*="chat-window"],
+[class*="_window_"] {
+    min-width: 340px !important;
+    max-width: min(850px, calc(100vw - 20px)) !important;
+    min-height: 480px !important;
+    max-height: min(920px, calc(100vh - 80px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+}
+
+/* Chat message full text rendering - prevent any cutting */
+.chat-message,
+.chat-message-markdown,
+.chat-message-text,
+.chat-message p,
+.chat-message span,
+.n8n-markdown,
+.n8n-markdown p,
+[class*="_markdown_"],
+[class*="_message_"] {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: auto !important;
+}
+
+/* Chat message container takes remaining space and scrolls - NEVER squashes footer */
+.chat-window .chat-layout,
+.chat-window .chat-body,
+.chat-window .chat-messages-container,
+.chat-window .chat-messages-list,
+.chat-window [class*="chat-layout"],
+.chat-window [class*="chat-body"],
+.chat-window [class*="chat-messages"],
+.chat-window [class*="_messages_"],
+.chat-window [class*="_body_"],
+.chat-window main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Full-width uncompressed footer - scoped to chat widget */
+.chat-window .chat-footer,
+.chat-window footer,
+.chat-window [class*="chat-footer"],
+.chat-window [class*="_footer_"] {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    min-height: 64px !important;
+    max-height: 180px !important;
+    height: auto !important;
+    padding: 8px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    background: #111827 !important;
+    border-top: 1px solid rgba(31, 182, 174, 0.3) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Full-width inputs wrapper - scoped to chat widget */
+.chat-window .chat-inputs,
+.chat-window .chat-input-wrapper,
+.chat-window .chat-footer form,
+.chat-window [class*="chat-inputs"],
+.chat-window [class*="inputContainer"],
+.chat-window [class*="_inputContainer_"],
+.chat-window [class*="_inputs_"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Chat text input / textarea - scoped to chat widget ONLY */
+.chat-window .chat-input,
+.chat-window textarea.chat-input,
+.chat-window input.chat-input,
+.chat-window .chat-inputs textarea,
+.chat-window .chat-inputs input,
+.chat-window textarea,
+.chat-window input[type="text"] {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 50px !important;
+    min-height: 38px !important;
+    max-height: 120px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    caret-color: #1FB6AE !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.chat-window .chat-input::placeholder,
+.chat-window textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ─── LIGHT THEME: Chat Widget Text Fix ─── */
+[data-theme="light"] .chat-window .chat-input,
+[data-theme="light"] .chat-window textarea.chat-input,
+[data-theme="light"] .chat-window .chat-inputs textarea,
+[data-theme="light"] .chat-window .chat-inputs input,
+[data-theme="light"] .chat-window textarea,
+[data-theme="light"] .chat-window input[type="text"],
+html[data-theme="light"] .chat-window textarea,
+html[data-theme="light"] .chat-window input[type="text"] {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    caret-color: #1FB6AE !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+[data-theme="light"] .chat-window .chat-input::placeholder,
+[data-theme="light"] .chat-window textarea::placeholder,
+html[data-theme="light"] .chat-window textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+
+/* ─── Controls Container ─── */
+.chat-window .chat-inputs-controls,
+.chat-window [class*="chat-inputs-controls"] {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ─── Attach / File Button (with scoped attribute override) ─── */
+.chat-window .chat-input-file-button,
+.chat-window button.chat-input-file-button,
+.chat-window [data-test-id="chat-attach-file-button"],
+.chat-window button[class*="file-button"],
+.chat-input-file-button[data-v-fb8d706b],
+button.chat-input-file-button[data-v-fb8d706b] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    background: rgba(31, 182, 174, 0.18) !important;
+    border: 1px solid rgba(31, 182, 174, 0.45) !important;
+    color: #1FB6AE !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 34px !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+}
+.chat-window .chat-input-file-button:hover {
+    background: rgba(31, 182, 174, 0.35) !important;
+    border-color: #1FB6AE !important;
+    transform: scale(1.06) !important;
+}
+.chat-window .chat-input-file-button svg,
+.chat-input-file-button[data-v-fb8d706b] svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #1FB6AE !important;
+    color: #1FB6AE !important;
+    display: block !important;
+    min-width: 18px !important;
+}
+
+/* ─── Send Button (with scoped attribute override) ─── */
+.chat-window .chat-input-send-button,
+.chat-window button.chat-input-send-button,
+.chat-window button[class*="send-button"],
+.chat-input-send-button[data-v-fb8d706b],
+button.chat-input-send-button[data-v-fb8d706b] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 34px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 8px rgba(31, 182, 174, 0.45) !important;
+    transition: all 0.2s ease !important;
+}
+.chat-window .chat-input-send-button:disabled,
+.chat-window .chat-input-send-button[disabled],
+.chat-input-send-button[data-v-fb8d706b]:disabled,
+.chat-input-send-button[data-v-fb8d706b][disabled] {
+    cursor: pointer !important;
+    opacity: 0.85 !important;
+    background: linear-gradient(135deg, #1FB6AE 0%, #147974 100%) !important;
+    color: #FFFFFF !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+}
+.chat-window .chat-input-send-button:hover:not([disabled]) {
+    background: linear-gradient(135deg, #25c9c1 0%, #19a095 100%) !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 3px 12px rgba(31, 182, 174, 0.6) !important;
+}
+.chat-window .chat-input-send-button svg,
+.chat-input-send-button[data-v-fb8d706b] svg {
+    width: 18px !important;
+    height: 18px !important;
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    color: #FFFFFF !important;
+    display: block !important;
+    min-width: 18px !important;
+}
+
+/* ─── LIGHT THEME: Buttons stay visible ─── */
+[data-theme="light"] .chat-window .chat-input-send-button,
+[data-theme="light"] .chat-input-file-button,
+html[data-theme="light"] .chat-window .chat-input-send-button,
+html[data-theme="light"] .chat-window .chat-input-file-button {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P5: BLOG & TIBEB PAGES — LUMINOUS LIGHT THEME & MAXIMUM READABILITY
+   ═══════════════════════════════════════════════════════════════════════════ */
+body[data-path="list"],
+body[data-path*="blog"],
+body[data-route*="blog"],
+#page-list[data-path="blog"],
+div[data-path="blog"],
+.blog-list-content,
+.blog-content,
+.page-content-wrapper {
+    background: linear-gradient(145deg, #f8fafc 0%, #f0fdfa 40%, #f1f5f9 100%) !important;
+    color: #0f172a !important;
+}
+
+/* Blog Headings & Breadcrumbs */
+body[data-path="list"] .page-breadcrumbs,
+body[data-path*="blog"] .page-breadcrumbs,
+body[data-path="list"] .page-breadcrumbs a,
+body[data-path*="blog"] .page-breadcrumbs a {
+    color: #008080 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+body[data-path="list"] .page-head h1,
+body[data-path*="blog"] .page-head h1,
+body[data-path="list"] .page-title,
+body[data-path*="blog"] .page-title,
+#page-list h1,
+#page-list .page-head h1,
+.blog-header h1,
+.blog-list-content h1,
+.blog-list-content h2 {
+    color: #072a2e !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+/* Blog Cards */
+.blog-list .blog-card .card,
+.blog-card .card,
+div[data-doctype="Blog Post"] .card {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 22px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.blog-list .blog-card .card:hover,
+.blog-card .card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 14px 35px rgba(0, 128, 128, 0.12) !important;
+    border-color: #008080 !important;
+}
+
+.blog-card .card-img-top img {
+    border-radius: 20px 20px 0 0 !important;
+    object-fit: cover !important;
+    max-height: 240px !important;
+}
+
+.blog-card .card-body {
+    padding: 22px 24px !important;
+    background: #ffffff !important;
+}
+
+/* Blog Category / Featured Badge */
+.blog-card .text-muted.small.text-uppercase,
+.blog-card .small.text-uppercase {
+    color: #0f766e !important;
+    font-weight: 800 !important;
+    font-size: 11.5px !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 6px !important;
+}
+
+.blog-card .small.text-uppercase span {
+    background: #f0fdfa !important;
+    border: 1px solid #ccfbf1 !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    color: #0f766e !important;
+    display: inline-block !important;
+}
+
+/* Blog Titles */
+.blog-card h5,
+.blog-card h5 span,
+.blog-card h5 .text-dark,
+.blog-card .text-dark {
+    color: #072a2e !important;
+    font-weight: 800 !important;
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+    margin-top: 6px !important;
+    margin-bottom: 8px !important;
+    transition: color 0.2s ease !important;
+}
+
+.blog-card:hover h5,
+.blog-card:hover h5 span {
+    color: #008080 !important;
+}
+
+/* Blog Descriptions */
+.blog-card .post-description,
+.blog-card p.post-description.text-muted,
+.blog-card .text-muted {
+    color: #475569 !important;
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+}
+
+/* Blog Card Footer */
+.blog-card .blog-card-footer {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding-top: 14px !important;
+    margin-top: 14px !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+.blog-card .blog-card-footer a {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+.blog-card .blog-card-footer .small {
+    color: #64748b !important;
+    font-size: 12px !important;
+}
+
+/* Single Blog Post Article View */
+.blog-text-content,
+.blog-post-content,
+.blog-article {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 24px !important;
+    padding: 36px 40px !important;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.04) !important;
+    color: #1e293b !important;
+    font-size: 16.5px !important;
+    line-height: 1.8 !important;
+}
+
+.blog-text-content p,
+.blog-post-content p {
+    color: #334155 !important;
+}
+
+.blog-text-content h1,
+.blog-text-content h2,
+.blog-text-content h3,
+.blog-text-content h4 {
+    color: #072a2e !important;
+    font-weight: 800 !important;
+}
+
+/* ==========================================================================
+   DESK FULL-WIDTH TITLE BAR & BUTTONS ROW BELOW
+   ========================================================================== */
+.page-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 24px 12px 24px !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    gap: 12px !important;
+}
+
+.page-head .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+}
+
+/* Row 1: Full-Width Title with status badge */
+.page-head .title-area {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    gap: 12px !important;
+}
+
+.page-head .title-area .title-text {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.3 !important;
+    text-overflow: unset !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+}
+
+.page-head .indicator-pill,
+.page-head .status-pill,
+.page-head .indicator {
+    margin-left: 8px !important;
+}
+
+/* Row 2: Action buttons placed underneath the title bar */
+.page-head .page-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding-top: 4px !important;
+}
+
+.page-head .page-actions .btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Page content below buttons */
+.page-body {
+    padding-top: 16px !important;
+}
+
+/* ==========================================================================
+   PORTAL & WEBPAGE PAGINATION (PREV & NEXT BUTTONS FIX)
+   ========================================================================== */
+.pagination,
+.product-paging-area,
+.page-footer,
+.frappe-list-pagination,
+.web-pagination {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    padding: 24px 0 !important;
+    margin: 20px 0 !important;
+    width: 100% !important;
+}
+
+.btn-prev,
+.btn-next,
+.pagination .btn,
+.product-paging-area .btn,
+.web-pagination .btn {
+    background: #008080 !important;
+    color: #ffffff !important;
+    border: 1px solid #008080 !important;
+    border-radius: 25px !important;
+    padding: 8px 24px !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    box-shadow: 0 4px 14px rgba(0, 128, 128, 0.25) !important;
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.btn-prev:hover,
+.btn-next:hover,
+.pagination .btn:hover,
+.product-paging-area .btn:hover {
+    background: #006666 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 128, 128, 0.35) !important;
+}
+
+.btn-prev[disabled],
+.btn-next[disabled],
+.pagination .btn.disabled {
+    background: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* Hide orphaned Prev/Next when viewing Maps */
+.view-map-active .pagination,
+.view-map-active .product-paging-area,
+.view-map-active .btn-prev,
+.view-map-active .btn-next,
+#products-map-area ~ .product-paging-area,
+#magala-embedded-map-container[style*="block"] ~ #magala-pagination {
+    display: none !important;
+}
+
+
+

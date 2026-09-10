@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include bismillah_ethiobiz *.css
+recursive-include bismillah_ethiobiz *.csv
+recursive-include bismillah_ethiobiz *.html
+recursive-include bismillah_ethiobiz *.ico
+recursive-include bismillah_ethiobiz *.js
+recursive-include bismillah_ethiobiz *.json
+recursive-include bismillah_ethiobiz *.md
+recursive-include bismillah_ethiobiz *.png
+recursive-include bismillah_ethiobiz *.py
+recursive-include bismillah_ethiobiz *.svg
+recursive-include bismillah_ethiobiz *.txt
+recursive-exclude bismillah_ethiobiz *.pyc
