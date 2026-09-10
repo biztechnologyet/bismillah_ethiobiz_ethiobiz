@@ -378,9 +378,9 @@ div[data-path*="dobiz-payment"] .control-label {
     visibility: visible !important;
 }
 
-html:not([data-route*="app"]) .frappe-control .control-label,
-html:not([data-route*="app"]) .form-group label,
-html:not([data-route*="app"]) .form-group .control-label {
+body:not([data-route*="app"]) .frappe-control .control-label,
+body:not([data-route*="app"]) .form-group label,
+body:not([data-route*="app"]) .form-group .control-label {
     color: #0f172a !important;
     font-weight: 800 !important;
     font-size: 14px !important;
@@ -2402,4 +2402,20 @@ body.sidebar-opened .workspace-sidebar-backdrop {
 .page-actions,
 .btn-group {
     overflow: visible !important;
+}
+
+/* ===== P4-C DESK-ONLY LABEL GUARANTEE (2026-09-10) =====
+   Scoped strictly to the Desk app shell (body carries data-route="app/..."),
+   so it can never leak onto public website pages. Every desk form label -
+   textbox, dropdown, link, and all editing tools - follows the active theme
+   variable --text-color instead of the near-black web-form color. */
+body[data-route*="app"] .frappe-control .control-label,
+body[data-route*="app"] .form-group label,
+body[data-route*="app"] .form-group .control-label,
+body[data-route*="app"] .form-section .section-head,
+body[data-route*="app"] .form-tabs-list .nav-link {
+    color: var(--text-color, #1f272e) !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
