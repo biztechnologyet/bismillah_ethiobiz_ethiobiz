@@ -3,9 +3,9 @@ from frappe import _
 from frappe.utils import flt, cint, today, add_days, get_datetime, now_datetime
 import json
 try:
-    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer, resolve_booking_customer
 except ImportError:
-    from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, get_or_create_customer_for_user, session_contact_defaults, resolve_or_create_customer, resolve_booking_customer
 
 # Fallback Seed Properties if none exist in database
 SAMPLE_PROPERTIES = [
@@ -266,9 +266,10 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
     check_out = check_out or kwargs.get("end_date") or kwargs.get("checkout")
     email = kwargs.get("email") or kwargs.get("customer_email")
 
-    # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone, email)
-    
+    # BISMALLAH (2026-09-10): login-gated; identity always from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone, email)
+    customer = party["customer"]
+
     if not all([property_id, check_in, check_out]):
         frappe.throw(_("Property, check-in date, and check-out date are required"))
 
@@ -297,8 +298,8 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
         property_company = resolve_booking_company(property_company, "property stay")
 
     customer_defaults = session_contact_defaults()
-    user = customer_name or customer_defaults.get("full_name")
-    phone = customer_phone or customer_defaults.get("phone") or "0911000000"
+    user = party["full_name"] or customer_name or customer_defaults.get("full_name")
+    phone = party["phone"] or customer_phone or customer_defaults.get("phone") or ""
 
     # Create BizBooking entry if DocType exists
     booking_id = f"STAY-{property_id}-{cint(now_datetime().timestamp())}"
@@ -344,6 +345,7 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
                 if listing:
                     bsvc = frappe.get_doc({
                         "doctype": "BizService Booking",
+                        "customer": customer,  # BISMALLAH: link to authenticated customer
                         "customer_name": user,
                         "customer_phone": phone,
                         "service": listing,

@@ -14,9 +14,9 @@ import frappe
 from frappe import _
 from frappe.utils import today, add_days, getdate, flt, cint
 try:
-    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
 except ImportError:
-    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
 
 # ==============================================================================
 # 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
@@ -331,7 +331,7 @@ def search_services(category=None, region=None, query=None,
         s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
         s["company_name"] = frappe.db.get_value("Company", s["company"], "company_name") or s["company"]
         s["rating"] = flt(s.get("average_rating") or 4.9)
-        # practitioners is a child table, not a column — load rows and attach
+        # practitioners is a child table, not a column ÔÇö load rows and attach
         try:
             s["practitioners"] = frappe.get_all(
                 "BizService Practitioner",
@@ -362,19 +362,19 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     b_date = booking_date or date or appointment_date or str(frappe.utils.now_datetime().date())
     b_time = booking_time or time_slot or appointment_time or "14:00"
 
-    # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone, customer_email)
-    
+    # BISMALLAH (2026-09-10): login-gated; identity always from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone, customer_email)
+    customer = party["customer"]
+
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
     service_doc = frappe.get_doc("BizService Listing", service_id)
     provider_user = None
 
-    # Get customer details from session
-    customer_defaults = session_contact_defaults()
-    customer_name = customer_name or customer_defaults.get("full_name") or "Valued Customer"
-    customer_phone = customer_phone or customer_defaults.get("phone") or "0911000000"
+    # Customer details come from the logged-in user's linked profile (no typing needed)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
 
     # BISMALLAH (multi-company): resolve the booking company reliably. Prefer the
     # listing's own company; fall back to BizService Settings > Global Defaults >
@@ -427,8 +427,8 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
         "customer": customer,  # BISMALLAH: Link to authenticated customer
-        "customer_name": customer_name or frappe.session.user,
-        "customer_phone": customer_phone or "0911000000",
+        "customer_name": customer_name or customer,
+        "customer_phone": customer_phone or "",
         "service": service_id,
         "company": company,
         "practitioner_name": practitioner or "Standard Specialist",
@@ -446,7 +446,7 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     frappe.db.commit()
 
     # BISMALLAH (Phase 6.1.4): real BizRide dispatch when the listing requires travel.
-    # The docstring previously claimed dispatch but never executed it — now wired to the
+    # The docstring previously claimed dispatch but never executed it ÔÇö now wired to the
     # real dispatch engine (bizride_api.request_delivery) and the delivery linked back.
     delivery_id = None
     if getattr(service_doc, "requires_travel", 0):
@@ -502,13 +502,18 @@ def create_unified_booking(booking_type=None, service_id=None, resource_id=None,
     s_id = service_id or resource_id
     b_date = booking_date or date or str(frappe.utils.now_datetime().date())
 
+    # BISMALLAH (2026-09-10): login-gated; identity from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
+
     # --- Salon bookings ---
     if booking_type and booking_type.lower() == "salon":
         if frappe.db.exists("DocType", "Salon Appointment"):
             sa = frappe.get_doc({
                 "doctype": "Salon Appointment",
-                "customer_name": customer_name or frappe.session.user,
-                "customer_phone": customer_phone or "0911000000",
+                "customer_name": customer_name or party["customer"],
+                "customer_phone": customer_phone,
                 "appointment_date": b_date,
                 "appointment_time": time_slot or "10:00",
                 "status": "Confirmed"
@@ -546,7 +551,6 @@ def create_universal_booking(booking_data=None, **kwargs):
     """
     from .bizbooking_aggregator_api import create_universal_booking as _agg
     return _agg(booking_data=booking_data, **kwargs)
-
 
 
 
