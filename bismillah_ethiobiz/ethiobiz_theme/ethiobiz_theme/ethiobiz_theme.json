@@ -57,17 +57,38 @@
                        "label":  "Copyright Text",
                        "default":  "© 2026 EthioBiz. All rights reserved."
                    },
-                   {
-                       "fieldname":  "footer_powered_by",
-                       "fieldtype":  "Data",
-                       "label":  "Footer Powered By",
-                       "default":  "Powered by Biz Technology Solutions"
-                   },
-                   {
-                       "fieldname":  "section_backgrounds",
-                       "fieldtype":  "Section Break",
-                       "label":  "Atmospheric Background \u0026 Engine"
-                   },
+{
+                        "fieldname":  "footer_powered_by",
+                        "fieldtype":  "Data",
+                        "label":  "Footer Powered By",
+                        "default":  "Powered by Biz Technology Solutions"
+                    },
+                    {
+                        "fieldname":  "section_icons",
+                        "fieldtype":  "Section Break",
+                        "label":  "Icons & Desk Branding"
+                    },
+                    {
+                        "fieldname":  "website_icon",
+                        "fieldtype":  "Attach Image",
+                        "label":  "Website Icon",
+                        "description":  "Shown in the website navbar and as the browser-tab favicon. Leave empty to keep the default EthioBiz icon."
+                    },
+                    {
+                        "fieldname":  "column_break_icons",
+                        "fieldtype":  "Column Break"
+                    },
+                    {
+                        "fieldname":  "desk_icon",
+                        "fieldtype":  "Attach Image",
+                        "label":  "Desk Icon",
+                        "description":  "Shown at the top-left of the Desk (main brand icon). Leave empty to keep the default EthioBiz icon."
+                    },
+                    {
+                        "fieldname":  "section_backgrounds",
+                        "fieldtype":  "Section Break",
+                        "label":  "Atmospheric Background \u0026 Engine"
+                    },
                    {
                        "fieldname":  "enable_background_images",
                        "fieldtype":  "Check",
@@ -280,13 +301,25 @@
                        "label":  "Enable \u0027Light\u0027 Label Fix",
                        "default":  1
                    },
-                   {
-                       "fieldname":  "custom_css",
-                       "fieldtype":  "Code",
-                       "label":  "Custom CSS Overrides",
-                       "options":  "CSS"
-                   }
-               ],
+{
+                        "fieldname":  "custom_css",
+                        "fieldtype":  "Code",
+                        "label":  "Custom CSS Overrides",
+                        "options":  "CSS"
+                    },
+                    {
+                        "fieldname":  "section_floating_widget",
+                        "fieldtype":  "Section Break",
+                        "label":  "Website Floating Widget (Bottom-Left CTAs)"
+                    },
+                    {
+                        "fieldname":  "floating_action_items",
+                        "fieldtype":  "Table",
+                        "label":  "Floating Action Items",
+                        "options":  "EthioBiz Floating Action Item",
+                        "description":  "Manage dynamic call-to-actions displayed when clicking the bottom-left floating butterfly on the website."
+                    }
+                ],
     "index_loggable":  0,
     "links":  [
 

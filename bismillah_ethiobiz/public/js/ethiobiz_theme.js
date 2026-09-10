@@ -427,12 +427,65 @@
         xhr.send();
     }
 
+    // ─── Apply Website / Desk icons from EthioBiz Theme Settings ───────────
+    // BISMALLAH (2026-09-10): custom icons are optional — empty settings keep
+    // the default EthioBiz branding untouched. Website icon drives the navbar
+    // brand + favicon; desk icon drives the Desk top-left brand.
+    function applyThemeIcons(s) {
+        if (!s) s = window.__ethiobizThemeSettings || {};
+        var websiteIcon = s.website_icon || s.favicon || '';
+        var deskIcon = s.desk_icon || '';
+        var isDesk = !!(document.body &&
+            (document.body.classList.contains('desk-page') ||
+             document.querySelector('.desk-sidebar') ||
+             document.querySelector('.layout-side-section')));
+
+        if (websiteIcon && !isDesk) {
+            var fav = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
+            if (fav) {
+                fav.href = websiteIcon;
+            } else {
+                fav = document.createElement('link');
+                fav.rel = 'icon';
+                fav.href = websiteIcon;
+                document.head.appendChild(fav);
+            }
+            document.querySelectorAll('.navbar-brand img, #navbar-logo, .app-logo').forEach(img => {
+                if (img.closest('.pillar-icon, .sub-icon, .detail-logo, .footer-brand, .legacy-image, .hero-logo, .loader-logo, .pillar-card, .sub-system-card, .final-cta, .detail-image, .hero-content, .ethiobiz-landing, #loading-screen')) return;
+                img.src = websiteIcon;
+                img.alt = (BRAND_CONFIG && BRAND_CONFIG.app_name) || 'EthioBiz';
+                img.style.maxHeight = '35px';
+            });
+        }
+
+        if (deskIcon && isDesk) {
+            document.querySelectorAll('.desk-sidebar .navbar-brand img, .desk-navbar .navbar-brand img, .layout-side-section .navbar-brand img, .navbar-brand img').forEach(img => {
+                img.src = deskIcon;
+                img.alt = (BRAND_CONFIG && BRAND_CONFIG.app_name) || 'EthioBiz';
+                img.style.maxHeight = '35px';
+            });
+            document.querySelectorAll('#switch-to-app img, .app-switcher-window img, .navbar .app-icon img').forEach(img => {
+                img.src = deskIcon;
+            });
+        }
+    }
+
     window.EthioBizBrandManager = new BrandManager();
 
     // Fetch settings first, then init so updateBackground has correct flags
-    fetchAndCacheThemeSettings(function() {
+    fetchAndCacheThemeSettings(function(s) {
         window.EthioBizBrandManager.init();
+        applyThemeIcons(s);
     });
+
+    // Desk content mounts asynchronously — retry icon override briefly
+    let _iconRetries = 0;
+    const iconRetryTimer = setInterval(function() {
+        if (++_iconRetries > 6) { clearInterval(iconRetryTimer); return; }
+        if (document.body && document.querySelector('.desk-sidebar, .layout-side-section')) {
+            applyThemeIcons(window.__ethiobizThemeSettings || {});
+        }
+    }, 1000);
 
 })();
 
