@@ -491,30 +491,33 @@
     window.EthioBizBrandManager = new BrandManager();
 
     // ─── Optional dark-mode label color from Theme Settings ───────────────
+    // BISMALLAH (2026-09-10): expose the chosen color as CSS custom properties
+    // on :root. ethiobiz_theme.css reads these variables so EVERY form label
+    // and edit-tool control updates in real time — no <style> injection battle.
+    function _shadeHex(hex, ratio) {
+        hex = String(hex || '').trim().replace(/^#/, '');
+        if (hex.length === 3) hex = hex.split('').map(function (ch) { return ch + ch; }).join('');
+        if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#94a3b8';
+        var n = parseInt(hex, 16);
+        var r = Math.round(((n >> 16) & 255) * ratio);
+        var g = Math.round(((n >> 8) & 255) * ratio);
+        var b = Math.round((n & 255) * ratio);
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
     function applyThemeDarkLabel(s) {
         if (!s) s = window.__ethiobizThemeSettings || {};
         ethiobizDarkLabelColor = s.dark_label_color || '';
-        if (!document.head || !document.body) return;
-        const BUILDERSEL = [
-            '.control-label', 'label.control-label', '.form-section .section-head',
-            '.field-group .label', '.frappe-control .label-area',
-            '.section-head .section-title', '.page-head .title-text',
-            '.form-section .section-head .section-head-label',
-            '.ql-toolbar button, .ql-toolbar .ql-picker-label',
-            '.ce-toolbar__actions, .ce-block__settings-button',
-            '.desk-sidebar .desk-sidebar-item-label, .desk-sidebar-item-label'
-        ].join(',\n');
-        let styleEl = document.getElementById('ethiobiz-label-styles');
-        if (!styleEl) {
-            styleEl = document.createElement('style');
-            styleEl.id = 'ethiobiz-label-styles';
-            document.head.appendChild(styleEl);
-        }
+        var root = document.documentElement;
+        if (!root) return;
         if (ethiobizDarkLabelColor) {
-            styleEl.textContent = `[data-theme="dark"] body ${BUILDERSEL} { color: ${ethiobizDarkLabelColor} !important; }\n[data-theme="dark"] body ${BUILDERSEL} .text-muted { color: ${ethiobizDarkLabelColor} !important; }`;
+            root.style.setProperty('--ethiobiz-dark-label-color', ethiobizDarkLabelColor);
+            root.style.setProperty('--ethiobiz-dark-label-muted', _shadeHex(ethiobizDarkLabelColor, 0.62));
         } else {
-            styleEl.textContent = '';
+            root.style.removeProperty('--ethiobiz-dark-label-color');
+            root.style.removeProperty('--ethiobiz-dark-label-muted');
         }
+        // live re-apply after short delay so later-rendered desk sections inherit
+        setTimeout(function () { document.body.setAttribute('data-eb-label-color', ethiobizDarkLabelColor || 'none'); }, 0);
     }
 
     // Fetch settings first, then init so updateBackground has correct flags

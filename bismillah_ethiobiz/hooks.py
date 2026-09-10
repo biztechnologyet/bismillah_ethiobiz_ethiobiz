@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.1.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -51,7 +51,7 @@ app_include_css = [
 # JS included in desk (backend)
 app_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.1.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
@@ -64,7 +64,7 @@ app_include_js = [
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.1.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
@@ -76,7 +76,7 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.1.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",

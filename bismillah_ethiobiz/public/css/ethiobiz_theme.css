@@ -1069,7 +1069,7 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] .frappe-control .control-label,
 [data-theme="dark"] .form-group label,
 [data-theme="dark"] .form-group .control-label {
-    color: var(--text-color, #cdd6f4) !important;
+    color: var(--ethiobiz-dark-label-color, #cdd6f4) !important;
     font-weight: 600 !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -1077,14 +1077,14 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] .page-head .title-text,
 [data-theme="dark"] h3.title-text,
 [data-theme="dark"] .page-title {
-    color: #e2e8f0 !important;
+    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 [data-theme="dark"] .form-section .section-head,
 [data-theme="dark"] .section-head,
 [data-theme="dark"] .form-tabs-list .nav-link {
-    color: #cbd5e1 !important;
+    color: var(--ethiobiz-dark-label-color, #cbd5e1) !important;
 }
 [data-theme="dark"] .control-label .reqd,
 [data-theme="dark"] label .reqd { color: #f87171 !important; }
@@ -1095,7 +1095,7 @@ body[data-path] { background-attachment: fixed !important; }
 }
 [data-theme="dark"] .frappe-control .control-label.muted,
 [data-theme="dark"] .frappe-control .label-muted,
-[data-theme="dark"] .frappe-control .help-box { color: #94a3b8 !important; }
+[data-theme="dark"] .frappe-control .help-box { color: var(--ethiobiz-dark-label-muted, #94a3b8) !important; }
 
 /* Light-mode desk labels â€” explicit AA guarantee (pairs with T3 inputs) */
 [data-theme="light"] .frappe-control .control-label,
@@ -1662,7 +1662,7 @@ body[data-route^="Form"] .page-head .title-text,
 [data-theme="dark"] [data-page-route^="Form"] .page-head .title-text,
 [data-theme="dark"] .form-page .page-head .title-text,
 [data-theme="dark"] .page-head.eb-doc-head .title-text {
-    color: #F8F6F2 !important;
+    color: var(--ethiobiz-dark-label-color, #F8F6F2) !important;
 }
 
 /* Tier 2: Dedicated Actions Row in Document Forms */
@@ -1812,7 +1812,7 @@ body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
 [data-theme="dark"] .page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
 [data-theme="dark"] .eb-title-expanded .title-text {
     background: #18222d !important;
-    color: #F8F6F2 !important;
+    color: var(--ethiobiz-dark-label-color, #F8F6F2) !important;
     border-color: #1FB6AE !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
@@ -2071,21 +2071,21 @@ body[data-route^="Form"] .form-tab-content,
 [data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link,
 [data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link,
 [data-theme="dark"] .form-tabs-list .nav-item .nav-link {
-    color: #94a3b8 !important;
+    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
 }
 
 [data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
 [data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
 [data-theme="dark"] .form-tabs-list .nav-item .nav-link:hover {
-    color: #f8fafc !important;
+    color: var(--ethiobiz-dark-label-color, #f8fafc) !important;
     background: rgba(45, 212, 191, 0.12) !important;
 }
 
 [data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
 [data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
 [data-theme="dark"] .form-tabs-list .nav-item .nav-link.active {
-    color: #2dd4bf !important;
-    border-bottom: 2.5px solid #2dd4bf !important;
+    color: var(--ethiobiz-dark-label-color, #2dd4bf) !important;
+    border-bottom: 2.5px solid var(--ethiobiz-dark-label-color, #2dd4bf) !important;
     background: rgba(45, 212, 191, 0.08) !important;
 }
 
@@ -2420,27 +2420,54 @@ body[data-route*="app"] .form-tabs-list .nav-link {
     visibility: visible !important;
 }
 
-/* ===== BISMALLAH 2026-09-10: Legible labels & edit-tool controls in dark mode ===== */
+/* ===== BISMALLAH 2026-09-10: Legible labels & edit-tool controls in dark mode =====
+   Color source: Theme Settings -> "Dark Mode Label Color", exposed as CSS custom
+   properties --ethiobiz-dark-label-color / --ethiobiz-dark-label-muted on :root
+   by ethiobiz_theme.js (applyThemeDarkLabel). Falls back to defaults when unset.
+   Covers ALL form labels, section heads, tabs, grids, sidebars, titles & editors. */
 [data-theme="dark"] body label,
 [data-theme="dark"] body .control-label,
 [data-theme="dark"] body label.control-label,
+[data-theme="dark"] body .form-group label,
+[data-theme="dark"] body .form-column label,
+[data-theme="dark"] body .checkbox label,
 [data-theme="dark"] body .form-section .section-head,
+[data-theme="dark"] body .section-head,
 [data-theme="dark"] body .field-group .label,
 [data-theme="dark"] body .frappe-control .label-area,
 [data-theme="dark"] body .section-head .section-title,
 [data-theme="dark"] body .section-head .section-head-label,
+[data-theme="dark"] body .form-tabs-list .nav-link,
+[data-theme="dark"] body .form-grid .grid-heading-row .grid-row-label,
+[data-theme="dark"] body .grid-heading-row .grid-row-label,
+[data-theme="dark"] body .form-grid .grid-row-label,
 [data-theme="dark"] body .editable-form label,
 [data-theme="dark"] body .static-area label,
+[data-theme="dark"] body .page-head .title-text,
+[data-theme="dark"] body .head-title,
+[data-theme="dark"] body .widget .widget-head-title,
+[data-theme="dark"] body .frappe-card .card-header,
+[data-theme="dark"] body .desk-sidebar .desk-sidebar-item-label,
+[data-theme="dark"] body .desk-sidebar-item-label,
+[data-theme="dark"] body .sidebar-item-label,
+[data-theme="dark"] body .desk-sidebar-item-underline,
 [data-theme="dark"] body .ql-toolbar button,
 [data-theme="dark"] body .ql-toolbar .ql-picker-label,
 [data-theme="dark"] body .ql-formats,
+[data-theme="dark"] body .ql-snow .ql-stroke,
+[data-theme="dark"] body .ql-snow .ql-fill,
 [data-theme="dark"] body .ce-toolbar__settings-btn,
 [data-theme="dark"] body .ce-block__settings-button,
-[data-theme="dark"] body .desk-sidebar-item-label {
-    color: #e2e8f0 !important;
+[data-theme="dark"] body .ce-toolbar__actions,
+[data-theme="dark"] body .ce-toolbar__plus,
+[data-theme="dark"] body .ce-block__settings-button {
+    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
 }
 [data-theme="dark"] body label .text-muted,
 [data-theme="dark"] body .control-label .text-muted,
-[data-theme="dark"] body .form-section .section-head .text-muted {
-    color: #94a3b8 !important;
+[data-theme="dark"] body .section-head .text-muted,
+[data-theme="dark"] body .label-area .text-muted,
+[data-theme="dark"] body .form-section .section-head .text-muted,
+[data-theme="dark"] body .form-grid .grid-heading-row .grid-row-label .text-muted {
+    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
 }
