@@ -1,5 +1,5 @@
 /* ============================================================
-   Bismallah EthioBiz — BizServices Public Portal Controller (Phase 6)
+   Bismallah EthioBiz ÔÇö BizServices Public Portal Controller (Phase 6)
    Loads categories + listings, search/filter, booking flow backed by
    real availability + book_service, and feed-interaction tracking.
    ============================================================ */
@@ -85,7 +85,7 @@
             );
         }
         if (!list.length) {
-            grid.innerHTML = '<div class="bs-empty">No services found yet. Check back soon — providers are joining daily.</div>';
+            grid.innerHTML = '<div class="bs-empty">No services found yet. Check back soon ÔÇö providers are joining daily.</div>';
             return;
         }
         grid.innerHTML = list.map(cardHtml).join("");
@@ -103,7 +103,7 @@
         }).then(res => {
             const slots = (res && res.slots) || [];
             const sel = el("bs-slot-select");
-            sel.innerHTML = "<option value=''>Select a time…</option>";
+            sel.innerHTML = "<option value=''>Select a timeÔÇª</option>";
             slots.forEach(s => {
                 const o = document.createElement("option");
                 o.value = s; o.textContent = s;
@@ -126,7 +126,7 @@
         if (!modal) return;
         el("bs-book-service").value = serviceId;
         el("bs-modal-title").textContent = "Book this service";
-        el("bs-slot-select").innerHTML = "<option value=''>Select a time…</option>";
+        el("bs-slot-select").innerHTML = "<option value=''>Select a timeÔÇª</option>";
 
         // Populate the provider picker with the listing's assigned staff
         const prov = el("bs-provider");
@@ -168,26 +168,37 @@
             address: el("bs-address").value,
             notes: el("bs-notes").value
         };
+        // BISMALLAH: only logged-in users may book — route guests to login
+        if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false && window.ethiobizRequireLogin) {
+            window.ethiobizRequireLogin();
+            return;
+        }
         fetch(API + "bizbooking_api.book_service", {
             method: "POST",
             headers: { "X-Frappe-CSRF-Token": window.csrf_token || "", "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams(payload)
         }).then(r => r.json()).then(res => {
+            if (window.ethiobizRequireLoginFromResponse && window.ethiobizRequireLoginFromResponse(res)) return;
             const msg = (res && res.message) || {};
-            track("booked", "BizService Listing", serviceId);
-            el("bs-modal-title").textContent = msg.message || "Booking confirmed!";
-            if (msg.booking_id) {
-                el("bs-book-result").innerHTML =
-                    `<div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:10px;padding:12px;">
-                       Booking ID: <b>${msg.booking_id}</b><br>
-                       ${msg.bizride_delivery ? "Home dispatch started: <b>" + msg.bizride_delivery + "</b><br>" : ""}
-                       ${msg.amount || ""}
-                     </div>`;
+            if (msg.status === "success") {
+                track("booked", "BizService Listing", serviceId);
+                el("bs-modal-title").textContent = msg.message || "Booking confirmed!";
+                if (msg.booking_id) {
+                    el("bs-book-result").innerHTML =
+                        `<div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:10px;padding:12px;">
+                           Booking ID: <b>${msg.booking_id}</b><br>
+                           ${msg.bizride_delivery ? "Home dispatch started: <b>" + msg.bizride_delivery + "</b><br>" : ""}
+                           ${msg.amount || ""}
+                         </div>`;
+                } else {
+                    el("bs-book-result").innerHTML = `<div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:10px;padding:12px;">${msg.message || "Booking confirmed!"}</div>`;
+                }
             } else {
-                el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">Something went wrong. Please try again.</div>`;
+                const serverMsg = (window.ethiobizServerMessage && window.ethiobizServerMessage(res)) || "Something went wrong. Please try again.";
+                el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">${String(serverMsg).replace(/</g, "&lt;")}</div>`;
             }
         }).catch(() => {
-            el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">Could not reach the booking service.</div>`;
+            el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">Could not reach the booking service. Your booking was NOT confirmed.</div>`;
         });
     }
 

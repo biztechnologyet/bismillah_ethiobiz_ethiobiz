@@ -8,6 +8,53 @@
 (function () {
   window.ETHIOBIZ_USER_PROFILE = null;
 
+  // BISMALLAH (2026-09-10): login-aware helpers shared by all booking/purchase forms.
+  window.ethiobizIsLoggedIn = function () {
+    var p = window.ETHIOBIZ_USER_PROFILE;
+    if (p && typeof p.logged_in !== "undefined") return !!p.logged_in;
+    return null;
+  };
+
+  window.ethiobizRequireLogin = function (returnUrl) {
+    var target = returnUrl || window.location.pathname + window.location.search;
+    try {
+      alert("Please log in to continue. Your booking or purchase will be linked to your account automatically.");
+    } catch (e) {}
+    window.location.href = "/login?redirect-to=" + encodeURIComponent(target);
+  };
+
+  window.ethiobizServerMessage = function (r) {
+    try {
+      if (r && r._server_messages) {
+        var msgs = JSON.parse(r._server_messages);
+        if (Array.isArray(msgs) && msgs.length) {
+          var m = JSON.parse(msgs[0]);
+          if (m && m.message) return m.message;
+        }
+      }
+    } catch (e) {}
+    try {
+      if (r && r.exc) {
+        var arr = JSON.parse(r.exc);
+        if (arr && arr.length) return String(arr[0]).replace(/^.*?:\s*/, "");
+      }
+    } catch (e2) {}
+    return null;
+  };
+
+  window.ethiobizRequireLoginFromResponse = function (r) {
+    if (r && (r.exc_type === "PermissionError" || String(r._server_messages || "").indexOf("Please log in") !== -1)) {
+      window.ethiobizRequireLogin();
+      return true;
+    }
+    var msg = window.ethiobizServerMessage(r) || "";
+    if (/log in|login|sign in/i.test(msg)) {
+      window.ethiobizRequireLogin();
+      return true;
+    }
+    return false;
+  };
+
   function fetchUserProfile(callback) {
     if (window.ETHIOBIZ_USER_PROFILE) {
       if (callback) callback(window.ETHIOBIZ_USER_PROFILE);
