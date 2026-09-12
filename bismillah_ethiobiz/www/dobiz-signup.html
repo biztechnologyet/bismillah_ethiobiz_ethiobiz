@@ -224,6 +224,130 @@
         margin-bottom: 6px;
     }
 
+    /* Industrial Vertical Showcase */
+    @keyframes dobVerticalIn {
+        0%   { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .dob-vertical-show {
+        margin-top: 20px;
+        animation: dobVerticalIn 0.45s ease both;
+    }
+    .dob-vertical-card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(7,42,46,0.08);
+        text-align: left;
+    }
+    .dob-vertical-band {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 22px;
+        background: linear-gradient(120deg, #0b6f6a, #008080 55%, #0d9488);
+        color: #ffffff;
+    }
+    .dob-vertical-big { font-size: 40px; line-height: 1; }
+    .dob-vertical-name { font-size: 20px; font-weight: 900; letter-spacing: .2px; }
+    .dob-vertical-tag { font-size: 12.5px; opacity: .92; }
+    .dob-vertical-body { padding: 18px 22px 20px; }
+    .dob-vertical-desc { font-size: 14px; color: #334155; margin: 0 0 14px 0; line-height: 1.55; }
+    .dob-vertical-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .dob-vertical-chip {
+        background: #f0fdfa;
+        color: #0b6f6a;
+        border: 1px solid #99f6e4;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 999px;
+    }
+    .dob-vertical-explore {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #008080;
+        color: #ffffff !important;
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 800;
+        padding: 11px 20px;
+        border-radius: 12px;
+        transition: background .2s, transform .2s;
+    }
+    .dob-vertical-explore:hover { background: #005a5a; transform: translateY(-1px); }
+    .dob-vertical-eco {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+        margin-top: 4px;
+    }
+    .dob-vertical-eco a {
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 14px;
+        background: #f8fafc;
+        color: #072a2e !important;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 800;
+        text-align: center;
+        transition: all .2s;
+    }
+    .dob-vertical-eco a:hover {
+        border-color: #008080;
+        background: #f0fdfa;
+        color: #008080 !important;
+        transform: translateY(-2px);
+    }
+    .dob-vertical-eco a span { font-size: 26px; display: block; margin-bottom: 6px; }
+
+    /* Applicant Agreement & Consent */
+    .dob-agree-wrap {
+        margin: 2px 0 18px 0;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 16px;
+        background: #f8fafc;
+        padding: 14px 16px;
+        transition: border-color .3s, box-shadow .3s;
+        text-align: left;
+    }
+    .dob-agree-details summary {
+        cursor: pointer;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #072a2e;
+        list-style-position: inside;
+    }
+    .dob-agree-details summary::-webkit-details-marker { color: #008080; }
+    .dob-agree-text {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #cbd5e1;
+        font-size: 12.5px;
+        color: #334155;
+        line-height: 1.65;
+        max-height: 340px;
+        overflow-y: auto;
+    }
+    .dob-agree-text h4 { margin: 12px 0 4px 0; font-size: 12px; color: #008080; text-transform: uppercase; letter-spacing: .5px; }
+    .dob-agree-text p { margin: 0 0 8px 0; }
+    .dob-agree-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #0f172a;
+        cursor: pointer;
+    }
+    .dob-agree-label input { margin-top: 2px; width: 17px; height: 17px; accent-color: #008080; }
+    .dob-agree-required { color: #b45309; font-weight: 700; font-size: 11.5px; }
+
     /* Packages Grid */
     .dob-pkg-grid {
         display: grid;
@@ -657,6 +781,7 @@
                 <div class="dob-ind-btn" data-ind="Maintenance"><span class="dob-ind-icon">🔧</span>Maintenance & Repair</div>
                 <div class="dob-ind-btn" data-ind="Other"><span class="dob-ind-icon">🌐</span>Other</div>
             </div>
+            <div class="dob-vertical-show" id="dob-vertical-showcase"></div>
         </div>
 
         <!-- Step 2: Package Tiers -->
@@ -883,6 +1008,47 @@
                 </div>
             </div>
 
+            <!-- Applicant Agreement & Consent -->
+            <div class="dob-agree-wrap" id="dob-agree-wrap">
+                <details class="dob-agree-details">
+                    <summary>📜 Read the Applicant Agreement, Consent &amp; Legal Terms</summary>
+                    <div class="dob-agree-text">
+                        <p><strong>DOBiz Smart ERP Enterprise Signup — Applicant Agreement, Consent &amp; Legal Terms.</strong> This agreement is entered into freely between you (the Applicant) and Biz Technology Solutions (the Provider) in the spirit of honesty, integrity and fair dealing — before God and man, and in accordance with the laws of the Federal Democratic Republic of Ethiopia and applicable international law.</p>
+
+                        <h4>1. Divine &amp; Moral Law</h4>
+                        <p>All parties covenant to transact with truthfulness, trustworthiness, honesty and justice; to avoid fraud, deception, exploitation and unjust enrichment; to honour lawful promises; and to treat every person with dignity and respect, as commanded by God and universal moral conscience.</p>
+
+                        <h4>2. Legal Capacity &amp; Truthfulness of Information</h4>
+                        <p>The Applicant declares being at least eighteen (18) years of age, lawfully authorized to act for the enterprise, and that all information submitted is true, complete and not misleading. Knowingly false or incomplete information may render this Agreement voidable and expose the Applicant to liability under applicable law (FDRE Constitution, Articles 9 &amp; 13; Commercial Code Proclamation No. 1243/2021).</p>
+
+                        <h4>3. Consent to Data Processing &amp; Privacy</h4>
+                        <p>By proceeding, the Applicant freely and expressly consents to the collection, processing, storage and use of the personal and business data provided (names, contacts, company details, subscription and payment records) for lawful purposes: account provisioning, billing and invoicing, service operation and support, legal and regulatory compliance (including taxation, financial crime prevention and record-keeping), and — only with separate, specific consent — direct marketing. Such processing complies with the Data Protection Proclamation No. 1321/2024 and with the constitutional rights to privacy and to the honour and dignity of the person (FDRE Constitution, Articles 24, 25 &amp; 26). The Applicant may exercise rights of access, rectification, erasure, restriction and objection, and may withdraw consent as permitted by law without prejudice to lawful mandatory retention.</p>
+
+                        <h4>4. Lawful Use &amp; Prohibited Activities</h4>
+                        <p>The Applicant shall use the service lawfully and shall not use it for any fraudulent, illegal or harmful purpose — including but not limited to money laundering or terrorist financing; computer crime or unlawful system interference (Computer Crime Proclamation No. 958/2016); infringement of intellectual property; harassment or defamation; or any conduct violating Ethiopian or international law. Electronic transactions made hereunder shall carry the legal force and effect recognized under the Electronic Transactions Proclamation (Proclamation No. 1205/2020).</p>
+
+                        <h4>5. Payments, Taxes &amp; Settlement</h4>
+                        <p>All subscription fees, invoices and settlement instructions are governed by the terms displayed, applicable tax legislation (including value-added tax and income tax proclamations), and the lawful directives of the National Bank of Ethiopia concerning payments. The Applicant remains responsible for the accuracy of payment details and for any legitimate taxes arising from its operations.</p>
+
+                        <h4>6. Consumer Protection &amp; Fair Dealing</h4>
+                        <p>The parties conduct business in good faith and in accordance with fair trade and consumer-protection standards (Trade Practice and Consumers' Protection Proclamation No. 685/2010), avoiding misleading conduct, unfair conditions and abuse of position.</p>
+
+                        <h4>7. International Law &amp; Human Rights</h4>
+                        <p>This Agreement is to be performed and construed in a manner consistent with the international instruments to which Ethiopia is a party, including the Universal Declaration of Human Rights, the International Covenant on Civil and Political Rights, the International Covenant on Economic, Social and Cultural Rights, the African Charter on Human and Peoples' Rights, the Convention on the Rights of the Child, and as incorporated by Article 9(3) of the FDRE Constitution. Nothing herein waives any fundamental right or freedom guaranteed by Chapter Three of the Constitution.</p>
+
+                        <h4>8. Governing Law, Jurisdiction &amp; Disputes</h4>
+                        <p>This Agreement is governed by the laws of the Federal Democratic Republic of Ethiopia. The parties first seek amicable resolution of any dispute in good faith; failing which, disputes shall be resolved by the competent Federal Courts of Ethiopia in Addis Ababa. Nothing in this clause removes or restricts any right to lawful remedies under applicable law.</p>
+
+                        <h4>9. Severability &amp; Entire Agreement</h4>
+                        <p>If any provision is held invalid or unenforceable, the remaining provisions shall continue in full force and effect. This Agreement, together with the displayed Terms of Service and Privacy Notice, constitutes the entire agreement between the parties, subject only to amendments lawfully issued by the Provider and communicated to the Applicant.</p>
+                    </div>
+                </details>
+                <label class="dob-agree-label" for="dob-agree">
+                    <input type="checkbox" id="dob-agree" required>
+                    <span>I confirm that I have read, understood and <strong>freely agree</strong> to the <strong>Applicant Agreement, Consent &amp; Legal Terms</strong> above, the processing of my personal data as described therein (including where applicable in accordance with the Data Protection Proclamation No. 1321/2024), and that I will use the service lawfully and honestly — before God and in compliance with the laws of Ethiopia and applicable international law. <span class="dob-agree-required">* Required</span></span>
+                </label>
+            </div>
+
             <button type="submit" class="dob-btn-submit" id="dob-btn-submit">Complete Registration & Provision Tenant &rarr;</button>
         </div>
 
@@ -968,8 +1134,151 @@
             document.querySelectorAll('.dob-ind-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             state.industry = this.getAttribute('data-ind');
+            renderVertical(state.industry);
         });
     });
+
+    // ===== EthioBiz Vertical Showcase — a curated home on the platform per industry =====
+    // Each entry: vertical page name, live tagline, link(s), and tailored benefit chips.
+    const DOB_ECO_VERTICALS = [
+        { name: 'Dikka Shop · Magala', icon: '🛍️', url: '/shop' },
+        { name: 'BizHealth', icon: '🏥', url: '/bizhealth' },
+        { name: 'BizHome', icon: '🏠', url: '/bizhome' },
+        { name: 'BizRide', icon: '🛵', url: '/bizride' },
+        { name: 'BizFix', icon: '🛠️', url: '/bizfix' },
+        { name: 'BizService', icon: '📅', url: '/bizservice' },
+        { name: 'Dagu Learning · LMS', icon: '🎓', url: '/lms' },
+        { name: 'EthioBiz Jobs', icon: '💼', url: '/jobs' }
+    ];
+    const DOB_VERTICALS = {
+        'Healthcare': {
+            vert: 'BizHealth', tag: 'Verified doctors, clinics & teleconsultation',
+            url: '/bizhealth', icon: '🏥',
+            desc: 'Get discovered on Ethiopia\u2019s digital health network — patients find your clinic, book appointments and reach you securely.',
+            chips: ['Verified doctors', 'Clinic & patient bookings', 'Teleconsultation']
+        },
+        'Hotel Management': {
+            vert: 'BizHome', tag: 'Real estate, lodging & property hub',
+            url: '/bizhome', icon: '🏨',
+            desc: 'Put your hotel and hospitality services in front of travellers on the BizHome hub — rooms, stays and local discovery in one place.',
+            chips: ['Lodging listings', 'Room availability', 'Guest bookings']
+        },
+        'Restaurant': {
+            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            url: '/shop', icon: '🍽️',
+            desc: 'List your menu and start receiving digital orders through the Magala marketplace — food to your customers, straight from your kitchen.',
+            chips: ['Online ordering', 'Menu publishing', 'Delivery-ready']
+        },
+        'Property Management': {
+            vert: 'BizHome', tag: 'Real estate, lodging & property hub',
+            url: '/bizhome', icon: '🏢',
+            desc: 'Showcase your listings on the national property hub and channel rental, sales and lodging demand straight to your desk.',
+            chips: ['Property listings', 'Rental & sales leads', 'Agent reach']
+        },
+        'Manufacturing': {
+            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            url: '/shop', icon: '🏭',
+            desc: 'Sell your manufactured goods on the national marketplace — reach business buyers and consumers across Ethiopia, B2B or B2C.',
+            chips: ['B2B / B2C selling', 'Product catalog', 'Order pipeline']
+        },
+        'Education': {
+            vert: 'Dagu Learning · LMS  +  EthioBiz Jobs', tag: 'Learning, courses & verified careers',
+            url: '/lms', url2: '/jobs', icon: '🎓',
+            desc: 'Deliver and discover learning on Dagu LMS, and recruit verified teachers and staff through Ethiopia\u2019s trusted careers platform.',
+            chips: ['E-learning & courses', 'Student enrolment', 'Verified staff postings'],
+            explore2: 'Explore /jobs'
+        },
+        'Retail & Wholesale': {
+            vert: 'Dikka Shop', tag: 'Magala Marketplace & Supermarket',
+            url: '/shop', icon: '📦',
+            desc: 'The marketplace built for retailers — publish your products, sync your stock and sell to customers across the nation.',
+            chips: ['Product publishing', 'Online orders', 'Stock sync']
+        },
+        'Non-Profit': {
+            vert: 'EthioBiz Jobs', tag: 'Verified career opportunities',
+            url: '/jobs', icon: '🏛️',
+            desc: 'Post trusted openings and reach mission-aligned talent — from field staff to volunteers — on Ethiopia\u2019s verified jobs platform.',
+            chips: ['Staff hiring', 'Volunteer outreach', 'Trusted postings']
+        },
+        'Professional Services': {
+            vert: 'BizService', tag: 'Book services & appointments online',
+            url: '/bizservice', icon: '💼',
+            desc: 'Let clients discover you, see your availability and book your services online — exactly when and where they need you.',
+            chips: ['Service listings', 'Appointment booking', 'Client reach']
+        },
+        'Transportation': {
+            vert: 'BizRide', tag: 'On-demand delivery, courier & logistics',
+            url: '/bizride', icon: '🚚',
+            desc: 'Plug your fleet into hyperlocal delivery and courier demand — accepted in minutes, revenue in real time.',
+            chips: ['On-demand delivery', 'Fleet dispatch', 'Courier jobs']
+        },
+        'Agriculture': {
+            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            url: '/shop', icon: '🌾',
+            desc: 'From farm to marketplace — sell produce and agribusiness products nationwide and shorten the road from harvest to buyer.',
+            chips: ['Produce selling', 'Market reach', 'Agri supplies']
+        },
+        'Construction': {
+            vert: 'BizHome', tag: 'Real estate, lodging & property hub',
+            url: '/bizhome', icon: '🏗️',
+            desc: 'Connect your housing and construction projects with serious property buyers on the BizHome property hub.',
+            chips: ['Housing projects', 'Property demand', 'Sales leads']
+        },
+        'Logistics': {
+            vert: 'BizRide', tag: 'On-demand delivery, courier & logistics',
+            url: '/bizride', icon: '🚚',
+            desc: 'Serve on-demand delivery, courier and fulfilment across Ethiopia — your vehicles busy, your network growing.',
+            chips: ['Dispatch', 'Warehouse fulfilment', 'Last-mile delivery']
+        },
+        'Government': {
+            vert: 'EthioBiz Jobs', tag: 'Verified career opportunities',
+            url: '/jobs', icon: '🏛️',
+            desc: 'Publish public-interest openings and reach qualified citizens at scale — transparent, verified and merit-based.',
+            chips: ['Public recruitment', 'Verified notices', 'Transparent postings']
+        },
+        'Maintenance': {
+            vert: 'BizFix', tag: '24/7 universal maintenance & repair',
+            url: '/bizfix', icon: '🔧',
+            desc: 'Join the universal repair network — service requests from across Ethiopia delivered straight to your technicians.',
+            chips: ['Service call-outs', 'Technician network', '24/7 demand']
+        },
+        'Other': {
+            vert: 'Explore the EthioBiz Ecosystem', tag: 'Every industry has a home',
+            url: null, icon: '✨',
+            desc: 'Whatever your sector, the EthioBiz ecosystem has a marketplace ready for you. Discover every vertical below:',
+            chips: []
+        }
+    };
+
+    function renderVertical(raw) {
+        const v = DOB_VERTICALS[raw] || DOB_VERTICALS['Other'];
+        const host = $('dob-vertical-showcase');
+        if (!host) return;
+        let html = '<div class="dob-vertical-card">'
+            + '<div class="dob-vertical-band"><span class="dob-vertical-big">' + v.icon + '</span><span><span class="dob-vertical-name">' + v.vert + '</span><br><span class="dob-vertical-tag">' + v.tag + '</span></span></div>'
+            + '<div class="dob-vertical-body">';
+        if (!v.url) {
+            html += '<p class="dob-vertical-desc">' + v.desc + '</p><div class="dob-vertical-eco">';
+            DOB_ECO_VERTICALS.forEach(function(evo) {
+                html += '<a href="https://ethiobiz.et' + evo.url + '" target="_blank" rel="noopener"><span>' + evo.icon + '</span>' + evo.name + '</a>';
+            });
+            html += '</div>';
+        } else {
+            html += '<p class="dob-vertical-desc">' + v.desc + '</p><div class="dob-vertical-chips">';
+            (v.chips || []).forEach(function(c) { html += '<span class="dob-vertical-chip">' + c + '</span>'; });
+            html += '</div><div style="display:flex; gap:10px; flex-wrap:wrap;">'
+                + '<a class="dob-vertical-explore" href="https://ethiobiz.et' + v.url + '" target="_blank" rel="noopener">Explore ' + v.url + ' &rarr;</a>';
+            if (v.url2) {
+                html += '<a class="dob-vertical-explore" style="background:#005a5a;" href="https://ethiobiz.et' + v.url2 + '" target="_blank" rel="noopener">' + (v.explore2 || ('Explore ' + v.url2)) + ' &rarr;</a>';
+            }
+            html += '</div>';
+        }
+        html += '</div></div>';
+        host.innerHTML = html;
+        host.classList.remove('dob-vertical-show');
+        void host.offsetWidth;
+        host.classList.add('dob-vertical-show');
+    }
 
     function bindPackageCards() {
         document.querySelectorAll('.dob-pkg-card').forEach(card => {
@@ -1213,6 +1522,19 @@
                 return;
             }
 
+            const agreeEl = $('dob-agree');
+            if (agreeEl && !agreeEl.checked) {
+                const wrap = $('dob-agree-wrap');
+                if (wrap) {
+                    wrap.style.borderColor = '#dc2626';
+                    wrap.style.boxShadow = '0 0 0 3px rgba(220,38,38,0.15)';
+                    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => { wrap.style.borderColor = ''; wrap.style.boxShadow = ''; }, 3000);
+                }
+                alert('Kindly review and accept the Applicant Agreement, Consent & Legal Terms before completing your registration.');
+                return;
+            }
+
             btnSubmit.disabled = true;
             btnSubmit.textContent = state.paymentMethod === 'addipay'
                 ? 'Creating AddisPay Checkout...'
@@ -1331,6 +1653,7 @@
         });
     }
 
+    renderVertical(state.industry);
     loadConfig();
 })();
 </script>
