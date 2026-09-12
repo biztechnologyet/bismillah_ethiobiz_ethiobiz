@@ -443,6 +443,124 @@
         color: #0f172a !important;
     }
 
+    /* Dynamic package details: users badge, module chips, feature highlights */
+    .dob-pkg-users {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12.5px;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0f766e, #008080);
+        border-radius: 999px;
+        padding: 5px 12px;
+        letter-spacing: .3px;
+        box-shadow: 0 2px 8px rgba(0,128,128,.28);
+        margin-bottom: 10px;
+    }
+    .dob-pkg-users svg {
+        width: 13px;
+        height: 13px;
+        fill: currentColor;
+    }
+    .dob-pkg-modules {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 10px 0 12px;
+    }
+    .dob-pkg-module {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #334155;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 5px 10px;
+        transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .dob-pkg-module:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(15,23,42,.10);
+        border-color: #94a3b8;
+    }
+    .dob-pkg-module.core {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+    }
+    .dob-pkg-module.core::after {
+        content: "core";
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #047857;
+        background: #a7f3d0;
+        border-radius: 999px;
+        padding: 2px 7px;
+    }
+    .dob-pkg-features li.dob-pkg-feature-hl {
+        background: linear-gradient(90deg, rgba(0,128,128,.07), transparent 80%);
+        border-radius: 8px;
+        padding-left: 30px !important;
+        font-weight: 700;
+        color: #0f172a !important;
+    }
+    .dob-pkg-features li.dob-pkg-feature-hl::before {
+        content: "★";
+        color: #f59e0b !important;
+        font-size: 15px;
+        left: 9px;
+        top: 2px;
+    }
+    .dob-pkg-theme-bar {
+        height: 5px;
+        border-radius: 999px;
+        margin: 14px 0 10px;
+        background: linear-gradient(90deg, var(--dob-theme, #008080), rgba(0,128,128,.12));
+    }
+    .dob-pkg-more {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f766e;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        margin-top: 4px;
+        text-decoration: underline dotted;
+    }
+    .dob-pkg-more:hover { color: #134e4a; }
+    .dob-core-feats-ext {
+        display: none;
+    }
+    .dob-core-feats-ext.shown {
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 0 0 0 !important;
+    }
+    .dob-core-feats-ext::before,
+    .dob-core-feats-ext .dob-pkg-feat-item::before { display: none !important; }
+    .dob-pkg-feat-item {
+        position: relative;
+        display: block;
+        padding: 7px 10px 7px 28px !important;
+        border-radius: 8px;
+        color: #334155 !important;
+        font-size: 13px;
+    }
+    .dob-pkg-feat-item::before {
+        content: "✓";
+        color: #008080 !important;
+        position: absolute;
+        left: 8px;
+        font-weight: 900;
+    }
+
     /* Billing Terms */
     .dob-term-grid {
         display: grid;
@@ -793,52 +911,87 @@
             <div class="dob-pkg-grid" id="dob-pkg-grid">
                 
                 <!-- Starter Module -->
-                <div class="dob-pkg-card" data-pkg="Starter Module" data-base="5000">
+                <div class="dob-pkg-card" data-pkg="Starter Module" data-base="5000" style="--dob-theme:#0e7490">
                     <div class="dob-pkg-name">Starter Module</div>
                     <div class="dob-pkg-price">5,000 ETB <span>/ month</span></div>
+                    <span class="dob-pkg-users"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>Up to 3 Active Users</span>
                     <p class="dob-pkg-desc">Single module tier ideal for micro-businesses starting their digital journey.</p>
+                    <div class="dob-pkg-modules">
+                        <span class="dob-pkg-module core">💰 Finance & Accounting</span>
+                        <span class="dob-pkg-module core">📦 Inventory & Point of Sale</span>
+                        <span class="dob-pkg-module core">👥 HR & Payroll</span>
+                        <span class="dob-pkg-module core">💼 Sales & CRM</span>
+                    </div>
                     <ul class="dob-pkg-features">
                         <li><strong>1 Selected Core Module</strong> (Finance OR Inventory OR HR)</li>
                         <li><strong>Up to 3 Active Users</strong></li>
                         <li>Amharic & English Interface</li>
-                        <li>Local Tax & Billing Compliance</li>
-                        <li>Standard Email & Phone Support</li>
-                        <li>EthioBiz Shop Product Publishing</li>
+                        <li class="dob-core-feats-ext" data-total="6">
+                            <span class="dob-pkg-feat-item">Local Tax & Billing Compliance</span>
+                            <span class="dob-pkg-feat-item">Standard Email & Phone Support</span>
+                            <span class="dob-pkg-feat-item">EthioBiz Shop Product Publishing</span>
+                        </li>
                     </ul>
+                    <div class="dob-pkg-theme-bar"></div>
+                    <button type="button" class="dob-pkg-more" data-expand="1">Show all features (6 total)</button>
                 </div>
 
                 <!-- Business Growth -->
-                <div class="dob-pkg-card active" data-pkg="Business Growth" data-base="9500">
+                <div class="dob-pkg-card active" data-pkg="Business Growth" data-base="9500" style="--dob-theme:#01796f">
                     <span class="dob-pkg-badge">MOST POPULAR</span>
                     <div class="dob-pkg-name">Business Growth</div>
                     <div class="dob-pkg-price">9,500 ETB <span>/ month</span></div>
+                    <span class="dob-pkg-users"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>Up to 10 Active Users</span>
                     <p class="dob-pkg-desc">Multi-module operational suite for growing enterprises and multi-branch operations.</p>
+                    <div class="dob-pkg-modules">
+                        <span class="dob-pkg-module core">💰 Finance & Accounting</span>
+                        <span class="dob-pkg-module core">📦 Inventory & Point of Sale</span>
+                        <span class="dob-pkg-module core">👥 HR & Payroll</span>
+                        <span class="dob-pkg-module">🏭 Industry Module of Your Choice</span>
+                    </div>
                     <ul class="dob-pkg-features">
                         <li><strong>3 Selected DOBiz ERP Modules</strong></li>
                         <li><strong>Up to 10 Active Users</strong></li>
                         <li>Full Financials & Inventory Control</li>
-                        <li>EthioBiz Shop + Jobs Integration</li>
-                        <li>Offline-Capable Local Sync</li>
-                        <li>Priority Customer Support</li>
-                        <li>Hadeeda AI Assistant Compatible</li>
+                        <li class="dob-core-feats-ext" data-total="7">
+                            <span class="dob-pkg-feat-item">EthioBiz Shop + Jobs Integration</span>
+                            <span class="dob-pkg-feat-item">Offline-Capable Local Sync</span>
+                            <span class="dob-pkg-feat-item">Priority Customer Support</span>
+                            <span class="dob-pkg-feat-item">Hadeeda AI Assistant Compatible</span>
+                        </li>
                     </ul>
+                    <div class="dob-pkg-theme-bar"></div>
+                    <button type="button" class="dob-pkg-more" data-expand="1">Show all features (7 total)</button>
                 </div>
 
                 <!-- Full Industry ERP Package -->
-                <div class="dob-pkg-card" data-pkg="Full Industry ERP Package" data-base="15000">
+                <div class="dob-pkg-card" data-pkg="Full Industry ERP Package" data-base="15000" style="--dob-theme:#7c2d12">
                     <span class="dob-pkg-badge best">BEST VALUE (15K FULL)</span>
                     <div class="dob-pkg-name">Full Industry ERP</div>
                     <div class="dob-pkg-price">15,000 ETB <span>/ month</span></div>
+                    <span class="dob-pkg-users"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>Unlimited Active Users</span>
                     <p class="dob-pkg-desc">Complete all-in-one DOBiz SmartERP suite with full dedicated industry modules.</p>
+                    <div class="dob-pkg-modules">
+                        <span class="dob-pkg-module core">💰 Finance & Accounting</span>
+                        <span class="dob-pkg-module core">📦 Inventory & Point of Sale</span>
+                        <span class="dob-pkg-module core">👥 HR & Payroll</span>
+                        <span class="dob-pkg-module core">💼 Sales & CRM</span>
+                        <span class="dob-pkg-module">🏭 All 12 Industry Modules</span>
+                    </div>
                     <ul class="dob-pkg-features">
                         <li><strong>ALL DOBiz Core & Industry Modules</strong></li>
                         <li><strong>Unlimited Staff Users</strong></li>
                         <li>Multi-Branch & Multi-Company Support</li>
-                        <li>EthioBiz Marketplace & Jobs Integration</li>
-                        <li>Custom Workflow Sync & API Access</li>
-                        <li>Dedicated Account Manager & Training</li>
-                        <li>99.9% Uptime Guarantee & Daily Backups</li>
+                        <li class="dob-core-feats-ext" data-total="8">
+                            <span class="dob-pkg-feat-item">EthioBiz Marketplace & Jobs Integration</span>
+                            <span class="dob-pkg-feat-item">Custom Workflow Sync & API Access</span>
+                            <span class="dob-pkg-feat-item">Dedicated Account Manager & Training</span>
+                            <span class="dob-pkg-feat-item">99.9% Uptime Guarantee & Daily Backups</span>
+                            <span class="dob-pkg-feat-item">Hadeeda AI Assistant + Dagu Learning Included</span>
+                        </li>
                     </ul>
+                    <div class="dob-pkg-theme-bar"></div>
+                    <button type="button" class="dob-pkg-more" data-expand="1">Show all features (8 total)</button>
                 </div>
 
             </div>
@@ -1282,13 +1435,31 @@
 
     function bindPackageCards() {
         document.querySelectorAll('.dob-pkg-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function(ev) {
+                if (ev.target.closest('.dob-pkg-more')) return; // handled by toggle
                 document.querySelectorAll('.dob-pkg-card').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 state.pkgTier = this.getAttribute('data-pkg');
                 state.basePrice = parseFloat(this.getAttribute('data-base')) || 0;
                 resetCoupon();
                 recalc();
+            });
+        });
+        document.querySelectorAll('.dob-pkg-card .dob-pkg-more').forEach(btn => {
+            btn.addEventListener('click', function(ev) {
+                ev.stopPropagation();
+                const card = this.closest('.dob-pkg-card');
+                const ext = card.querySelector('.dob-core-feats-ext');
+                if (!ext) return;
+                if (ext.classList.contains('shown')) {
+                    ext.classList.remove('shown');
+                    this.textContent = 'Show all features (' + ext.dataset.total + ' total)';
+                    this.setAttribute('data-expand', '1');
+                } else {
+                    ext.classList.add('shown');
+                    this.textContent = 'Collapse features';
+                    this.setAttribute('data-expand', '0');
+                }
             });
         });
     }
@@ -1372,14 +1543,36 @@
         // Packages
         const grid = $('dob-pkg-grid');
         if (grid && Array.isArray(cfg.packages_list) && cfg.packages_list.length) {
-            grid.innerHTML = cfg.packages_list.map(p => `
+            grid.innerHTML = cfg.packages_list.map(p => {
+                const usersTxt = (!p.max_users || p.max_users <= 0)
+                    ? 'Unlimited Active Users'
+                    : `Up to ${p.max_users} Active Users`;
+                const mods = Array.isArray(p.modules) && p.modules.length ? p.modules
+                    : [{name:'Core Module', icon:'', group:'Core'}];
+                const feats = Array.isArray(p.features) && p.features.length
+                    ? p.features : [{text:'Full features included', highlight:0}];
+                const theme = p.color_theme || '#008080';
+                return `
                 <div class="dob-pkg-card${p.package_tier === state.pkgTier ? ' active' : ''}"
-                     data-pkg="${p.package_tier}" data-base="${p.price_per_month}">
+                     data-pkg="${p.package_tier}" data-base="${p.price_per_month}"
+                     style="--dob-theme:${theme}">
                     ${p.badge ? `<span class="dob-pkg-badge">${p.badge}</span>` : ''}
                     <h3>${p.display_label}</h3>
                     <div class="dob-price"><span class="dob-amt">${fmt(p.price_per_month)} ${p.currency || cfg.currency}/mo</span></div>
+                    <span class="dob-pkg-users"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg>${usersTxt}</span>
                     <p>${p.description || ''}</p>
-                </div>`).join('');
+                    <div class="dob-pkg-modules">
+                        ${mods.map(m => `<span class="dob-pkg-module${m.core ? ' core' : ''}">${m.icon || ''} ${m.name}</span>`).join('')}
+                    </div>
+                    <ul class="dob-pkg-features">
+                        ${feats.slice(0,3).map(f => `<li class="${f.highlight ? 'dob-pkg-feature-hl' : ''}">${f.text}</li>`).join('')}
+                        ${feats.length > 3 ? `<li class="dob-core-feats-ext" data-total="${feats.length}">
+                            ${feats.slice(3).map(f => `<span class="dob-pkg-feat-item ${f.highlight ? 'dob-pkg-feature-hl' : ''}">${f.text}</span>`).join('')}
+                        </li>` : ''}
+                    </ul>
+                    <div class="dob-pkg-theme-bar"></div>
+                    ${feats.length > 3 ? `<button type="button" class="dob-pkg-more" data-expand="1">Show all features (${feats.length} total)</button>` : ''}
+                </div>`}).join('');
             bindPackageCards();
             const sel = cfg.packages_list.find(p => p.package_tier === state.pkgTier);
             if (sel) state.basePrice = parseFloat(sel.price_per_month);

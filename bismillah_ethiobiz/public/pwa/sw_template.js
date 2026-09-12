@@ -12,6 +12,7 @@
 
 var VERSION = "__CACHE_VERSION__";
 var CACHE = "dobiz-pwa-v" + VERSION;
+var NAV_TIMEOUT_MS = 8000; // hard cap for network-first so pages never "stuck"
 var OFFLINE_URL = "__OFFLINE_URL__";
 var OFFLINE_TITLE = "__OFFLINE_TITLE__";
 var OFFLINE_MESSAGE = "__OFFLINE_MESSAGE__";
@@ -99,8 +100,41 @@ self.addEventListener("activate", function (event) {
     );
 });
 
+function raceTimeout(fetchPromise, request, ms) {
+    return new Promise(function (resolve) {
+        var settled = false;
+        var timer = setTimeout(function () {
+            if (!settled) {
+                settled = true;
+                caches.match(request).then(function (page) {
+                    return page || caches.match(OFFLINE_URL);
+                }).then(function (fallback) {
+                    resolve(fallback || offlinePage());
+                });
+            }
+        }, ms);
+        fetchPromise.then(function (resp) {
+            if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                resolve(resp);
+            }
+        }).catch(function () {
+            if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                caches.match(request).then(function (page) {
+                    return page || caches.match(OFFLINE_URL);
+                }).then(function (fallback) {
+                    resolve(fallback || offlinePage());
+                });
+            }
+        });
+    });
+}
+
 function networkFirst(request) {
-    return fetch(request)
+    return raceTimeout(fetch(request), request, NAV_TIMEOUT_MS)
         .then(function (response) {
             if (response && response.ok) {
                 var copy = response.clone();
