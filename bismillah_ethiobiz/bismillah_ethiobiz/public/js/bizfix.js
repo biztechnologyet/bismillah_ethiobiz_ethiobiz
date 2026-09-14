@@ -1,4 +1,4 @@
-// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT — v4.0.0
+// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT ÔÇö v4.0.0
 document.addEventListener("DOMContentLoaded", function() {
     var currentCategory = "all";
     var services = [];
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        // Search Input — debounced
+        // Search Input ÔÇö debounced
         var searchTimer = null;
         var sInp = document.getElementById("fix-search-input");
         if (sInp) {
@@ -57,6 +57,59 @@ document.addEventListener("DOMContentLoaded", function() {
         if (confirmBtn) {
             confirmBtn.addEventListener("click", handleFixSubmit);
         }
+
+        // Urgency toggle: reveal the Schedule date/slot picker for Scheduled
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var fixDate = document.getElementById("fix-date");
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        document.querySelectorAll('input[name="fix_urgency"]').forEach(function(rad) {
+            rad.addEventListener("change", function() {
+                var isScheduled = (this.value === "Scheduled" && this.checked);
+                if (schedBlock) schedBlock.style.display = isScheduled ? "block" : "none";
+                if (isScheduled) {
+                    loadFixSlots();
+                }
+            });
+        });
+        if (fixDate) {
+            fixDate.addEventListener("change", loadFixSlots);
+        }
+    }
+
+    function loadFixSlots() {
+        if (!selectedService) return;
+        var fixDate = document.getElementById("fix-date");
+        var sSelect = document.getElementById("fix-slot-select");
+        var note = document.getElementById("fix-avail-note");
+        if (!sSelect) return;
+        var date = fixDate ? fixDate.value : "";
+        sSelect.innerHTML = "<option value=''>Loading times…</option>";
+        if (note) note.textContent = "";
+        if (!date) { sSelect.innerHTML = "<option value=''>Select a date first</option>"; return; }
+
+        var params = new URLSearchParams();
+        params.append("listing", selectedService.name);
+        params.append("date", date);
+        fetch("/api/method/bismillah_ethiobiz.bizservice_api.get_service_availability?" + params.toString())
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                var ml = (res && res.message) || res || {};
+                var slots = ml.slots || [];
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) {
+                    note.textContent = ml.available && slots.length ? slots.length + " slots available for this date" :
+                        "No slots available for the selected date";
+                }
+                slots.forEach(function(s) {
+                    var o = document.createElement("option");
+                    o.value = s; o.textContent = s;
+                    sSelect.appendChild(o);
+                });
+            })
+            .catch(function() {
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) note.textContent = "Could not load slots — booking will use default time.";
+            });
     }
 
     function loadFixCategories() {
@@ -77,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             var card = document.createElement("div");
                             card.className = "fix-cat-card";
                             card.dataset.cat = cat.category_name;
-                            card.innerHTML = '<span class="cat-icon">🔧</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
+                            card.innerHTML = '<span class="cat-icon">­ƒöº</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
                             categoryGrid.appendChild(card);
                         }
                     });
@@ -97,14 +150,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error("Failed to load categories:", err);
                 // Fallback to hardcoded categories if API fails
                 var fallbackCategories = [
-                    { cat: "Electrical & Power", icon: "⚡", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
-                    { cat: "Plumbing & Water", icon: "🚿", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
-                    { cat: "HVAC & Appliances", icon: "❄️", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
-                    { cat: "Auto Mechanics", icon: "🚗", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
-                    { cat: "IT & Security", icon: "💻", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
-                    { cat: "Facility Maintenance", icon: "🏢", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
-                    { cat: "Carpentry & Woodwork", icon: "🪵", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
-                    { cat: "Sanitation & Cleaning", icon: "🧹", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
+                    { cat: "Electrical & Power", icon: "ÔÜí", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
+                    { cat: "Plumbing & Water", icon: "­ƒÜ┐", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
+                    { cat: "HVAC & Appliances", icon: "ÔØä´©Å", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
+                    { cat: "Auto Mechanics", icon: "­ƒÜù", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
+                    { cat: "IT & Security", icon: "­ƒÆ╗", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
+                    { cat: "Facility Maintenance", icon: "­ƒÅó", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
+                    { cat: "Carpentry & Woodwork", icon: "­ƒ¬Á", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
+                    { cat: "Sanitation & Cleaning", icon: "­ƒº╣", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
                 ];
                 fallbackCategories.forEach(function(cat) {
                     var card = document.createElement("div");
@@ -179,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (!filtered.length) {
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +
-                '<div style="font-size:3rem; margin-bottom:12px;">🔧</div>' +
+                '<div style="font-size:3rem; margin-bottom:12px;">­ƒöº</div>' +
                 '<h3 style="font-weight:800; color:#334155; margin-bottom:6px;">No Maintenance Services Found</h3>' +
                 '<p style="color:#64748b; font-size:0.9rem;">Try selecting "All Services" or adjusting your search keywords.</p>' +
                 '</div>';
@@ -187,18 +240,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         var catIcons = {
-            "Electrical & Power": "⚡",
-            "Plumbing & Water": "🚿",
-            "HVAC & Appliances": "❄️",
-            "Auto Mechanics": "🚗",
-            "IT & Security": "💻",
-            "Facility Maintenance": "🏢",
-            "Carpentry & Woodwork": "🪵",
-            "Sanitation & Cleaning": "🧹"
+            "Electrical & Power": "ÔÜí",
+            "Plumbing & Water": "­ƒÜ┐",
+            "HVAC & Appliances": "ÔØä´©Å",
+            "Auto Mechanics": "­ƒÜù",
+            "IT & Security": "­ƒÆ╗",
+            "Facility Maintenance": "­ƒÅó",
+            "Carpentry & Woodwork": "­ƒ¬Á",
+            "Sanitation & Cleaning": "­ƒº╣"
         };
 
         filtered.forEach(function(srv, idx) {
-            var icon = catIcons[srv.category] || "🔧";
+            var icon = catIcons[srv.category] || "­ƒöº";
             var card = document.createElement("div");
             card.className = "vert-card";
             card.style.animation = "slideUp 0.4s ease-out " + (idx * 0.05) + "s both";
@@ -209,12 +262,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 '<div class="vert-card-body">' +
                     '<div class="vert-card-badge" style="background:var(--vert-fix-light); color:#b45309;">' + srv.category + '</div>' +
                     '<div class="vert-card-title">' + srv.title + '</div>' +
-                    '<div class="vert-card-subtitle">🏢 ' + (srv.company_name || 'EthioBiz Certified Partner') + '</div>' +
+                    '<div class="vert-card-subtitle">­ƒÅó ' + (srv.company_name || 'EthioBiz Certified Partner') + '</div>' +
                     '<div class="vert-card-meta">' +
-                        '<span style="color:#059669; font-weight:700; font-size:0.85rem;">⏱️ ' + (srv.duration_minutes || 60) + ' min arrival</span>' +
+                        '<span style="color:#059669; font-weight:700; font-size:0.85rem;">ÔÅ▒´©Å ' + (srv.duration_minutes || 60) + ' min arrival</span>' +
                         '<span class="vert-card-price" style="color:var(--vert-fix);">' + srv.formatted_price + '</span>' +
                     '</div>' +
-                    '<button class="btn-vertical-primary w-100 btn-book-fix" style="background:var(--vert-fix); border-radius:12px;" data-srv-id="' + srv.name + '">Dispatch Technician ➔</button>' +
+                    '<button class="btn-vertical-primary w-100 btn-book-fix" style="background:var(--vert-fix); border-radius:12px;" data-srv-id="' + srv.name + '">Dispatch Technician Ô×ö</button>' +
                 '</div>';
 
             card.querySelector(".btn-book-fix").addEventListener("click", function() { openFixModal(srv); });
@@ -227,26 +280,78 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("modal-fix-title").innerText = "Request " + srv.title;
         document.getElementById("modal-fix-summary").innerHTML =
             '<div style="display:flex; align-items:center; gap:12px;">' +
-                '<div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🔧</div>' +
+                '<div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">­ƒöº</div>' +
                 '<div>' +
                     '<strong>' + srv.title + '</strong><br>' +
                     '<span style="font-size:0.82rem;">' + srv.category + ' &bull; Rate: <strong>' + srv.formatted_price + '</strong></span>' +
                 '</div>' +
             '</div>';
         document.getElementById("fix-booking-modal").style.display = "flex";
+        // Reset schedule picker for the newly selected service
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var sSelect = document.getElementById("fix-slot-select");
+        var fixDate = document.getElementById("fix-date");
+        if (sSelect) sSelect.innerHTML = "<option value=''>Select a time…</option>";
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        if (schedBlock) {
+            var isScheduled = document.querySelector('input[name="fix_urgency"]:checked');
+            var show = isScheduled && isScheduled.value === "Scheduled";
+            schedBlock.style.display = show ? "block" : "none";
+        }
+        if (window.ethiobizAutofillProfile) {
+            window.ethiobizAutofillProfile();
+        }
     }
 
     function handleFixSubmit() {
         if (!selectedService) return;
-        var name = document.getElementById("fix-contact-name").value.trim();
-        var phone = document.getElementById("fix-contact-phone").value.trim();
-        var address = document.getElementById("fix-address").value.trim();
-        var desc = document.getElementById("fix-fault-desc").value.trim();
-        var urgency = document.querySelector('input[name="fix_urgency"]:checked').value;
+        var name = (document.getElementById("fix-contact-name") ? document.getElementById("fix-contact-name").value : "").trim();
+        var phone = (document.getElementById("fix-contact-phone") ? document.getElementById("fix-contact-phone").value : "").trim();
+        var address = (document.getElementById("fix-address") ? document.getElementById("fix-address").value : "").trim();
+        var desc = (document.getElementById("fix-fault-desc") ? document.getElementById("fix-fault-desc").value : "").trim();
+        var urgency = document.querySelector('input[name="fix_urgency"]:checked') ? document.querySelector('input[name="fix_urgency"]:checked').value : "Emergency";
 
-        if (!name || !phone || !address) {
-            alert("Please enter contact name, phone number, and service address.");
+        // Fallback to logged-in user profile if inputs were not populated
+        if (!name && window.ETHIOBIZ_USER_PROFILE) {
+            name = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!phone && window.ETHIOBIZ_USER_PROFILE) {
+            phone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+        }
+        if (!address && window.ETHIOBIZ_USER_PROFILE && window.ETHIOBIZ_USER_PROFILE.address) {
+            address = window.ETHIOBIZ_USER_PROFILE.address;
+        }
+
+        if (!name || !phone) {
+            if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+                window.ethiobizRequireLogin();
+            } else {
+                alert("Please sign in or ensure your verified contact phone number is active.");
+            }
             return;
+        }
+        // BISMALLAH: only logged-in users may book — route guests to login
+        if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+            window.ethiobizRequireLogin();
+            return;
+        }
+if (!address) {
+            alert("Please enter the service location address for technician dispatch.");
+            return;
+        }
+
+        // BISMALLAH (BizFix): for Scheduled visits, require date + validated time slot.
+        var bookingDate = null;
+        var bookingTime = null;
+        var fixDateEl = document.getElementById("fix-date");
+        var fixSlotEl = document.getElementById("fix-slot-select");
+        if (urgency === "Scheduled") {
+            bookingDate = fixDateEl ? fixDateEl.value : "";
+            bookingTime = fixSlotEl ? fixSlotEl.value : "";
+            if (!bookingDate || !bookingTime) {
+                alert("Please pick an inspection date and time slot for the scheduled visit.");
+                return;
+            }
         }
 
         var btn = document.getElementById("btn-confirm-fix");
@@ -259,6 +364,8 @@ document.addEventListener("DOMContentLoaded", function() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 service_id: selectedService.name,
+                booking_date: bookingDate,
+                booking_time: bookingTime,
                 customer_name: name,
                 customer_phone: phone,
                 address: address,
@@ -266,19 +373,42 @@ document.addEventListener("DOMContentLoaded", function() {
                 notes: desc
             })
         })
+        })
         .then(function(r) { return r.json(); })
         .then(function(res) {
             resetBtn(btn);
-            showFixSuccess(res.message, address, phone);
+            var msg = (res && res.message) || res;
+            if (msg && msg.status === "success") {
+                showFixSuccess(msg, address, phone);
+                return;
+            }
+            if (window.ethiobizRequireLoginFromResponse && window.ethiobizRequireLoginFromResponse(res)) return;
+            var serverMsg = window.ethiobizServerMessage ? window.ethiobizServerMessage(res) : null;
+            showFixError(serverMsg || "Unable to confirm your request right now. Please try again.");
         })
         .catch(function() {
             resetBtn(btn);
-            showFixSuccess({ booking_id: "FIX-" + Math.floor(Math.random() * 10000) }, address, phone);
+            showFixError("Connection error — your request was NOT dispatched. Please try again.");
         });
     }
 
+    function showFixError(message) {
+        var modal = document.getElementById("fix-booking-modal");
+        if (!modal) return;
+        var body = modal.querySelector(".modal-body-custom");
+        body.innerHTML =
+            '<div style="text-align:center; padding:20px 0;">' +
+                '<div style="font-size:3rem; margin-bottom:12px;">⚠️</div>' +
+                '<h3 style="font-weight:900; color:#991b1b; margin-bottom:6px;">Not Dispatched!</h3>' +
+                '<p style="color:#7f1d1d; font-size:0.92rem; margin-bottom:16px;">' +
+                (message ? message.replace(/</g, "&lt;") : "Please try again.") +
+                '</p>' +
+                '<button class="btn btn-warning" onclick="document.querySelector(\'#fix-booking-modal\').classList.remove(\'show\'); document.querySelector(\'#fix-booking-modal\').style.display=\'none\'; document.querySelector(\'.modal-backdrop\') && document.querySelector(\'.modal-backdrop\').remove();">Close</button>' +
+            '</div>';
+    }
+
     function resetBtn(btn) {
-        btn.innerHTML = "Dispatch Certified Technician ➔";
+        btn.innerHTML = "Dispatch Certified Technician Ô×ö";
         btn.disabled = false;
         btn.style.opacity = "1";
     }
@@ -290,7 +420,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         body.innerHTML =
             '<div style="text-align:center; padding:20px 0;">' +
-                '<div style="font-size:3.5rem; margin-bottom:12px;">⚡</div>' +
+                '<div style="font-size:3.5rem; margin-bottom:12px;">ÔÜí</div>' +
                 '<h3 style="font-weight:900; color:#92400e; margin-bottom:6px;">Technician Dispatched!</h3>' +
                 '<p style="color:#78350f; font-size:0.92rem; margin-bottom:20px;">A certified technician has been assigned to your request.</p>' +
                 '<div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:14px; padding:16px; text-align:left; margin-bottom:16px;">' +
@@ -301,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     '</div>' +
                 '</div>' +
                 '<p style="font-size:0.8rem; color:#78350f;">Dispatch hotline will contact you at <strong>' + phone + '</strong> within 10 minutes.</p>' +
-                '<button onclick="document.getElementById(\'fix-booking-modal\').style.display=\'none\'; location.reload();" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:12px; margin-top:8px;">Done ✓</button>' +
+                '<button onclick="document.getElementById(\'fix-booking-modal\').style.display=\'none\'; location.reload();" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:12px; margin-top:8px;">Done Ô£ô</button>' +
             '</div>';
     }
 });

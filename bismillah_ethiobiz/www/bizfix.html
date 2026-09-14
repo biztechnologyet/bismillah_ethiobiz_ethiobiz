@@ -105,6 +105,22 @@
                 </div>
             </div>
 
+            <div id="fix-schedule-block" class="form-group mb-3" style="display:none;">
+                <div class="row">
+                    <div class="col-md-6 form-group mb-3">
+                        <label class="form-label font-weight-bold">Preferred Inspection Date:</label>
+                        <input type="date" id="fix-date" class="form-control-custom" />
+                    </div>
+                    <div class="col-md-6 form-group mb-3">
+                        <label class="form-label font-weight-bold">Preferred Time Slot:</label>
+                        <select id="fix-slot-select" class="form-control-custom">
+                            <option value="">Select a time…</option>
+                        </select>
+                        <div id="fix-avail-note" style="font-size:0.75rem; color:#92400e; margin-top:4px;"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group mb-3">
                 <label class="form-label font-weight-bold">Service Address / Location:</label>
                 <input type="text" id="fix-address" class="form-control-custom" placeholder="e.g. Bole Medhanialem, House 102, Addis Ababa" />
@@ -124,5 +140,5 @@
 </div>
 
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.1"></script>
-<script src="/assets/bismillah_ethiobiz/js/bizfix.js?v=4.0.1"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizfix.js?v=4.0.2"></script>
 {% endblock %}
