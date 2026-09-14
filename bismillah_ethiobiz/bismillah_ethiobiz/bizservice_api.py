@@ -392,3 +392,174 @@ def submit_review(booking=None, rating=0, review=None):
             )
 
     return {"status": "success", "booking": booking, "rating": doc.rating, "review": doc.review}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_provider_detail(provider=None, listing=None, service=None):
+    """Provider / service detail page payload: company profile, active listings,
+    public reviews, rating summary, and login state (to gate the review UI).
+
+    `provider` resolves a whole portfolio; `listing`/`service` resolves a single
+    listing and carries its availability quick-check too.
+    """
+    listing = listing or service
+    resolved_provider = provider
+    listing_doc = None
+
+    if (listing and _has("BizService Listing")
+            and frappe.db.exists("BizService Listing", listing)):
+        listing_doc = frappe.get_doc("BizService Listing", listing)
+        resolved_provider = listing_doc.get("company") or resolved_provider
+
+    listings = []
+    if resolved_provider and frappe.db.exists("Company", resolved_provider):
+        if _has("BizService Listing"):
+            listings = frappe.get_all(
+                "BizService Listing",
+                filters={"is_active": 1, "company": resolved_provider},
+                fields=["name", "service_name", "category", "price", "price_type",
+                        "currency", "duration_minutes", "requires_travel",
+                        "serving_city", "serving_region", "featured",
+                        "average_rating", "total_bookings", "slug",
+                        "custom_slots", "slot_days"],
+                order_by="featured desc, service_name asc",
+            )
+    elif listing_doc is not None:
+        listings = [{
+            "name": listing_doc.name,
+            "service_name": listing_doc.service_name,
+            "category": listing_doc.category,
+            "price": listing_doc.price,
+            "price_type": listing_doc.price_type,
+            "currency": listing_doc.currency,
+            "duration_minutes": listing_doc.duration_minutes,
+            "requires_travel": listing_doc.requires_travel,
+            "serving_city": listing_doc.serving_city,
+            "serving_region": listing_doc.serving_region,
+            "featured": listing_doc.featured,
+            "average_rating": listing_doc.average_rating,
+            "total_bookings": listing_doc.total_bookings,
+            "slug": listing_doc.slug,
+        }]
+
+    for l in listings:
+        l["title"] = l.get("service_name") or l.get("name")
+        l["formatted_price"] = f"{flt(l.get('price') or 0.0):,.2f} {l.get('currency') or 'ETB'}"
+        l["detail_url"] = "/bizservice/" + (l.get("slug") or l.get("name"))
+
+    company_info = {}
+    if resolved_provider and frappe.db.exists("Company", resolved_provider):
+        comp = frappe.get_doc("Company", resolved_provider)
+        def _comp(field, default=""):
+            try:
+                val = comp.get(field)
+                return val if val not in (None, "") else default
+            except Exception:
+                return default
+        company_info = {
+            "name": comp.name,
+            "company_name": comp.company_name,
+            "abbr": comp.abbr,
+            "company_logo": comp.company_logo,
+            "location_address": _comp("location_address") or _comp("address"),
+            "city": _comp("city"),
+            "country": _comp("country"),
+            "website": _comp("website"),
+            "map_enabled": _comp("map_enabled", 0),
+            "latitude": _comp("latitude"),
+            "longitude": _comp("longitude"),
+        }
+
+    # Public reviews across the provider's completed, rated bookings
+    reviews = []
+    rating_summary = {"average_rating": 0.0, "review_count": 0}
+    if resolved_provider and _has("BizService Booking"):
+        listing_names = [l["name"] for l in listings] or [listing]
+        if listing_names:
+            avg = frappe.db.sql("""
+                SELECT COALESCE(AVG(rating),0) avg_rating, COUNT(*) cnt
+                FROM `tabBizService Booking`
+                WHERE rating IS NOT NULL AND rating > 0
+                  AND service IN %(listings)s
+            """, {"listings": tuple(listing_names)}, as_dict=True)
+            if avg:
+                rating_summary = {
+                    "average_rating": flt(avg[0].get("avg_rating")),
+                    "review_count": int(avg[0].get("cnt") or 0),
+                }
+            reviews = frappe.db.sql("""
+                SELECT customer_name, rating, review, booking_date
+                FROM `tabBizService Booking`
+                WHERE rating IS NOT NULL AND rating > 0
+                  AND service IN %(listings)s
+                ORDER BY booking_date DESC
+                LIMIT 20
+            """, {"listings": tuple(listing_names)}, as_dict=True)
+    for r in reviews:
+        r["rating"] = flt(r.get("rating") or 0)
+
+    payload = {
+        "status": "success",
+        "provider": company_info,
+        "is_logged_in": (frappe.session.user != "Guest"),
+        "total": len(listings),
+        "listings": listings,
+        "reviews": reviews,
+        "rating_summary": rating_summary,
+    }
+
+    # Availability quick-check when a single listing was requested
+    if listing and _has("BizService Listing"):
+        try:
+            avail = get_service_availability(listing=listing, date=nowdate())
+            payload["availability"] = {
+                f"{k}": avail.get(k) for k in ("date", "source", "available", "slots")
+            }
+        except Exception:
+            payload["availability"] = {"available": True, "slots": []}
+
+    return payload
+
+
+@frappe.whitelist()
+def get_my_provider_bookings(company=None, listing=None):
+    """Return the logged-in customer's BizService bookings for a provider
+    (or a single listing) with their review eligibility.
+
+    Gated to Completed bookings on the Desk side via submit_review.
+    """
+    from bismillah_ethiobiz import ethiobiz_identity
+    customer = ethiobiz_identity.require_authed_customer(
+        "Please log in to view your bookings and reviews")
+
+    if not _has("BizService Booking"):
+        return {"status": "success", "total": 0, "bookings": [], "review_eligible": []}
+
+    filters = {"customer": customer}
+    if listing and _has("BizService Listing"):
+        filters["service"] = listing
+    if company and frappe.db.exists("Company", company):
+        filters["company"] = company
+
+    bookings = frappe.get_all(
+        "BizService Booking",
+        filters=filters,
+        fields=["name", "customer_name", "service", "service_name",
+                "status", "payment_status", "booking_date", "booking_time",
+                "total_amount", "rating"],
+        order_by="booking_date desc, booking_time desc",
+        limit_page_length=50,
+    )
+
+    review_eligible = [
+        b for b in bookings
+        if (b.get("status") == "Completed" and not (flt(b.get("rating") or 0) > 0))
+    ]
+
+    return {
+        "status": "success",
+        "customer": customer,
+        "total": len(bookings),
+        "bookings": bookings,
+        "review_eligible": review_eligible,
+    }

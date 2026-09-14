@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -51,7 +51,7 @@ app_include_css = [
 # JS included in desk (backend)
 app_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
@@ -64,7 +64,7 @@ app_include_js = [
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
@@ -76,7 +76,7 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
@@ -115,6 +115,9 @@ website_route_rules = [
     {"from_route": "/bizhome", "to_route": "bizhome"},
     {"from_route": "/bizservice", "to_route": "bizservice"},
     {"from_route": "/bizservices", "to_route": "bizservice"},
+    {"from_route": "/bizservice/<path:slug>", "to_route": "bizservice_detail"},
+    {"from_route": "/bizservices/<path:slug>", "to_route": "bizservice_detail"},
+    {"from_route": "/doctor/<path:slug>", "to_route": "doctor_detail"},
 ]
 
 # ============================================
@@ -137,6 +140,15 @@ on_session_creation = [
 
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
+
+# ============================================
+# SCHEDULER EVENTS
+# ============================================
+scheduler_events = {
+    "daily": [
+        "bismillah_ethiobiz.event_notification.send_event_digest"
+    ]
+}
 
 # ============================================
 # DOC EVENTS

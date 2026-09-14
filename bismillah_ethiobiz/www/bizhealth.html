@@ -4,6 +4,8 @@
 
 {% block page_content %}
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.1.0" />
+
 
 <div class="vertical-portal-wrapper">
     <!-- HERO SECTION -->
@@ -126,19 +128,9 @@
                 <div class="col-md-6 form-group mb-3">
                     <label class="form-label font-weight-bold">Available Time Slot:</label>
                     <select id="book-time-slot" class="form-control-custom">
-                        <option value="09:00 AM">09:00 AM</option>
-                        <option value="09:30 AM">09:30 AM</option>
-                        <option value="10:00 AM">10:00 AM</option>
-                        <option value="10:30 AM">10:30 AM</option>
-                        <option value="11:00 AM">11:00 AM</option>
-                        <option value="11:30 AM">11:30 AM</option>
-                        <option value="02:00 PM">02:00 PM</option>
-                        <option value="02:30 PM">02:30 PM</option>
-                        <option value="03:00 PM">03:00 PM</option>
-                        <option value="04:00 PM">04:00 PM</option>
-                        <option value="04:30 PM">04:30 PM</option>
-                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="">Select date &amp; mode to load real slots…</option>
                     </select>
+                    <div id="book-slot-note" style="font-size:0.78rem; color:#64748b; margin-top:4px; font-weight:600;"></div>
                 </div>
             </div>
 
@@ -164,5 +156,5 @@
 </div>
 
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.1"></script>
-<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.0.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.1.0"></script>
 {% endblock %}

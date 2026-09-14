@@ -11,7 +11,12 @@ public-facing appointment booking backed by the Healthcare Desk module.
 import frappe
 from frappe import _
 from frappe.utils import today, now_datetime, getdate, flt, cint
-from ethiobiz_identity import require_authed_customer, resolve_booking_company
+try:
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company
+except ImportError:
+    from bismillah_ethiobiz import ethiobiz_identity
+    require_authed_customer = ethiobiz_identity.require_authed_customer
+    resolve_booking_company = ethiobiz_identity.resolve_booking_company
 
 
 @frappe.whitelist(allow_guest=True)
@@ -51,7 +56,7 @@ def get_specialties(region=None):
 
 @frappe.whitelist(allow_guest=True)
 def search_doctors(department=None, query=None, consultation_type=None,
-                   region=None, min_rating=None, page=1, limit=20):
+                   region=None, min_rating=None, is_active=None, page=1, limit=20):
     """
     Searches Healthcare Practitioners by specialty, name query, consultation
     mode, region and minimum rating; returns public profile + pricing + rating.
@@ -61,6 +66,13 @@ def search_doctors(department=None, query=None, consultation_type=None,
 
     conditions = []
     values = {}
+
+    # Publish toggle: only show doctors that are not unpublished
+    try:
+        if frappe.db.has_column("Healthcare Practitioner", "is_active"):
+            conditions.append("(p.is_active = 1 OR p.is_active IS NULL)")
+    except Exception:
+        pass
 
     if department and department.strip():
         conditions.append("(p.department = %(department)s)")
@@ -143,10 +155,10 @@ def get_doctor_slots(doctor_id, date=None, consultation_type="In-Clinic"):
 
     date = date or today()
 
-    # Base clinic hours (30-min granularity)
+    # Base clinic hours (30-min granularity, canonical 24h HH:MM)
     base_slots = [
         "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-        "02:00", "02:30", "03:00", "03:30", "04:00", "04:30", "05:00", "05:30"
+        "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"
     ]
     slots = []
 
@@ -273,6 +285,82 @@ def book_clinical_appointment(doctor_id, patient_name=None, patient_phone=None,
         "fee": f"{flt(fee):,.2f} ETB",
         "consultation_type": consultation_type
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_doctor_detail(doctor_id=None, slug=None):
+    """Public doctor profile page payload: bio, qualifications, fees, languages,
+    consultation modes, and a quick availability snapshot for today."""
+    if not doctor_id and not slug:
+        frappe.throw("Doctor is required")
+
+    if not frappe.db.exists("DocType", "Healthcare Practitioner"):
+        return {"status": "error", "message": "Healthcare module not installed"}
+
+    name = doctor_id
+    if slug and not name:
+        try:
+            name = frappe.db.get_value("Healthcare Practitioner", {"public_profile_slug": slug}, "name")
+        except Exception:
+            name = None
+    if not name or not frappe.db.exists("Healthcare Practitioner", name):
+        return {"status": "error", "message": "Doctor not found"}
+
+    # Publish toggle guard
+    try:
+        if frappe.db.has_column("Healthcare Practitioner", "is_active"):
+            inactive = frappe.db.get_value("Healthcare Practitioner", name, "is_active")
+            if inactive is not None and not int(inactive or 0):
+                return {"status": "error", "message": "Doctor not found"}
+    except Exception:
+        pass
+
+    doc = frappe.get_doc("Healthcare Practitioner", name)
+
+    def _f(field, default=None):
+        try:
+            val = doc.get(field)
+            return val if val not in (None, "") else default
+        except Exception:
+            return default
+
+    dept = _f("department") or "General Medicine"
+    company = _f("company")
+    company_name = None
+    if company:
+        company_name = frappe.db.get_value("Company", company, "company_name") or company
+
+    detail = {
+        "id": doc.name,
+        "name": _f("practitioner_name") or f"{_f('first_name') or ''} {_f('last_name') or ''}".strip() or doc.name,
+        "specialty": dept,
+        "qualifications": _f("qualifications_display") or "Senior Medical Practitioner",
+        "bio": _f("bio") or _f("bio_text") or "",
+        "image": _f("profile_photo_hd") or _f("image") or "/assets/frappe/images/default-avatar.png",
+        "slug": _f("public_profile_slug") or "",
+        "consultation_fee": flt(_f("consultation_fee") or 500.0),
+        "fee_formatted": f"{flt(_f('consultation_fee') or 500.0):,.2f} ETB",
+        "rating": flt(_f("average_rating") or 4.9),
+        "total_reviews": int(_f("total_reviews") or 24),
+        "languages": _f("spoken_languages_text") or "Amharic, English",
+        "teleconsultation_available": int(_f("teleconsultation_available") or 0),
+        "home_visit_available": int(_f("home_visit_available") or 0),
+        "clinic": company_name or "EthioBiz Specialist Medical Center",
+        "company": company,
+        "profile_url": f"/doctor/{slug or doc.name}",
+    }
+
+    # Quick availability snapshot for today
+    try:
+        avail = get_doctor_slots(doc.name, date=today(), consultation_type="In-Clinic")
+        detail["availability"] = {
+            "date": avail.get("date"),
+            "slots": [s.get("slot") for s in (avail.get("slots") or []) if s.get("is_available") is not False],
+        }
+    except Exception:
+        detail["availability"] = {"date": today(), "slots": []}
+
+    return {"status": "success", "doctor": detail}
 
 
 def _weekday_numbers(day):

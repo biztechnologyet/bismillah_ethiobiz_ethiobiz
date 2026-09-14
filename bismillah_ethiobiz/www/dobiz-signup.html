@@ -357,6 +357,20 @@
     @media (max-width: 860px) {
         .dob-pkg-grid { grid-template-columns: 1fr; }
     }
+    .dob-ind-edition {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 4px 0 16px 0;
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #0f766e, #0e7490);
+        color: #ffffff !important;
+        font-size: 13.5px;
+        font-weight: 700;
+        border-radius: 12px;
+        letter-spacing: 0.3px;
+    }
+    .dob-ind-edition .dob-ind-edition-icon { font-size: 17px; }
     .dob-pkg-card {
         border: 2px solid #cbd5e1 !important;
         border-radius: 18px;
@@ -908,6 +922,7 @@
                 <div class="dob-step-num">2</div>
                 <h3 class="dob-step-title">Choose Your Subscription Package</h3>
             </div>
+            <div class="dob-ind-edition" id="dob-ind-edition" style="display:none"></div>
             <div class="dob-pkg-grid" id="dob-pkg-grid">
                 
                 <!-- Starter Module -->
@@ -1288,6 +1303,8 @@
             this.classList.add('active');
             state.industry = this.getAttribute('data-ind');
             renderVertical(state.industry);
+            loadConfig(state.industry);
+            resetCoupon();
         });
     });
 
@@ -1526,8 +1543,10 @@
     }
 
     // ---------- Live config from server (Item Price source of truth) ----------
-    function loadConfig() {
-        fetch('/api/method/bizmarketing.api.dobiz_signup_api.get_dobiz_packages')
+    function loadConfig(industry) {
+        const url = '/api/method/bizmarketing.api.dobiz_signup_api.get_dobiz_packages'
+            + (industry ? ('?industry=' + encodeURIComponent(industry)) : '');
+        fetch(url)
             .then(r => r.json())
             .then(res => { if (res.message) applyConfig(res.message); })
             .catch(() => { /* static fallback markup stays */ })
@@ -1539,6 +1558,21 @@
 
     function applyConfig(cfg) {
         state.cfg = cfg;
+
+        // Industry edition banner (updates per selected industry)
+        const edition = $('dob-ind-edition');
+        if (edition) {
+            const indLabel = (cfg.industry || '').trim();
+            const aliasKey = (state.industry || '').trim();
+            const indIcon = (DOB_VERTICALS[aliasKey] && DOB_VERTICALS[aliasKey].icon) || '🌐';
+            if (indLabel) {
+                edition.style.display = 'flex';
+                edition.innerHTML = `<span class="dob-ind-edition-icon">${indIcon}</span>
+                    <span>Industry Edition: <b>${indLabel}</b> — packages, modules & pricing below are tailored to your industry. Editable live from DOBiz SaaS Settings.</span>`;
+            } else {
+                edition.style.display = 'none';
+            }
+        }
 
         // Packages
         const grid = $('dob-pkg-grid');
@@ -1847,7 +1881,7 @@
     }
 
     renderVertical(state.industry);
-    loadConfig();
+    loadConfig(state.industry);
 })();
 </script>
 {% endblock %}

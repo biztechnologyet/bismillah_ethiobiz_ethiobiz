@@ -1,34 +1,37 @@
 {% extends "templates/web.html" %}
 
-{% block title %}BizService — Book Services & Appointments Online | EthioBiz.ET{% endblock %}
+{% block title %}Service Provider Detail | EthioBiz.ET{% endblock %}
 
 {% block page_content %}
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizservices.css?v=1.3.0">
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.1"></script>
 <script src="/assets/bismillah_ethiobiz/js/bizservices.js?v=1.3.0" defer></script>
+<script>window.BS_PROVIDER = {{ (frappe.form_dict.slug or "") | tojson }};</script>
 
 <div class="bizservices-page" id="bizservices-app">
-  <div class="bs-hero">
-    <h1>BizService — Book Services &amp; Appointments</h1>
-    <p>Book hair salons, spas, barbers, massage &amp; beauty, home services, auto care, events, tutoring, coaching and professional services — direct from trusted local providers, all managed in Desk.</p>
-    <div class="bs-stats">
-      <div class="bs-stat"><b id="bs-total-services">0</b><span>Services</span></div>
-      <div class="bs-stat"><b id="bs-total-cats">8</b><span>Categories</span></div>
-      <div class="bs-stat"><b>24/7</b><span>Booking</span></div>
-    </div>
+  <div class="bs-detail-header" id="bs-provider-header">
+    <div style="text-align:center; padding:20px 0; color:#64748b;">Loading provider…</div>
   </div>
 
   <div class="bs-container">
     <div class="bs-panel">
       <div class="bs-search-row">
-        <input type="text" id="bs-search" class="bs-search" placeholder="Search services, categories, cities…">
-        <button type="button" class="bs-btn" onclick="window.location='/dobiz-signup'">List Your Business</button>
+        <input type="text" id="bs-search" class="bs-search" placeholder="Search this provider's services…">
+        <button type="button" class="bs-btn" onclick="window.location='/bizservice'">All Services</button>
       </div>
 
       <div class="bs-cats" id="bs-cats"></div>
+      <div id="bs-detail-subhead" style="font-size:0.85rem; color:#64748b; font-weight:700; margin:6px 0 10px;">Services by this provider</div>
 
       <div class="bs-grid" id="bs-grid">
         <div class="bs-empty">Loading services…</div>
+      </div>
+
+      <!-- Public reviews + gated review form -->
+      <div class="bs-reviews" id="bs-reviews">
+        <h3 style="margin:24px 0 8px;">Ratings &amp; Reviews</h3>
+        <div id="bs-reviews-list"><div class="bs-empty">No reviews yet — be the first to review this provider after a completed booking.</div></div>
+        <div id="bs-review-action"></div>
       </div>
     </div>
   </div>

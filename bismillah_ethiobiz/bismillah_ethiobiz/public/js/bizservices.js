@@ -12,6 +12,7 @@
     let currentQuery = "";
     const urlParams = new URLSearchParams(window.location.search);
     const deepProvider = urlParams.get("provider") || "";
+    const detailSlug = window.BS_PROVIDER || urlParams.get("provider") || "";
 
     function getJSON(method, params) {
         const url = new URL(API + method, window.location.origin);
@@ -50,6 +51,7 @@
     function cardHtml(s) {
         const img = (s.images && s.images[0] && s.images[0].image) || "";
         const slug = s.slug || s.name;
+        const detailUrl = s.detail_url || ("/bizservice/" + slug);
         const imgStyle = img
             ? `background-image:url('${img}')`
             : "background:linear-gradient(135deg,#0d9488,#0284c7)";
@@ -61,7 +63,7 @@
           <div class="bs-card-img" style="${imgStyle}"></div>
           <div class="bs-card-body">
             <div class="bs-card-cat">${s.category_name || s.category || ""}</div>
-            <h3>${s.service_name}</h3>
+            <h3><a href="${detailUrl}" style="color:inherit; text-decoration:none;">${s.service_name}</a></h3>
             <div class="bs-card-price">${Number(s.price).toLocaleString()} ${s.currency || "ETB"}${s.price_type === "Starting From" ? " / from" : " " + (s.price_type || "")}</div>
             <div class="bs-card-meta">&#9200; ${s.duration_minutes || 30} min &nbsp; ${rating}</div>
             ${s.requires_travel ? '<div class="bs-card-meta" style="color:#ea580c;">&#128674; Home dispatch available</div>' : ""}
@@ -85,7 +87,7 @@
             );
         }
         if (!list.length) {
-            grid.innerHTML = '<div class="bs-empty">No services found yet. Check back soon — providers are joining daily.</div>';
+            renderEmpty(grid);
             return;
         }
         grid.innerHTML = list.map(cardHtml).join("");
@@ -192,38 +194,11 @@
         const date = el("bs-date");
         if (date && !date.value) date.value = new Date().toISOString().slice(0, 10);
 
-        getJSON("bizservice_api.get_categories").then(cats => renderCats(cats.categories));
-        getJSON("bizbooking_api.search_services", { limit: 200 }).then(res => {
-            const services = (res && res.services) || [];
-            const catMap = {};
-            if (window.__bsCats) catMap = window.__bsCats;
-            allListings = services.map(s => Object.assign({}, s, {
-                category_name: (catMap[s.category] || ""),
-                images: s.images || []
-            }));
-            render();
-            const stats = el("bs-total-services");
-            if (stats) stats.textContent = allListings.length;
-        });
-
-        // category names for display
-        getJSON("bizservice_api.get_categories").then(cats => {
-            window.__bsCats = {};
-            (cats.categories || []).forEach(c => window.__bsCats[c.name] = c.category_name);
-            allListings = allListings.map(s => Object.assign({}, s, { category_name: window.__bsCats[s.category] || s.category }));
-            render();
-            // Deep-link: ?provider=<listing name> auto-opens that listing's booking
-            if (deepProvider) {
-                (function deepLink() {
-                    const match = allListings.find(l => l.name === deepProvider || (l.slug && l.slug === deepProvider));
-                    if (match) { window.__openBizServiceBooking(match.name); return; }
-                    const providerMatch = allListings.find(l =>
-                        (l.practitioners || []).some(p => (p.name || "") === deepProvider || (p.practitioner_name || "") === deepProvider)
-                    );
-                    if (providerMatch) window.__openBizServiceBooking(providerMatch.name);
-                })();
-            }
-        });
+        if (detailSlug) {
+            loadDetail(detailSlug);
+        } else {
+            initBrowse();
+        }
 
         const modal = el("bs-modal");
         if (modal) {
@@ -242,6 +217,193 @@
         }
 
         window.__openBizServiceBooking = openBooking;
+    }
+
+    // ---- Detail view (provider / single listing) ----
+    function initBrowse() {
+        getJSON("bizservice_api.get_categories").then(cats => {
+            renderCats(cats.categories);
+            window.__bsCats = {};
+            (cats.categories || []).forEach(c => window.__bsCats[c.name] = c.category_name);
+        });
+        getJSON("bizbooking_api.search_services", { limit: 200 }).then(res => {
+            const services = (res && res.services) || [];
+            const catMap = window.__bsCats || {};
+            allListings = services.map(s => Object.assign({}, s, {
+                detail_url: "/bizservice/" + (s.slug || s.name),
+                category_name: (catMap[s.category] || ""),
+                images: s.images || []
+            }));
+            render();
+            const stats = el("bs-total-services");
+            if (stats) stats.textContent = allListings.length;
+        }).then(() => {
+            // Deep-link: ?provider=<listing name> auto-opens that listing's booking
+            if (deepProvider) {
+                const match = allListings.find(l => l.name === deepProvider || (l.slug && l.slug === deepProvider));
+                if (match) { window.__openBizServiceBooking(match.name); return; }
+                const providerMatch = allListings.find(l =>
+                    (l.practitioners || []).some(p => (p.name || "") === deepProvider || (p.practitioner_name || "") === deepProvider)
+                );
+                if (providerMatch) window.__openBizServiceBooking(providerMatch.name);
+            }
+        });
+    }
+
+    function renderEmpty(grid) {
+        grid.innerHTML =
+            '<div class="bs-empty" style="padding:48px 20px; text-align:center;">' +
+                '<div style="font-size:2.8rem; margin-bottom:10px;">🧰</div>' +
+                '<h3 style="margin:0 0 6px; color:#0f172a; font-weight:800;">No services listed yet</h3>' +
+                '<p style="margin:0 0 14px; color:#64748b; font-size:0.9rem;">Providers are joining every week. Check back soon — or join EthioBiz as a provider today.</p>' +
+                '<a class="bs-btn" href="/bizservice" style="text-decoration:none; display:inline-block; margin-right:6px;">Browse all services</a>' +
+                '<a class="bs-btn" href="/dobiz-signup" style="text-decoration:none; display:inline-block; background:#0d9488;">List your business</a>' +
+            '</div>';
+    }
+
+    function renderProviderHeader(detail) {
+        const wrap = el("bs-provider-header");
+        if (!wrap) return;
+        const provider = detail.provider || {};
+        const rs = detail.rating_summary || {};
+        const logo = provider.company_logo
+            ? '<img src="' + provider.company_logo + '" style="width:72px;height:72px;border-radius:16px;object-fit:cover;" alt="">'
+            : '<div class="bs-provider-initial">' + (provider.company_name || "P").trim().charAt(0) + "</div>";
+        const loc = (provider.location_address || provider.city || "").trim();
+        const ratingLine = rs.review_count
+            ? "&#9733; " + Number(rs.average_rating || 0).toFixed(1) + " (" + rs.review_count + " reviews)"
+            : "No reviews yet";
+        const sub = el("bs-detail-subhead");
+        if (sub) sub.textContent = "Services by " + (provider.company_name || "this provider");
+        wrap.innerHTML =
+            '<div class="bs-provider-hero">' +
+                logo +
+                '<div class="bs-provider-info">' +
+                    '<h1>' + (provider.company_name || "Service Provider") + "</h1>" +
+                    (loc ? '<div class="bs-card-meta">' + "&#128205; " + loc + "</div>" : "") +
+                    '<div class="bs-card-meta">' + ratingLine + " &nbsp; &bull; &nbsp; " + detail.total + " services</div>" +
+                '</div>' +
+                '<a class="bs-btn" href="/bizservice" style="text-decoration:none; margin-left:auto; align-self:center;">&#8592; All Services</a>' +
+            "</div>";
+    }
+
+    function renderProviderReviews(detail) {
+        const listWrap = el("bs-reviews-list");
+        const actionWrap = el("bs-review-action");
+        if (!listWrap || !actionWrap) return;
+
+        const reviews = detail.reviews || [];
+        if (reviews.length) {
+            listWrap.innerHTML = reviews.map(r =>
+                '<div class="bs-review-item">' +
+                    '<div class="bs-card-meta">&#9733; ' + Number(r.rating || 0).toFixed(1) +
+                    ' &nbsp;&nbsp; <b>' + (r.customer_name || "Customer") + "</b>&nbsp;&nbsp; " + (r.booking_date || "") + "</div>" +
+                    "<div>" + (r.review || "") + "</div>" +
+                "</div>").join("");
+        } else {
+            listWrap.innerHTML = '<div class="bs-empty">No reviews yet — be the first to review this provider after a completed booking.</div>';
+        }
+
+        if (!detail.is_logged_in) {
+            actionWrap.innerHTML =
+                '<div class="bs-review-gate" style="margin-top:12px; padding:14px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:12px; color:#475569; font-size:0.9rem;">' +
+                    "Sign in to write a review after your booking is completed. " +
+                    '<a href="/login?redirect-to=' + encodeURIComponent(window.location.pathname) + '" style="font-weight:700; color:#0d9488;">Log in here &#8594;</a>' +
+                "</div>";
+            return;
+        }
+
+        actionWrap.innerHTML =
+            '<div style="margin-top:14px;">' +
+                '<button type="button" class="bs-btn" id="bs-review-btn">&#9733; Review a completed booking</button>' +
+                '<div id="bs-review-form" style="display:none; margin-top:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;"></div>' +
+            "</div>";
+
+        const btn = el("bs-review-btn");
+        const form = el("bs-review-form");
+        if (!btn || !form) return;
+        btn.addEventListener("click", function () {
+            form.style.display = "block";
+            if (form.dataset.loaded) return;
+            form.dataset.loaded = "1";
+            form.innerHTML = "Loading your completed bookings…";
+            const providerName = (detail.provider && detail.provider.name) || "";
+            getJSON("bizservice_api.get_my_provider_bookings", { company: providerName }).then(res => {
+                const eligible = (res && res.review_eligible) || [];
+                if (!eligible.length) {
+                    form.innerHTML = '<div style="color:#64748b; font-size:0.9rem;">You have no completed bookings for this provider yet. Bookings can be reviewed only after they are Completed.</div>';
+                    return;
+                }
+                form.innerHTML =
+                    '<label style="font-weight:700; font-size:0.85rem;">Completed booking to review</label>' +
+                    '<select id="bs-review-booking" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin:6px 0 10px;">' +
+                        eligible.map(b => '<option value="' + b.name + '">' + (b.booking_date || "") + " &bull; " + (b.service_name || b.service || "") + "</option>").join("") +
+                    "</select>" +
+                    '<label style="font-weight:700; font-size:0.85rem;">Rating (1–5)</label>' +
+                    '<select id="bs-review-rating" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin:6px 0 10px;">' +
+                        "<option value='5'>&#9733;&#9733;&#9733;&#9733;&#9733; Excellent</option>" +
+                        "<option value='4'>&#9733;&#9733;&#9733;&#9733; Good</option>" +
+                        "<option value='3'>&#9733;&#9733;&#9733; Average</option>" +
+                        "<option value='2'>&#9733;&#9733; Poor</option>" +
+                        "<option value='1'>&#9733; Terrible</option>" +
+                    "</select>" +
+                    '<label style="font-weight:700; font-size:0.85rem;">Your review</label>' +
+                    '<textarea id="bs-review-text" rows="3" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin:6px 0 10px;" placeholder="How was your experience?"></textarea>' +
+                    '<button type="button" class="bs-btn" id="bs-review-submit" style="width:100%;">Submit review</button>' +
+                    '<div id="bs-review-msg" style="margin-top:8px; font-size:0.85rem; color:#0d9488; font-weight:700;"></div>';
+
+                el("bs-review-submit").addEventListener("click", function () {
+                    const payload = {
+                        booking: el("bs-review-booking").value,
+                        rating: el("bs-review-rating").value,
+                        review: el("bs-review-text").value.trim()
+                    };
+                    fetch(API + "bizservice_api.submit_review", {
+                        method: "POST",
+                        headers: { "X-Frappe-CSRF-Token": window.csrf_token || "", "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams(payload)
+                    }).then(function (r) { return r.json(); }).then(function (res) {
+                        const msg = (res && res.message) || {};
+                        el("bs-review-msg").textContent = (msg.status === "success") ? "Review submitted. Thank you!" : ("Could not submit: " + (msg.message || "review is gated to Completed bookings"));
+                        if (msg.status === "success") { form.dataset.loaded = ""; loadDetail(detailSlug || ""); }
+                    }).catch(function () {
+                        el("bs-review-msg").textContent = "Could not reach the review service.";
+                    });
+                });
+            }).catch(function () {
+                form.innerHTML = '<div style="color:#b91c1c; font-size:0.9rem;">Could not load your bookings.</div>';
+            });
+        });
+    }
+
+    let detailAutoOpened = false;
+
+    function loadDetail(slug) {
+        if (!slug) { initBrowse(); return; }
+        getJSON("bizservice_api.get_categories").then(cats => {
+            window.__bsCats = {};
+            (cats.categories || []).forEach(c => window.__bsCats[c.name] = c.category_name);
+        });
+        getJSON("bizservice_api.get_provider_detail", { provider: slug, listing: slug }).then(detail => {
+            if (!detail || !(detail.listings || detail.provider)) { initBrowse(); return; }
+            window.__BS_DETAIL = detail;
+            renderProviderHeader(detail);
+            const catMap = window.__bsCats || {};
+            allListings = (detail.listings || []).map(s => Object.assign({}, s, {
+                detail_url: "/bizservice/" + (s.slug || s.name),
+                category_name: catMap[s.category] || s.category || "",
+                images: []
+            }));
+            render();
+            const stats = el("bs-total-services");
+            if (stats) stats.textContent = allListings.length;
+            renderProviderReviews(detail);
+            // Single-service deep link: auto-open its booking modal (once per load)
+            if (allListings.length === 1 && !detailAutoOpened) {
+                detailAutoOpened = true;
+                window.__openBizServiceBooking(allListings[0].name);
+            }
+        }).catch(() => initBrowse());
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

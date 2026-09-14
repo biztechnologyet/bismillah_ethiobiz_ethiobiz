@@ -12,11 +12,30 @@ Directly interfaces with:
 
 import frappe
 from frappe import _
-from frappe.utils import today, add_days, getdate, flt, cint
+from frappe.utils import today, add_days, getdate, flt, cint, cstr
 try:
-    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
 except ImportError:
-    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
+
+
+def _norm_time(raw):
+    """Normalize a time string for equality/storage comparisons.
+
+    '09:00 AM' -> '09:00', '02:00 PM' -> '14:00', '02:00:00' -> '02:00'.
+    """
+    import re
+    s = re.sub(r"[^0-9:APMapm ]", "", cstr(raw or ""))
+    s = s.strip().upper()
+    m = re.match(r"^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$", s)
+    if not m:
+        return cstr(raw or "").strip()[:5]
+    h, mm, suf = int(m.group(1)), m.group(2), m.group(3)
+    if suf == "PM" and h != 12:
+        h += 12
+    if suf == "AM" and h == 12:
+        h = 0
+    return f"{h:02d}:{mm}"
 
 # ==============================================================================
 # 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
@@ -29,6 +48,13 @@ def search_practitioners(specialty=None, region=None, availability=None,
     """Search healthcare practitioners with specialty, location, rating & fee filters."""
     conditions = ["(p.status != 'Disabled' OR p.status IS NULL)"]
     values = {}
+
+    # Publish toggle: only show practitioners that are not unpublished
+    try:
+        if frappe.db.has_column("Healthcare Practitioner", "is_active"):
+            conditions.append("(p.is_active = 1 OR p.is_active IS NULL)")
+    except Exception:
+        pass
 
     if specialty and specialty.strip():
         conditions.append("(p.department = %(specialty)s)")
@@ -98,19 +124,20 @@ def get_available_slots(practitioner, date=None, service_type="In-Clinic"):
         "05:00 PM", "05:30 PM"
     ]
 
-    # Query already booked appointments
-    booked = []
+    # Query already booked appointments (normalized 24h comparison, AM/PM-safe)
+    booked_set = set()
     if frappe.db.exists("DocType", "Patient Appointment"):
         booked = frappe.db.sql_list("""
             SELECT appointment_time FROM `tabPatient Appointment`
             WHERE practitioner = %s AND appointment_date = %s AND status NOT IN ('Cancelled', 'Closed')
         """, (practitioner, date))
+        booked_set = {_norm_time(t) for t in booked}
 
     available = []
     for s in all_slots:
         available.append({
             "slot": s,
-            "is_available": (s not in booked)
+            "is_available": (_norm_time(s) not in booked_set)
         })
 
     return {
@@ -138,6 +165,7 @@ def create_appointment(practitioner=None, date=None, time_slot=None, service_typ
     practitioner = practitioner or kwargs.get("doctor") or kwargs.get("doctor_id") or "HLC-PRAC-2026-00001"
     date = date or kwargs.get("appointment_date") or str(today())
     time_slot = time_slot or kwargs.get("appointment_time") or kwargs.get("time") or "10:00"
+    time_slot = _norm_time(time_slot)  # store uniformly as 24h HH:MM
     patient_name = patient_name or kwargs.get("customer_name") or kwargs.get("name") or kwargs.get("full_name")
     patient_phone = patient_phone or kwargs.get("customer_phone") or kwargs.get("phone") or kwargs.get("mobile")
     email = kwargs.get("customer_email") or kwargs.get("email") or kwargs.get("patient_email")
@@ -310,28 +338,59 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
 @frappe.whitelist(allow_guest=True)
 def search_services(category=None, region=None, query=None,
                     min_price=None, max_price=None, min_rating=None,
-                    availability=None, page=1, limit=20):
-    """Returns universal service listings (Salons, Technicians, Home Services, Legal)."""
+                    availability=None, page=1, limit=20, sort_by=None):
+    """Returns universal service listings (Salons, Technicians, Home Services, Legal).
+
+    Server-side filters: category, region/city, keyword, fee range and rating floor.
+    sort_by supports price_asc | price_desc | rating. Only listings with
+    is_active=1 are returned (publish toggle).
+    """
     if not frappe.db.exists("DocType", "BizService Listing"):
         return {"status": "success", "total": 0, "services": []}
 
-    filters = {"is_active": 1}
-    if category and category != "all":
-        filters["category"] = category
+    filters = [["is_active", "=", 1]]
+    if category and str(category) != "all":
+        filters.append(["category", "=", category])
+    q = str(query or "").strip()
+    if q:
+        filters.append(["service_name", "like", f"%{q}%"])
+    if region and str(region).strip().lower() not in ("", "all"):
+        filters.append(["serving_city", "like", f"%{str(region).strip()}%"])
+    if min_price is not None and str(min_price) != "":
+        filters.append(["price", ">=", flt(min_price)])
+    if max_price is not None and str(max_price) != "":
+        filters.append(["price", "<=", flt(max_price)])
+    if min_rating and str(min_rating) != "":
+        filters.append(["average_rating", ">=", flt(min_rating)])
+
+    order_by = "service_name asc"
+    if sort_by == "price_asc":
+        order_by = "price asc"
+    elif sort_by == "price_desc":
+        order_by = "price desc"
+    elif sort_by == "rating":
+        order_by = "average_rating desc"
+
+    page = max(1, cint(page))
+    limit = min(200, max(1, cint(limit)))
 
     services = frappe.get_all(
         "BizService Listing",
         filters=filters,
-        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug"],
-        limit=limit
+        fields=["name", "service_name", "company", "category", "price", "duration_minutes",
+                "requires_travel", "average_rating", "total_bookings", "slug",
+                "currency", "price_type", "serving_city", "serving_region"],
+        order_by=order_by,
+        limit_page_length=limit,
+        start=(page - 1) * limit,
     )
 
     for s in services:
         s["title"] = s.get("service_name") or s.get("name")
-        s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
-        s["company_name"] = frappe.db.get_value("Company", s["company"], "company_name") or s["company"]
+        s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} {s.get('currency') or 'ETB'}"
+        s["company_name"] = frappe.db.get_value("Company", s.get("company") or "", "company_name") or s.get("company")
         s["rating"] = flt(s.get("average_rating") or 4.9)
-        # practitioners is a child table, not a column — load rows and attach
+        # practitioners is a child table, not a column; load rows and attach
         try:
             s["practitioners"] = frappe.get_all(
                 "BizService Practitioner",
@@ -362,19 +421,19 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     b_date = booking_date or date or appointment_date or str(frappe.utils.now_datetime().date())
     b_time = booking_time or time_slot or appointment_time or "14:00"
 
-    # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone, customer_email)
-    
+    # BISMALLAH (2026-09-10): login-gated; identity always from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone, customer_email)
+    customer = party["customer"]
+
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
     service_doc = frappe.get_doc("BizService Listing", service_id)
     provider_user = None
 
-    # Get customer details from session
-    customer_defaults = session_contact_defaults()
-    customer_name = customer_name or customer_defaults.get("full_name") or "Valued Customer"
-    customer_phone = customer_phone or customer_defaults.get("phone") or "0911000000"
+    # Customer details come from the logged-in user's linked profile (no typing needed)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
 
     # BISMALLAH (multi-company): resolve the booking company reliably. Prefer the
     # listing's own company; fall back to BizService Settings > Global Defaults >
@@ -427,8 +486,8 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
         "customer": customer,  # BISMALLAH: Link to authenticated customer
-        "customer_name": customer_name or frappe.session.user,
-        "customer_phone": customer_phone or "0911000000",
+        "customer_name": customer_name or customer,
+        "customer_phone": customer_phone or "",
         "service": service_id,
         "company": company,
         "practitioner_name": practitioner or "Standard Specialist",
@@ -446,7 +505,7 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     frappe.db.commit()
 
     # BISMALLAH (Phase 6.1.4): real BizRide dispatch when the listing requires travel.
-    # The docstring previously claimed dispatch but never executed it — now wired to the
+    # The docstring previously claimed dispatch but never executed it ÔÇö now wired to the
     # real dispatch engine (bizride_api.request_delivery) and the delivery linked back.
     delivery_id = None
     if getattr(service_doc, "requires_travel", 0):
@@ -502,13 +561,18 @@ def create_unified_booking(booking_type=None, service_id=None, resource_id=None,
     s_id = service_id or resource_id
     b_date = booking_date or date or str(frappe.utils.now_datetime().date())
 
+    # BISMALLAH (2026-09-10): login-gated; identity from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
+
     # --- Salon bookings ---
     if booking_type and booking_type.lower() == "salon":
         if frappe.db.exists("DocType", "Salon Appointment"):
             sa = frappe.get_doc({
                 "doctype": "Salon Appointment",
-                "customer_name": customer_name or frappe.session.user,
-                "customer_phone": customer_phone or "0911000000",
+                "customer_name": customer_name or party["customer"],
+                "customer_phone": customer_phone,
                 "appointment_date": b_date,
                 "appointment_time": time_slot or "10:00",
                 "status": "Confirmed"
@@ -546,7 +610,6 @@ def create_universal_booking(booking_data=None, **kwargs):
     """
     from .bizbooking_aggregator_api import create_universal_booking as _agg
     return _agg(booking_data=booking_data, **kwargs)
-
 
 
 

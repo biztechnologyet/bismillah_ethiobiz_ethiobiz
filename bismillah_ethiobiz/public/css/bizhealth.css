@@ -1,0 +1,50 @@
+/* Bismallah EthioBiz BizHealth Brand Polish — INSHA'ALLAH */
+/* Brand identity: clinical teal+sky, warm clinical cards, mobile-first, ETB-aware */
+:root{
+  --health-950:#022c22;
+  --health-900:#064e3b;
+  --health-700:#0f766e;
+  --health-600:#0d9488;
+  --health-500:#14b8a6;
+  --health-100:#ccfbf1;
+  --health-50:#f0fdfa;
+  --health-shadow:0 10px 30px -10px rgba(13,148,136,.35);
+  --health-card-shadow:0 4px 16px -8px rgba(2,44,34,.18);
+  --health-ring:0 0 0 3px rgba(20,184,166,.25);
+  --radius-xl:18px;
+  --radius-lg:14px;
+  --radius-md:10px;
+}
+body.bizhealth .vert-card{border-radius:var(--radius-xl); box-shadow:var(--health-card-shadow); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; border:1px solid #e2e8f0; background:#fff; overflow:hidden;}
+body.bizhealth .vert-card:hover{transform:translateY(-4px); box-shadow:var(--health-shadow); border-color:#99f6e4;}
+body.bizhealth .vert-card-badge{background:var(--health-100); color:var(--health-900); font-weight:800;}
+body.bizhealth .vert-card-price{color:var(--health-700) !important; font-weight:800;}
+body.bizhealth .btn-vertical-primary{background:linear-gradient(135deg,var(--health-600),var(--health-500)); color:#fff; font-weight:800; border-radius:12px; box-shadow:var(--health-card-shadow); transition:transform .15s ease, box-shadow .2s ease;}
+body.bizhealth .btn-vertical-primary:hover{transform:translateY(-1px) scale(1.01); box-shadow:var(--health-shadow);}
+body.bizhealth .btn-vertical-primary:active{transform:scale(.98);}
+body.bizhealth .doc-avatar{width:56px; height:56px; border-radius:50%; object-fit:cover; border:3px solid var(--health-100);}
+body.bizhealth .health-hero{background:linear-gradient(135deg,var(--health-900) 0%, var(--health-600) 60%, var(--health-500) 100%);}
+/* Dashboard stat cards */
+body.bizhealth .health-stat{border-radius:var(--radius-xl); background:#fff; box-shadow:var(--health-card-shadow); padding:18px; display:flex; flex-direction:column; gap:6px;}
+body.bizhealth .filter-pill{display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; border:1.5px solid #e2e8f0; background:#fff; color:#334155; font-size:.85rem; font-weight:700; cursor:pointer; transition:all .18s ease; white-space:nowrap;}
+body.bizhealth .filter-pill:hover{border-color:var(--health-500); color:var(--health-700);}
+body.bizhealth .filter-pill.active{background:var(--health-600); border-color:var(--health-600); color:#fff; box-shadow:var(--health-card-shadow);}
+/* Mobile-first: 360px no horizontal scroll */
+@media (max-width:420px){
+  body.bizhealth .health-hero{padding:40px 16px !important;}
+  body.bizhealth .vert-grid{grid-template-columns:1fr !important; gap:14px !important;}
+  body.bizhealth .filter-pill{font-size:.78rem; padding:8px 12px;}
+  body.bizhealth .health-stat{grid-column:1 / -1;}
+  body.bizhealth .health-newsletter, body.bizhealth .health-stay-tuned{padding:0 8px;}
+}
+/* Micro-interactions */
+body.bizhealth .spec-chip{padding:10px 16px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-weight:700; font-size:.85rem; cursor:pointer; transition:all .18s ease;}
+body.bizhealth .spec-chip:hover{border-color:var(--health-500); color:var(--health-700); transform:translateY(-1px);}
+body.bizhealth .spec-chip.active{background:var(--health-600); border-color:var(--health-600); color:#fff;}
+/* Skeleton shimmer (while loading) */
+body.bizhealth .skeleton{position:relative; overflow:hidden; background:#e2e8f0; border-radius:var(--radius-lg);}
+body.bizhealth .skeleton::after{content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent); animation:healthShimmer 1.4s infinite;}
+@keyframes healthShimmer{100%{transform:translateX(100%);}}
+/* Toast */
+body.bizhealth .health-toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--health-900); color:#fff; padding:12px 20px; border-radius:12px; font-weight:700; font-size:.9rem; z-index:9999; box-shadow:var(--health-shadow); animation:healthToast .3s ease;}
+@keyframes healthToast{from{opacity:0; transform:translate(-50%,8px);} to{opacity:1; transform:translate(-50%,0);}}
