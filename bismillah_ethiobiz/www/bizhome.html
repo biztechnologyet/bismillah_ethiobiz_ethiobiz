@@ -270,6 +270,23 @@
             </select>
           </div>
 
+          <!-- Viewing Specific (Date & Time) -->
+          <div class="col-md-6 viewing-field" style="display:none;">
+            <label class="form-label font-weight-bold small">📅 Preferred Viewing Date</label>
+            <input type="date" id="viewingDate" class="form-control rounded-pill">
+          </div>
+          <div class="col-md-6 viewing-field" style="display:none;">
+            <label class="form-label font-weight-bold small">⏰ Preferred Time Slot</label>
+            <select id="viewingTime" class="form-select rounded-pill">
+              <option value="09:00 AM">09:00 AM</option>
+              <option value="10:00 AM" selected>10:00 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="02:00 PM">02:00 PM</option>
+              <option value="04:00 PM">04:00 PM</option>
+            </select>
+          </div>
+
           <div class="col-12">
             <label class="form-label font-weight-bold small">📝 Special Inquiries / Requests / Move-in Timeline</label>
             <textarea id="custNotes" class="form-control rounded-3" rows="2" placeholder="Airport pickup, move-in timeline, workplace, specific floor, viewing preference..."></textarea>
@@ -402,7 +419,7 @@
 </div>
 
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.1"></script>
-<script src="/assets/bismillah_ethiobiz/js/bizhome.js?v=2.3.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizhome.js?v=2.4.0"></script>
 <script>
   // Close modal when clicking outside dialog or pressing Escape
   document.addEventListener("DOMContentLoaded", function() {

@@ -16,10 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkInInput = document.getElementById("bookCheckIn");
   const checkOutInput = document.getElementById("bookCheckOut");
   const leaseStartInput = document.getElementById("leaseStartDate");
+  const viewingDateInput = document.getElementById("viewingDate");
 
   if (checkInInput) checkInInput.valueAsDate = today;
   if (checkOutInput) checkOutInput.valueAsDate = tomorrow;
   if (leaseStartInput) leaseStartInput.valueAsDate = today;
+  if (viewingDateInput) viewingDateInput.valueAsDate = tomorrow;
 
   loadProperties();
 });
@@ -252,11 +254,13 @@ function openPropertyModal(propId) {
 
   const stayFields = document.querySelectorAll(".stay-field");
   const leaseFields = document.querySelectorAll(".lease-field");
+  const viewingFields = document.querySelectorAll(".viewing-field");
   const btnSubmit = document.getElementById("btnSubmitBooking");
 
   if (isDaily) {
     stayFields.forEach((f) => (f.style.display = "block"));
     leaseFields.forEach((f) => (f.style.display = "none"));
+    viewingFields.forEach((f) => (f.style.display = "none"));
     if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation ­ƒÅ¿";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
@@ -265,6 +269,7 @@ function openPropertyModal(propId) {
   } else if (isSale) {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "none"));
+    viewingFields.forEach((f) => (f.style.display = "block"));
     if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour ­ƒÅá";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
@@ -273,6 +278,7 @@ function openPropertyModal(propId) {
   } else {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "block"));
+    viewingFields.forEach((f) => (f.style.display = "none"));
     if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application ­ƒôæ";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
@@ -354,8 +360,8 @@ function submitBooking() {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.schedule_property_viewing";
     payload = {
       property_id: selectedProperty.name,
-      preferred_date: new Date().toISOString().split("T")[0],
-      preferred_time: "10:00 AM",
+      viewing_date: document.getElementById("viewingDate")?.value || new Date().toISOString().split("T")[0],
+      viewing_time: document.getElementById("viewingTime")?.value || "10:00 AM",
       customer_name: custName,
       customer_phone: custPhone,
       customer_email: custEmail

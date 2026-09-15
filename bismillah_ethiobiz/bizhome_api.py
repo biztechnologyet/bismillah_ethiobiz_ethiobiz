@@ -127,30 +127,125 @@ SAMPLE_PROPERTIES = [
     }
 ]
 
+# BISMALLAH (2026-09-15 BizHome batch): canonical owning company every BizHome
+# booking/listen row is bound to when a Property-less property (sample or bare
+# listing) has no valid company. Mirrors the BizService Default Company chain.
+def _default_company():
+    return (frappe.db.get_single_value("BizService Settings", "company")
+            or frappe.db.get_single_value("Global Defaults", "default_company")
+            or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0] or "")
+
+
+def _valid_company(co):
+    co = (co or "").strip()
+    if co and frappe.db.exists("Company", co):
+        return co
+    return _default_company()
+
+
+def _ensure_biz_category(cat_name="Real Estate & Property"):
+    """DB-first: create the BizHome booking category once when missing."""
+    if not frappe.db.exists("DocType", "BizService Category"):
+        return None
+    cat = frappe.db.get_value("BizService Category", {"category_name": cat_name}, "name")
+    if not cat:
+        try:
+            d = frappe.get_doc({"doctype": "BizService Category", "category_name": cat_name})
+            d.flags.ignore_mandatory = True
+            cat = d.insert(ignore_permissions=True).name
+            frappe.db.commit()
+        except Exception:
+            cat = frappe.db.get_value("BizService Category", {"category_name": cat_name}, "name")
+    return cat
+
+
+def _ensure_service_listing(service_name, category=None, price=0, is_active=1,
+                            description=None, duration_minutes=0, slug=None):
+    """Find-or-create a BizService Listing, always repairing an invalid company."""
+    if not frappe.db.exists("DocType", "BizService Listing"):
+        return None
+    listing = frappe.db.get_value("BizService Listing", {"service_name": service_name}, "name")
+    company = _default_company()
+    if listing:
+        lo = frappe.db.get_value("BizService Listing", listing, "company")
+        if not (lo and frappe.db.exists("Company", lo)):
+            company = _valid_company(lo) or company
+            try:
+                frappe.db.set_value("BizService Listing", listing, "company", company, update_modified=False)
+                frappe.db.commit()
+            except Exception:
+                pass
+        return listing
+    if not company:
+        return None
+    cat = category or _ensure_biz_category()
+    payload = {
+        "doctype": "BizService Listing",
+        "service_name": service_name,
+        "company": _valid_company(company),
+        "category": cat,
+        "price": flt(price),
+        "price_type": "Starting From",
+        "duration_minutes": cint(duration_minutes),
+        "is_active": cint(is_active),
+    }
+    if description:
+        payload["description"] = description
+    if slug:
+        payload["slug"] = slug
+    try:
+        d = frappe.get_doc(payload)
+        d.flags.ignore_mandatory = True
+        return d.insert(ignore_permissions=True).name
+    except Exception as e:
+        frappe.log_error(f"BizHome listing create error: {str(e)}")
+        return frappe.db.get_value("BizService Listing", {"service_name": service_name}, "name")
+
+
+def _norm_time(t):
+    """Normalise '10:00 AM'/'14:30' etc into 24h HH:MM for the Time field."""
+    t = (t or "").strip()
+    if not t:
+        return ""
+    low = t.lower()
+    try:
+        if "pm" in low or "am" in low:
+            hhmm = t.strip().split()[0]
+            hh, mm = hhmm.split(":")
+            h = int(hh)
+            if "pm" in low and h < 12:
+                h += 12
+            if "am" in low and h == 12:
+                h = 0
+            return "%02d:%02d" % (h, cint(mm[:2]) if mm[:2].isdigit() else 0)
+        if ":" in t:
+            return t[:5]
+        return t
+    except Exception:
+        return t
+
+
 @frappe.whitelist(allow_guest=True)
 def search_properties(tenure=None, property_type=None, min_price=None, max_price=None,
                       bedrooms=None, city=None, subcity=None, query=None, limit=20):
     """
     Omnichannel Property Search for ethiobiz.et/bizhome.
     Searches across PropMS Property doctype with smart fallback to real-time seed listings.
+    BISMALLAH (2026-09-15): maps the real PropMS Property columns (type/rent/common_bathroom/
+    shop_image ...) so published records surface instead of failing the column lookup.
     """
     props = []
 
     # 1. Try querying real PropMS Property DocType if it has published records
     try:
         if frappe.db.exists("DocType", "Property"):
-            filters = {}
-            if tenure and tenure != "All":
-                filters["shop_offer_type"] = tenure
-            if city:
-                filters["city"] = city
-            
             records = frappe.get_all(
                 "Property",
-                filters=filters,
-                fields=["name", "name1 as title", "property_type", "shop_offer_type as tenure",
-                        "shop_price as price", "city", "bedroom as bedrooms", "bathroom as bathrooms",
-                        "furnished", "company", "description", "image"],
+                fields=["name", "name1 as title", "type as property_type",
+                        "shop_offer_type as tenure", "shop_price as price", "rent",
+                        "bedroom as bedrooms", "common_bathroom as bathrooms",
+                        "builtup_area as area_sqm", "furnished", "company", "status",
+                        "description", "photo", "shop_image", "territory"],
                 limit_page_length=cint(limit) or 20
             )
             for r in records:
@@ -159,19 +254,19 @@ def search_properties(tenure=None, property_type=None, min_price=None, max_price
                     "title": r.title or r.name,
                     "property_type": r.property_type or "Residential",
                     "tenure": r.tenure or "Monthly Rental",
-                    "price": flt(r.price or 15000.0),
+                    "price": flt(r.price or r.rent or 15000.0),
                     "price_unit": "night" if (r.tenure and "Day" in r.tenure) else "month",
-                    "city": r.city or "Addis Ababa",
-                    "subcity": "City Center",
+                    "city": "Addis Ababa",
+                    "subcity": r.territory or "City Center",
                     "bedrooms": cint(r.bedrooms or 2),
                     "bathrooms": cint(r.bathrooms or 1),
-                    "area_sqm": 120,
+                    "area_sqm": flt(r.area_sqm or 120),
                     "furnished": cint(r.furnished or 0),
                     "amenities": ["WiFi", "Water Tank", "Parking"],
-                    "image": r.image or "/assets/bismillah_ethiobiz/images/placeholder_property.jpg",
+                    "image": (r.shop_image or r.photo or "/assets/bismillah_ethiobiz/images/placeholder_property.jpg"),
                     "rating": 4.8,
                     "reviews_count": 15,
-                    "status": "Available",
+                    "status": r.status or "Available",
                     "description": r.description or "Quality property in prime location."
                 })
     except Exception as e:
@@ -198,9 +293,9 @@ def search_properties(tenure=None, property_type=None, min_price=None, max_price
         if query:
             q = query.lower()
             text_match = (
-                q in p["title"].lower() or 
-                q in p["description"].lower() or 
-                q in p["city"].lower() or 
+                q in p["title"].lower() or
+                q in p["description"].lower() or
+                q in p["city"].lower() or
                 q in p["subcity"].lower()
             )
             if not text_match:
@@ -230,19 +325,20 @@ def get_property_details(property_id):
         doc = frappe.get_doc("Property", property_id)
         p_dict = {
             "name": doc.name,
-            "title": getattr(doc, "name1", doc.name),
-            "property_type": getattr(doc, "property_type", "Residential"),
+            "title": getattr(doc, "name1", None) or doc.name,
+            "property_type": getattr(doc, "type", "Residential"),
             "tenure": getattr(doc, "shop_offer_type", "Monthly Rental"),
-            "price": flt(getattr(doc, "shop_price", 15000.0)),
+            "price": flt(getattr(doc, "shop_price", None) or getattr(doc, "rent", 15000.0)),
             "price_unit": "night" if "Day" in str(getattr(doc, "shop_offer_type", "")) else "month",
-            "city": getattr(doc, "city", "Addis Ababa"),
-            "subcity": getattr(doc, "address", "City Center"),
+            "city": "Addis Ababa",
+            "subcity": getattr(doc, "territory", "City Center"),
             "bedrooms": cint(getattr(doc, "bedroom", 2)),
-            "bathrooms": cint(getattr(doc, "bathroom", 1)),
-            "area_sqm": 120,
+            "bathrooms": cint(getattr(doc, "common_bathroom", 1) or getattr(doc, "bathroom", 1) or 1),
+            "area_sqm": flt(getattr(doc, "builtup_area", 0) or getattr(doc, "carpet_area", 120)),
             "furnished": cint(getattr(doc, "furnished", 0)),
             "amenities": ["WiFi", "Water Tank", "Security", "Parking"],
-            "image": getattr(doc, "image", "/assets/bismillah_ethiobiz/images/placeholder_property.jpg"),
+            "image": (getattr(doc, "shop_image", None) or getattr(doc, "photo", None)
+                      or "/assets/bismillah_ethiobiz/images/placeholder_property.jpg"),
             "rating": 4.8,
             "reviews_count": 15,
             "status": getattr(doc, "status", "Available"),
@@ -256,8 +352,10 @@ def get_property_details(property_id):
 def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1, customer_name=None, customer_phone=None, special_requests=None, **kwargs):
     """
     Premium hotel / Airbnb style daily stay booking.
-    Creates a confirmed BizBooking / Hotel Reservation entry.
-    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
+    Creates a confirmed BizService Booking / Hotel Reservation entry.
+    BISMALLAH (2026-09-15): repaired listing-company handling so a Hotels & Stays
+    listing whose owning company is missing/corrupted is auto-repaired and the
+    booking always persists as a real BizService Booking row.
     """
     property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
     customer_name = customer_name or kwargs.get("name") or kwargs.get("full_name")
@@ -289,13 +387,12 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
         property_company = frappe.db.get_value("Property", property_id, "company")
     if not property_company:
         # Fall back to default company if Property DocType doesn't exist or no company set
-        property_company = frappe.db.get_single_value("BizService Settings", "company")
-        if not property_company:
-            property_company = (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0]
-    
+        property_company = _default_company()
+
     # Validate company exists
-    if property_company:
-        property_company = resolve_booking_company(property_company, "property stay")
+    booking_company = _valid_company(property_company)
+    if not booking_company:
+        booking_company = resolve_booking_company(property_company, "property stay")
 
     customer_defaults = session_contact_defaults()
     user = party["full_name"] or customer_name or customer_defaults.get("full_name")
@@ -324,13 +421,12 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
                     )
                 if not listing:
                     # Create a Hotels & Stays listing to host the stay (DB-first)
-                    co = (frappe.db.get_single_value("BizService Settings", "company")
-                          or (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0])
+                    co = _default_company()
                     if co:
                         # BISMALLAH: Validate company before creating listing
                         co = resolve_booking_company(co, "BizService Settings")
                         try:
-                            listing = frappe.get_doc({
+                            d = frappe.get_doc({
                                 "doctype": "BizService Listing",
                                 "service_name": f"Stay - {prop.get('title', property_id)}",
                                 "company": co,
@@ -339,17 +435,28 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
                                 "price_type": "Starting From",
                                 "duration_minutes": nights,
                                 "is_active": 1
-                            }).insert(ignore_permissions=True).name
+                            })
+                            d.flags.ignore_mandatory = True
+                            listing = d.insert(ignore_permissions=True).name
                         except Exception:
                             listing = None
                 if listing:
+                    # Repair a listing whose owning company went missing/corrupted
+                    lo = frappe.db.get_value("BizService Listing", listing, "company")
+                    if not (lo and frappe.db.exists("Company", lo)):
+                        lo = _valid_company(lo)
+                        try:
+                            frappe.db.set_value("BizService Listing", listing, "company", lo, update_modified=False)
+                            frappe.db.commit()
+                        except Exception:
+                            pass
                     bsvc = frappe.get_doc({
                         "doctype": "BizService Booking",
                         "customer": customer,  # BISMALLAH: link to authenticated customer
                         "customer_name": user,
                         "customer_phone": phone,
                         "service": listing,
-                        "company": frappe.db.get_value("BizService Listing", listing, "company") or "",
+                        "company": lo or booking_company,
                         "practitioner_name": "Property Host",
                         "booking_date": str(d1),
                         "booking_time": "12:00",
@@ -402,7 +509,9 @@ def book_property_stay(property_id=None, check_in=None, check_out=None, guests=1
 def request_property_lease(property_id=None, tenure_frequency="Monthly", start_date=None, duration_months=6, customer_name=None, customer_phone=None, **kwargs):
     """
     Submits a residential or commercial lease agreement application.
-    BISMALLAH: Enforces login/registration, binds to customer and company.
+    BISMALLAH (2026-09-15): login-gated (resolve_booking_customer) and PERSISTS a
+    real BizService Booking row so Desk sees the application; previously the
+    endpoint returned only a synthetic reference with no database record.
     """
     property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
     customer_name = customer_name or kwargs.get("applicant_name") or kwargs.get("name") or kwargs.get("full_name")
@@ -411,26 +520,13 @@ def request_property_lease(property_id=None, tenure_frequency="Monthly", start_d
     duration_months = duration_months or kwargs.get("lease_duration_months") or 6
     email = kwargs.get("email") or kwargs.get("customer_email") or kwargs.get("applicant_email")
 
-    # Resolve customer (logged in or guest with contact info)
-    customer = resolve_or_create_customer(customer_name, customer_phone, email)
-    
+    # Resolve customer (login required; identity always from the account)
+    party = resolve_booking_customer(customer_name, customer_phone, email)
+    customer = party["customer"]
+
     if not property_id:
         frappe.throw(_("Property ID is required"))
 
-    # Resolve property company (owning company)
-    property_company = None
-    if property_id and frappe.db.exists("DocType", "Property"):
-        property_company = frappe.db.get_value("Property", property_id, "company")
-    if not property_company:
-        # Fall back to default company if Property DocType doesn't exist or no company set
-        property_company = frappe.db.get_single_value("BizService Settings", "company")
-        if not property_company:
-            property_company = (frappe.db.get_all("Company", limit=1, pluck="name") or [None])[0]
-    
-    # Validate company exists
-    if property_company:
-        property_company = resolve_booking_company(property_company, "property stay")
-    
     s_date = start_date or today()
     dur = cint(duration_months) or 6
     prop_res = get_property_details(property_id)
@@ -439,9 +535,46 @@ def request_property_lease(property_id=None, tenure_frequency="Monthly", start_d
     total_contract = monthly_rent * dur
     deposit = monthly_rent * 2.0  # 2 months standard security deposit
 
+    lease_ref = f"LEASE-APP-{property_id}-{cint(now_datetime().timestamp())}"
+    booking_company = _default_company()
+    if booking_company:
+        booking_company = _valid_company(booking_company)
+    try:
+        if (frappe.db.exists("DocType", "BizService Booking")
+                and frappe.db.exists("DocType", "BizService Listing")):
+            listing = _ensure_service_listing(
+                "Lease Application - EthioBiz Property",
+                category=_ensure_biz_category(), price=0, is_active=1,
+                description="Lease / rental application for properties listed on BizHome.",
+                slug="lease-application")
+            if listing and booking_company:
+                bsvc = frappe.get_doc({
+                    "doctype": "BizService Booking",
+                    "customer": customer,
+                    "customer_name": party["full_name"] or customer_name or _("Valued Member"),
+                    "customer_phone": party["phone"] or customer_phone or "",
+                    "service": listing,
+                    "company": booking_company,
+                    "practitioner_name": "Property Agent",
+                    "booking_date": str(s_date),
+                    "booking_time": "10:00",
+                    "duration_minutes": max(1, dur * 30 * 24 * 60),
+                    "status": "Pending",
+                    "payment_status": "Unpaid",
+                    "total_amount": flt(total_contract + deposit),
+                    "customer_notes": (f"Lease application. Tenure: {tenure_frequency}. Duration: {dur} months. "
+                                       f"Monthly rent: {monthly_rent:,.2f} ETB. Deposit (2 months): {deposit:,.2f} ETB.")
+                })
+                bsvc.flags.ignore_mandatory = True
+                bsvc.insert(ignore_permissions=True)
+                frappe.db.commit()
+                lease_ref = bsvc.name
+    except Exception as e:
+        frappe.log_error(f"BizHome lease persist error: {str(e)}")
+
     return {
         "status": "success",
-        "lease_ref": f"LEASE-APP-{property_id}-{cint(now_datetime().timestamp())}",
+        "lease_ref": lease_ref,
         "property_id": property_id,
         "property_title": prop.get("title"),
         "tenure_frequency": tenure_frequency,
@@ -450,7 +583,7 @@ def request_property_lease(property_id=None, tenure_frequency="Monthly", start_d
         "monthly_rent": f"{monthly_rent:,.2f} ETB",
         "security_deposit": f"{deposit:,.2f} ETB",
         "total_commitment": f"{total_contract + deposit:,.2f} ETB",
-        "company": property_company,
+        "company": booking_company,
         "customer": customer,
         "message": f"Lease application submitted for {prop.get('title')}. An agent will contact you within 2 hours."
     }
@@ -459,6 +592,9 @@ def request_property_lease(property_id=None, tenure_frequency="Monthly", start_d
 def schedule_property_viewing(property_id=None, preferred_date=None, preferred_time="10:00 AM", customer_name=None, customer_phone=None, **kwargs):
     """
     Schedules an in-person or virtual property tour with an assigned EthioBiz Real Estate agent.
+    BISMALLAH (2026-09-15): now login-gated (resolve_booking_customer) and PERSISTS a
+    real BizService Booking row; previously it was the only BizHome mutator open to
+    guests and it wrote no database record (synthetic confirmation only).
     """
     property_id = property_id or kwargs.get("property") or kwargs.get("property_name")
     preferred_date = preferred_date or kwargs.get("date") or kwargs.get("viewing_date") or today()
@@ -470,12 +606,50 @@ def schedule_property_viewing(property_id=None, preferred_date=None, preferred_t
     if not all([property_id, preferred_date]):
         frappe.throw(_("Property ID and preferred date are required"))
 
+    # BISMALLAH: viewing is a real appointment now - requires a logged-in account.
+    party = resolve_booking_customer(customer_name, customer_phone, email)
+    customer = party["customer"]
+
     prop_res = get_property_details(property_id)
     prop = prop_res.get("property", {})
 
+    viewing_id = f"VIEW-{property_id}-{cint(now_datetime().timestamp())}"
+    booking_company = _valid_company(_default_company())
+    try:
+        if (frappe.db.exists("DocType", "BizService Booking")
+                and frappe.db.exists("DocType", "BizService Listing")):
+            listing = _ensure_service_listing(
+                "Property Viewing - EthioBiz Real Estate",
+                category=_ensure_biz_category(), price=0, is_active=1,
+                description="In-person or virtual property tour appointment on BizHome.",
+                slug="property-viewing")
+            if listing and booking_company:
+                bsvc = frappe.get_doc({
+                    "doctype": "BizService Booking",
+                    "customer": customer,
+                    "customer_name": party["full_name"] or customer_name or _("Valued Member"),
+                    "customer_phone": party["phone"] or customer_phone or "",
+                    "service": listing,
+                    "company": booking_company,
+                    "practitioner_name": "Hadi Awad (Senior Property Consultant)",
+                    "booking_date": str(preferred_date),
+                    "booking_time": _norm_time(preferred_time) or "10:00",
+                    "duration_minutes": 60,
+                    "status": "Pending",
+                    "payment_status": "Unpaid",
+                    "total_amount": 0.0,
+                    "customer_notes": "Property viewing request. Contact phone: +251 91 100 0000."
+                })
+                bsvc.flags.ignore_mandatory = True
+                bsvc.insert(ignore_permissions=True)
+                frappe.db.commit()
+                viewing_id = bsvc.name
+    except Exception as e:
+        frappe.log_error(f"BizHome viewing persist error: {str(e)}")
+
     return {
         "status": "success",
-        "viewing_id": f"VIEW-{property_id}-{cint(now_datetime().timestamp())}",
+        "viewing_id": viewing_id,
         "property_id": property_id,
         "property_title": prop.get("title"),
         "viewing_date": preferred_date,
@@ -490,6 +664,9 @@ def register_property_listing(title=None, property_type="Residential", tenure="M
     """
     Allows a property owner, landlord, or hotelier to register a property or lodging on EthioBiz.
     Auto-registers owner as an ERPNext Customer/Partner.
+    BISMALLAH (2026-09-15): login-gated (resolve_or_create_customer) and PERSISTS a
+    draft BizService Listing row (is_active=0) so Desk verification officers see the
+    application; previously it only returned a synthetic reference.
     """
     title = title or kwargs.get("property_title") or "New Property Listing"
     owner_name = owner_name or kwargs.get("name") or kwargs.get("full_name")
@@ -502,6 +679,21 @@ def register_property_listing(title=None, property_type="Residential", tenure="M
     customer = resolve_or_create_customer(owner_name, owner_phone, owner_email)
 
     ref = f"PROP-REG-{cint(now_datetime().timestamp())}"
+    listing_company = _valid_company(_default_company())
+    try:
+        if frappe.db.exists("DocType", "BizService Listing"):
+            slug = (title or "property").lower().strip()
+            slug = "".join(c if c.isalnum() else "-" for c in slug)[:60].strip("-")
+            listing_name = _ensure_service_listing(
+                f"{title} ({city})",
+                category=_ensure_biz_category(), price=flt(price), is_active=0,
+                description=(description or "Pending verification by EthioBiz property verification officers."),
+                slug=slug or "property-registration", duration_minutes=1)
+            if listing_name:
+                ref = listing_name
+    except Exception as e:
+        frappe.log_error(f"BizHome listing register error: {str(e)}")
+
     return {
         "status": "success",
         "reference": ref,

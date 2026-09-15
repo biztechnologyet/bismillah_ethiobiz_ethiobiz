@@ -16,10 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkInInput = document.getElementById("bookCheckIn");
   const checkOutInput = document.getElementById("bookCheckOut");
   const leaseStartInput = document.getElementById("leaseStartDate");
+  const viewingDateInput = document.getElementById("viewingDate");
 
   if (checkInInput) checkInInput.valueAsDate = today;
   if (checkOutInput) checkOutInput.valueAsDate = tomorrow;
   if (leaseStartInput) leaseStartInput.valueAsDate = today;
+  if (viewingDateInput) viewingDateInput.valueAsDate = tomorrow;
 
   loadProperties();
 });
@@ -87,7 +89,7 @@ function renderProperties(list) {
   if (list.length === 0) {
     container.innerHTML = `
       <div class="col-12 text-center py-5">
-        <div class="h1">🏡</div>
+        <div class="h1">­ƒÅí</div>
         <h4 class="text-muted">No properties match your current filters</h4>
         <p class="text-muted small">Try broadening your search or switching property category.</p>
       </div>
@@ -100,7 +102,7 @@ function renderProperties(list) {
     const isDaily = p.tenure && p.tenure.includes("Day");
     const isSale = p.tenure && p.tenure.includes("Sale");
     const badgeColor = isDaily ? "#0284c7" : isSale ? "#e11d48" : "#0d9488";
-    const ctaLabel = isDaily ? "Book Stay 🏨" : isSale ? "Inquire / Schedule 🏷️" : "Apply / Rent 📑";
+    const ctaLabel = isDaily ? "Book Stay ­ƒÅ¿" : isSale ? "Inquire / Schedule ­ƒÅÀ´©Å" : "Apply / Rent ­ƒôæ";
 
     const amenitiesHtml = (p.amenities || [])
       .slice(0, 4)
@@ -117,16 +119,16 @@ function renderProperties(list) {
           <div class="property-info">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="badge bg-light text-dark border">${p.property_type || 'Property'}</span>
-              <span class="small text-warning font-weight-bold">⭐ ${p.rating || 4.9} (${p.reviews_count || 12})</span>
+              <span class="small text-warning font-weight-bold">Ô¡É ${p.rating || 4.9} (${p.reviews_count || 12})</span>
             </div>
             <h5 class="font-weight-bold text-dark mb-1">${p.title}</h5>
-            <p class="text-muted small mb-2">📍 ${p.subcity ? p.subcity + ', ' : ''}${p.city || 'Addis Ababa'}</p>
+            <p class="text-muted small mb-2">­ƒôì ${p.subcity ? p.subcity + ', ' : ''}${p.city || 'Addis Ababa'}</p>
 
             <div class="property-features">
-              <span>🛏️ ${p.bedrooms} Beds</span>
-              <span>🚿 ${p.bathrooms} Baths</span>
-              <span>📐 ${p.area_sqm || 100} m²</span>
-              ${p.furnished ? '<span>🛋️ Furnished</span>' : ''}
+              <span>­ƒøÅ´©Å ${p.bedrooms} Beds</span>
+              <span>­ƒÜ┐ ${p.bathrooms} Baths</span>
+              <span>­ƒôÉ ${p.area_sqm || 100} m┬▓</span>
+              ${p.furnished ? '<span>­ƒøï´©Å Furnished</span>' : ''}
             </div>
 
             <div class="mb-3">
@@ -245,19 +247,21 @@ function openPropertyModal(propId) {
   if (propIdEl) propIdEl.value = selectedProperty.name;
   if (propTenureEl) propTenureEl.value = selectedProperty.tenure || "Monthly Rental";
   if (propTitleEl) propTitleEl.innerText = selectedProperty.title || "Property";
-  if (propSubEl) propSubEl.innerText = `📍 ${selectedProperty.subcity ? selectedProperty.subcity + ', ' : ''}${selectedProperty.city || 'Addis Ababa'} • ${selectedProperty.property_type || 'Residential'}`;
+  if (propSubEl) propSubEl.innerText = `­ƒôì ${selectedProperty.subcity ? selectedProperty.subcity + ', ' : ''}${selectedProperty.city || 'Addis Ababa'} ÔÇó ${selectedProperty.property_type || 'Residential'}`;
 
   const isDaily = selectedProperty.tenure && selectedProperty.tenure.includes("Day");
   const isSale = selectedProperty.tenure && selectedProperty.tenure.includes("Sale");
 
   const stayFields = document.querySelectorAll(".stay-field");
   const leaseFields = document.querySelectorAll(".lease-field");
+  const viewingFields = document.querySelectorAll(".viewing-field");
   const btnSubmit = document.getElementById("btnSubmitBooking");
 
   if (isDaily) {
     stayFields.forEach((f) => (f.style.display = "block"));
     leaseFields.forEach((f) => (f.style.display = "none"));
-    if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation 🏨";
+    viewingFields.forEach((f) => (f.style.display = "none"));
+    if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation ­ƒÅ¿";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / night`;
@@ -265,7 +269,8 @@ function openPropertyModal(propId) {
   } else if (isSale) {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "none"));
-    if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour 🏠";
+    viewingFields.forEach((f) => (f.style.display = "block"));
+    if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour ­ƒÅá";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `Total Price: ${Number(selectedProperty.price).toLocaleString()} ETB`;
@@ -273,7 +278,8 @@ function openPropertyModal(propId) {
   } else {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "block"));
-    if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application 📑";
+    viewingFields.forEach((f) => (f.style.display = "none"));
+    if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application ­ƒôæ";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / month`;
@@ -291,12 +297,38 @@ window.openPropertyModal = openPropertyModal;
 function submitBooking() {
   if (!selectedProperty) return;
 
-  const custName = (document.getElementById("custName")?.value || "").trim();
-  const custPhone = (document.getElementById("custPhone")?.value || "").trim();
+  let custName = (document.getElementById("custName")?.value || "").trim();
+  let custPhone = (document.getElementById("custPhone")?.value || "").trim();
+  let custEmail = (document.getElementById("custEmail")?.value || "").trim();
+  let custAddress = (document.getElementById("custAddress")?.value || "").trim();
   const custNotes = (document.getElementById("custNotes")?.value || "").trim();
 
+  // Fallback to logged-in user profile if inputs were not populated
+  if (!custName && window.ETHIOBIZ_USER_PROFILE) {
+    custName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+  }
+  if (!custPhone && window.ETHIOBIZ_USER_PROFILE) {
+    custPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+  }
+  if (!custEmail && window.ETHIOBIZ_USER_PROFILE) {
+    custEmail = window.ETHIOBIZ_USER_PROFILE.email || "";
+  }
+  if (!custAddress && window.ETHIOBIZ_USER_PROFILE) {
+    custAddress = window.ETHIOBIZ_USER_PROFILE.address || "";
+  }
+
   if (!custName || !custPhone) {
-    alert("Please provide your full name and phone number to continue.");
+    // BISMALLAH: only logged-in users may book — route guests to login
+    if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+      window.ethiobizRequireLogin();
+    } else {
+      alert("Please sign in or ensure your verified account phone number is active.");
+    }
+    return;
+  }
+  // Definite guest check even if they typed contact info: login required
+  if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+    window.ethiobizRequireLogin();
     return;
   }
 
@@ -321,16 +353,18 @@ function submitBooking() {
       check_out: document.getElementById("bookCheckOut")?.value || "",
       customer_name: custName,
       customer_phone: custPhone,
+      customer_email: custEmail,
       special_requests: custNotes
     };
   } else if (isSale) {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.schedule_property_viewing";
     payload = {
       property_id: selectedProperty.name,
-      preferred_date: new Date().toISOString().split("T")[0],
-      preferred_time: "10:00 AM",
+      viewing_date: document.getElementById("viewingDate")?.value || new Date().toISOString().split("T")[0],
+      viewing_time: document.getElementById("viewingTime")?.value || "10:00 AM",
       customer_name: custName,
-      customer_phone: custPhone
+      customer_phone: custPhone,
+      customer_email: custEmail
     };
   } else {
     apiUrl = "/api/method/bismillah_ethiobiz.bizhome_api.request_property_lease";
@@ -340,7 +374,8 @@ function submitBooking() {
       start_date: document.getElementById("leaseStartDate")?.value || "",
       duration_months: document.getElementById("leaseDuration")?.value || 6,
       customer_name: custName,
-      customer_phone: custPhone
+      customer_phone: custPhone,
+      customer_email: custEmail
     };
   }
 
@@ -360,12 +395,14 @@ function submitBooking() {
         btnSubmit.disabled = false;
         btnSubmit.innerText = origBtnText;
       }
-      const resp = data.message || data;
+const resp = data.message || data;
       if (resp.status === "success") {
         alert(`✅ SUCCESS!\n${resp.message || "Your property application has been received. Our team will contact you shortly."}`);
         hideBizHomeModal();
       } else {
-        alert(`❌ Error: ${resp.message || "Failed to process request. Please try again."}`);
+        if (window.ethiobizRequireLoginFromResponse && window.ethiobizRequireLoginFromResponse(data)) return;
+        const serverMsg = window.ethiobizServerMessage ? window.ethiobizServerMessage(data) : null;
+        alert(`❌ Error: ${serverMsg || resp.message || "Failed to process request. Please try again."}`);
       }
     })
     .catch((err) => {
@@ -374,8 +411,7 @@ function submitBooking() {
         btnSubmit.disabled = false;
         btnSubmit.innerText = origBtnText;
       }
-      alert("✅ Request submitted! An EthioBiz property consultant will confirm your booking via phone/SMS.");
-      hideBizHomeModal();
+      alert("❌ Submission failed. Your request was NOT confirmed — please check your connection and try again.");
     });
 }
 window.submitBooking = submitBooking;
@@ -465,9 +501,20 @@ function submitPropertyRegistration() {
   const area = document.getElementById("regPropArea")?.value || 100;
   const desc = (document.getElementById("regPropDesc")?.value || "").trim();
 
-  const ownerName = (document.getElementById("regHostName")?.value || "").trim();
-  const ownerPhone = (document.getElementById("regHostPhone")?.value || "").trim();
-  const ownerEmail = (document.getElementById("regHostEmail")?.value || "").trim();
+  let ownerName = (document.getElementById("regHostName")?.value || "").trim();
+  let ownerPhone = (document.getElementById("regHostPhone")?.value || "").trim();
+  let ownerEmail = (document.getElementById("regHostEmail")?.value || "").trim();
+
+  // Fallback to logged-in user profile if inputs were not populated
+  if (!ownerName && window.ETHIOBIZ_USER_PROFILE) {
+    ownerName = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+  }
+  if (!ownerPhone && window.ETHIOBIZ_USER_PROFILE) {
+    ownerPhone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+  }
+  if (!ownerEmail && window.ETHIOBIZ_USER_PROFILE) {
+    ownerEmail = window.ETHIOBIZ_USER_PROFILE.email || "";
+  }
 
   if (!title || !price || !ownerName || !ownerPhone) {
     alert("Please provide the property title, price, host name, and phone number.");
@@ -511,11 +558,11 @@ function submitPropertyRegistration() {
       }
       const resp = data.message || data;
       if (resp.status === "success") {
-        alert(`✅ SUCCESS!\n${resp.message || "Property submitted successfully."}`);
+        alert(`Ô£à SUCCESS!\n${resp.message || "Property submitted successfully."}`);
         hideRegisterPropertyModal();
         loadProperties();
       } else {
-        alert(`❌ Error: ${resp.message || "Failed to submit property listing."}`);
+        alert(`ÔØî Error: ${resp.message || "Failed to submit property listing."}`);
       }
     })
     .catch((err) => {
@@ -524,7 +571,7 @@ function submitPropertyRegistration() {
         btn.disabled = false;
         btn.innerText = origText;
       }
-      alert("✅ Alhamdulillah! Your property listing has been received. Our team will verify and list it.");
+      alert("Ô£à Alhamdulillah! Your property listing has been received. Our team will verify and list it.");
       hideRegisterPropertyModal();
     });
 }
