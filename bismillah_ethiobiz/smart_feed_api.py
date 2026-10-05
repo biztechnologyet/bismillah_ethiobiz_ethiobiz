@@ -10,7 +10,115 @@ import json
 import random
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, now_datetime, getdate, add_to_date
+from frappe.utils import flt, cint, now_datetime, getdate, get_datetime, add_to_date
+
+
+# BISMALLAH: Feed card image policy.
+# A feed card renders an image ONLY when one is genuinely attached to its source
+# record. There is no default artwork, no placeholder, no company logo stand-in.
+# If nothing is attached the card is rendered as a clean text-only card.
+_FEED_IMAGE_PLACEHOLDERS = (
+    "default-avatar",
+    "placeholder_",
+    "walta_real_logo",
+    "jobs_logo",
+    "no-image",
+    "no_image",
+    "coming-soon",
+    "coming_soon",
+    "sample",
+    "demo",
+)
+
+
+def _feed_image(value):
+    """
+    Return a genuinely attached image URL, or None when there is nothing real to show.
+
+    Guards against legacy/placeholder artwork that may still sit in an old record
+    (default avatars, generated placeholders, brand logos used as filler).
+    """
+    if not value or not isinstance(value, str):
+        return None
+
+    url = value.strip()
+    if not url or url.lower() in ("null", "none", "undefined", "#", "0", "-", "n/a"):
+        return None
+
+    lowered = url.lower()
+    if any(token in lowered for token in _FEED_IMAGE_PLACEHOLDERS):
+        return None
+
+    return url
+
+
+def _feed_service_gallery_images(names):
+    """
+    Map BizService Listing name -> its genuinely attached gallery image.
+
+    Prefers the row flagged is_primary, otherwise the first attached image.
+    Returns {} whenever the gallery table/child link is absent on this site,
+    so listings without artwork simply produce a text-only card.
+    """
+    names = [n for n in (names or []) if n]
+    if not names:
+        return {}
+
+    if not (
+        frappe.db.exists("DocType", "BizService Image")
+        and frappe.db.has_column("BizService Listing", "images")
+        and frappe.db.has_column("BizService Image", "image")
+    ):
+        return {}
+
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT si.parent AS parent, si.image AS image, si.is_primary AS is_primary
+            FROM `tabBizService Image` si
+            WHERE si.parent IN ({})
+              AND COALESCE(si.image, '') <> ''
+            ORDER BY si.is_primary DESC, si.idx ASC
+            """.format(",".join(["%s"] * len(names))),
+            tuple(names),
+            as_dict=True,
+        )
+    except Exception:
+        return {}
+
+    gallery = {}
+    for row in rows:
+        gallery.setdefault(row.parent, _feed_image(row.image))
+    return gallery
+
+
+def _feed_time_ago(value):
+    """
+    Compact relative timestamp for feed cards: 'Just now', '4h ago', '3d ago', '2mo ago'.
+    Returns None when the source timestamp is missing/unparseable, or when the site
+    context is unavailable, so this can never abort feed assembly.
+    """
+    if not value:
+        return None
+    try:
+        dt = get_datetime(value)
+        if not dt:
+            return None
+        seconds = (now_datetime() - dt).total_seconds()
+    except Exception:
+        return None
+
+    if seconds < 60:
+        return "Just now"
+    if seconds < 3600:
+        return "%dm ago" % int(seconds // 60)
+    if seconds < 86400:
+        return "%dh ago" % int(seconds // 3600)
+    if seconds < 2592000:
+        return "%dd ago" % int(seconds // 86400)
+    if seconds < 31536000:
+        return "%dmo ago" % int(seconds // 2592000)
+    return "%dy ago" % int(seconds // 31536000)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -200,7 +308,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "subtitle": f"🏢 {p.company or 'Verified Merchant'} • In Stock",
                 "content": f"High-quality verified {p.item_name} from {p.company or 'EthioBiz Merchant'}, available for nationwide delivery.",
                 "category": p.item_group or "General",
-                "image": p.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                "image": _feed_image(p.image),
                 "author": p.company or "Verified Merchant",
                 "author_name": p.company or "Verified Merchant",
                 "rating": flt(p.average_product_rating or 5.0),
@@ -243,7 +351,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {j.company or 'EthioBiz Partner'} • 📍 {j.location or 'Addis Ababa'}",
                     "content": (j.description or "Exciting career opportunity with professional growth.")[:200] + "...",
                     "category": "Career",
-                    "image": "/files/jobs_logo.png",
+                    "image": None,
                     "author": j.company or "EthioBiz Partner",
                     "author_name": j.company or "EthioBiz Partner",
                     "rating": 5.0,
@@ -280,7 +388,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏥 {d.hospital or 'St. Paul Hospital'} • Verified Specialist",
                     "content": f"Book in-clinic appointments, video teleconsultations, or home medical visits with certified physician {dname}.",
                     "category": "Healthcare",
-                    "image": d.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(d.image),
                     "author": d.hospital or "EthioBiz Health Network",
                     "author_name": dname,
                     "rating": flt(d.average_rating or 4.9),
@@ -306,6 +414,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 fields=["name", "service_name", "category", "price", "duration_minutes", "company", "average_rating", "creation"],
                 limit=15
             )
+            service_gallery = _feed_service_gallery_images([s.name for s in services])
             for s in services:
                 items.append({
                     "id": s.name,
@@ -316,7 +425,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {s.company or 'EthioBiz Certified Service'} • 45-Min Express Dispatch",
                     "content": f"Professional certified {s.service_name} for homes, offices, and commercial facilities across Ethiopia.",
                     "category": "Maintenance",
-                    "image": "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": service_gallery.get(s.name),
                     "author": s.company or "EthioBiz Certified Technician",
                     "author_name": s.company or "Certified Technician",
                     "rating": flt(s.average_rating or 4.9),
@@ -336,10 +445,15 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             res_query = {"is_active": 1}
             if search:
                 res_query["resource_name"] = ["like", f"%{search}%"]
+            # Only request the artwork column when this site actually defines it.
+            res_fields = ["name", "resource_name", "category", "base_rate", "company", "description", "creation"]
+            has_res_image = frappe.db.has_column("BizBooking Resource", "image")
+            if has_res_image:
+                res_fields.append("image")
             resources = frappe.get_all(
                 "BizBooking Resource",
                 filters=res_query,
-                fields=["name", "resource_name", "category", "base_rate", "company", "description", "creation"],
+                fields=res_fields,
                 limit=15,
                 order_by="creation desc"
             )
@@ -356,7 +470,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {r.company or 'EthioBiz Hospitality'} • Instant Voucher Pass",
                     "content": r.description or f"Reserve {r.resource_name} with confirmed instant time slot booking and verified digital pass.",
                     "category": cat,
-                    "image": "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(r.get("image")) if has_res_image else None,
                     "author": r.company or "Verified Host",
                     "author_name": r.company or "Verified Host",
                     "rating": 4.9,
@@ -384,7 +498,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"📍 {p.get('city', 'Addis Ababa')} • {p.get('bedrooms', 1)} Beds • {p.get('property_type', 'Property')}",
                     "content": p.get("description") or f"Premium {p.get('tenure', 'Rental')} property in {p.get('city', 'Addis Ababa')}, verified title deeds and modern amenities.",
                     "category": "Real Estate",
-                    "image": p.get("image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(p.get("image")),
                     "author": "EthioBiz Property Network",
                     "author_name": "EthioBiz Real Estate",
                     "rating": flt(p.get("rating", 4.9)),
@@ -423,10 +537,10 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {post.company or 'EthioBiz Network'} • {post.author_handle or '@member'}",
                     "content": post.content,
                     "category": post.category_tag or "Social",
-                    "image": post.post_image,
+                    "image": _feed_image(post.post_image),
+                    "avatar": _feed_image(post.author_image),
                     "author": post.author_name,
                     "author_name": post.author_name,
-                    "avatar": post.author_image,
                     "rating": 5.0,
                     "likes_count": cint(post.likes_count or 12),
                     "comments_count": cint(post.comments_count or 3),
@@ -459,7 +573,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "subtitle": f"✍️ By {b.blogger or 'EthioBiz Editorial Team'}",
                 "content": b.blog_intro or "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
                 "category": "Knowledge",
-                "image": b.meta_image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                "image": _feed_image(b.meta_image),
                 "author": b.blogger or "Editorial Team",
                 "author_name": b.blogger or "Editorial Team",
                 "rating": 5.0,
@@ -495,7 +609,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": "Online Vocational & Professional Skills Certification",
                     "content": c.short_introduction or "Master industry-standard skills with practical real-world modules and verified digital certificates.",
                     "category": "Education",
-                    "image": c.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(c.image),
                     "author": "Dagu Academy",
                     "author_name": "Dagu Academy",
                     "rating": 4.9,
@@ -538,7 +652,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                         "subtitle": f"🛡️ {ft.author_name} • {ft.company or 'EthioBiz'}",
                         "content": (clean_c[:180] + "...") if len(clean_c) > 180 else clean_c,
                         "category": ft.category or "Discussion",
-                        "image": ft.image,
+                        "image": _feed_image(ft.image),
                         "author": ft.author_name,
                         "author_name": ft.author_name,
                         "rating": 5.0,
@@ -567,7 +681,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {ad.get('company') or 'EthioBiz Partner'} • Sponsored",
                     "content": "Discover featured enterprise solutions and exclusive flash offers from verified partners.",
                     "category": "Sponsored",
-                    "image": ad.get("creative_image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(ad.get("creative_image")),
                     "author": ad.get("company") or "EthioBiz Partner",
                     "author_name": ad.get("company") or "EthioBiz Partner",
                     "rating": 5.0,
@@ -584,6 +698,16 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
 
     # 13. Apply Personalization Algorithm (Facebook/TikTok/LinkedIn/Amazon Hybrid Scorer)
     for it in items:
+        # Final image gate: a card carries artwork only when one is genuinely attached.
+        # This is the single choke point, so no source can leak placeholder/filler media
+        # into the payload even if a legacy record or a duplicated API still holds one.
+        it["image"] = _feed_image(it.get("image"))
+        it["avatar"] = _feed_image(it.get("avatar"))
+        # Feed cards read these two keys; emit real values instead of letting the
+        # renderer fall back to a hardcoded "Verified Enterprise"/"Verified Listing".
+        it["time_ago"] = _feed_time_ago(it.get("created"))
+        it["stats"] = "💬 %s" % cint(it.get("comments_count") or 0)
+
         # User Affinity (0.0 to 1.0)
         cat_aff = cat_affinities.get(it.get("category", ""), 0.05)
         type_aff = type_affinities.get(it.get("type", ""), 0.1)
