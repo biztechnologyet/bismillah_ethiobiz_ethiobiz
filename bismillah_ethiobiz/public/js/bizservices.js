@@ -12,7 +12,20 @@
     let currentQuery = "";
     const urlParams = new URLSearchParams(window.location.search);
     const deepProvider = urlParams.get("provider") || "";
+    // Feed CTA: /bizservice?resource=<BizBooking Resource name> - resolved
+    // through the universal aggregator, booked via create_universal_booking.
+    const deepResource = urlParams.get("resource") || "";
     const detailSlug = window.BS_PROVIDER || urlParams.get("provider") || "";
+    // Active submit target: null = listing mode (book_service), otherwise
+    // { vertical, target_id } for the universal booking dispatcher.
+    let bookingMode = null;
+
+    function getCsrf() {
+        if (window.csrf_token) return window.csrf_token;
+        if (window.frappe && window.frappe.csrf_token) return window.frappe.csrf_token;
+        const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+        return m ? m[1] : "";
+    }
 
     function getJSON(method, params) {
         const url = new URL(API + method, window.location.origin);
@@ -124,6 +137,7 @@
 
     function openBooking(serviceId) {
         track("view_booking", "BizService Listing", serviceId);
+        bookingMode = null;
         const modal = el("bs-modal");
         if (!modal) return;
         el("bs-book-service").value = serviceId;
@@ -147,9 +161,78 @@
         loadAvailability(serviceId, prov ? prov.value : undefined);
     }
 
-    function closeBooking() { el("bs-modal") && el("bs-modal").classList.remove("open"); }
+    function closeBooking() {
+        bookingMode = null;
+        el("bs-modal") && el("bs-modal").classList.remove("open");
+    }
+
+    // ---- Resource booking mode (deep link /bizservice?resource=...) ----
+    function openResourceBooking(res) {
+        track("view_booking", "BizBooking Resource", res.id);
+        bookingMode = { vertical: "resource", target_id: res.id };
+        const modal = el("bs-modal");
+        if (!modal) return;
+        el("bs-book-service").value = res.id;
+        el("bs-modal-title").textContent = "Reserve " + (res.title || "this resource");
+        el("bs-slot-select").innerHTML = "<option value=''>Any time (provider confirms)</option>";
+        const prov = el("bs-provider");
+        if (prov) prov.innerHTML = "<option value=''>Any available resource</option>";
+        const note = el("bs-avail-note");
+        if (note) note.textContent = res.price_text ? res.price_text + " - the resource owner confirms the exact time after booking." : "The resource owner confirms the exact time after booking.";
+        const result = el("bs-book-result");
+        if (result) result.innerHTML = "";
+        modal.classList.add("open");
+        if (window.ethiobizAutofillProfile) window.ethiobizAutofillProfile();
+    }
+
+    function openResourceDeepLink(resourceId) {
+        getJSON("bizbooking_aggregator_api.search_all_bookables", { vertical: "resources", limit: 50 })
+            .then(res => {
+                const found = ((res && res.bookables) || []).find(b => b.id === resourceId);
+                if (found) openResourceBooking(found);
+            })
+            .catch(() => { /* deleted/absent resource: browse page stays usable */ });
+    }
+
+    function submitResourceBooking() {
+        const payload = {
+            booking_data: JSON.stringify({
+                vertical: "resource",
+                target_id: bookingMode.target_id,
+                date: el("bs-date").value || undefined,
+                time_slot: el("bs-slot-select").value || undefined,
+                customer_name: el("bs-name").value,
+                customer_phone: el("bs-phone").value,
+                notes: el("bs-notes").value
+            })
+        };
+        fetch(API + "bizbooking_aggregator_api.create_universal_booking", {
+            method: "POST",
+            headers: { "X-Frappe-CSRF-Token": getCsrf(), "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(payload)
+        }).then(r => r.json()).then(res => {
+            const msg = (res && res.message) || {};
+            track("booked", "BizBooking Resource", bookingMode.target_id);
+            el("bs-modal-title").textContent = msg.message || "Resource reserved!";
+            if (msg.booking_id) {
+                el("bs-book-result").innerHTML =
+                    `<div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:10px;padding:12px;">
+                       Booking ID: <b>${msg.booking_id}</b><br>
+                       Pass PIN: <b>${msg.booking_pass_pin || "-"}</b>
+                     </div>`;
+            } else {
+                el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">Something went wrong. Please try again.</div>`;
+            }
+        }).catch(() => {
+            el("bs-book-result").innerHTML = `<div style="color:#b91c1c;">Could not reach the booking service.</div>`;
+        });
+    }
 
     function submitBooking() {
+        if (bookingMode && bookingMode.vertical === "resource") {
+            submitResourceBooking();
+            return;
+        }
         const serviceId = el("bs-book-service").value;
         const payload = {
             service_id: serviceId,
@@ -238,6 +321,12 @@
             const stats = el("bs-total-services");
             if (stats) stats.textContent = allListings.length;
         }).then(() => {
+            // Deep-link: ?resource= (BizBooking Resource) is resolved through
+            // the aggregator first - it is not part of the listing catalog.
+            if (deepResource) {
+                openResourceDeepLink(deepResource);
+                return;
+            }
             // Deep-link: ?provider=<listing name> auto-opens that listing's booking
             if (deepProvider) {
                 const match = allListings.find(l => l.name === deepProvider || (l.slug && l.slug === deepProvider));

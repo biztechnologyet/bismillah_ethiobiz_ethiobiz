@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     services = data.message.services;
                     if (countText) countText.innerText = "Showing " + services.length + " certified maintenance packages";
                     renderFixGrid();
+                    maybeOpenDeepLinkedService();
                 }
             })
             .catch(function() {
@@ -212,7 +213,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 ];
                 if (countText) countText.innerText = "Found " + services.length + " certified maintenance packages";
                 renderFixGrid();
+                maybeOpenDeepLinkedService();
             });
+    }
+
+    // Deep link from the feed CTA: /bizfix?service=<BizService Listing name>.
+    // Runs once, after the first catalog load, and never blocks browsing when
+    // the parameter is absent or the listing was deleted.
+    var deepLinkServiceHandled = false;
+    function maybeOpenDeepLinkedService() {
+        if (deepLinkServiceHandled) return;
+        deepLinkServiceHandled = true;
+        try {
+            var want = new URLSearchParams(window.location.search).get("service");
+            if (!want) return;
+            var srv = services.find(function(s) { return s.name === want || s.id === want; });
+            if (srv) openFixModal(srv);
+        } catch (e) { /* deep link must never break the catalog */ }
     }
 
     function renderFixGrid(filterQuery) {
@@ -361,7 +378,16 @@ if (!address) {
 
         fetch("/api/method/bismillah_ethiobiz.bizbooking_api.book_service", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            // Same verified root cause as the feed buttons: a browser POST
+            // without X-Frappe-CSRF-Token dies in validate_csrf_token (400)
+            // before the endpoint ever runs.
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": window.csrf_token
+                    || (window.frappe && window.frappe.csrf_token)
+                    || (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/) || [])[1]
+                    || ""
+            },
             body: JSON.stringify({
                 service_id: selectedService.name,
                 booking_date: bookingDate,
@@ -372,7 +398,6 @@ if (!address) {
                 urgency: urgency,
                 notes: desc
             })
-        })
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {

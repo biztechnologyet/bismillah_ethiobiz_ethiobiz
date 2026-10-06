@@ -303,6 +303,15 @@ def get_doctor_detail(doctor_id=None, slug=None):
             name = frappe.db.get_value("Healthcare Practitioner", {"public_profile_slug": slug}, "name")
         except Exception:
             name = None
+        if not name:
+            # Feed CTAs address practitioners by document name
+            # (/doctor/HP-0001) as well as by public slug - accept both so a
+            # deep link resolves instead of returning "Doctor not found".
+            try:
+                if frappe.db.exists("Healthcare Practitioner", slug):
+                    name = slug
+            except Exception:
+                name = None
     if not name or not frappe.db.exists("Healthcare Practitioner", name):
         return {"status": "error", "message": "Doctor not found"}
 

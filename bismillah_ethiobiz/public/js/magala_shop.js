@@ -218,11 +218,31 @@ document.addEventListener("DOMContentLoaded", function() {
                     renderItems(data.message.items);
                     countText.innerText = `Showing ${data.message.items.length} of ${data.message.total} products`;
                     renderPagination(data.message.total, data.message.total_pages);
+                    maybeOpenDeepLinkedProduct();
                 }
             })
             .catch(err => {
                 countText.innerText = "Failed to load products";
             });
+    }
+
+    // Deep link from the feed CTA: /shop?product=<item_code>. Opens the order
+    // modal once, after the first catalog page renders; a product that is not
+    // on the first page (or was deleted) is silently ignored rather than
+    // blocking browsing.
+    var deepLinkProductHandled = false;
+    function maybeOpenDeepLinkedProduct() {
+        if (deepLinkProductHandled) return;
+        deepLinkProductHandled = true;
+        try {
+            var want = new URLSearchParams(window.location.search).get("product");
+            if (!want) return;
+            var items = window.__lastFetchedItems || [];
+            var it = items.find(function(x) {
+                return x.item_code === want || x.name === want || x.id === want;
+            });
+            if (it) openShopOrderModal(it);
+        } catch (e) { /* deep link must never break the shop */ }
     }
 
     function renderItems(items) {

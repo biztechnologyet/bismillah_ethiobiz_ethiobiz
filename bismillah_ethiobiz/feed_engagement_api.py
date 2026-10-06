@@ -6,6 +6,9 @@ EthioBiz Home Feed - Likes & Comments API
 Canonical storage is Frappe's own `Comment` DocType:
     comment_type = 'Like'     -> a like
     comment_type = 'Comment'  -> a written comment
+    comment_type = 'Shared'   -> an in-EthioBiz repost (frappe.desk.share's own
+                                 option; "Repost" is NOT in the Select list and
+                                 _validate_selects would reject it)
 
 This is the same convention Frappe's desk (`frappe.desk.like.toggle_like`) and
 website (`frappe.templates.includes.likes.likes.like`) use, so nothing here is
@@ -32,7 +35,6 @@ import json
 
 import frappe
 from frappe import _
-from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, now_datetime, strip_html_tags
 
 # A comment longer than this is rejected. Generous for real conversation,
@@ -45,6 +47,16 @@ MAX_COMMENTS_PER_PAGE = 50
 # Read amplification guard for the batch-counts endpoint. The feed renders a
 # page of cards at a time, so the real batches are well under this ceiling.
 MAX_BULK_TARGETS = 60
+
+# Per-user write ceilings inside a rolling 300-second window. Generous for
+# real people, tight for a scripted spam run. See _rate_limit() below for why
+# this is a hand-rolled helper instead of frappe.rate_limiter.rate_limit.
+RATE_LIMIT_SECONDS = 300
+RATE_LIMITS = {
+    "comment": 20,
+    "like": 60,
+    "repost": 30,
+}
 
 # The ONLY documents that may be read or written through this module.
 #
@@ -95,6 +107,45 @@ def _require_login():
             frappe.PermissionError,
         )
     return user
+
+
+def _rate_limit(bucket, limit=None):
+    """
+    Rolling per-USER write ceiling, stored under the `rl:` key prefix so the
+    suite's cache-clearing globs still see it.
+
+    Why not frappe.rate_limiter.rate_limit? Its identity is `request_ip:` for
+    these endpoints (the decorator's `key` field, "reference", never appears in
+    form_dict), i.e. every user behind one CGNAT/school NAT shares a single
+    20-comments-per-5-minutes budget. This helper keys on the session user
+    instead. Guests and in-process callers are skipped deliberately:
+      * guests are rejected by _require_login() milliseconds later anyway,
+      * the suite's group D/E run in-process (no frappe.request) and must be
+        able to exercise write paths repeatedly within one window - the same
+        bypass frappe's own decorator applies (`if not frappe.request`).
+    """
+    if not frappe.request:
+        return
+    user = _session_user()
+    if not user:
+        return
+
+    ceiling = int(limit if limit is not None else RATE_LIMITS.get(bucket, 60))
+    key = "rl:fea:%s:%s" % (bucket, user)
+    try:
+        cache = frappe.cache()
+        value = cache.incr(key)
+        if value == 1:
+            cache.expire(key, RATE_LIMIT_SECONDS)
+    except Exception:
+        # A cache hiccup must never block a legitimate write.
+        return
+
+    if value > ceiling:
+        frappe.throw(
+            _("You're doing that too often. Please wait a moment and try again."),
+            frappe.RateLimitExceededError,
+        )
 
 
 def _validate_target(doctype, name):
@@ -213,6 +264,32 @@ def _viewer_has_liked(doctype, name):
             "Comment",
             {
                 "comment_type": "Like",
+                "reference_doctype": doctype,
+                "reference_name": name,
+                "comment_email": user,
+            },
+        )
+    )
+
+
+def _repost_count(doctype, name):
+    return cint(
+        frappe.db.count(
+            "Comment",
+            {"comment_type": "Shared", "reference_doctype": doctype, "reference_name": name},
+        )
+    )
+
+
+def _viewer_has_reposted(doctype, name):
+    user = _session_user()
+    if not user:
+        return False
+    return bool(
+        frappe.db.exists(
+            "Comment",
+            {
+                "comment_type": "Shared",
                 "reference_doctype": doctype,
                 "reference_name": name,
                 "comment_email": user,
@@ -355,11 +432,18 @@ def bulk_engagement(items=None):
 # ---------------------------------------------------------------------------
 
 @frappe.whitelist()
-@rate_limit(key="reference", limit=20, seconds=300)
-def add_comment(doctype=None, name=None, content=None):
-    """Post a comment. Requires login."""
+def add_comment(doctype=None, name=None, docname=None, content=None):
+    """Post a comment. Requires login.
+
+    `name` is the canonical parameter; `docname` is accepted as an alias so the
+    feed's own payload (which addresses every card by doctype/docname) works
+    even if a client sends its natural key. Without this, get_newargs silently
+    drops an unknown `docname` kwarg and _validate_target later throws
+    "Missing document reference." for a perfectly valid request.
+    """
     user = _require_login()
-    doctype, name = _validate_target(doctype, name)
+    _rate_limit("comment")
+    doctype, name = _validate_target(doctype, name or docname)
 
     text = _clean_text(content)
     if not text:
@@ -441,13 +525,13 @@ def delete_comment(comment=None):
 
 
 @frappe.whitelist()
-@rate_limit(key="reference", limit=60, seconds=300)
 def toggle_like(doctype=None, name=None):
     """
     Like or unlike an item. Idempotent per user: liking twice un-likes.
     Returns the authoritative counts so the client never has to guess.
     """
     user = _require_login()
+    _rate_limit("like")
     doctype, name = _validate_target(doctype, name)
 
     existing = frappe.get_all(
@@ -493,4 +577,70 @@ def toggle_like(doctype=None, name=None):
         "likes_count": data["likes"],
         "comments_count": data["comments"],
         "viewer_has_liked": liked,
+    }
+
+
+@frappe.whitelist()
+def toggle_repost(doctype=None, name=None, note=None, docname=None):
+    """
+    Repost (or undo a repost of) an item so it appears in the EthioBiz feed.
+
+    Storage is a Frappe `Comment` row with comment_type='Shared' - an option
+    that already exists in the DocType's Select list (frappe.desk.share uses it
+    for "shared with X"). The obvious-looking value, 'Repost', is NOT in the
+    list and base_document._validate_selects would reject it, so 'Shared' keeps
+    this feature schema-free. get_comments() filters on comment_type='Comment'
+    and the native-counter sync only counts Like/Comment, so these rows stay
+    invisible to every other surface.
+
+    Toggle semantics mirror the like button: reposting twice removes the
+    repost. One row per (user, target) is the de-duplication rule.
+    """
+    user = _require_login()
+    _rate_limit("repost")
+    doctype, name = _validate_target(doctype, name or docname)
+
+    existing = frappe.get_all(
+        "Comment",
+        filters={
+            "comment_type": "Shared",
+            "reference_doctype": doctype,
+            "reference_name": name,
+            "comment_email": user,
+        },
+        fields=["name"],
+        limit=1,
+    )
+
+    if existing:
+        frappe.delete_doc("Comment", existing[0].name, force=True, ignore_permissions=True)
+        reposted = False
+    else:
+        # An empty note stores an empty `content` (ignore_mandatory is set), so
+        # the feed reader can tell "reposted silently" from "reposted with a
+        # note" without guessing at a translated default string.
+        text = _clean_text(note) if note else ""
+        row = frappe.get_doc(
+            {
+                "doctype": "Comment",
+                "comment_type": "Shared",
+                "reference_doctype": doctype,
+                "reference_name": name,
+                "comment_email": user,
+                "comment_by": user,
+                "content": text,
+            }
+        )
+        row.flags.ignore_permissions = True
+        row.flags.ignore_mandatory = True
+        row.insert(ignore_permissions=True)
+        reposted = True
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "reposted": reposted,
+        "reposts_count": _repost_count(doctype, name),
+        "viewer_has_reposted": reposted,
     }

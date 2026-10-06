@@ -71,6 +71,7 @@ function loadProperties() {
       const resp = data.message || data;
       propertiesList = resp.properties || [];
       renderProperties(propertiesList);
+      maybeOpenDeepLinkedProperty();
     })
     .catch((err) => {
       console.error("Error loading properties:", err);
@@ -80,6 +81,20 @@ function loadProperties() {
         </div>
       `;
     });
+}
+
+// Deep link from the feed CTA: /bizhome?property=<name>. Runs once after the
+// first (broadest) load - the modal reads its fields from propertiesList, so
+// the property must be present; a missing/deleted one is silently ignored.
+let deepLinkPropertyHandled = false;
+function maybeOpenDeepLinkedProperty() {
+  if (deepLinkPropertyHandled) return;
+  deepLinkPropertyHandled = true;
+  try {
+    const want = new URLSearchParams(window.location.search).get("property");
+    if (!want) return;
+    if (propertiesList.some((p) => p.name === want)) openPropertyModal(want);
+  } catch (e) { /* deep link must never break browsing */ }
 }
 
 function renderProperties(list) {
