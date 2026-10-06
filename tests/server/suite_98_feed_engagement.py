@@ -844,6 +844,13 @@ def group_e(target):
             not any(s in html for s in stale),
             "old payload marker still present",
         )
+        for i, m in enumerate(("Security token expired - refreshing", "Please log in to continue",
+                               "Too many actions - please wait a moment")):
+            chk(
+                "E27.%d mapped error message '%s' on deployed page" % (i + 1, m),
+                m in html,
+                "missing " + m,
+            )
     except Exception as exc:
         skip("E24-E26 deployed page markers", str(exc)[:120])
 
