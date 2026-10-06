@@ -57,6 +57,59 @@ document.addEventListener("DOMContentLoaded", function() {
         if (confirmBtn) {
             confirmBtn.addEventListener("click", handleFixSubmit);
         }
+
+        // Urgency toggle: reveal the Schedule date/slot picker for Scheduled
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var fixDate = document.getElementById("fix-date");
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        document.querySelectorAll('input[name="fix_urgency"]').forEach(function(rad) {
+            rad.addEventListener("change", function() {
+                var isScheduled = (this.value === "Scheduled" && this.checked);
+                if (schedBlock) schedBlock.style.display = isScheduled ? "block" : "none";
+                if (isScheduled) {
+                    loadFixSlots();
+                }
+            });
+        });
+        if (fixDate) {
+            fixDate.addEventListener("change", loadFixSlots);
+        }
+    }
+
+    function loadFixSlots() {
+        if (!selectedService) return;
+        var fixDate = document.getElementById("fix-date");
+        var sSelect = document.getElementById("fix-slot-select");
+        var note = document.getElementById("fix-avail-note");
+        if (!sSelect) return;
+        var date = fixDate ? fixDate.value : "";
+        sSelect.innerHTML = "<option value=''>Loading times…</option>";
+        if (note) note.textContent = "";
+        if (!date) { sSelect.innerHTML = "<option value=''>Select a date first</option>"; return; }
+
+        var params = new URLSearchParams();
+        params.append("listing", selectedService.name);
+        params.append("date", date);
+        fetch("/api/method/bismillah_ethiobiz.bizservice_api.get_service_availability?" + params.toString())
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                var ml = (res && res.message) || res || {};
+                var slots = ml.slots || [];
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) {
+                    note.textContent = ml.available && slots.length ? slots.length + " slots available for this date" :
+                        "No slots available for the selected date";
+                }
+                slots.forEach(function(s) {
+                    var o = document.createElement("option");
+                    o.value = s; o.textContent = s;
+                    sSelect.appendChild(o);
+                });
+            })
+            .catch(function() {
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) note.textContent = "Could not load slots — booking will use default time.";
+            });
     }
 
     function loadFixCategories() {
@@ -143,6 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     services = data.message.services;
                     if (countText) countText.innerText = "Showing " + services.length + " certified maintenance packages";
                     renderFixGrid();
+                    maybeOpenDeepLinkedService();
                 }
             })
             .catch(function() {
@@ -159,7 +213,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 ];
                 if (countText) countText.innerText = "Found " + services.length + " certified maintenance packages";
                 renderFixGrid();
+                maybeOpenDeepLinkedService();
             });
+    }
+
+    // Deep link from the feed CTA: /bizfix?service=<BizService Listing name>.
+    // Runs once, after the first catalog load, and never blocks browsing when
+    // the parameter is absent or the listing was deleted.
+    var deepLinkServiceHandled = false;
+    function maybeOpenDeepLinkedService() {
+        if (deepLinkServiceHandled) return;
+        deepLinkServiceHandled = true;
+        try {
+            var want = new URLSearchParams(window.location.search).get("service");
+            if (!want) return;
+            var srv = services.find(function(s) { return s.name === want || s.id === want; });
+            if (srv) openFixModal(srv);
+        } catch (e) { /* deep link must never break the catalog */ }
     }
 
     function renderFixGrid(filterQuery) {
@@ -234,6 +304,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 '</div>' +
             '</div>';
         document.getElementById("fix-booking-modal").style.display = "flex";
+        // Reset schedule picker for the newly selected service
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var sSelect = document.getElementById("fix-slot-select");
+        var fixDate = document.getElementById("fix-date");
+        if (sSelect) sSelect.innerHTML = "<option value=''>Select a time…</option>";
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        if (schedBlock) {
+            var isScheduled = document.querySelector('input[name="fix_urgency"]:checked');
+            var show = isScheduled && isScheduled.value === "Scheduled";
+            schedBlock.style.display = show ? "block" : "none";
+        }
         if (window.ethiobizAutofillProfile) {
             window.ethiobizAutofillProfile();
         }
@@ -271,21 +352,46 @@ document.addEventListener("DOMContentLoaded", function() {
             window.ethiobizRequireLogin();
             return;
         }
-        if (!address) {
+if (!address) {
             alert("Please enter the service location address for technician dispatch.");
             return;
         }
 
+        // BISMALLAH (BizFix): for Scheduled visits, require date + validated time slot.
+        var bookingDate = null;
+        var bookingTime = null;
+        var fixDateEl = document.getElementById("fix-date");
+        var fixSlotEl = document.getElementById("fix-slot-select");
+        if (urgency === "Scheduled") {
+            bookingDate = fixDateEl ? fixDateEl.value : "";
+            bookingTime = fixSlotEl ? fixSlotEl.value : "";
+            if (!bookingDate || !bookingTime) {
+                alert("Please pick an inspection date and time slot for the scheduled visit.");
+                return;
+            }
+        }
+
         var btn = document.getElementById("btn-confirm-fix");
-        btn.innerHTML = "ÔÅ│ Dispatching Technician...";
+        btn.innerHTML = "⏳ Dispatching Technician...";
         btn.disabled = true;
         btn.style.opacity = "0.7";
 
         fetch("/api/method/bismillah_ethiobiz.bizbooking_api.book_service", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            // Same verified root cause as the feed buttons: a browser POST
+            // without X-Frappe-CSRF-Token dies in validate_csrf_token (400)
+            // before the endpoint ever runs.
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": window.csrf_token
+                    || (window.frappe && window.frappe.csrf_token)
+                    || (document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/) || [])[1]
+                    || ""
+            },
             body: JSON.stringify({
                 service_id: selectedService.name,
+                booking_date: bookingDate,
+                booking_time: bookingTime,
                 customer_name: name,
                 customer_phone: phone,
                 address: address,
