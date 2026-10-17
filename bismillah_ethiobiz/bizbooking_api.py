@@ -505,7 +505,7 @@ def book_service(service_id=None, booking_date=None, booking_time=None, customer
     frappe.db.commit()
 
     # BISMALLAH (Phase 6.1.4): real BizRide dispatch when the listing requires travel.
-    # The docstring previously claimed dispatch but never executed it ÔÇö now wired to the
+    # The docstring previously claimed dispatch but never executed it — now wired to the
     # real dispatch engine (bizride_api.request_delivery) and the delivery linked back.
     delivery_id = None
     if getattr(service_doc, "requires_travel", 0):
