@@ -78,7 +78,7 @@
       });
   }
 
-  function applyAutofill(root) {
+  function applyAutofillCore(root) {
     const p = window.ETHIOBIZ_USER_PROFILE;
     if (!p || !p.logged_in) return;
 
@@ -204,13 +204,13 @@
     const metaStr = metaParts.join(" • ") || "Verified Profile";
 
     container.querySelectorAll(".ethiobiz-user-name").forEach((el) => {
-      el.innerText = fullName;
+      if (el.innerText !== fullName) el.innerText = fullName;
     });
     container.querySelectorAll(".ethiobiz-user-meta").forEach((el) => {
-      el.innerText = metaStr;
+      if (el.innerText !== metaStr) el.innerText = metaStr;
     });
     container.querySelectorAll(".ethiobiz-user-avatar").forEach((el) => {
-      el.innerText = initials;
+      if (el.innerText !== initials) el.innerText = initials;
     });
 
     // 6. INJECT PROFILE BANNER IN MODALS ONLY IF NO TOP PROFILE CARD EXISTS
@@ -238,6 +238,37 @@
     });
   }
 
+  // BISMALLAH (2026-10-16): SAFE WRAPPER - root-cause fix for the page freeze.
+  // Previously the profile-card writes set .innerText unconditionally from inside a
+  // MutationObserver watching document.body {childList:true, subtree:true}. Every
+  // innerText write replaces a text node => a childList mutation => the observer
+  // fires again => applyAutofill runs again => endless micro-task loop that never
+  // yields to the browser, so the page froze (scrolling stopped, no response).
+  // This wrapper (a) blocks re-entrancy, (b) pauses the observer while we mutate the
+  // DOM, and (c) the writes above are now idempotent. The loop is now impossible.
+  function applyAutofill(root) {
+    const p = window.ETHIOBIZ_USER_PROFILE;
+    if (!p || !p.logged_in) return;
+    if (applyAutofill._busy) return;
+    applyAutofill._busy = true;
+    const obs = window.__ethiobizAutofillObserver;
+    if (obs) {
+      try {
+        obs.disconnect();
+      } catch (e) {}
+    }
+    try {
+      applyAutofillCore(root);
+    } finally {
+      applyAutofill._busy = false;
+      if (obs) {
+        try {
+          obs.observe(document.body, { childList: true, subtree: true });
+        } catch (e) {}
+      }
+    }
+  }
+
   // Hook into DOMContentLoaded
   document.addEventListener("DOMContentLoaded", function () {
     fetchUserProfile();
@@ -251,6 +282,7 @@
       });
     });
 
+    window.__ethiobizAutofillObserver = observer;
     observer.observe(document.body, { childList: true, subtree: true });
 
     // Re-check on clicks that open modals

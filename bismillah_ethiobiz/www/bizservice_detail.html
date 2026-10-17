@@ -1,0 +1,77 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Service Provider Detail | EthioBiz.ET{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizservices.css?v=1.3.0">
+<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizservices.js?v=1.3.0" defer></script>
+<script>window.BS_PROVIDER = {{ (frappe.form_dict.slug or "") | tojson }};</script>
+
+<div class="bizservices-page" id="bizservices-app">
+  <div class="bs-detail-header" id="bs-provider-header">
+    <div style="text-align:center; padding:20px 0; color:#64748b;">Loading provider…</div>
+  </div>
+
+  <div class="bs-container">
+    <div class="bs-panel">
+      <div class="bs-search-row">
+        <input type="text" id="bs-search" class="bs-search" placeholder="Search this provider's services…">
+        <button type="button" class="bs-btn" onclick="window.location='/bizservice'">All Services</button>
+      </div>
+
+      <div class="bs-cats" id="bs-cats"></div>
+      <div id="bs-detail-subhead" style="font-size:0.85rem; color:#64748b; font-weight:700; margin:6px 0 10px;">Services by this provider</div>
+
+      <div class="bs-grid" id="bs-grid">
+        <div class="bs-empty">Loading services…</div>
+      </div>
+
+      <!-- Public reviews + gated review form -->
+      <div class="bs-reviews" id="bs-reviews">
+        <h3 style="margin:24px 0 8px;">Ratings &amp; Reviews</h3>
+        <div id="bs-reviews-list"><div class="bs-empty">No reviews yet — be the first to review this provider after a completed booking.</div></div>
+        <div id="bs-review-action"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking modal (slot-picker backed by real availability) -->
+  <div class="bs-modal" id="bs-modal">
+    <div class="bs-modal-box">
+      <span class="bs-close" id="bs-close-modal">&times;</span>
+      <h3 id="bs-modal-title">Book this service</h3>
+      <input type="hidden" id="bs-book-service">
+      <div id="bs-book-result"></div>
+
+      <label>Date</label>
+      <input type="date" id="bs-date">
+
+      <label>Service Provider (optional — for provider-specific time slots)</label>
+      <select id="bs-provider">
+        <option value="">Any available provider</option>
+      </select>
+
+      <label>Time Slot</label>
+      <select id="bs-slot-select"><option value="">Select a time…</option></select>
+      <div id="bs-avail-note" style="font-size:0.78rem;color:#64748b;margin-top:4px;"></div>
+
+      <label>Full Name</label>
+      <input type="text" id="bs-name" placeholder="Your name">
+
+      <label>Phone</label>
+      <input type="tel" id="bs-phone" placeholder="09xxxxxxxx">
+
+      <label>Address (for home dispatch)</label>
+      <textarea id="bs-address" rows="2" placeholder="Area / landmark"></textarea>
+
+      <label>Notes / Requests</label>
+      <textarea id="bs-notes" rows="2" placeholder="Optional"></textarea>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="bs-btn" id="bs-submit" style="width:100%;">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
