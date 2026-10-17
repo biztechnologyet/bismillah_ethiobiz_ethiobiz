@@ -8,6 +8,53 @@
 (function () {
   window.ETHIOBIZ_USER_PROFILE = null;
 
+  // BISMALLAH (2026-09-10): login-aware helpers shared by all booking/purchase forms.
+  window.ethiobizIsLoggedIn = function () {
+    var p = window.ETHIOBIZ_USER_PROFILE;
+    if (p && typeof p.logged_in !== "undefined") return !!p.logged_in;
+    return null;
+  };
+
+  window.ethiobizRequireLogin = function (returnUrl) {
+    var target = returnUrl || window.location.pathname + window.location.search;
+    try {
+      alert("Please log in to continue. Your booking or purchase will be linked to your account automatically.");
+    } catch (e) {}
+    window.location.href = "/login?redirect-to=" + encodeURIComponent(target);
+  };
+
+  window.ethiobizServerMessage = function (r) {
+    try {
+      if (r && r._server_messages) {
+        var msgs = JSON.parse(r._server_messages);
+        if (Array.isArray(msgs) && msgs.length) {
+          var m = JSON.parse(msgs[0]);
+          if (m && m.message) return m.message;
+        }
+      }
+    } catch (e) {}
+    try {
+      if (r && r.exc) {
+        var arr = JSON.parse(r.exc);
+        if (arr && arr.length) return String(arr[0]).replace(/^.*?:\s*/, "");
+      }
+    } catch (e2) {}
+    return null;
+  };
+
+  window.ethiobizRequireLoginFromResponse = function (r) {
+    if (r && (r.exc_type === "PermissionError" || String(r._server_messages || "").indexOf("Please log in") !== -1)) {
+      window.ethiobizRequireLogin();
+      return true;
+    }
+    var msg = window.ethiobizServerMessage(r) || "";
+    if (/log in|login|sign in/i.test(msg)) {
+      window.ethiobizRequireLogin();
+      return true;
+    }
+    return false;
+  };
+
   function fetchUserProfile(callback) {
     if (window.ETHIOBIZ_USER_PROFILE) {
       if (callback) callback(window.ETHIOBIZ_USER_PROFILE);
@@ -31,7 +78,7 @@
       });
   }
 
-  function applyAutofill(root) {
+  function applyAutofillCore(root) {
     const p = window.ETHIOBIZ_USER_PROFILE;
     if (!p || !p.logged_in) return;
 
@@ -142,12 +189,36 @@
       });
     }
 
-    // 5. INJECT PROFILE BANNER IN MODALS IF NOT PRESENT
+    // 5. UPDATE EMBEDDED TOP PROFILE CARDS
+    const fullName = p.full_name || p.user || "EthioBiz Member";
+    const initials = fullName
+      .split(" ")
+      .map((w) => w[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "👤";
+    const metaParts = [];
+    if (p.phone) metaParts.push("📞 " + p.phone);
+    if (p.email) metaParts.push("✉️ " + p.email);
+    const metaStr = metaParts.join(" • ") || "Verified Profile";
+
+    container.querySelectorAll(".ethiobiz-user-name").forEach((el) => {
+      if (el.innerText !== fullName) el.innerText = fullName;
+    });
+    container.querySelectorAll(".ethiobiz-user-meta").forEach((el) => {
+      if (el.innerText !== metaStr) el.innerText = metaStr;
+    });
+    container.querySelectorAll(".ethiobiz-user-avatar").forEach((el) => {
+      if (el.innerText !== initials) el.innerText = initials;
+    });
+
+    // 6. INJECT PROFILE BANNER IN MODALS ONLY IF NO TOP PROFILE CARD EXISTS
     const modalBodies = container.querySelectorAll(
       ".modal-body, .bs-modal-box, #booking-modal-card, .home-booking-modal-body, #modal-booking-form-area"
     );
     modalBodies.forEach((body) => {
-      if (!body.querySelector(".ethiobiz-autofill-banner")) {
+      if (!body.querySelector(".ethiobiz-autofill-banner") && !body.querySelector(".ethiobiz-user-profile-top-card")) {
         const banner = document.createElement("div");
         banner.className = "ethiobiz-autofill-banner";
         banner.style.cssText =
@@ -167,6 +238,37 @@
     });
   }
 
+  // BISMALLAH (2026-10-16): SAFE WRAPPER - root-cause fix for the page freeze.
+  // Previously the profile-card writes set .innerText unconditionally from inside a
+  // MutationObserver watching document.body {childList:true, subtree:true}. Every
+  // innerText write replaces a text node => a childList mutation => the observer
+  // fires again => applyAutofill runs again => endless micro-task loop that never
+  // yields to the browser, so the page froze (scrolling stopped, no response).
+  // This wrapper (a) blocks re-entrancy, (b) pauses the observer while we mutate the
+  // DOM, and (c) the writes above are now idempotent. The loop is now impossible.
+  function applyAutofill(root) {
+    const p = window.ETHIOBIZ_USER_PROFILE;
+    if (!p || !p.logged_in) return;
+    if (applyAutofill._busy) return;
+    applyAutofill._busy = true;
+    const obs = window.__ethiobizAutofillObserver;
+    if (obs) {
+      try {
+        obs.disconnect();
+      } catch (e) {}
+    }
+    try {
+      applyAutofillCore(root);
+    } finally {
+      applyAutofill._busy = false;
+      if (obs) {
+        try {
+          obs.observe(document.body, { childList: true, subtree: true });
+        } catch (e) {}
+      }
+    }
+  }
+
   // Hook into DOMContentLoaded
   document.addEventListener("DOMContentLoaded", function () {
     fetchUserProfile();
@@ -180,6 +282,7 @@
       });
     });
 
+    window.__ethiobizAutofillObserver = observer;
     observer.observe(document.body, { childList: true, subtree: true });
 
     // Re-check on clicks that open modals
