@@ -274,12 +274,25 @@
     fetchUserProfile();
 
     // Observe modal opens or dynamic DOM injections
+    // (PHASE C 2026-10-17) Debounced. Previously every added node anywhere in
+    // document.body triggered a full-document applyAutofill() scan, which is
+    // expensive on feed / infinite-scroll pages. Coalesce bursts into one pass.
+    let autofillDebounce = null;
     const observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
+      let hasAdditions = false;
+      for (let i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
         if (m.addedNodes && m.addedNodes.length) {
-          applyAutofill(document);
+          hasAdditions = true;
+          break;
         }
-      });
+      }
+      if (!hasAdditions) return;
+      if (autofillDebounce) clearTimeout(autofillDebounce);
+      autofillDebounce = setTimeout(function () {
+        autofillDebounce = null;
+        applyAutofill(document);
+      }, 200);
     });
 
     window.__ethiobizAutofillObserver = observer;

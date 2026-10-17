@@ -4,6 +4,11 @@
 
 {% block page_content %}
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+<!-- (PHASE C 2026-10-17) non-blocking Google Fonts load (replaces the render-blocking @import in biz_verticals.css) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"></noscript>
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.1.0" />
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
 <script src="/assets/bismillah_ethiobiz/js/doctor_detail.js?v=1.0.0" defer></script>
