@@ -1,4 +1,4 @@
-// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT ÔÇö v4.0.0
+// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT — v4.0.0
 document.addEventListener("DOMContentLoaded", function() {
     var currentCategory = "all";
     var services = [];
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        // Search Input ÔÇö debounced
+        // Search Input — debounced
         var searchTimer = null;
         var sInp = document.getElementById("fix-search-input");
         if (sInp) {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             var card = document.createElement("div");
                             card.className = "fix-cat-card";
                             card.dataset.cat = cat.category_name;
-                            card.innerHTML = '<span class="cat-icon">­ƒöº</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
+                            card.innerHTML = '<span class="cat-icon">🔧</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
                             categoryGrid.appendChild(card);
                         }
                     });
@@ -150,14 +150,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error("Failed to load categories:", err);
                 // Fallback to hardcoded categories if API fails
                 var fallbackCategories = [
-                    { cat: "Electrical & Power", icon: "ÔÜí", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
-                    { cat: "Plumbing & Water", icon: "­ƒÜ┐", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
-                    { cat: "HVAC & Appliances", icon: "ÔØä´©Å", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
-                    { cat: "Auto Mechanics", icon: "­ƒÜù", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
-                    { cat: "IT & Security", icon: "­ƒÆ╗", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
-                    { cat: "Facility Maintenance", icon: "­ƒÅó", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
-                    { cat: "Carpentry & Woodwork", icon: "­ƒ¬Á", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
-                    { cat: "Sanitation & Cleaning", icon: "­ƒº╣", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
+                    { cat: "Electrical & Power", icon: "⚡", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
+                    { cat: "Plumbing & Water", icon: "🚿", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
+                    { cat: "HVAC & Appliances", icon: "❄️", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
+                    { cat: "Auto Mechanics", icon: "🚗", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
+                    { cat: "IT & Security", icon: "💻", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
+                    { cat: "Facility Maintenance", icon: "🏢", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
+                    { cat: "Carpentry & Woodwork", icon: "🪵", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
+                    { cat: "Sanitation & Cleaning", icon: "🧹", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
                 ];
                 fallbackCategories.forEach(function(cat) {
                     var card = document.createElement("div");
@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (!filtered.length) {
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +
-                '<div style="font-size:3rem; margin-bottom:12px;">­ƒöº</div>' +
+                '<div style="font-size:3rem; margin-bottom:12px;">🔧</div>' +
                 '<h3 style="font-weight:800; color:#334155; margin-bottom:6px;">No Maintenance Services Found</h3>' +
                 '<p style="color:#64748b; font-size:0.9rem;">Try selecting "All Services" or adjusting your search keywords.</p>' +
                 '</div>';
@@ -257,18 +257,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         var catIcons = {
-            "Electrical & Power": "ÔÜí",
-            "Plumbing & Water": "­ƒÜ┐",
-            "HVAC & Appliances": "ÔØä´©Å",
-            "Auto Mechanics": "­ƒÜù",
-            "IT & Security": "­ƒÆ╗",
-            "Facility Maintenance": "­ƒÅó",
-            "Carpentry & Woodwork": "­ƒ¬Á",
-            "Sanitation & Cleaning": "­ƒº╣"
+            "Electrical & Power": "⚡",
+            "Plumbing & Water": "🚿",
+            "HVAC & Appliances": "❄️",
+            "Auto Mechanics": "🚗",
+            "IT & Security": "💻",
+            "Facility Maintenance": "🏢",
+            "Carpentry & Woodwork": "🪵",
+            "Sanitation & Cleaning": "🧹"
         };
 
         filtered.forEach(function(srv, idx) {
-            var icon = catIcons[srv.category] || "­ƒöº";
+            var icon = catIcons[srv.category] || "🔧";
             var card = document.createElement("div");
             card.className = "vert-card";
             card.style.animation = "slideUp 0.4s ease-out " + (idx * 0.05) + "s both";
@@ -279,12 +279,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 '<div class="vert-card-body">' +
                     '<div class="vert-card-badge" style="background:var(--vert-fix-light); color:#b45309;">' + srv.category + '</div>' +
                     '<div class="vert-card-title">' + srv.title + '</div>' +
-                    '<div class="vert-card-subtitle">­ƒÅó ' + (srv.company_name || 'EthioBiz Certified Partner') + '</div>' +
+                    '<div class="vert-card-subtitle">🏢 ' + (srv.company_name || 'EthioBiz Certified Partner') + '</div>' +
                     '<div class="vert-card-meta">' +
-                        '<span style="color:#059669; font-weight:700; font-size:0.85rem;">ÔÅ▒´©Å ' + (srv.duration_minutes || 60) + ' min arrival</span>' +
+                        '<span style="color:#059669; font-weight:700; font-size:0.85rem;">⏱️ ' + (srv.duration_minutes || 60) + ' min arrival</span>' +
                         '<span class="vert-card-price" style="color:var(--vert-fix);">' + srv.formatted_price + '</span>' +
                     '</div>' +
-                    '<button class="btn-vertical-primary w-100 btn-book-fix" style="background:var(--vert-fix); border-radius:12px;" data-srv-id="' + srv.name + '">Dispatch Technician Ô×ö</button>' +
+                    '<button class="btn-vertical-primary w-100 btn-book-fix" style="background:var(--vert-fix); border-radius:12px;" data-srv-id="' + srv.name + '">Dispatch Technician ➔</button>' +
                 '</div>';
 
             card.querySelector(".btn-book-fix").addEventListener("click", function() { openFixModal(srv); });
@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("modal-fix-title").innerText = "Request " + srv.title;
         document.getElementById("modal-fix-summary").innerHTML =
             '<div style="display:flex; align-items:center; gap:12px;">' +
-                '<div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">­ƒöº</div>' +
+                '<div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🔧</div>' +
                 '<div>' +
                     '<strong>' + srv.title + '</strong><br>' +
                     '<span style="font-size:0.82rem;">' + srv.category + ' &bull; Rate: <strong>' + srv.formatted_price + '</strong></span>' +
@@ -433,7 +433,7 @@ if (!address) {
     }
 
     function resetBtn(btn) {
-        btn.innerHTML = "Dispatch Certified Technician Ô×ö";
+        btn.innerHTML = "Dispatch Certified Technician ➔";
         btn.disabled = false;
         btn.style.opacity = "1";
     }
@@ -445,7 +445,7 @@ if (!address) {
 
         body.innerHTML =
             '<div style="text-align:center; padding:20px 0;">' +
-                '<div style="font-size:3.5rem; margin-bottom:12px;">ÔÜí</div>' +
+                '<div style="font-size:3.5rem; margin-bottom:12px;">⚡</div>' +
                 '<h3 style="font-weight:900; color:#92400e; margin-bottom:6px;">Technician Dispatched!</h3>' +
                 '<p style="color:#78350f; font-size:0.92rem; margin-bottom:20px;">A certified technician has been assigned to your request.</p>' +
                 '<div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:14px; padding:16px; text-align:left; margin-bottom:16px;">' +
@@ -456,7 +456,7 @@ if (!address) {
                     '</div>' +
                 '</div>' +
                 '<p style="font-size:0.8rem; color:#78350f;">Dispatch hotline will contact you at <strong>' + phone + '</strong> within 10 minutes.</p>' +
-                '<button onclick="document.getElementById(\'fix-booking-modal\').style.display=\'none\'; location.reload();" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:12px; margin-top:8px;">Done Ô£ô</button>' +
+                '<button onclick="document.getElementById(\'fix-booking-modal\').style.display=\'none\'; location.reload();" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:12px; margin-top:8px;">Done ✓</button>' +
             '</div>';
     }
 });
