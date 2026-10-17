@@ -1,5 +1,6 @@
 /* BISMALLAH ETHIOBIZ VERTICAL HUBS & SUPER PORTALS STYLING — v4.0.0 */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+/* (PHASE C 2026-10-17) render-blocking Google-Fonts @import removed;
+   the font is now loaded non-blocking from each vertical page head. */
 
 :root {
     --vert-primary: #1FB6AE;
