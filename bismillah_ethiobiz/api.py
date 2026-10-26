@@ -674,6 +674,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
         "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_analytics.js?v=1.0.0",
     ]
     for js in js_files:
         base = js.split("?")[0]
