@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -51,12 +51,12 @@ app_include_css = [
 # JS included in desk (backend)
 app_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js"
@@ -64,7 +64,7 @@ app_include_js = [
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
@@ -76,14 +76,15 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=1.0.0",
 ]
 
 # ============================================
@@ -106,18 +107,12 @@ website_route_rules = [
     {"from_route": "/lms", "to_route": "lms"},
     {"from_route": "/lms/<path:app_path>", "to_route": "lms"},
     {"from_route": "/map", "to_route": "map"},
-    {"from_route": "/bizmap", "to_route": "map"},
     {"from_route": "/companies", "to_route": "map"},
     {"from_route": "/shop", "to_route": "shop"},
     {"from_route": "/bizhealth", "to_route": "bizhealth"},
     {"from_route": "/bizfix", "to_route": "bizfix"},
     {"from_route": "/bizride", "to_route": "bizride"},
-    {"from_route": "/bizhome", "to_route": "bizhome"},
-    {"from_route": "/bizservice", "to_route": "bizservice"},
-    {"from_route": "/bizservices", "to_route": "bizservice"},
-    {"from_route": "/bizservice/<path:slug>", "to_route": "bizservice_detail"},
-    {"from_route": "/bizservices/<path:slug>", "to_route": "bizservice_detail"},
-    {"from_route": "/doctor/<path:slug>", "to_route": "doctor_detail"},
+    {"from_route": "/booking", "to_route": "booking"},
 ]
 
 # ============================================
@@ -140,15 +135,6 @@ on_session_creation = [
 
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
-
-# ============================================
-# SCHEDULER EVENTS
-# ============================================
-scheduler_events = {
-    "daily": [
-        "bismillah_ethiobiz.event_notification.send_event_digest"
-    ]
-}
 
 # ============================================
 # DOC EVENTS

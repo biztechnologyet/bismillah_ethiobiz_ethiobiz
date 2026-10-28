@@ -1,7 +1,8 @@
 /* BISMALLAH ETHIOBIZ FULL-SCREEN GOOGLE MAPS-STYLE PORTAL CSS */
 :root {
-    --map-primary: #1FB6AE;
-    --map-bg-blur: rgba(255, 255, 255, 0.92);
+    --map-primary: #0d9488;
+    --map-primary-hover: #0f766e;
+    --map-bg-blur: rgba(255, 255, 255, 0.96);
     --map-border: rgba(0, 0, 0, 0.12);
     --map-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
@@ -17,7 +18,7 @@
     z-index: 10;
 }
 
-/* FLOATING / DOCKED COLLAPSIBLE SIDEBAR */
+/* FLOATING SIDEBAR (Default) */
 .map-sidebar {
     position: absolute;
     top: 16px;
@@ -34,7 +35,214 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* PINNED / DOCKED SIDEBAR STATE (TASK-2026-00845) */
+.map-portal-wrapper.is-pinned .map-sidebar {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 390px;
+    height: 100%;
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    border-right: 1px solid var(--map-border);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+}
+
+/* COLLAPSED SIDEBAR STATE - Works seamlessly whether pinned or floating */
+.map-portal-wrapper.sidebar-collapsed .map-sidebar {
+    transform: translateX(-120%) !important;
+    margin-left: -390px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+}
+
+.map-portal-wrapper.sidebar-collapsed .btn-floating-map-expand {
+    display: flex !important;
+}
+
+.btn-pin-map-sidebar {
+    background: #ffffff;
+    border: 1px solid var(--map-border);
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: all 0.2s ease;
+}
+
+.btn-pin-map-sidebar:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: scale(1.05);
+}
+
+.btn-pin-map-sidebar.active {
+    background: #0d9488 !important;
+    color: #ffffff !important;
+    border-color: #0d9488 !important;
+    box-shadow: 0 2px 10px rgba(13, 148, 136, 0.35);
+}
+
+.btn-collapse-map-sidebar {
+    background: #ffffff;
+    border: 1px solid var(--map-border);
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: all 0.2s ease;
+}
+
+.btn-collapse-map-sidebar:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    transform: scale(1.05);
+}
+
+.btn-floating-map-expand {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 30px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-floating-map-expand:hover {
+    background: #0f766e !important;
+    color: #ffffff !important;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 128, 128, 0.25);
+}
+
+/* FLOATING INTERACTIVE MAP TOOLS (TASK-2026-00845) */
+.map-floating-tools {
+    position: absolute;
+    top: 16px;
+    right: 56px;
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.map-tool-btn {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid var(--map-border);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.map-tool-btn:hover {
+    background: #f8fafc;
+    border-color: var(--map-primary);
+    color: var(--map-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(13, 148, 136, 0.2);
+}
+
+.btn-locate-fab.locating {
+    background: #0d9488;
+    color: #ffffff;
+    animation: pulse-gps-button 1.2s infinite;
+}
+
+@keyframes pulse-gps-button {
+    0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+}
+
+/* USER GPS PULSE PIN */
+.user-gps-pulse-pin {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+.user-gps-pulse-pin .pulse-core {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 5px;
+    left: 5px;
+    background: #0d9488;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.user-gps-pulse-pin .pulse-ring {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(13, 148, 136, 0.4);
+    animation: ring-pulse 1.8s infinite ease-out;
+}
+@keyframes ring-pulse {
+    0% { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* LEAFLET CONTROL CUSTOMIZATION */
+.leaflet-top.leaflet-right .leaflet-control-layers {
+    border-radius: 12px;
+    border: 1px solid var(--map-border);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+.leaflet-control-zoom {
+    border: 1px solid var(--map-border) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12) !important;
+}
+
+.ethiobiz-map-pin, .magala-shop-pin {
+    background: transparent;
+    border: none;
 }
 
 @media (max-width: 768px) {
@@ -50,12 +258,21 @@
         height: 55vh;
         border-radius: 20px 20px 0 0;
     }
+    .map-portal-wrapper.is-pinned .map-sidebar {
+        width: 100vw;
+        height: 55vh;
+        border-radius: 20px 20px 0 0;
+    }
+    .map-floating-tools {
+        top: 10px;
+        right: 10px;
+    }
 }
 
 .sidebar-header {
     padding: 16px;
     border-bottom: 1px solid var(--map-border);
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .sidebar-search-box {
@@ -114,13 +331,18 @@
     font-size: 0.85rem;
 }
 .btn-geo-action {
-    background: rgba(31, 182, 174, 0.15);
+    background: rgba(13, 148, 136, 0.12);
     color: var(--map-primary);
     border: 1px solid var(--map-primary);
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-geo-action:hover {
+    background: var(--map-primary);
+    color: #ffffff;
 }
 .radius-control {
     display: flex;
@@ -138,7 +360,7 @@
     font-size: 0.85rem;
     color: #64748b;
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .company-card-list {
@@ -159,7 +381,7 @@
 }
 .company-map-card:hover, .company-map-card.active {
     border-color: var(--map-primary);
-    box-shadow: 0 4px 16px rgba(31, 182, 174, 0.2);
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.2);
     transform: translateY(-2px);
 }
 .comp-card-thumb {
@@ -189,6 +411,24 @@
     border-radius: 6px;
     font-weight: 600;
 }
+.branch-badge {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    margin-left: 6px;
+}
+.branch-badge.primary {
+    background: rgba(13, 148, 136, 0.12);
+    color: #0d9488;
+    border: 1px solid rgba(13, 148, 136, 0.3);
+}
+.branch-badge.branch {
+    background: rgba(2, 132, 199, 0.12);
+    color: #0284c7;
+    border: 1px solid rgba(2, 132, 199, 0.3);
+}
 
 /* DOSSIER PANEL */
 .dossier-panel {
@@ -207,9 +447,14 @@
     background: #f1f5f9;
     border: none;
     padding: 12px 16px;
-    font-weight: 600;
+    font-weight: 700;
     text-align: left;
     cursor: pointer;
+    font-size: 0.9rem;
+    color: #0f172a;
+}
+.btn-back-dossier:hover {
+    background: #e2e8f0;
 }
 .dossier-content {
     padding: 16px;
@@ -219,6 +464,7 @@
 .map-canvas-container {
     flex: 1;
     height: 100%;
+    position: relative;
 }
 .map-canvas {
     width: 100%;

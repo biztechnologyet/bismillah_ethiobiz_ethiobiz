@@ -1567,6 +1567,41 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         except Exception:
             pass
 
+    # 12c. SOURCE: Live News Feeds (Deduplicated, with genuine source images)
+    if filter_type in ["all", "news"]:
+        try:
+            from bismillah_ethiobiz.news_api import get_live_news
+            n_res = get_live_news(limit=8, page=1)
+            news_items = n_res.get("news", []) if isinstance(n_res, dict) else (n_res or [])
+            for n in news_items:
+                items.append({
+                    "id": n.get("id"),
+                    "type": "news",
+                    "badge": f"{n.get('icon', '📰')} {n.get('category', 'Live News')}",
+                    "badge_class": "badge-news",
+                    "title": n.get("title"),
+                    "subtitle": f"🌐 {n.get('source', 'EthioBiz News')} • Live News",
+                    "content": n.get("summary") or n.get("title"),
+                    "category": n.get("category", "News"),
+                    "image": n.get("image_url"),
+                    "author": n.get("source", "EthioBiz News"),
+                    "author_name": n.get("source", "EthioBiz News"),
+                    "rating": 5.0,
+                    "likes_count": 0,
+                    "comments_count": 0,
+                    "price": "Live Update",
+                    "created": now_datetime(),
+                    "action_url": n.get("url") or "/news",
+                    "action_label": "Read Article ➔",
+                    "doctype": "News",
+                    "docname": n.get("id"),
+                    "commentable": False,
+                    "is_booking": False,
+                    "is_news": True
+                })
+        except Exception:
+            pass
+
     # 12b. SOURCE: In-EthioBiz reposts (Shared rows) become first-class cards.
     # Runs BEFORE the engagement lookup so the repost cards get real counts,
     # viewer_has_* flags and share meta like every other item. Originals

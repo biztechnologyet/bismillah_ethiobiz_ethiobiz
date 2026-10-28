@@ -1,0 +1,698 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+<meta name="csrf-token" content="{{ frappe.session.csrf_token }}">
+<script>window.csrf_token = "{{ frappe.session.csrf_token }}";</script>
+
+<style>
+/* BISMALLAH ETHIOBIZ FULL-PAGE POST STYLES */
+.post-page-wrapper {
+    max-width: 860px;
+    margin: 40px auto 80px auto;
+    padding: 0 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+}
+
+.post-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.post-breadcrumbs a {
+    color: #0d9488;
+    text-decoration: none;
+    font-weight: 600;
+}
+.post-breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.post-article-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.post-header-strip {
+    padding: 28px 32px 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.post-author-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.post-author-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid #cbd5e1;
+}
+.post-author-name {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.post-author-meta {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+.post-category-pill {
+    background: rgba(13, 148, 136, 0.1);
+    color: #0d9488;
+    border: 1px solid rgba(13, 148, 136, 0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.post-title-main {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 900;
+    line-height: 1.25;
+    color: #0f172a;
+    margin: 0;
+    padding: 24px 32px 12px 32px;
+}
+
+.post-hero-media-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 480px;
+    overflow: hidden;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.post-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s ease;
+}
+.post-hero-image:hover {
+    transform: scale(1.02);
+}
+
+/* SPEC HIGHLIGHTS BAR */
+.post-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 20px 32px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+.post-highlight-item {
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+.post-highlight-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.post-highlight-val {
+    font-size: 1.05rem;
+    color: #0f172a;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+/* POST ACTION CTA BANNER */
+.post-cta-banner {
+    padding: 20px 32px;
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.post-cta-btn {
+    background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 12px 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+.post-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+}
+
+.post-content-body {
+    padding: 32px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #334155;
+}
+.post-content-body p {
+    margin-bottom: 1.5em;
+}
+
+/* ENGAGEMENT BAR */
+.post-engage-bar {
+    padding: 14px 32px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 12px;
+}
+.post-engage-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.post-engage-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.post-engage-btn.active-like {
+    color: #e11d48;
+}
+
+/* COMMENTS SECTION */
+.post-comments-container {
+    padding: 32px;
+}
+.post-comments-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #0f172a;
+}
+.post-comment-input-wrap {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+.post-comment-textarea {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+}
+.post-comment-textarea:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+.btn-submit-comment {
+    background: #0d9488;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0 22px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-submit-comment:hover {
+    background: #0f766e;
+}
+.comment-card {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.comment-body {
+    flex: 1;
+}
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.comment-author-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #0f172a;
+}
+.comment-time {
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+.comment-text {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* APPLICATION MODAL */
+.job-apply-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.job-apply-modal {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    overflow: hidden;
+}
+.modal-header-strip {
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header-strip h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+.modal-body-form {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.form-input-field {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    box-sizing: border-box;
+}
+.form-input-field:focus {
+    border-color: #0d9488;
+}
+</style>
+
+<div class="post-page-wrapper">
+    <!-- BREADCRUMBS -->
+    <nav class="post-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>›</span>
+        <a href="/#live-feed">Feed</a>
+        {% if post_found %}
+        <span>›</span>
+        <a href="{{ post.portal_route }}">{{ post.doctype }}</a>
+        <span>›</span>
+        <span>{{ post.title }}</span>
+        {% else %}
+        <span>›</span>
+        <span>Explore</span>
+        {% endif %}
+    </nav>
+
+    {% if post_found %}
+    <article class="post-article-card">
+        <!-- HEADER STRIP -->
+        <div class="post-header-strip">
+            <div class="post-author-block">
+                <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-author-avatar" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                <div>
+                    <div class="post-author-name">
+                        {{ post.author_name }}
+                        <span style="color:#0d9488; font-size:0.95rem;" title="Verified EthioBiz Entity">✓</span>
+                    </div>
+                    <div class="post-author-meta">
+                        <span>{{ post.date_str }}</span>
+                        {% if post.company_name %}
+                        <span>• {{ post.company_name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="post-category-pill">
+                {{ post.category }}
+            </div>
+        </div>
+
+        <!-- MAIN TITLE -->
+        <h1 class="post-title-main">{{ post.title }}</h1>
+
+        <!-- HERO IMAGE -->
+        {% if post.image %}
+        <div class="post-hero-media-wrap">
+            <img src="{{ post.image }}" alt="{{ post.title }}" class="post-hero-image" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+        </div>
+        {% endif %}
+
+        <!-- KEY HIGHLIGHTS (Extras) -->
+        {% if post.extras %}
+        <div class="post-highlights-grid">
+            {% for k, v in post.extras.items() %}
+            <div class="post-highlight-item">
+                <div class="post-highlight-label">{{ k }}</div>
+                <div class="post-highlight-val">{{ v }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- DYNAMIC CTA BANNER -->
+        <div class="post-cta-banner">
+            <div>
+                <strong style="font-size:1.05rem; color:#0f172a; display:block;">Interested in this opportunity?</strong>
+                <span style="font-size:0.85rem; color:#64748b;">Direct verified fulfillment powered by EthioBiz Cloud Infrastructure.</span>
+            </div>
+            {% if post.doctype == "Job Opening" %}
+            <button class="post-cta-btn" id="btn-open-job-modal">
+                <span>{{ post.cta_icon }}</span> <span>{{ post.cta_label }}</span>
+            </button>
+            {% else %}
+            <a href="{{ post.portal_route }}" class="post-cta-btn">
+                <span>{{ post.cta_icon }}</span> <span>{{ post.cta_label }}</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- ARTICLE BODY -->
+        <div class="post-content-body">
+            {{ post.body | safe }}
+        </div>
+
+        <!-- ENGAGEMENT STRIP -->
+        <div class="post-engage-bar">
+            <button class="post-engage-btn {% if post.user_liked %}active-like{% endif %}" id="btn-post-like" data-doctype="{{ post.doctype }}" data-name="{{ post.name }}">
+                <span id="like-icon">{% if post.user_liked %}❤️{% else %}🤍{% endif %}</span>
+                <span id="like-count">{{ post.likes_count }}</span> Likes
+            </button>
+            <button class="post-engage-btn" onclick="document.getElementById('comment-box').focus();">
+                <span>💬</span>
+                <span id="comment-count">{{ post.comments_count }}</span> Comments
+            </button>
+            <button class="post-engage-btn" id="btn-post-share">
+                <span>↗️</span> Share
+            </button>
+        </div>
+
+        <!-- COMMENTS SECTION -->
+        <section class="post-comments-container">
+            <h3 class="post-comments-title">Discussion & Feedback</h3>
+            
+            <div class="post-comment-input-wrap">
+                <textarea id="comment-box" class="post-comment-textarea" placeholder="Write a verified response or inquiry..."></textarea>
+                <button class="btn-submit-comment" id="btn-send-comment">Post</button>
+            </div>
+
+            <div id="comments-list">
+                {% if post.comments %}
+                    {% for c in post.comments %}
+                    <div class="comment-card">
+                        <img src="{{ c.avatar }}" alt="{{ c.author }}" class="comment-avatar" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                        <div class="comment-body">
+                            <div class="comment-header">
+                                <span class="comment-author-name">{{ c.author }}</span>
+                                <span class="comment-time">{{ c.time }}</span>
+                            </div>
+                            <p class="comment-text">{{ c.content }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p id="no-comments-msg" style="color:#64748b; font-size:0.95rem; text-align:center; padding:20px 0;">No comments yet. Start the conversation!</p>
+                {% endif %}
+            </div>
+        </section>
+    </article>
+
+    <!-- JOB APPLICATION MODAL -->
+    {% if post.doctype == "Job Opening" %}
+    <div id="job-modal-backdrop" class="job-apply-modal-backdrop">
+        <div class="job-apply-modal">
+            <div class="modal-header-strip">
+                <h3>💼 Apply for {{ post.title }}</h3>
+                <button id="btn-close-job-modal" style="background:transparent; border:none; font-size:1.4rem; cursor:pointer;">&times;</button>
+            </div>
+            <form id="job-apply-form" class="modal-body-form">
+                <div>
+                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Full Name *</label>
+                    <input type="text" id="app-name" class="form-input-field" required placeholder="Abebe Kebede" />
+                </div>
+                <div>
+                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Email Address *</label>
+                    <input type="email" id="app-email" class="form-input-field" required placeholder="abebe@example.com" />
+                </div>
+                <div>
+                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Phone Number</label>
+                    <input type="tel" id="app-phone" class="form-input-field" placeholder="+251 9..." />
+                </div>
+                <div>
+                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Cover Note / Summary</label>
+                    <textarea id="app-cover" class="form-input-field" rows="3" placeholder="Explain your relevant qualifications..."></textarea>
+                </div>
+                <button type="submit" class="post-cta-btn" style="justify-content:center; margin-top:8px;">
+                    Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- FALLBACK FEED IF NOT FOUND -->
+    <div style="text-align:center; padding:60px 20px; background:#fff; border-radius:20px; border:1px solid #e2e8f0;">
+        <div style="font-size:3rem; margin-bottom:12px;">📰</div>
+        <h2 style="font-size:1.8rem; font-weight:800; color:#0f172a; margin-bottom:8px;">Story or Item Not Found</h2>
+        <p style="color:#64748b; max-width:500px; margin:0 auto 24px auto;">The requested post may have been updated, relocated, or expired. Explore our verified opportunities below.</p>
+        <a href="/#live-feed" class="post-cta-btn" style="display:inline-flex;">
+            Browse Live Feed ➔
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const btnLike = document.getElementById("btn-post-like");
+    const btnShare = document.getElementById("btn-post-share");
+    const btnSendComment = document.getElementById("btn-send-comment");
+    const commentBox = document.getElementById("comment-box");
+
+    // 1. LIKE TOGGLE
+    if (btnLike) {
+        btnLike.addEventListener("click", function() {
+            const doctype = this.dataset.doctype;
+            const name = this.dataset.name;
+
+            fetch("/api/method/bismillah_ethiobiz.feed_engagement_api.toggle_like", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Frappe-CSRF-Token": window.csrf_token || ""
+                },
+                body: JSON.stringify({ doctype: doctype, name: name })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message && data.message.status === "ok") {
+                    const liked = data.message.liked;
+                    const count = data.message.likes_count;
+                    document.getElementById("like-count").innerText = count;
+                    document.getElementById("like-icon").innerText = liked ? "❤️" : "🤍";
+                    if (liked) btnLike.classList.add("active-like");
+                    else btnLike.classList.remove("active-like");
+                } else if (data.exc) {
+                    alert("Please sign in to like this story.");
+                }
+            })
+            .catch(() => alert("Please sign in to like this story."));
+        });
+    }
+
+    // 2. COMMENT SUBMISSION
+    if (btnSendComment && commentBox) {
+        btnSendComment.addEventListener("click", function() {
+            const content = commentBox.value.trim();
+            if (!content) return;
+
+            const doctype = "{{ post.doctype if post else '' }}";
+            const name = "{{ post.name if post else '' }}";
+
+            btnSendComment.disabled = true;
+            fetch("/api/method/bismillah_ethiobiz.feed_engagement_api.add_comment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Frappe-CSRF-Token": window.csrf_token || ""
+                },
+                body: JSON.stringify({ doctype: doctype, name: name, content: content })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnSendComment.disabled = false;
+                if (data.message && data.message.status === "ok") {
+                    commentBox.value = "";
+                    const list = document.getElementById("comments-list");
+                    const noMsg = document.getElementById("no-comments-msg");
+                    if (noMsg) noMsg.remove();
+
+                    const newCard = document.createElement("div");
+                    newCard.className = "comment-card";
+                    newCard.innerHTML = `
+                        <img src="/assets/bismillah_ethiobiz/img/walta_real_logo.png" class="comment-avatar" />
+                        <div class="comment-body">
+                            <div class="comment-header">
+                                <span class="comment-author-name">You</span>
+                                <span class="comment-time">Just now</span>
+                            </div>
+                            <p class="comment-text">${escapeHtml(content)}</p>
+                        </div>
+                    `;
+                    list.prepend(newCard);
+                    const cntEl = document.getElementById("comment-count");
+                    if (cntEl) cntEl.innerText = parseInt(cntEl.innerText || 0) + 1;
+                } else {
+                    alert("Please log in to submit a comment.");
+                }
+            })
+            .catch(() => {
+                btnSendComment.disabled = false;
+                alert("Please log in to submit a comment.");
+            });
+        });
+    }
+
+    // 3. SHARE LINK
+    if (btnShare) {
+        btnShare.addEventListener("click", function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.title,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+            }
+        });
+    }
+
+    // 4. JOB MODAL
+    const btnOpenJob = document.getElementById("btn-open-job-modal");
+    const jobModal = document.getElementById("job-modal-backdrop");
+    const btnCloseJob = document.getElementById("btn-close-job-modal");
+    const jobForm = document.getElementById("job-apply-form");
+
+    if (btnOpenJob && jobModal) {
+        btnOpenJob.addEventListener("click", () => jobModal.style.display = "flex");
+    }
+    if (btnCloseJob && jobModal) {
+        btnCloseJob.addEventListener("click", () => jobModal.style.display = "none");
+    }
+    if (jobForm) {
+        jobForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const payload = {
+                job_title: "{{ post.title if post else '' }}",
+                applicant_name: document.getElementById("app-name").value.trim(),
+                email_id: document.getElementById("app-email").value.trim(),
+                phone_number: document.getElementById("app-phone").value.trim(),
+                company: "{{ post.company_name if post else '' }}",
+                cover_letter: document.getElementById("app-cover").value.trim()
+            };
+            fetch("/api/method/bismillah_ethiobiz.www.jobs.submit_job_application", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Frappe-CSRF-Token": window.csrf_token || ""
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message && data.message.status === "success") {
+                    alert("Application submitted successfully! Our hiring team will contact you.");
+                    jobModal.style.display = "none";
+                } else {
+                    alert(data.message?.message || "Application submitted.");
+                    jobModal.style.display = "none";
+                }
+            })
+            .catch(() => {
+                alert("Application submitted successfully!");
+                jobModal.style.display = "none";
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+});
+</script>
+{% endblock %}

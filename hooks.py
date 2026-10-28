@@ -56,7 +56,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js"
@@ -79,11 +79,12 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=1.0.0",
 ]
 
 # ============================================

@@ -10,7 +10,360 @@ import json
 import random
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, now_datetime, getdate, add_to_date
+from frappe.utils import flt, cint, now_datetime, getdate, get_datetime, add_to_date, get_url, strip_html_tags
+
+
+# BISMALLAH: Feed card image policy.
+# A feed card renders an image ONLY when one is genuinely attached to its source
+# record. There is no default artwork, no placeholder, no company logo stand-in.
+# If nothing is attached the card is rendered as a clean text-only card.
+_FEED_IMAGE_PLACEHOLDERS = (
+    "default-avatar",
+    "placeholder_",
+    "walta_real_logo",
+    "jobs_logo",
+    "no-image",
+    "no_image",
+    "coming-soon",
+    "coming_soon",
+    "sample",
+    "demo",
+)
+
+
+def _feed_image(value):
+    """
+    Return a genuinely attached image URL, or None when there is nothing real to show.
+
+    Guards against legacy/placeholder artwork that may still sit in an old record
+    (default avatars, generated placeholders, brand logos used as filler).
+    """
+    if not value or not isinstance(value, str):
+        return None
+
+    url = value.strip()
+    if not url or url.lower() in ("null", "none", "undefined", "#", "0", "-", "n/a"):
+        return None
+
+    lowered = url.lower()
+    if any(token in lowered for token in _FEED_IMAGE_PLACEHOLDERS):
+        return None
+
+    return url
+
+
+def _feed_service_gallery_images(names):
+    """
+    Map BizService Listing name -> its genuinely attached gallery image.
+
+    Prefers the row flagged is_primary, otherwise the first attached image.
+    Returns {} whenever the gallery table/child link is absent on this site,
+    so listings without artwork simply produce a text-only card.
+    """
+    names = [n for n in (names or []) if n]
+    if not names:
+        return {}
+
+    if not (
+        frappe.db.exists("DocType", "BizService Image")
+        and frappe.db.has_column("BizService Listing", "images")
+        and frappe.db.has_column("BizService Image", "image")
+    ):
+        return {}
+
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT si.parent AS parent, si.image AS image, si.is_primary AS is_primary
+            FROM `tabBizService Image` si
+            WHERE si.parent IN ({})
+              AND COALESCE(si.image, '') <> ''
+            ORDER BY si.is_primary DESC, si.idx ASC
+            """.format(",".join(["%s"] * len(names))),
+            tuple(names),
+            as_dict=True,
+        )
+    except Exception:
+        return {}
+
+    gallery = {}
+    for row in rows:
+        gallery.setdefault(row.parent, _feed_image(row.image))
+    return gallery
+
+
+def _feed_engagement_counts(pairs):
+    """
+    Real like / comment / repost counts for many feed documents in ONE pass.
+
+    Frappe stores all three engagements as `Comment` rows:
+      comment_type = 'Like'     -> a like
+      comment_type = 'Comment'  -> a written comment
+      comment_type = 'Shared'   -> an in-EthioBiz repost
+
+    `pairs` is a list of (doctype, docname). Returns
+    {(doctype, docname): {"likes": int, "comments": int, "reposts": int}}.
+
+    Batched deliberately: doing one db.count() per feed card would issue ~200
+    queries for a 200-item feed. Two grouped queries serve the whole page.
+
+    A doctype that is not a Frappe DocType (e.g. the raw-SQL Walta Forum Topic
+    table) simply never matches here, and the caller supplies its own counter.
+    """
+    result = {}
+    wanted = []
+    for doctype, docname in (pairs or []):
+        if not doctype or not docname:
+            continue
+        key = (doctype, docname)
+        if key not in wanted:
+            wanted.append(key)
+            result[key] = {"likes": 0, "comments": 0, "reposts": 0}
+
+    if not wanted:
+        return result
+
+    names_by_type = {}
+    for doctype, docname in wanted:
+        names_by_type.setdefault(doctype, []).append(docname)
+
+    for doctype, names in names_by_type.items():
+        if not frappe.db.exists("DocType", doctype):
+            # Not a real DocType (raw table or absent): leave the zeros in place.
+            continue
+        try:
+            rows = frappe.db.sql(
+                """
+                SELECT reference_name, comment_type, COUNT(*) AS total
+                FROM `tabComment`
+                WHERE reference_doctype = %s
+                  AND reference_name IN ({})
+                  AND comment_type IN ('Like', 'Comment', 'Shared')
+                GROUP BY reference_name, comment_type
+                """.format(",".join(["%s"] * len(names))),
+                [doctype] + list(names),
+                as_dict=True,
+            )
+        except Exception:
+            continue
+
+        for row in rows:
+            key = (doctype, row.reference_name)
+            if key not in result:
+                continue
+            if row.comment_type == "Like":
+                result[key]["likes"] = cint(row.total)
+            elif row.comment_type == "Shared":
+                result[key]["reposts"] = cint(row.total)
+            else:
+                result[key]["comments"] = cint(row.total)
+
+    return result
+
+
+def _feed_engagement_lookup(items):
+    """
+    Attach real engagement counts + addressing + share meta to every feed item.
+
+    Sets on each item:
+      doctype, docname        -> what a comment/like/repost must reference
+      likes_count             -> real count (0 when nobody has liked it)
+      comments_count          -> real count (0 when there is no discussion)
+      reposts_count           -> real count of in-EthioBiz reposts
+      viewer_has_liked        -> whether the current session already liked it
+      viewer_has_reposted     -> whether the current session already reposted it
+      commentable             -> whether to offer the comment UI at all
+      share_url               -> absolute URL for the Web Share API / clipboard
+      share_title/share_text  -> pre-composed share text (bilingual-safe: plain
+      share_image               data, the client never has to rebuild it)
+    """
+    counts = _feed_engagement_counts(
+        (it.get("doctype"), it.get("docname")) for it in items
+    )
+
+    viewer = frappe.session.user if (frappe.session and frappe.session.user != "Guest") else None
+    liked_by_viewer = set()
+    reposted_by_viewer = set()
+
+    # Which (doctype, docname) pairs has this viewer already liked?
+    viewer_targets = [
+        (doctype, docname)
+        for (doctype, docname), data in counts.items()
+        if data["likes"] and frappe.db.exists("DocType", doctype)
+    ]
+    if viewer and viewer_targets:
+        try:
+            # NOTE: the placeholder in the SQL below is NAMED (`{conds}`), so the
+            # argument has to be `conds=...`. Passing it positionally raises
+            # KeyError: 'conds', and because the whole block is wrapped in a bare
+            # `except`, that failure is invisible: liked_by_viewer stays empty
+            # and every like button renders as un-liked after a page reload even
+            # though the visitor did like the item.
+            rows = frappe.db.sql(
+                """
+                SELECT reference_doctype, reference_name
+                FROM `tabComment`
+                WHERE comment_type = 'Like'
+                  AND comment_email = %s
+                  AND (
+                {conds}
+                  )
+                """.format(conds=" OR ".join(["(reference_doctype = %s AND reference_name = %s)"] * len(viewer_targets))),
+                [viewer] + [v for pair in viewer_targets for v in pair],
+                as_dict=True,
+            )
+            for row in rows:
+                liked_by_viewer.add((row.reference_doctype, row.reference_name))
+        except Exception:
+            # Never let this break feed assembly, but do not hide the reason.
+            liked_by_viewer = set()
+            try:
+                frappe.log_error(
+                    title="feed engagement: viewer_has_liked lookup failed"
+                )
+            except Exception:
+                pass
+
+    # Same contract for reposts: which pairs has this viewer already Shared?
+    # Same named-placeholder caution applies - this block deliberately mirrors
+    # the like query above so the two cannot drift apart.
+    repost_targets = [
+        (doctype, docname)
+        for (doctype, docname), data in counts.items()
+        if data.get("reposts") and frappe.db.exists("DocType", doctype)
+    ]
+    if viewer and repost_targets:
+        try:
+            rows = frappe.db.sql(
+                """
+                SELECT reference_doctype, reference_name
+                FROM `tabComment`
+                WHERE comment_type = 'Shared'
+                  AND comment_email = %s
+                  AND (
+                {conds}
+                  )
+                """.format(conds=" OR ".join(["(reference_doctype = %s AND reference_name = %s)"] * len(repost_targets))),
+                [viewer] + [v for pair in repost_targets for v in pair],
+                as_dict=True,
+            )
+            for row in rows:
+                reposted_by_viewer.add((row.reference_doctype, row.reference_name))
+        except Exception:
+            reposted_by_viewer = set()
+
+    for it in items:
+        key = (it.get("doctype"), it.get("docname"))
+        data = counts.get(key) or {"likes": 0, "comments": 0, "reposts": 0}
+
+        # A raw-SQL source (Walta Forum Topic) is not a Frappe DocType, so it has
+        # no Comment store and keeps its own maintained counters.
+        #
+        # A REAL DocType that also keeps denormalised counters (Afocha Post) is
+        # different: the canonical Comment rows are the truth and the columns
+        # are a cache of them. If we trusted the columns here, a site whose
+        # columns had never been backfilled would show its invented numbers and
+        # hide every real like. Canonical wins, columns are only the fallback
+        # when there is genuinely nothing canonical yet.
+        if it.get("engagement_source") == "native" and not it.get("doctype"):
+            likes = cint(it.get("likes_count") or 0)
+            comments = cint(it.get("comments_count") or 0)
+        else:
+            likes = data["likes"]
+            comments = data["comments"]
+            if (not likes and not comments) and it.get("engagement_source") == "native":
+                likes = cint(it.get("likes_count") or 0)
+                comments = cint(it.get("comments_count") or 0)
+
+        it["likes_count"] = likes
+        it["comments_count"] = comments
+        it["reposts_count"] = cint(data.get("reposts") or 0)
+        it["viewer_has_liked"] = key in liked_by_viewer
+        it["viewer_has_reposted"] = key in reposted_by_viewer
+        it["commentable"] = bool(it.get("commentable", True)) and bool(it.get("doctype"))
+
+        # Share meta: the client must never assemble these itself. Trap 13 of
+        # the ecosystem docs requires absolute share URLs, and the share sheet
+        # wants plain text - the card body may still carry entity-laden markup.
+        action_url = it.get("action_url") or "/"
+        it["share_url"] = action_url if "://" in action_url else get_url(action_url)
+        it["share_title"] = (it.get("title") or "EthioBiz")[:160]
+        try:
+            share_body = strip_html_tags(it.get("content") or "")
+        except Exception:
+            share_body = it.get("content") or ""
+        share_body = " ".join(str(share_body).split())
+        it["share_text"] = (share_body[:180] + "…") if len(share_body) > 180 else share_body
+        image = it.get("image")
+        it["share_image"] = get_url(image) if image and "://" not in str(image) else (image or None)
+
+
+def _feed_article(value, fallback=""):
+    """
+    Normalise a source record's body text for a feed card.
+
+    Strips the stored HTML (job descriptions are Quill/rich-text, which would
+    otherwise dump markup into the card), collapses runaway whitespace, and
+    NEVER truncates. Truncating here is what previously made "Read Full Story"
+    a no-op: the server had already cut the text to 180-203 characters, well
+    below the ~570 characters a 6-line clamp actually hides.
+    """
+    text = value or ""
+    if text and "<" in text:
+        try:
+            text = frappe.utils.strip_html(text)
+        except Exception:
+            pass
+    text = " ".join(str(text).split())
+    return text or fallback
+
+
+def _item_text_fields():
+    """
+    Item body columns to SELECT, filtered by what this schema actually has.
+
+    `short_description` only exists on newer ERPNext Item, and `description` is
+    standard but can be absent on a stripped-down install. Selecting a missing
+    column raises, so the guard has to happen before the query is built rather
+    than after it fails.
+    """
+    fields = []
+    for column in ("short_description", "description"):
+        try:
+            if frappe.db.has_column("Item", column):
+                fields.append(column)
+        except Exception:
+            continue
+    return fields
+
+
+def _feed_time_ago(value):
+    """
+    Compact relative timestamp for feed cards: 'Just now', '4h ago', '3d ago', '2mo ago'.
+    Returns None when the source timestamp is missing/unparseable, or when the site
+    context is unavailable, so this can never abort feed assembly.
+    """
+    if not value:
+        return None
+    try:
+        dt = get_datetime(value)
+        if not dt:
+            return None
+        seconds = (now_datetime() - dt).total_seconds()
+    except Exception:
+        return None
+
+    if seconds < 60:
+        return "Just now"
+    if seconds < 3600:
+        return "%dm ago" % int(seconds // 60)
+    if seconds < 86400:
+        return "%dh ago" % int(seconds // 3600)
+    if seconds < 2592000:
+        return "%dd ago" % int(seconds // 86400)
+    if seconds < 31536000:
+        return "%dmo ago" % int(seconds // 2592000)
+    return "%dy ago" % int(seconds // 31536000)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -155,6 +508,538 @@ def compute_user_preferences(user=None):
     }
 
 
+# ---------------------------------------------------------------------------
+# Repost source: Shared rows become first-class feed cards (type = "repost")
+# ---------------------------------------------------------------------------
+
+# Which vertical filters surface a repost of each doctype. Mirrors the
+# source-gate lists inside get_personalized_feed so a repost never appears
+# under a filter where its original would not. "all" is in every set.
+_REPOST_FILTERS = {
+    "Item": {"all", "products", "goods", "shop"},
+    "Job Opening": {"all", "jobs", "careers", "career"},
+    "Healthcare Practitioner": {"all", "health", "doctors", "clinics", "bizhealth"},
+    "BizService Listing": {"all", "fix", "bizfix", "maintenance", "repair", "services", "bizservices"},
+    "BizBooking Resource": {"all", "services", "bizservices", "bookings", "booking",
+                            "hotels", "salons", "spaces", "rentals"},
+    "Property": {"all", "home", "bizhome", "property", "lodging", "realestate"},
+    "Afocha Post": {"all", "social", "afocha"},
+    "Blog Post": {"all", "blogs", "tibeb", "articles"},
+    "LMS Course": {"all", "courses", "dagu", "academy"},
+}
+
+# Read-amplification guard: one page of cards should carry a handful of
+# reposts, not the entire history of the Shared table.
+MAX_REPOST_FEED_ITEMS = 30
+
+
+def _hydrate_original(doctype, name):
+    """
+    Build a card payload for a reposted document that is NOT in the current
+    pool of assembled items. Field choices mirror the main source builders so
+    a hydrated card renders identically to a freshly-fetched one; badges are
+    plain labels (no emoji) because the pool path keeps the exact original.
+
+    Returns None when the document is gone or the schema cannot express it -
+    a repost card is skipped rather than shipped half-built.
+    """
+    try:
+        if doctype == "Item":
+            fields = ["name", "item_name", "item_group", "company", "image", "creation"] + _item_text_fields()
+            for extra in ("average_product_rating", "total_product_reviews"):
+                if frappe.db.has_column("Item", extra):
+                    fields.append(extra)
+            rows = frappe.get_all("Item", filters={"name": name}, fields=fields, limit=1)
+            if not rows:
+                return None
+            p = rows[0]
+            prices = frappe.get_all(
+                "Item Price",
+                filters={"item_code": p.name, "selling": 1},
+                fields=["price_list_rate", "currency"],
+                limit=1,
+            )
+            price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
+            return {
+                "id": p.name,
+                "type": "product",
+                "badge": p.item_group or "Product",
+                "badge_class": "badge-product",
+                "title": p.item_name,
+                "subtitle": f"{p.company or 'Verified Merchant'} • In Stock",
+                "content": _feed_article(
+                    p.get("short_description") or p.get("description"),
+                    fallback=f"{p.item_name} from {p.company or 'an EthioBiz merchant'}.",
+                ),
+                "category": p.item_group or "General",
+                "image": _feed_image(p.image),
+                "author": p.company or "Verified Merchant",
+                "author_name": p.company or "Verified Merchant",
+                "rating": flt(p.get("average_product_rating") or 5.0),
+                "reviews": cint(p.get("total_product_reviews") or 0),
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": price_str,
+                "created": p.creation,
+                "action_url": f"/shop?product={p.name}",
+                "action_label": "Order Product ➔",
+                "doctype": "Item",
+                "docname": p.name,
+                "commentable": True,
+                "is_booking": False,
+            }
+
+        if doctype == "Job Opening":
+            rows = frappe.get_all(
+                "Job Opening",
+                filters={"name": name},
+                fields=["name", "job_title", "company", "employment_type", "location",
+                        "lower_range", "upper_range", "currency", "salary_per",
+                        "description", "creation"],
+                limit=1,
+            )
+            if not rows:
+                return None
+            j = rows[0]
+            sal_str = "Competitive Salary"
+            if j.lower_range and j.upper_range:
+                sal_str = f"{j.lower_range:,.0f} - {j.upper_range:,.0f} {j.currency or 'ETB'}/{j.salary_per or 'mo'}"
+            elif j.lower_range:
+                sal_str = f"{j.lower_range:,.0f} {j.currency or 'ETB'}/{j.salary_per or 'mo'}"
+            return {
+                "id": j.name,
+                "type": "job",
+                "badge": j.employment_type or "Career",
+                "badge_class": "badge-job",
+                "title": j.job_title,
+                "subtitle": f"{j.company or 'EthioBiz Partner'} • {j.location or 'Addis Ababa'}",
+                "content": _feed_article(j.description, "Exciting career opportunity with professional growth."),
+                "category": "Career",
+                "image": None,
+                "author": j.company or "EthioBiz Partner",
+                "author_name": j.company or "EthioBiz Partner",
+                "rating": 5.0,
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": sal_str,
+                "created": j.creation,
+                "action_url": f"/jobs?job={j.name}",
+                "action_label": "Apply Now ➔",
+                "doctype": "Job Opening",
+                "docname": j.name,
+                "commentable": True,
+                "is_booking": False,
+            }
+
+        if doctype == "Healthcare Practitioner":
+            doc_fields = ["name", "first_name", "last_name", "department", "image",
+                          "consultation_fee", "hospital", "creation"]
+            for optional in ("average_rating", "total_reviews", "bio", "about", "specialization"):
+                if frappe.db.has_column("Healthcare Practitioner", optional):
+                    doc_fields.append(optional)
+            rows = frappe.get_all(
+                "Healthcare Practitioner",
+                filters={"name": name},
+                fields=doc_fields,
+                limit=1,
+            )
+            if not rows:
+                return None
+            d = rows[0]
+            dname = f"{d.first_name or ''} {d.last_name or ''}".strip() or d.name
+            return {
+                "id": d.name,
+                "type": "doctor",
+                "badge": d.department or "Healthcare",
+                "badge_class": "badge-booking",
+                "title": f"Dr. {dname}" if not dname.startswith("Dr.") else dname,
+                "subtitle": f"{d.hospital or 'St. Paul Hospital'} • Verified Specialist",
+                "content": _feed_article(
+                    d.get("bio") or d.get("about") or d.get("specialization"),
+                    f"Book in-clinic appointments, video teleconsultations, or home medical visits with certified physician {dname}.",
+                ),
+                "category": "Healthcare",
+                "image": _feed_image(d.image),
+                "author": d.hospital or "EthioBiz Health Network",
+                "author_name": dname,
+                "rating": flt(d.get("average_rating") or 4.9),
+                "reviews": cint(d.get("total_reviews") or 0),
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": f"{flt(d.consultation_fee or 500):,.2f} ETB",
+                "created": d.creation or now_datetime(),
+                "action_url": f"/doctor/{d.name}",
+                "action_label": "Book Doctor ➔",
+                "doctype": "Healthcare Practitioner",
+                "docname": d.name,
+                "commentable": True,
+                "is_booking": True,
+            }
+
+        if doctype == "BizService Listing":
+            srv_fields = ["name", "service_name", "category", "price", "duration_minutes",
+                          "company", "creation"]
+            for optional in ("average_rating", "description", "details", "overview"):
+                if frappe.db.has_column("BizService Listing", optional):
+                    srv_fields.append(optional)
+            rows = frappe.get_all(
+                "BizService Listing",
+                filters={"name": name},
+                fields=srv_fields,
+                limit=1,
+            )
+            if not rows:
+                return None
+            s = rows[0]
+            gallery = _feed_service_gallery_images([s.name])
+            return {
+                "id": s.name,
+                "type": "fix_service",
+                "badge": s.category or "Maintenance",
+                "badge_class": "badge-booking",
+                "title": s.service_name or s.name,
+                "subtitle": f"{s.company or 'EthioBiz Certified Service'} • 45-Min Express Dispatch",
+                "content": _feed_article(
+                    s.get("description") or s.get("details") or s.get("overview"),
+                    f"Professional certified {s.service_name} for homes, offices, and commercial facilities across Ethiopia.",
+                ),
+                "category": "Maintenance",
+                "image": gallery.get(s.name),
+                "author": s.company or "EthioBiz Certified Technician",
+                "author_name": s.company or "Certified Technician",
+                "rating": flt(s.get("average_rating") or 0),
+                "reviews": 0,
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": f"{flt(s.price or 450):,.2f} ETB",
+                "created": s.creation or now_datetime(),
+                "action_url": f"/bizfix?service={s.name}",
+                "action_label": "Dispatch Technician ➔",
+                "doctype": "BizService Listing",
+                "docname": s.name,
+                "commentable": True,
+                "is_booking": True,
+            }
+
+        if doctype == "BizBooking Resource":
+            res_fields = ["name", "resource_name", "category", "base_rate", "company",
+                          "description", "creation"]
+            has_image = frappe.db.has_column("BizBooking Resource", "image")
+            if has_image:
+                res_fields.append("image")
+            for optional in ("average_rating", "total_reviews"):
+                if frappe.db.has_column("BizBooking Resource", optional):
+                    res_fields.append(optional)
+            rows = frappe.get_all(
+                "BizBooking Resource",
+                filters={"name": name, "is_active": 1},
+                fields=res_fields,
+                limit=1,
+            )
+            if not rows:
+                return None
+            r = rows[0]
+            rate_val = r.base_rate or 0.0
+            return {
+                "id": r.name,
+                "type": "booking",
+                "badge": r.category or "Service Booking",
+                "badge_class": "badge-booking",
+                "title": r.resource_name,
+                "subtitle": f"{r.company or 'EthioBiz Hospitality'} • Instant Voucher Pass",
+                "content": _feed_article(
+                    r.description,
+                    f"Reserve {r.resource_name} with confirmed instant time slot booking and verified digital pass.",
+                ),
+                "category": r.category or "Service Booking",
+                "image": _feed_image(r.get("image")) if has_image else None,
+                "author": r.company or "Verified Host",
+                "author_name": r.company or "Verified Host",
+                "rating": flt(r.get("average_rating") or 0),
+                "reviews": cint(r.get("total_reviews") or 0),
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": f"{rate_val:,.2f} ETB" if rate_val > 0 else "Free Appointment",
+                "created": r.creation,
+                "action_url": f"/bizservice?resource={r.name}",
+                "action_label": "Reserve Now ➔",
+                "doctype": "BizBooking Resource",
+                "docname": r.name,
+                "commentable": True,
+                "is_booking": True,
+            }
+
+        if doctype == "Property":
+            # Same aliased columns bizhome_api.search_properties maps - this
+            # schema's Property is PropMS-flavoured, not the ERPNext property.
+            rows = frappe.get_all(
+                "Property",
+                filters={"name": name},
+                fields=["name", "name1 as title", "type as property_type",
+                        "shop_offer_type as tenure", "shop_price as price", "rent",
+                        "bedroom as bedrooms", "description", "photo", "shop_image",
+                        "territory"],
+                limit=1,
+            )
+            if not rows:
+                return None
+            p = rows[0]
+            price_val = flt(p.price or p.rent or 0)
+            return {
+                "id": p.name,
+                "type": "property",
+                "badge": p.tenure or "Property",
+                "badge_class": "badge-booking",
+                "title": p.title or p.name,
+                "subtitle": f"{p.territory or 'Addis Ababa'} • {cint(p.bedrooms or 2)} Beds • {p.property_type or 'Property'}",
+                "content": _feed_article(
+                    p.description,
+                    f"Premium {p.tenure or 'Rental'} property in {p.territory or 'Addis Ababa'}, verified title deeds and modern amenities.",
+                ),
+                "category": "Real Estate",
+                "image": _feed_image(p.shop_image or p.photo),
+                "author": "EthioBiz Property Network",
+                "author_name": "EthioBiz Real Estate",
+                "rating": 0,
+                "reviews": 0,
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": f"{price_val:,.2f} ETB/month" if price_val else "Contact Agent",
+                "created": None,
+                "action_url": f"/bizhome?property={p.name}",
+                "action_label": "View Property ➔",
+                "doctype": "Property",
+                "docname": p.name,
+                "commentable": True,
+                "is_booking": True,
+            }
+
+        if doctype == "Afocha Post":
+            rows = frappe.get_all(
+                "Afocha Post",
+                filters={"name": name},
+                fields=["name", "author_name", "author_handle", "author_image", "company",
+                        "category_tag", "content", "post_image", "likes_count",
+                        "comments_count", "creation"],
+                limit=1,
+            )
+            if not rows:
+                return None
+            post = rows[0]
+            return {
+                "id": post.name,
+                "type": "social",
+                "badge": post.category_tag or "Afocha Story",
+                "badge_class": "badge-social",
+                "title": post.author_name,
+                "subtitle": f"{post.company or 'EthioBiz Network'} • {post.author_handle or '@member'}",
+                "content": _feed_article(post.content),
+                "category": post.category_tag or "Social",
+                "image": _feed_image(post.post_image),
+                "avatar": _feed_image(post.author_image),
+                "author": post.author_name,
+                "author_name": post.author_name,
+                "rating": 5.0,
+                "likes_count": cint(post.likes_count or 0),
+                "comments_count": cint(post.comments_count or 0),
+                "engagement_source": "native",
+                "price": "Social Update",
+                "created": post.creation,
+                "action_url": f"/social?post={post.name}",
+                "action_label": "Join Conversation ➔",
+                "doctype": "Afocha Post",
+                "docname": post.name,
+                "commentable": True,
+                "is_booking": False,
+            }
+
+        if doctype == "Blog Post":
+            blog_fields = ["name", "title", "blogger", "blog_category", "meta_image",
+                           "blog_intro", "route", "published_on", "creation"]
+            if frappe.db.has_column("Blog Post", "content"):
+                blog_fields.append("content")
+            rows = frappe.get_all(
+                "Blog Post",
+                filters={"name": name, "published": 1},
+                fields=blog_fields,
+                limit=1,
+            )
+            if not rows:
+                return None
+            b = rows[0]
+            return {
+                "id": b.name,
+                "type": "blog",
+                "badge": b.blog_category or "Tibeb Wisdom",
+                "badge_class": "badge-blog",
+                "title": b.title,
+                "subtitle": f"By {b.blogger or 'EthioBiz Editorial Team'}",
+                "content": _feed_article(
+                    b.blog_intro or b.get("content"),
+                    "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
+                ),
+                "category": "Knowledge",
+                "image": _feed_image(b.meta_image),
+                "author": b.blogger or "Editorial Team",
+                "author_name": b.blogger or "Editorial Team",
+                "rating": 5.0,
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": "Knowledge Article",
+                "created": b.published_on or b.creation,
+                "action_url": f"/{b.route or 'blog'}",
+                "action_label": "Read Article ➔",
+                "doctype": "Blog Post",
+                "docname": b.name,
+                "commentable": True,
+                "is_booking": False,
+            }
+
+        if doctype == "LMS Course":
+            course_fields = ["name", "title", "image", "short_introduction", "creation"]
+            for optional in ("description", "rating", "course_rating"):
+                if frappe.db.has_column("LMS Course", optional):
+                    course_fields.append(optional)
+            rows = frappe.get_all(
+                "LMS Course",
+                filters={"name": name, "published": 1},
+                fields=course_fields,
+                limit=1,
+            )
+            if not rows:
+                return None
+            c = rows[0]
+            return {
+                "id": c.name,
+                "type": "course",
+                "badge": "Dagu Academy",
+                "badge_class": "badge-course",
+                "title": c.title,
+                "subtitle": "Online Vocational & Professional Skills Certification",
+                "content": _feed_article(
+                    c.get("short_introduction") or c.get("description"),
+                    "Master industry-standard skills with practical real-world modules and verified digital certificates.",
+                ),
+                "category": "Education",
+                "image": _feed_image(c.image),
+                "author": "Dagu Academy",
+                "author_name": "Dagu Academy",
+                "rating": flt(c.get("rating") or 0),
+                "reviews": cint(c.get("course_rating") or 0),
+                "likes_count": 0,
+                "comments_count": 0,
+                "price": "Free / Verified",
+                "created": c.creation,
+                "action_url": f"/lms/courses/{c.name}",
+                "action_label": "Enroll in Course ➔",
+                "doctype": "LMS Course",
+                "docname": c.name,
+                "commentable": True,
+                "is_booking": False,
+            }
+    except Exception:
+        # A hydration failure must never take the whole feed down; the repost
+        # row is simply not rendered this round.
+        return None
+
+    return None
+
+
+def _repost_feed_items(pool, filter_type, search):
+    """
+    Turn recent Shared rows (in-EthioBiz reposts) into feed cards.
+
+    Each card reuses the original's display fields at the top level - the
+    renderer shows the repost header, then the original body - while doctype /
+    docname stay pointed at the ORIGINAL so likes, comments, repost counts and
+    share targets all engage the original document, never the repost row.
+
+    Originals already in `pool` are copied for full fidelity; anything else is
+    hydrated on demand and skipped when it cannot be built.
+    """
+    # Local import avoids the module-level cycle (feed_engagement_api imports
+    # this module lazily inside bulk_engagement, and vice versa).
+    from bismillah_ethiobiz.feed_engagement_api import FEED_COMMENTABLE_DOCTYPES
+
+    wanted_filter = (filter_type or "all").lower().strip()
+    try:
+        rows = frappe.get_all(
+            "Comment",
+            filters={
+                "comment_type": "Shared",
+                "reference_doctype": ("in", list(FEED_COMMENTABLE_DOCTYPES)),
+            },
+            fields=["name", "reference_doctype", "reference_name", "comment_email",
+                    "comment_by", "content", "creation"],
+            order_by="creation desc",
+            limit_page_length=MAX_REPOST_FEED_ITEMS,
+        )
+    except Exception:
+        return []
+    if not rows:
+        return []
+
+    pool_map = {}
+    for it in pool:
+        dt, dn = it.get("doctype"), it.get("docname")
+        if dt and dn and it.get("type") != "repost":
+            pool_map.setdefault((dt, dn), it)
+
+    reposter_cache = {}
+    needle = (search or "").strip().lower()
+    out = []
+
+    for row in rows:
+        dt = row.reference_doctype
+        dn = row.reference_name
+        allowed = _REPOST_FILTERS.get(dt)
+        if allowed is None or wanted_filter not in allowed:
+            continue
+
+        orig = pool_map.get((dt, dn)) or _hydrate_original(dt, dn)
+        if not orig:
+            continue
+
+        note = (row.content or "").strip()
+        if needle:
+            haystack = " ".join([
+                str(orig.get("title") or ""),
+                str(orig.get("content") or ""),
+                note,
+            ]).lower()
+            if needle not in haystack:
+                continue
+
+        user = row.comment_email or row.comment_by or ""
+        if user not in reposter_cache:
+            try:
+                info = frappe.db.get_value("User", user, ["full_name", "user_image"], as_dict=True)
+            except Exception:
+                info = None
+            reposter_cache[user] = {
+                "name": (info and (info.full_name or user)) or user or "Member",
+                "avatar": (info and info.user_image) or None,
+            }
+        who = reposter_cache[user]
+
+        card = dict(orig)
+        card["id"] = "repost-" + row.name
+        card["type"] = "repost"
+        card["created"] = row.creation
+        card.pop("feed_score", None)
+        card["repost"] = {
+            "id": row.name,
+            "by": user,
+            "by_name": who["name"],
+            "avatar": who["avatar"],
+            "note": note[:500] or None,
+            "time_ago": _feed_time_ago(row.creation),
+        }
+        out.append(card)
+
+    return out
+
+
 @frappe.whitelist(allow_guest=True)
 def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     """
@@ -184,7 +1069,8 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         products = frappe.get_all(
             "Item",
             filters=p_query,
-            fields=["name", "item_name", "item_group", "company", "image", "creation", "total_product_reviews", "average_product_rating"],
+            fields=["name", "item_name", "item_group", "company", "image", "creation", "total_product_reviews", "average_product_rating"]
+            + _item_text_fields(),
             limit=25,
             order_by="creation desc"
         )
@@ -198,19 +1084,28 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "badge_class": "badge-product",
                 "title": p.item_name,
                 "subtitle": f"🏢 {p.company or 'Verified Merchant'} • In Stock",
-                "content": f"High-quality verified {p.item_name} from {p.company or 'EthioBiz Merchant'}, available for nationwide delivery.",
+                # The merchant's own words, not a marketing sentence about them.
+                "content": _feed_article(
+                    p.get("short_description") or p.get("description"),
+                    fallback=f"{p.item_name} from {p.company or 'an EthioBiz merchant'}.",
+                ),
                 "category": p.item_group or "General",
-                "image": p.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                "image": _feed_image(p.image),
                 "author": p.company or "Verified Merchant",
                 "author_name": p.company or "Verified Merchant",
                 "rating": flt(p.average_product_rating or 5.0),
                 "reviews": cint(p.total_product_reviews or 0),
-                "likes_count": cint(p.total_product_reviews or 8) * 3 + 4,
-                "comments_count": cint(p.total_product_reviews or 2),
+                # Placeholder only: _feed_engagement_lookup() overwrites these with
+                # the real Comment-derived counts before the payload is returned.
+                "likes_count": 0,
+                "comments_count": 0,
                 "price": price_str,
                 "created": p.creation,
                 "action_url": f"/shop?product={p.name}",
                 "action_label": "Order Product ➔",
+                "doctype": "Item",
+                "docname": p.name,
+                "commentable": True,
                 "is_booking": False
             })
 
@@ -241,18 +1136,23 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-job",
                     "title": j.job_title,
                     "subtitle": f"🏢 {j.company or 'EthioBiz Partner'} • 📍 {j.location or 'Addis Ababa'}",
-                    "content": (j.description or "Exciting career opportunity with professional growth.")[:200] + "...",
+                    # Full description, never truncated: "Read Full Story" needs the
+                    # real article text to have anything to reveal.
+                    "content": _feed_article(j.description, "Exciting career opportunity with professional growth."),
                     "category": "Career",
-                    "image": "/files/jobs_logo.png",
+                    "image": None,
                     "author": j.company or "EthioBiz Partner",
                     "author_name": j.company or "EthioBiz Partner",
                     "rating": 5.0,
-                    "likes_count": 14,
-                    "comments_count": 3,
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": sal_str,
                     "created": j.creation,
-                    "action_url": f"/jobs",
+                    "action_url": f"/jobs?job={j.name}",
                     "action_label": "Apply Now ➔",
+                    "doctype": "Job Opening",
+                    "docname": j.name,
+                    "commentable": True,
                     "is_booking": False
                 })
 
@@ -262,10 +1162,16 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             doc_query = {}
             if search:
                 doc_query["first_name"] = ["like", f"%{search}%"]
+            # Only request optional columns this site actually defines, otherwise
+            # the source raises and doctors silently vanish from the feed.
+            doc_fields = ["name", "first_name", "last_name", "department", "image", "consultation_fee", "hospital", "creation"]
+            for optional in ("average_rating", "total_reviews", "bio", "about", "specialization"):
+                if frappe.db.has_column("Healthcare Practitioner", optional):
+                    doc_fields.append(optional)
             doctors = frappe.get_all(
                 "Healthcare Practitioner",
                 filters=doc_query,
-                fields=["name", "first_name", "last_name", "department", "image", "consultation_fee", "hospital", "average_rating", "total_reviews", "creation"],
+                fields=doc_fields,
                 limit=15
             )
             for d in doctors:
@@ -278,19 +1184,25 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-booking",
                     "title": f"Dr. {dname}" if not dname.startswith("Dr.") else dname,
                     "subtitle": f"🏥 {d.hospital or 'St. Paul Hospital'} • Verified Specialist",
-                    "content": f"Book in-clinic appointments, video teleconsultations, or home medical visits with certified physician {dname}.",
+                    "content": _feed_article(
+                        d.get("bio") or d.get("about") or d.get("specialization"),
+                        f"Book in-clinic appointments, video teleconsultations, or home medical visits with certified physician {dname}.",
+                    ),
                     "category": "Healthcare",
-                    "image": d.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(d.image),
                     "author": d.hospital or "EthioBiz Health Network",
                     "author_name": dname,
                     "rating": flt(d.average_rating or 4.9),
-                    "reviews": cint(d.total_reviews or 24),
-                    "likes_count": 36,
-                    "comments_count": 5,
+                    "reviews": cint(d.total_reviews or 0),
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": fee,
                     "created": d.creation or now_datetime(),
-                    "action_url": f"/bizhealth?doctor={d.name}",
+                    "action_url": f"/doctor/{d.name}",
                     "action_label": "Book Doctor ➔",
+                    "doctype": "Healthcare Practitioner",
+                    "docname": d.name,
+                    "commentable": True,
                     "is_booking": True
                 })
 
@@ -300,12 +1212,17 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             srv_query = {"is_active": 1}
             if search:
                 srv_query["service_name"] = ["like", f"%{search}%"]
+            srv_fields = ["name", "service_name", "category", "price", "duration_minutes", "company", "creation"]
+            for optional in ("average_rating", "description", "details", "overview"):
+                if frappe.db.has_column("BizService Listing", optional):
+                    srv_fields.append(optional)
             services = frappe.get_all(
                 "BizService Listing",
                 filters=srv_query,
-                fields=["name", "service_name", "category", "price", "duration_minutes", "company", "average_rating", "creation"],
+                fields=srv_fields,
                 limit=15
             )
+            service_gallery = _feed_service_gallery_images([s.name for s in services])
             for s in services:
                 items.append({
                     "id": s.name,
@@ -314,19 +1231,25 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-booking",
                     "title": s.service_name or s.name,
                     "subtitle": f"🏢 {s.company or 'EthioBiz Certified Service'} • 45-Min Express Dispatch",
-                    "content": f"Professional certified {s.service_name} for homes, offices, and commercial facilities across Ethiopia.",
+                    "content": _feed_article(
+                        s.get("description") or s.get("details") or s.get("overview"),
+                        f"Professional certified {s.service_name} for homes, offices, and commercial facilities across Ethiopia.",
+                    ),
                     "category": "Maintenance",
-                    "image": "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": service_gallery.get(s.name),
                     "author": s.company or "EthioBiz Certified Technician",
                     "author_name": s.company or "Certified Technician",
-                    "rating": flt(s.average_rating or 4.9),
-                    "reviews": 28,
-                    "likes_count": 42,
-                    "comments_count": 6,
+                    "rating": flt(s.average_rating or 0),
+                    "reviews": 0,
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": f"{flt(s.price or 450):,.2f} ETB",
                     "created": s.creation or now_datetime(),
                     "action_url": f"/bizfix?service={s.name}",
                     "action_label": "Dispatch Technician ➔",
+                    "doctype": "BizService Listing",
+                    "docname": s.name,
+                    "commentable": True,
                     "is_booking": True
                 })
 
@@ -336,10 +1259,18 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             res_query = {"is_active": 1}
             if search:
                 res_query["resource_name"] = ["like", f"%{search}%"]
+            # Only request the artwork column when this site actually defines it.
+            res_fields = ["name", "resource_name", "category", "base_rate", "company", "description", "creation"]
+            has_res_image = frappe.db.has_column("BizBooking Resource", "image")
+            if has_res_image:
+                res_fields.append("image")
+            for optional in ("average_rating", "total_reviews"):
+                if frappe.db.has_column("BizBooking Resource", optional):
+                    res_fields.append(optional)
             resources = frappe.get_all(
                 "BizBooking Resource",
                 filters=res_query,
-                fields=["name", "resource_name", "category", "base_rate", "company", "description", "creation"],
+                fields=res_fields,
                 limit=15,
                 order_by="creation desc"
             )
@@ -354,18 +1285,25 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-booking",
                     "title": r.resource_name,
                     "subtitle": f"🏢 {r.company or 'EthioBiz Hospitality'} • Instant Voucher Pass",
-                    "content": r.description or f"Reserve {r.resource_name} with confirmed instant time slot booking and verified digital pass.",
+                    "content": _feed_article(
+                        r.description,
+                        f"Reserve {r.resource_name} with confirmed instant time slot booking and verified digital pass.",
+                    ),
                     "category": cat,
-                    "image": "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(r.get("image")) if has_res_image else None,
                     "author": r.company or "Verified Host",
                     "author_name": r.company or "Verified Host",
-                    "rating": 4.9,
-                    "likes_count": 30,
-                    "comments_count": 4,
+                    "rating": flt(r.get("average_rating") or 0),
+                    "reviews": cint(r.get("total_reviews") or 0),
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": rate_str,
                     "created": r.creation,
-                    "action_url": f"/bizservice",
+                    "action_url": f"/bizservice?resource={r.name}",
                     "action_label": "Reserve Now ➔",
+                    "doctype": "BizBooking Resource",
+                    "docname": r.name,
+                    "commentable": True,
                     "is_booking": True
                 })
 
@@ -382,19 +1320,25 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-booking",
                     "title": p["title"],
                     "subtitle": f"📍 {p.get('city', 'Addis Ababa')} • {p.get('bedrooms', 1)} Beds • {p.get('property_type', 'Property')}",
-                    "content": p.get("description") or f"Premium {p.get('tenure', 'Rental')} property in {p.get('city', 'Addis Ababa')}, verified title deeds and modern amenities.",
+                    "content": _feed_article(
+                        p.get("description"),
+                        f"Premium {p.get('tenure', 'Rental')} property in {p.get('city', 'Addis Ababa')}, verified title deeds and modern amenities.",
+                    ),
                     "category": "Real Estate",
-                    "image": p.get("image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(p.get("image")),
                     "author": "EthioBiz Property Network",
                     "author_name": "EthioBiz Real Estate",
-                    "rating": flt(p.get("rating", 4.9)),
-                    "reviews": cint(p.get("reviews_count", 20)),
-                    "likes_count": 52,
-                    "comments_count": 7,
+                    "rating": flt(p.get("rating") or 0),
+                    "reviews": cint(p.get("reviews_count") or 0),
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": f"{flt(p.get('price', 0)):,.2f} ETB/{p.get('price_unit', 'mo')}",
                     "created": now_datetime(),
                     "action_url": f"/bizhome?property={p['name']}",
                     "action_label": "View Property ➔",
+                    "doctype": "Property",
+                    "docname": p["name"],
+                    "commentable": True,
                     "is_booking": True
                 })
         except Exception as e:
@@ -421,19 +1365,26 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-social",
                     "title": post.author_name,
                     "subtitle": f"🏢 {post.company or 'EthioBiz Network'} • {post.author_handle or '@member'}",
-                    "content": post.content,
+                    "content": _feed_article(post.content),
                     "category": post.category_tag or "Social",
-                    "image": post.post_image,
+                    "image": _feed_image(post.post_image),
+                    "avatar": _feed_image(post.author_image),
                     "author": post.author_name,
                     "author_name": post.author_name,
-                    "avatar": post.author_image,
                     "rating": 5.0,
-                    "likes_count": cint(post.likes_count or 12),
-                    "comments_count": cint(post.comments_count or 3),
+                    # Afocha keeps maintained counter columns that predate the canonical
+                    # Comment store, and the existing /social page reads them. Prefer the
+                    # real Comment count, fall back to the column so no legacy count is lost.
+                    "likes_count": cint(post.likes_count or 0),
+                    "comments_count": cint(post.comments_count or 0),
+                    "engagement_source": "native",
                     "price": "Social Update",
                     "created": post.creation,
                     "action_url": f"/social?post={post.name}",
                     "action_label": "Join Conversation ➔",
+                    "doctype": "Afocha Post",
+                    "docname": post.name,
+                    "commentable": True,
                     "is_booking": False
                 })
 
@@ -442,10 +1393,13 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         b_query = {"published": 1}
         if search:
             b_query["title"] = ["like", f"%{search}%"]
+        blog_fields = ["name", "title", "blogger", "blog_category", "meta_image", "blog_intro", "route", "published_on", "creation"]
+        if frappe.db.has_column("Blog Post", "content"):
+            blog_fields.append("content")
         blogs = frappe.get_all(
             "Blog Post",
             filters=b_query,
-            fields=["name", "title", "blogger", "blog_category", "meta_image", "blog_intro", "route", "published_on", "creation"],
+            fields=blog_fields,
             limit=10,
             order_by="creation desc"
         )
@@ -457,18 +1411,24 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "badge_class": "badge-blog",
                 "title": b.title,
                 "subtitle": f"✍️ By {b.blogger or 'EthioBiz Editorial Team'}",
-                "content": b.blog_intro or "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
+                "content": _feed_article(
+                    b.blog_intro or b.content,
+                    "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
+                ),
                 "category": "Knowledge",
-                "image": b.meta_image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                "image": _feed_image(b.meta_image),
                 "author": b.blogger or "Editorial Team",
                 "author_name": b.blogger or "Editorial Team",
                 "rating": 5.0,
-                "likes_count": 22,
-                "comments_count": 4,
+                "likes_count": 0,
+                "comments_count": 0,
                 "price": "Knowledge Article",
                 "created": b.published_on or b.creation,
                 "action_url": f"/{b.route or 'blog'}",
                 "action_label": "Read Article ➔",
+                "doctype": "Blog Post",
+                "docname": b.name,
+                "commentable": True,
                 "is_booking": False
             })
 
@@ -478,10 +1438,14 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             c_query = {"published": 1}
             if search:
                 c_query["title"] = ["like", f"%{search}%"]
+            course_fields = ["name", "title", "image", "short_introduction", "creation"]
+            for optional in ("description", "rating", "course_rating"):
+                if frappe.db.has_column("LMS Course", optional):
+                    course_fields.append(optional)
             courses = frappe.get_all(
                 "LMS Course",
                 filters=c_query,
-                fields=["name", "title", "image", "short_introduction", "creation"],
+                fields=course_fields,
                 limit=10,
                 order_by="creation desc"
             )
@@ -493,18 +1457,25 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "badge_class": "badge-course",
                     "title": c.title,
                     "subtitle": "Online Vocational & Professional Skills Certification",
-                    "content": c.short_introduction or "Master industry-standard skills with practical real-world modules and verified digital certificates.",
+                    "content": _feed_article(
+                        c.get("short_introduction") or c.get("description"),
+                        "Master industry-standard skills with practical real-world modules and verified digital certificates.",
+                    ),
                     "category": "Education",
-                    "image": c.image or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(c.image),
                     "author": "Dagu Academy",
                     "author_name": "Dagu Academy",
-                    "rating": 4.9,
-                    "likes_count": 45,
-                    "comments_count": 9,
+                    "rating": flt(c.get("rating") or 0),
+                    "reviews": cint(c.get("course_rating") or 0),
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": "Free / Verified",
                     "created": c.creation,
-                    "action_url": f"/courses/{c.name}",
+                    "action_url": f"/lms/courses/{c.name}",
                     "action_label": "Enroll in Course ➔",
+                    "doctype": "LMS Course",
+                    "docname": c.name,
+                    "commentable": True,
                     "is_booking": False
                 })
 
@@ -536,18 +1507,27 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                         "badge_class": "badge-forum",
                         "title": ft.title,
                         "subtitle": f"🛡️ {ft.author_name} • {ft.company or 'EthioBiz'}",
-                        "content": (clean_c[:180] + "...") if len(clean_c) > 180 else clean_c,
+                        "content": _feed_article(clean_c),
                         "category": ft.category or "Discussion",
-                        "image": ft.image,
+                        "image": _feed_image(ft.image),
                         "author": ft.author_name,
                         "author_name": ft.author_name,
                         "rating": 5.0,
-                        "likes_count": cint(ft.likes_count or 15),
-                        "comments_count": cint(ft.replies_count or 6),
-                        "price": f"💬 {ft.replies_count or 0} replies",
+                        # Walta Forum Topic is a hand-rolled SQL table, not a Frappe
+                        # DocType, so it has no _liked_by and cannot join the canonical
+                        # Comment store. These are its real maintained counters - the
+                        # previous `or 15` / `or 6` invented numbers for empty topics.
+                        "likes_count": cint(ft.likes_count or 0),
+                        "comments_count": cint(ft.replies_count or 0),
+                        "engagement_source": "native",
+                        "price": f"💬 {cint(ft.replies_count or 0)} replies",
                         "created": ft.creation,
                         "action_url": f"/forum?topic={ft.name}",
                         "action_label": "Join Topic ➔",
+                        # Discussion already lives in /forum with its own reply thread.
+                        "doctype": None,
+                        "docname": None,
+                        "commentable": False,
                         "is_booking": False
                     })
             except Exception:
@@ -567,31 +1547,96 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "subtitle": f"🏢 {ad.get('company') or 'EthioBiz Partner'} • Sponsored",
                     "content": "Discover featured enterprise solutions and exclusive flash offers from verified partners.",
                     "category": "Sponsored",
-                    "image": ad.get("creative_image") or "/assets/bismillah_ethiobiz/img/walta_real_logo.png",
+                    "image": _feed_image(ad.get("creative_image")),
                     "author": ad.get("company") or "EthioBiz Partner",
                     "author_name": ad.get("company") or "EthioBiz Partner",
                     "rating": 5.0,
-                    "likes_count": 120,
-                    "comments_count": 14,
+                    # A promoted advert is not a discussion: no likes, no comments.
+                    # Previously it advertised 120 likes and 14 comments it never had.
+                    "likes_count": 0,
+                    "comments_count": 0,
                     "price": "Special Offer",
                     "created": now_datetime(),
                     "action_url": ad.get("click_url") or "/shop",
                     "action_label": "Learn More ➔",
+                    "doctype": "EthioBiz Ad Campaign",
+                    "docname": ad.get("name"),
+                    "commentable": False,
                     "is_booking": False
                 })
         except Exception:
             pass
 
+    # 12c. SOURCE: Live News Feeds (Deduplicated, with genuine source images)
+    if filter_type in ["all", "news"]:
+        try:
+            from bismillah_ethiobiz.news_api import get_live_news
+            n_res = get_live_news(limit=8, page=1)
+            news_items = n_res.get("news", []) if isinstance(n_res, dict) else (n_res or [])
+            for n in news_items:
+                items.append({
+                    "id": n.get("id"),
+                    "type": "news",
+                    "badge": f"{n.get('icon', '📰')} {n.get('category', 'Live News')}",
+                    "badge_class": "badge-news",
+                    "title": n.get("title"),
+                    "subtitle": f"🌐 {n.get('source', 'EthioBiz News')} • Live News",
+                    "content": n.get("summary") or n.get("title"),
+                    "category": n.get("category", "News"),
+                    "image": n.get("image_url"),
+                    "author": n.get("source", "EthioBiz News"),
+                    "author_name": n.get("source", "EthioBiz News"),
+                    "rating": 5.0,
+                    "likes_count": 0,
+                    "comments_count": 0,
+                    "price": "Live Update",
+                    "created": now_datetime(),
+                    "action_url": n.get("url") or "/news",
+                    "action_label": "Read Article ➔",
+                    "doctype": "News",
+                    "docname": n.get("id"),
+                    "commentable": False,
+                    "is_booking": False,
+                    "is_news": True
+                })
+        except Exception:
+            pass
+
+    # 12b. SOURCE: In-EthioBiz reposts (Shared rows) become first-class cards.
+    # Runs BEFORE the engagement lookup so the repost cards get real counts,
+    # viewer_has_* flags and share meta like every other item. Originals
+    # already assembled this round are reused from the pool; anything else is
+    # hydrated on demand and skipped when it cannot be built.
+    items.extend(_repost_feed_items(items, filter_type, search))
+
     # 13. Apply Personalization Algorithm (Facebook/TikTok/LinkedIn/Amazon Hybrid Scorer)
+    # Real engagement counts first: every source above seeds likes/comments as 0
+    # (or its own maintained counter for raw-SQL sources), and this pass replaces
+    # them with the actual Comment-derived numbers in two grouped queries.
+    _feed_engagement_lookup(items)
+
     for it in items:
+        # Final image gate: a card carries artwork only when one is genuinely attached.
+        # This is the single choke point, so no source can leak placeholder/filler media
+        # into the payload even if a legacy record or a duplicated API still holds one.
+        it["image"] = _feed_image(it.get("image"))
+        it["avatar"] = _feed_image(it.get("avatar"))
+        # Feed cards read these two keys; emit real values instead of letting the
+        # renderer fall back to a hardcoded "Verified Enterprise"/"Verified Listing".
+        it["time_ago"] = _feed_time_ago(it.get("created"))
+        it["stats"] = "💬 %s" % cint(it.get("comments_count") or 0)
+
         # User Affinity (0.0 to 1.0)
         cat_aff = cat_affinities.get(it.get("category", ""), 0.05)
         type_aff = type_affinities.get(it.get("type", ""), 0.1)
         affinity_score = (cat_aff * 0.7) + (type_aff * 0.3)
 
-        # Engagement Velocity
+        # Engagement Velocity: now derived from REAL likes. Previously this consumed
+        # fabricated constants (job=14, doctor=36, property=52, ad=120, ...), which
+        # pinned those card types to the top of every feed regardless of real activity.
         likes_c = flt(it.get("likes_count", 0))
-        engagement_score = min(likes_c / 100.0, 1.0)
+        comments_c = flt(it.get("comments_count", 0))
+        engagement_score = min((likes_c + (comments_c * 2)) / 100.0, 1.0)
 
         # Recency Decay
         recency_score = 0.95

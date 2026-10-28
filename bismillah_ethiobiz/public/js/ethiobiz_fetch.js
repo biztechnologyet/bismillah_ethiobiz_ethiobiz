@@ -13,9 +13,13 @@
   if (window.ebFetch) return;
 
   window.ebCsrfToken = function () {
+    if (typeof window !== "undefined") {
+      if (window.csrf_token) return window.csrf_token;
+      if (window.frappe && window.frappe.csrf_token) return window.frappe.csrf_token;
+    }
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (meta && meta.content) return meta.content;
-    var match = document.cookie.match(/csrf_token=([^;]+)/);
+    var match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : null;
   };
 
