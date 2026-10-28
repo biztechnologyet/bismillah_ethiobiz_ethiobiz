@@ -2471,3 +2471,54 @@ body[data-route*="app"] .form-tabs-list .nav-link {
 [data-theme="dark"] body .form-grid .grid-heading-row .grid-row-label .text-muted {
     color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
 }
+
+/* ===== BISMALLAH 2026-09-10: same dark-label rules under the "data-theme-mode" gate =====
+   Frappe v15 theme switcher (frappe/ui/theme_switcher.js) sets BOTH data-theme and
+   data-theme-mode on <html>; in "Auto" mode the resolved data-theme may stay non-"dark"
+   while data-theme-mode="dark" + prefers-color-scheme: dark. Mirror every selector so
+   the label color reflects regardless of which attribute carries the dark state. */
+[data-theme-mode="dark"] body label,
+[data-theme-mode="dark"] body .control-label,
+[data-theme-mode="dark"] body label.control-label,
+[data-theme-mode="dark"] body .form-group label,
+[data-theme-mode="dark"] body .form-column label,
+[data-theme-mode="dark"] body .checkbox label,
+[data-theme-mode="dark"] body .form-section .section-head,
+[data-theme-mode="dark"] body .section-head,
+[data-theme-mode="dark"] body .field-group .label,
+[data-theme-mode="dark"] body .frappe-control .label-area,
+[data-theme-mode="dark"] body .section-head .section-title,
+[data-theme-mode="dark"] body .section-head .section-head-label,
+[data-theme-mode="dark"] body .form-tabs-list .nav-link,
+[data-theme-mode="dark"] body .form-grid .grid-heading-row .grid-row-label,
+[data-theme-mode="dark"] body .grid-heading-row .grid-row-label,
+[data-theme-mode="dark"] body .form-grid .grid-row-label,
+[data-theme-mode="dark"] body .editable-form label,
+[data-theme-mode="dark"] body .static-area label,
+[data-theme-mode="dark"] body .page-head .title-text,
+[data-theme-mode="dark"] body .head-title,
+[data-theme-mode="dark"] body .widget .widget-head-title,
+[data-theme-mode="dark"] body .frappe-card .card-header,
+[data-theme-mode="dark"] body .desk-sidebar .desk-sidebar-item-label,
+[data-theme-mode="dark"] body .desk-sidebar-item-label,
+[data-theme-mode="dark"] body .sidebar-item-label,
+[data-theme-mode="dark"] body .desk-sidebar-item-underline,
+[data-theme-mode="dark"] body .ql-toolbar button,
+[data-theme-mode="dark"] body .ql-toolbar .ql-picker-label,
+[data-theme-mode="dark"] body .ql-formats,
+[data-theme-mode="dark"] body .ql-snow .ql-stroke,
+[data-theme-mode="dark"] body .ql-snow .ql-fill,
+[data-theme-mode="dark"] body .ce-toolbar__settings-btn,
+[data-theme-mode="dark"] body .ce-block__settings-button,
+[data-theme-mode="dark"] body .ce-toolbar__actions,
+[data-theme-mode="dark"] body .ce-toolbar__plus {
+    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
+}
+[data-theme-mode="dark"] body label .text-muted,
+[data-theme-mode="dark"] body .control-label .text-muted,
+[data-theme-mode="dark"] body .section-head .text-muted,
+[data-theme-mode="dark"] body .label-area .text-muted,
+[data-theme-mode="dark"] body .form-section .section-head .text-muted,
+[data-theme-mode="dark"] body .form-grid .grid-heading-row .grid-row-label .text-muted {
+    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
+}

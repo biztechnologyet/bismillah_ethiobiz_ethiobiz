@@ -69,8 +69,9 @@ walta.init_observer = function () {
         });
     }
 
-    // 2. Fallback Interval (every 1 sec) to catch anything missed
-    setInterval(walta.apply_branding, 1000);
+    // 2. (PHASE C 2026-10-17) The 1s setInterval was removed: it re-ran a
+    // full-document TreeWalker scan every second, forever, on every page.
+    // The debounced MutationObserver above already covers dynamic DOM changes.
 };
 
 // Init

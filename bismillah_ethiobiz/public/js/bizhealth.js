@@ -75,7 +75,71 @@ document.addEventListener("DOMContentLoaded", function() {
         if (dateInp) {
             dateInp.value = new Date().toISOString().split("T")[0];
             dateInp.min = new Date().toISOString().split("T")[0];
+            dateInp.addEventListener("change", loadSlots);
         }
+
+        // Reload real slots when the consultation mode changes
+        document.querySelectorAll("input[name='consult_mode']").forEach(function(r) {
+            r.addEventListener("change", loadSlots);
+        });
+
+        loadSlots(); // no-op until a doctor is selected
+    }
+
+    function slotLabel(slot) {
+        var parts = String(slot || "").split(":");
+        if (parts.length < 2) return slot;
+        var hh = parseInt(parts[0], 10);
+        if (isNaN(hh)) return slot;
+        var suf = hh >= 12 ? "PM" : "AM";
+        var h12 = ((hh + 11) % 12) + 1;
+        return h12 + ":" + parts[1] + " " + suf;
+    }
+
+    function loadSlots() {
+        var slotSel = document.getElementById("book-time-slot");
+        var note = document.getElementById("book-slot-note");
+        if (!slotSel || !selectedDoctor) return;
+        if (slotSel.dataset.loading === "1") return;
+        slotSel.dataset.loading = "1";
+
+        var date = document.getElementById("book-appointment-date").value;
+        var mode = document.querySelector('input[name="consult_mode"]:checked');
+        var consultType = mode ? mode.value : "In-Clinic";
+
+        slotSel.innerHTML = "<option value=''>Loading real slots…</option>";
+        if (note) note.textContent = "Fetching the doctor's actual schedule for this date…";
+
+        var params = new URLSearchParams({
+            doctor_id: selectedDoctor.id,
+            date: date,
+            consultation_type: consultType
+        });
+
+        fetch("/api/method/bismillah_ethiobiz.bizhealth_api.get_doctor_slots?" + params.toString())
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var slots = (data.message && data.message.slots) || [];
+                var available = slots.filter(function (s) { return s.is_available !== false; });
+                slotSel.innerHTML = "";
+                if (!available.length) {
+                    slotSel.innerHTML = "<option value=''>No slots available — try another date</option>";
+                    if (note) note.textContent = "This doctor is fully booked on this date. Pick a different date or mode.";
+                    return;
+                }
+                available.forEach(function (s) {
+                    var o = document.createElement("option");
+                    o.value = s.slot;
+                    o.textContent = slotLabel(s.slot);
+                    slotSel.appendChild(o);
+                });
+                if (note) note.textContent = available.length + " real slots available for this date & mode.";
+            })
+            .catch(function () {
+                slotSel.innerHTML = "<option value=''>Slots unavailable right now</option>";
+                if (note) note.textContent = "Could not load the doctor's schedule.";
+            })
+            .then(function () { slotSel.dataset.loading = "0"; });
     }
 
     function loadDoctors() {
@@ -95,6 +159,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     doctors = data.message.practitioners;
                     if (countText) countText.innerText = "Showing " + doctors.length + " verified medical specialists";
                     renderDoctorGrid();
+                    openDoctorDeepLink();
                 }
             })
             .catch(function() {
@@ -109,7 +174,41 @@ document.addEventListener("DOMContentLoaded", function() {
                     { id: "DOC-006", name: "Dr. Tigist Mengistu", specialty: "Gynecology", clinic_name: "Hallelujah Hospital", rating: "4.8", total_reviews: 167, fee_formatted: "550.00 ETB", image: "", teleconsultation_available: true, home_visit_available: true }
                 ];
                 renderDoctorGrid();
+                openDoctorDeepLink();
             });
+    }
+
+    function openDoctorDeepLink() {
+        var params = new URLSearchParams(window.location.search);
+        var deepId = params.get("doctor");
+        if (!deepId) return;
+        var match = doctors.find(function (d) { return d.id === deepId || d.slug === deepId; });
+        if (!match) return;
+        openBookingModal(match);
+
+        // Honor date/time carried from the doctor profile page
+        if (params.get("date")) {
+            var dateInp = document.getElementById("book-appointment-date");
+            if (dateInp) {
+                dateInp.value = params.get("date");
+                loadSlots();
+            }
+        }
+        var wantTime = String(params.get("time") || "").slice(0, 5);
+        if (wantTime) {
+            (function applyTime() {
+                var sel = document.getElementById("book-time-slot");
+                if (!sel) return;
+                if (sel.value.slice(0, 5) === wantTime) return;
+                for (var i = 0; i < sel.options.length; i++) {
+                    if (String(sel.options[i].value).slice(0, 5) === wantTime) {
+                        sel.selectedIndex = i;
+                        return;
+                    }
+                }
+                setTimeout(applyTime, 250);
+            })();
+        }
     }
 
     function renderDoctorGrid(filterQuery) {
@@ -167,10 +266,19 @@ document.addEventListener("DOMContentLoaded", function() {
                         '<span class="vert-card-rating">⭐ ' + (doc.rating || '4.9') + ' <span style="color:#94a3b8; font-weight:500;">(' + (doc.total_reviews || 24) + ')</span></span>' +
                         '<span class="vert-card-price" style="color:var(--vert-health);">' + (doc.fee_formatted || '500.00 ETB') + '</span>' +
                     '</div>' +
-                    '<button class="btn-vertical-primary w-100 btn-book-doc" style="background:var(--vert-health); border-radius:12px;" data-doc-id="' + doc.id + '">Book Appointment ➔</button>' +
+                    '<div style="display:flex; gap:8px;">' +
+                        '<button class="btn-vertical-primary btn-view-doc" style="background:#ffffff; color:var(--vert-health); border:1.5px solid var(--vert-health); border-radius:12px; flex:1;" data-doc-id="' + doc.id + '">View Profile</button>' +
+                        '<button class="btn-vertical-primary btn-book-doc" style="background:var(--vert-health); border-radius:12px; flex:1;" data-doc-id="' + doc.id + '">Book Appointment ➔</button>' +
+                    '</div>' +
                 '</div>';
 
             card.querySelector(".btn-book-doc").addEventListener("click", function() { openBookingModal(doc); });
+            var viewBtn = card.querySelector(".btn-view-doc");
+            if (viewBtn) {
+                viewBtn.addEventListener("click", function() {
+                    window.location.href = doc.profile_url || "/doctor/" + (doc.slug || doc.id);
+                });
+            }
             grid.appendChild(card);
         });
     }
@@ -187,9 +295,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 '</div>' +
             '</div>';
         document.getElementById("health-booking-modal").style.display = "flex";
+        var slotSel = document.getElementById("book-time-slot");
+        if (slotSel) {
+            slotSel.innerHTML = "<option value=''>Loading real slots…</option>";
+            slotSel.dataset.loading = "0";
+        }
+        var noteEl = document.getElementById("book-slot-note");
+        if (noteEl) noteEl.textContent = "Select a date to load the doctor's real schedule.";
         if (window.ethiobizAutofillProfile) {
             window.ethiobizAutofillProfile();
         }
+        loadSlots();
     }
 
     function handleBookingSubmit() {
@@ -220,6 +336,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         if (!appDate) {
             alert("Please select an appointment date.");
+            return;
+        }
+        if (!appTime) {
+            alert("Please select an available time slot.");
             return;
         }
 

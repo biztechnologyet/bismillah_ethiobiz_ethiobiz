@@ -3,6 +3,10 @@
 {% block title %}AFOCHA Social & Business Pulse | EthioBiz{% endblock %}
 
 {% block head_include %}
+<meta name="csrf-token" content="{{ frappe.session.csrf_token }}">
+<script>
+    window.csrf_token = "{{ frappe.session.csrf_token }}";
+</script>
 <style>
     :root {
         --af-teal: #008080;

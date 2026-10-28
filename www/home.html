@@ -1473,7 +1473,17 @@ function closeFlip(btn, event) {
 
                 data.items.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'stream-card';
+                    card.className = 'stream-card stream-card-interactive';
+                    card.style.cursor = 'pointer';
+                    card.setAttribute('role', 'link');
+                    card.title = 'Click to open in full page';
+                    const targetUrl = item.post_url || item.action_url;
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('.btn-card-booking')) return;
+                        if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+                            window.location.href = targetUrl;
+                        }
+                    });
                     let topVisualHtml = '';
                     if (item.image) {
                         topVisualHtml = '<div class="stream-card-img-wrapper"><img src="' + item.image + '" alt="' + item.title + '" class="stream-card-img" onerror="this.parentElement.innerHTML=\'<div class=stream-card-no-img-header><span>' + (item.icon || '🛍️') + '</span></div>\'"></div>';

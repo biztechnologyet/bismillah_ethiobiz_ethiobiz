@@ -527,6 +527,56 @@
         applyThemeDarkLabel(s);
     });
 
+    // ─── BISMALLAH (2026-09-10): theme-gate-independent label enforcement ────
+    // Frappe v15 can gate dark mode via data-theme OR data-theme-mode
+    // (auto + prefers-color-scheme). On top of the CSS custom-property rules we
+    // additionally force the label color INLINE so it always wins regardless of
+    // cascade/specificity/markup drift. Runs throttled via MutationObserver.
+    function ebIsDarkMode() {
+        var r = document.documentElement;
+        var t = r.getAttribute ? r.getAttribute('data-theme') : '';
+        var m = r.getAttribute ? r.getAttribute('data-theme-mode') : '';
+        if (t === 'dark' || m === 'dark') return true;
+        if (t === 'light' || m === 'light') return false;
+        try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; }
+    }
+    function ebApplyLabelColorNow() {
+        var root = document.documentElement;
+        if (!root || !document.body || !ebIsDarkMode()) return;
+        var color = root.style.getPropertyValue('--ethiobiz-dark-label-color').trim();
+        if (!color) return;
+        var sel = '.frappe-control .control-label, .control-label, .form-group label,'
+                + ' .section-head, .form-tabs-list .nav-link, .form-grid .grid-heading-row .grid-row-label,'
+                + ' .grid-heading-row, .label-area, .desk-sidebar-item-label, .sidebar-item-label,'
+                + ' .page-head .title-text, .ql-toolbar button, .ql-picker-label,'
+                + ' .ce-toolbar__actions, .ce-block__settings-button';
+        var els = document.querySelectorAll(sel);
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el && el.nodeType === 1 && el.style.setProperty) {
+                if (el.style.getPropertyValue('color') !== color) {
+                    el.style.setProperty('color', color, 'important');
+                }
+            }
+        }
+    }
+    var ebLabelPending = false;
+    function ebApplyLabelColorSoon() {
+        if (ebLabelPending) return;
+        ebLabelPending = true;
+        setTimeout(function () { ebLabelPending = false; ebApplyLabelColorNow(); }, 300);
+    }
+    setTimeout(function () { ebApplyLabelColorNow(); }, 700);
+    try {
+        if (typeof MutationObserver !== 'undefined' && document.body) {
+            new MutationObserver(ebApplyLabelColorSoon).observe(document.body, { childList: true, subtree: true });
+            var _ebThemeRoot = document.documentElement;
+            if (_ebThemeRoot) {
+                new MutationObserver(ebApplyLabelColorNow).observe(_ebThemeRoot, { attributes: true, attributeFilter: ['data-theme', 'data-theme-mode'] });
+            }
+        }
+    } catch (e) {}
+
     // Desk content mounts asynchronously — retry icon override briefly
     let _iconRetries = 0;
     const iconRetryTimer = setInterval(function() {

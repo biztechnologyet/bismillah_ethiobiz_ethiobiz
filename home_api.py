@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 import frappe
 from frappe import _
 
@@ -12,6 +13,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
     - AFOCHA Social Posts (Afocha Post)
     - Tibeb Articles (Blog Post)
     - Dagu LMS Courses (LMS Course)
+    - Walta Forum Discussions (Walta Forum Topic)
     """
     start = int(start or 0)
     limit = int(limit or 12)
@@ -42,9 +44,13 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             comp = frappe.db.get_value("Item", p.name, "company") or "Biz Technology Solutions"
             prices = frappe.get_all("Item Price", filters={"item_code": p.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
-            
+            item_id = p.name or p.item_name
+            full_post_url = f"/post?doctype=Item&name={quote(str(item_id))}"
+
             items.append({
                 "type": "product",
+                "doctype": "Item",
+                "docname": item_id,
                 "badge": f"🛍️ {p.item_group or 'Product'}",
                 "badge_class": "badge-product",
                 "title": p.web_item_name or p.item_name,
@@ -54,7 +60,8 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "image": img,
                 "icon": "🛍️",
                 "action_label": "Order Now →",
-                "action_url": f"/{p.route or 'shop'}",
+                "action_url": full_post_url,
+                "post_url": full_post_url,
                 "is_booking": False,
                 "created_at": str(p.creation)
             })
@@ -81,8 +88,12 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 elif j.lower_range:
                     sal_str = f"{j.lower_range:,.0f} {j.currency or 'ETB'}/{j.salary_per or 'mo'}"
 
+                job_post_url = f"/post?doctype=Job%20Opening&name={quote(str(j.name))}"
+
                 items.append({
                     "type": "job",
+                    "doctype": "Job Opening",
+                    "docname": j.name,
                     "badge": f"💼 {j.employment_type or 'Full-time'}",
                     "badge_class": "badge-job",
                     "title": j.job_title,
@@ -93,7 +104,8 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "icon": "💼",
                     "company": comp,
                     "action_label": "Apply Now →",
-                    "action_url": f"/jobs",
+                    "action_url": job_post_url,
+                    "post_url": job_post_url,
                     "is_booking": False,
                     "is_job": True,
                     "created_at": str(j.creation)
@@ -119,9 +131,12 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 rate_val = r.base_rate or 0.0
                 rate_str = f"{rate_val:,.2f} ETB" if rate_val > 0 else "Free Appointment"
                 comp = r.company or "Biz Technology Solutions"
+                res_post_url = f"/post?doctype=BizBooking%20Resource&name={quote(str(r.name))}"
                 
                 items.append({
                     "type": "booking",
+                    "doctype": "BizBooking Resource",
+                    "docname": r.name,
                     "badge": f"{icon} {cat}",
                     "badge_class": "badge-booking",
                     "title": r.resource_name,
@@ -135,7 +150,8 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "resource_name": r.resource_name,
                     "category": cat,
                     "action_label": "Reserve Now →",
-                    "action_url": "#",
+                    "action_url": res_post_url,
+                    "post_url": res_post_url,
                     "is_booking": True,
                     "created_at": str(r.creation)
                 })
@@ -154,8 +170,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             )
             for s in srvs:
                 comp = s.company or "Salon & Spa Hub"
+                srv_post_url = f"/post?doctype=Salon%20Service&name={quote(str(s.name))}"
                 items.append({
                     "type": "booking",
+                    "doctype": "Salon Service",
+                    "docname": s.name,
                     "badge": f"💇 {s.category}",
                     "badge_class": "badge-booking",
                     "title": s.service_name,
@@ -169,7 +188,8 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "resource_name": s.service_name,
                     "category": s.category,
                     "action_label": "Book Service →",
-                    "action_url": "#",
+                    "action_url": srv_post_url,
+                    "post_url": srv_post_url,
                     "is_booking": True,
                     "created_at": str(s.creation)
                 })
@@ -191,8 +211,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             )
             for post in posts:
                 img = post.post_image
+                post_url = f"/post?doctype=Afocha%20Post&name={quote(str(post.name))}"
                 items.append({
                     "type": "social",
+                    "doctype": "Afocha Post",
+                    "docname": post.name,
                     "badge": f"🌟 {post.category_tag or 'Afocha Story'}",
                     "badge_class": "badge-social",
                     "title": post.author_name,
@@ -201,8 +224,9 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "stats": f"❤️ {post.likes_count or 0} likes • 💬 {post.comments_count or 0} comments",
                     "image": img,
                     "icon": "🌟",
-                    "action_label": "Join Discussion →",
-                    "action_url": f"/social?post={post.name}",
+                    "action_label": "View Post & Discussion →",
+                    "action_url": post_url,
+                    "post_url": post_url,
                     "is_booking": False,
                     "created_at": str(post.creation)
                 })
@@ -222,8 +246,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             limit_start=start
         )
         for b in blogs:
+            blog_post_url = f"/post?doctype=Blog%20Post&name={quote(str(b.name))}"
             items.append({
                 "type": "blog",
+                "doctype": "Blog Post",
+                "docname": b.name,
                 "badge": f"📝 {b.blog_category or 'Tibeb Wisdom'}",
                 "badge_class": "badge-blog",
                 "title": b.title,
@@ -231,8 +258,9 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 "content": b.blog_intro or "In-depth insights, economic analysis, and cultural perspectives from Ethiopian pioneers.",
                 "image": b.meta_image,
                 "icon": "📝",
-                "action_label": "Read Article →",
-                "action_url": f"/{b.route or 'blog'}",
+                "action_label": "Read Full Article →",
+                "action_url": blog_post_url,
+                "post_url": blog_post_url,
                 "is_booking": False,
                 "created_at": str(b.creation)
             })
@@ -253,8 +281,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                 limit_start=start
             )
             for c in courses:
+                course_post_url = f"/post?doctype=LMS%20Course&name={quote(str(c.name))}"
                 items.append({
                     "type": "course",
+                    "doctype": "LMS Course",
+                    "docname": c.name,
                     "badge": "🎓 Dagu Academy Course",
                     "badge_class": "badge-course",
                     "title": c.title,
@@ -262,8 +293,9 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "content": c.short_introduction or "Master industry-standard skills with practical real-world modules and certification.",
                     "image": c.image,
                     "icon": "🎓",
-                    "action_label": "Enroll Now →",
-                    "action_url": f"/courses/{c.name}",
+                    "action_label": "Enroll & View Course →",
+                    "action_url": course_post_url,
+                    "post_url": course_post_url,
                     "is_booking": False,
                     "created_at": str(c.creation)
                 })
@@ -290,8 +322,11 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
             for ft in forum_topics:
                 clean_c = frappe.utils.strip_html(ft.content or "")
                 img = ft.image if (ft.image and ft.image.strip()) else None
+                forum_url = f"/forum?topic={quote(str(ft.name))}"
                 items.append({
                     "type": "forum",
+                    "doctype": "Walta Forum Topic",
+                    "docname": ft.name,
                     "badge": f"💬 {ft.category or 'Walta Forum'}",
                     "badge_class": "badge-social",
                     "title": ft.title,
@@ -301,7 +336,8 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "image": img,
                     "icon": "💬",
                     "action_label": "Join Discussion →",
-                    "action_url": f"/forum?topic={ft.name}",
+                    "action_url": forum_url,
+                    "post_url": forum_url,
                     "is_booking": False,
                     "created_at": str(ft.creation)
                 })

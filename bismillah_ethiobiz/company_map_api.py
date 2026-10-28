@@ -134,9 +134,14 @@ def ensure_company_map_locations_installed():
     """Ensure the multi-pin infrastructure exists: the `BizCompany Location`
     child DocType AND the `company_locations` Table field on Company. Idempotent."""
     ensure_bizcompany_location_installed()
-    if not frappe.db.has_column("Company", "company_locations"):
-        try:
+    try:
+        meta = frappe.get_meta("Company")
+        if not meta.get_field("company_locations"):
             setup_company_map_fields()
+    except Exception:
+        try:
+            if not frappe.db.has_column("Company", "company_locations"):
+                setup_company_map_fields()
         except Exception as e:
             frappe.log_error(f"ensure_company_map_locations_installed: {e}", "MapPins")
 
@@ -144,24 +149,52 @@ def ensure_company_map_locations_installed():
 def _get_company_location_rows(company_name, as_dicts=True):
     """Return the `company_locations` child rows for a Company, defensively.
 
-    The child table field (`company_locations` → `BizCompany Location`) is a
-    runtime/versioned table that may not exist yet on a given server, so every
-    access is guarded. Returns an empty list when absent.
+    Child rows live in `tabBizCompany Location` with parent/parenttype/parentfield.
+    We must NOT rely on a physical column on `tabCompany` — Frappe Table fields
+    do not create parent columns. Still guard if the child DocType/field aren't
+    installed yet. Returns an empty list when absent.
     """
-    if not frappe.db.exists("DocType", "BizCompany Location"):
+    if not company_name:
         return []
-    if not frappe.db.has_column("Company", "company_locations"):
+    if not frappe.db.exists("DocType", "BizCompany Location"):
         return []
     try:
         doc = frappe.get_doc("Company", company_name)
         rows = doc.get("company_locations") or []
+        if not rows and frappe.db.has_column("BizCompany Location", "parent"):
+            try:
+                rows = frappe.get_all(
+                    "BizCompany Location",
+                    filters={"parent": company_name, "parenttype": "Company", "parentfield": "company_locations"},
+                    order_by="idx asc",
+                    fields="*",
+                ) or []
+            except Exception:
+                rows = []
+        if not rows:
+            return []
     except Exception:
-        return []
+        try:
+            if not frappe.db.has_column("BizCompany Location", "parent"):
+                return []
+            rows = frappe.get_all(
+                "BizCompany Location",
+                filters={"parent": company_name, "parenttype": "Company", "parentfield": "company_locations"},
+                order_by="idx asc",
+                fields="*",
+            ) or []
+        except Exception:
+            return []
     if as_dicts:
         out = []
         for r in rows:
             try:
-                out.append(r.as_dict() if hasattr(r, "as_dict") else frappe._dict(r))
+                if isinstance(r, dict):
+                    out.append(frappe._dict(r))
+                elif hasattr(r, "as_dict"):
+                    out.append(r.as_dict())
+                else:
+                    out.append(frappe._dict(r))
             except Exception:
                 pass
         return out
@@ -221,9 +254,14 @@ def seed_company_location_rows(dry_run=0):
         ensure_company_map_locations_installed()
     except Exception:
         pass
-    if not frappe.db.exists("DocType", "BizCompany Location") \
-            or not frappe.db.has_column("Company", "company_locations"):
+    if not frappe.db.exists("DocType", "BizCompany Location"):
         return {"status": "success", "note": "BizCompany Location table not present", "seeded": 0}
+    try:
+        meta = frappe.get_meta("Company")
+        if not meta.get_field("company_locations") and not frappe.db.has_column("Company", "company_locations"):
+            return {"status": "success", "note": "BizCompany Location table not present", "seeded": 0}
+    except Exception:
+        pass
 
     companies = frappe.get_all(
         "Company",
@@ -609,15 +647,25 @@ def register_live_gps(company=None, location_name=None, lat=0, lng=0,
       (or first) location row with the live coordinates.
     Stamps `gps_source=Live GPS`, `captured_at`, `gps_captured_by`.
     """
-    if not frappe.db.exists("DocType", "BizCompany Location") \
-            or not frappe.db.has_column("Company", "company_locations"):
+    if not frappe.db.exists("DocType", "BizCompany Location"):
         try:
             ensure_company_map_locations_installed()
         except Exception:
             pass
-    if not frappe.db.exists("DocType", "BizCompany Location") \
-            or not frappe.db.has_column("Company", "company_locations"):
+    if not frappe.db.exists("DocType", "BizCompany Location"):
         frappe.throw("Multi-location map pins are not installed on this server")
+    try:
+        meta = frappe.get_meta("Company")
+        if not meta.get_field("company_locations"):
+            try:
+                ensure_company_map_locations_installed()
+            except Exception:
+                pass
+            meta = frappe.get_meta("Company")
+            if not meta.get_field("company_locations"):
+                frappe.throw("Multi-location map pins are not installed on this server")
+    except Exception:
+        pass
 
     if not company or not frappe.db.exists("Company", company):
         frappe.throw("A valid Company is required to register a live GPS pin")

@@ -896,13 +896,71 @@
         }
     });
 
-    // 3. Double-click trigger: open the inline AI popup anywhere, at the cursor position
-    document.addEventListener('dblclick', function (e) {
+    // 3. Desktop Right-Click Trigger (contextmenu) - (TASK-2026-00858)
+    document.addEventListener("contextmenu", function (e) {
         if (popup) return;
         const el = e.target;
         if (isExcluded(el)) return;
+
+        const isEdit = isEditable(el) || el.closest("input, textarea, [contenteditable=\"true\"], .ql-editor, .frappe-control, .form-control");
+        const sel = window.getSelection ? window.getSelection().toString().trim() : "";
+
+        // Allow right click inside editable fields, on selected text, or with Alt key
+        if (!isEdit && !sel && !e.altKey) return;
+
+        e.preventDefault();
         showPopup(el, e.clientX, e.clientY);
     });
+
+    // 4. Mobile Tap-and-Hold / Long-Press Trigger (550ms)
+    let touchTimer = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchTarget = null;
+
+    document.addEventListener("touchstart", function(e) {
+        if (popup || e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchTarget = e.target;
+
+        if (isExcluded(touchTarget)) return;
+
+        clearTimeout(touchTimer);
+        touchTimer = setTimeout(function() {
+            if (!touchTarget) return;
+            const isEdit = isEditable(touchTarget) || touchTarget.closest("input, textarea, [contenteditable=\"true\"], .ql-editor, .frappe-control, .form-control");
+            const sel = window.getSelection ? window.getSelection().toString().trim() : "";
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(50); } catch(err) {}
+            }
+
+            showPopup(touchTarget, touchStartX, touchStartY);
+        }, 550);
+    }, { passive: true });
+
+    document.addEventListener("touchmove", function(e) {
+        if (e.touches.length > 0) {
+            const dx = Math.abs(e.touches[0].clientX - touchStartX);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY);
+            if (dx > 12 || dy > 12) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+        }
+    }, { passive: true });
+
+    document.addEventListener("touchend", function(e) {
+        clearTimeout(touchTimer);
+        touchTimer = null;
+    }, { passive: true });
+
+    document.addEventListener("touchcancel", function(e) {
+        clearTimeout(touchTimer);
+        touchTimer = null;
+    }, { passive: true });
 
     document.addEventListener('click', function (e) {
         if (popup && !popup.contains(e.target) && targetState && e.target !== targetState.el) {

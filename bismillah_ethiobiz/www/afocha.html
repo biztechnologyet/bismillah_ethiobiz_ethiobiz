@@ -761,7 +761,7 @@
         btn.disabled = true;
         btn.innerText = 'Publishing...';
 
-        fetch('/api/method/bismillah_ethiobiz.afocha_api.create_social_post', {
+        ebFetch('/api/method/bismillah_ethiobiz.afocha_api.create_social_post', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
@@ -1088,7 +1088,7 @@
                         btnCmt.disabled = true;
                         btnCmt.innerText = 'Posting...';
 
-                        fetch('/api/method/bismillah_ethiobiz.afocha_api.add_post_comment', {
+                        ebFetch('/api/method/bismillah_ethiobiz.afocha_api.add_post_comment', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams({
@@ -1099,11 +1099,18 @@
                         .then(r => r.json())
                         .then(res => {
                             btnCmt.disabled = false;
+                            btnCmt.innerText = 'Post Comment';
+                            if (res.exc) {
+                                ebToast('Failed to post comment' + (res._server_messages ? ' — ' + res._server_messages : ''), true);
+                                return;
+                            }
                             loadSinglePost(p.name);
                         })
                         .catch(e => {
                             btnCmt.disabled = false;
+                            btnCmt.innerText = 'Post Comment';
                             console.error(e);
+                            ebToast('Comment failed — please retry.', true);
                         });
                     });
                 }

@@ -12,6 +12,7 @@
 
 var VERSION = "__CACHE_VERSION__";
 var CACHE = "dobiz-pwa-v" + VERSION;
+var NAV_TIMEOUT_MS = 8000; // hard cap for network-first so pages never "stuck"
 var OFFLINE_URL = "__OFFLINE_URL__";
 var OFFLINE_TITLE = "__OFFLINE_TITLE__";
 var OFFLINE_MESSAGE = "__OFFLINE_MESSAGE__";
@@ -99,8 +100,41 @@ self.addEventListener("activate", function (event) {
     );
 });
 
+function raceTimeout(fetchPromise, request, ms) {
+    return new Promise(function (resolve) {
+        var settled = false;
+        var timer = setTimeout(function () {
+            if (!settled) {
+                settled = true;
+                caches.match(request).then(function (page) {
+                    return page || caches.match(OFFLINE_URL);
+                }).then(function (fallback) {
+                    resolve(fallback || offlinePage());
+                });
+            }
+        }, ms);
+        fetchPromise.then(function (resp) {
+            if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                resolve(resp);
+            }
+        }).catch(function () {
+            if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                caches.match(request).then(function (page) {
+                    return page || caches.match(OFFLINE_URL);
+                }).then(function (fallback) {
+                    resolve(fallback || offlinePage());
+                });
+            }
+        });
+    });
+}
+
 function networkFirst(request) {
-    return fetch(request)
+    return raceTimeout(fetch(request), request, NAV_TIMEOUT_MS)
         .then(function (response) {
             if (response && response.ok) {
                 var copy = response.clone();
@@ -144,6 +178,28 @@ function cacheFirst(request) {
     });
 }
 
+// (PHASE C 2026-10-17) Frappe build assets are content-hashed, e.g.
+// /assets/<app>/dist/js/<name>.<hash>.js ; user assets under
+// /assets/<app>/js/<name>.js are NOT hashed and must never be cached-first.
+function isHashedAsset(url) {
+    return /\.[0-9a-f]{8,}\.(js|css|png|jpg|jpeg|svg|webp|woff2?)$/i.test(url.pathname)
+        || /\/assets\/[^/]+\/dist\//.test(url.pathname);
+}
+
+function networkFirstAsset(request) {
+    return fetch(request).then(function (response) {
+        if (response && response.ok) {
+            var copy = response.clone();
+            caches.open(CACHE).then(function (cache) {
+                cache.put(request, copy).catch(function () {});
+            }).catch(function () {});
+        }
+        return response;
+    }).catch(function () {
+        return caches.match(request);
+    });
+}
+
 function networkWithFallback(request) {
     return fetch(request).catch(function () {
         return caches.match(request).then(function (cached) {
@@ -169,7 +225,10 @@ self.addEventListener("fetch", function (event) {
     }
 
     if (isAsset(request)) {
-        event.respondWith(cacheFirst(request));
+        // (PHASE C 2026-10-17) Only content-hashed bundles may be served
+        // cache-first. Plain /assets/<app>/js|css/<name>.js|css URLs are NOT
+        // hashed, so they must be network-first to avoid serving stale JS.
+        event.respondWith(isHashedAsset(url) ? cacheFirst(request) : networkFirstAsset(request));
         return;
     }
 
