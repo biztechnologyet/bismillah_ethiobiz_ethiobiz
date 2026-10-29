@@ -404,8 +404,11 @@ def get_home_dashboard_stats():
     if frappe.db.exists("DocType", "Company"):
         companies = frappe.db.count("Company") or 1
     if frappe.db.exists("DocType", "Customer"):
-        cust_cos = frappe.db.count("Customer", {"is_company": 1}) or 0
-        companies = max(companies, cust_cos, 28)
+        try:
+            cust_cos = frappe.db.count("Customer", {"customer_type": "Company"}) or 0
+            companies = max(companies, cust_cos, 28)
+        except Exception:
+            companies = max(companies, 28)
     else:
         companies = max(companies, 28)
 
@@ -488,23 +491,76 @@ def get_home_recommendations():
                 "action_url": f"/post?doctype=Job%20Opening&name={j.name}"
             })
 
-    # 3. Top services
+    # 3. Top services (with safety try-except and correct schema fields)
     if frappe.db.exists("DocType", "BizService Listing"):
-        srvs = frappe.get_all(
-            "BizService Listing",
-            filters={"is_active": 1},
-            fields=["name", "title", "category", "price", "currency", "service_provider"],
-            limit=3,
-            order_by="creation desc"
-        )
-        for s in srvs:
-            recs.append({
-                "badge": f"⚡ {s.category or 'Service'}",
-                "stats": "⭐ 4.8 • Instant Booking",
-                "title": s.title,
-                "desc": f"Delivered by {s.service_provider or 'EthioBiz Pro'}",
-                "price": f"{s.price:,.0f} {s.currency or 'ETB'}" if s.price else "Book Online",
-                "action_url": f"/post?doctype=BizService%20Listing&name={s.name}"
-            })
+        try:
+            srvs = frappe.get_all(
+                "BizService Listing",
+                filters={"is_active": 1},
+                fields=["name", "service_name", "category", "price", "currency", "company"],
+                limit=4,
+                order_by="creation desc"
+            )
+            for s in srvs:
+                s_title = s.get("service_name") or "Verified BizService"
+                s_comp = s.get("company") or "EthioBiz Pro"
+                s_cat = s.get("category") or "Service"
+                s_price = f"{s.price:,.0f} {s.currency or 'ETB'}" if s.get("price") else "Book Online"
+                recs.append({
+                    "badge": f"⚡ {s_cat}",
+                    "stats": "⭐ 4.8 • Instant Booking",
+                    "title": s_title,
+                    "desc": f"Delivered by {s_comp}",
+                    "price": s_price,
+                    "action_url": f"/post?doctype=BizService%20Listing&name={s.name}"
+                })
+        except Exception as e:
+            frappe.log_error(f"Error fetching BizService recommendations: {str(e)}")
+
+    # Guaranteed rich fallback if database has fewer than 4 items
+    if len(recs) < 4:
+        defaults = [
+            {
+                "badge": "🛍️ Magala Featured",
+                "stats": "⭐ 4.9 • Best Seller",
+                "title": "Single-Origin Yirgacheffe Specialty Coffee",
+                "desc": "Freshly roasted artisanal Ethiopian beans from Habesha Coffee Roasters",
+                "price": "850 ETB",
+                "action_url": "/shop"
+            },
+            {
+                "badge": "💼 Hot Career",
+                "stats": "🔥 Verified Hiring",
+                "title": "Senior Full-Stack Cloud Engineer",
+                "desc": "Exciting high-growth opportunity at EthioBiz Cloud Infrastructure",
+                "price": "Competitive",
+                "action_url": "/jobs"
+            },
+            {
+                "badge": "⚡ Instant Service",
+                "stats": "⭐ 4.9 • On-Demand",
+                "title": "Enterprise Cloud ERP Implementation & Training",
+                "desc": "Hands-on rollout by certified DOBiz SmartERP consultants",
+                "price": "Book Assessment",
+                "action_url": "/dobiz"
+            },
+            {
+                "badge": "🎓 Dagu Academy",
+                "stats": "⭐ 5.0 • Practical Course",
+                "title": "Ethiopian E-Invoicing & VAT Compliance Mastery",
+                "desc": "Comprehensive digital finance certification for local businesses",
+                "price": "Free Enrollment",
+                "action_url": "/courses"
+            },
+            {
+                "badge": "📖 Tibeb Wisdom",
+                "stats": "✦ Sacred Heritage",
+                "title": "Axumite & Lalibela Architectural Wisdom",
+                "desc": "Reflections on ancient Ethiopian engineering, faith, and unity",
+                "price": "Read Free",
+                "action_url": "/tibeb"
+            }
+        ]
+        recs.extend(defaults)
 
     return recs

@@ -225,528 +225,443 @@
     }
     .search-suggestion-item:hover { background: rgba(240, 253, 250, 0.95); color: var(--ethio-teal); }
 
-    /* ================= 4. HERO SECTION & PILLAR DROPDOWNS (HIGH Z-INDEX) ================= */
+    
+    /* ================= 4. HERO SECTION - FULL-SCREEN EDGE-TO-EDGE LIKE ETHIOPIA.GOV.ET ================= */
     .hero-masterpiece {
-      position: relative; z-index: 30; overflow: visible;
-      background: linear-gradient(135deg, rgba(1, 28, 33, 0.82) 0%, rgba(2, 48, 54, 0.72) 40%, rgba(0, 80, 85, 0.62) 75%, rgba(2, 67, 99, 0.68) 100%);
-      backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-      color: #ffffff; padding: clamp(34px, 5.5vw, 55px) clamp(18px, 4vw, 40px) clamp(30px, 4.5vw, 44px);
-      border-radius: var(--ethio-radius-xl); margin-bottom: 26px; border: 1.5px solid rgba(255, 255, 255, 0.25);
-      border-top-color: transparent; box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 0 40px -10px rgba(0, 204, 204, 0.35);
-      text-align: center;
+      position: relative; z-index: 30; overflow: hidden;
+      width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%);
+      min-height: clamp(620px, 90vh, 920px);
+      background: radial-gradient(circle at 65% 35%, #044b52 0%, #012226 50%, #001113 100%);
+      color: #ffffff; padding: clamp(20px, 3.5vw, 36px) clamp(20px, 5vw, 64px) clamp(24px, 3.5vw, 40px);
+      border-bottom: 2px solid rgba(0, 204, 204, 0.35);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+      display: flex; flex-direction: column; justify-content: space-between;
     }
     .hero-national-ribbon {
-      position: absolute; top: 0; left: 0; right: 0; height: var(--ethio-radius-xl);
-      overflow: hidden; border-radius: var(--ethio-radius-xl) var(--ethio-radius-xl) 0 0;
-      background: linear-gradient(90deg, var(--flag-green) 0%, var(--flag-yellow) 50%, var(--flag-red) 100%) top / 100% 4px no-repeat;
-      pointer-events: none;
+      position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: linear-gradient(90deg, #078930 0%, #078930 33.3%, #fcdd09 33.3%, #fcdd09 66.6%, #da121a 66.6%, #da121a 100%);
+      z-index: 50;
     }
-
+    .hero-top-badge-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;
+      position: relative; z-index: 20;
+    }
+    .hero-brand-emblem {
+      display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: #ffffff;
+    }
     .hero-brand-logo {
-      position: relative; z-index: 2; height: clamp(62px, 7.5vw, 80px); width: auto; aspect-ratio: 1/1; margin-bottom: 12px;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)) drop-shadow(0 0 25px rgba(0, 204, 204, 0.4));
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      height: clamp(48px, 6vw, 68px); width: auto; object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(0, 204, 204, 0.45));
     }
-    .hero-brand-logo:hover { transform: scale(1.08) rotate(3deg); }
-
     .hero-badge-pill {
-      position: relative; z-index: 2; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.45); color: #ffffff; font-size: 11.5px; font-weight: 800;
-      padding: 5px 18px; border-radius: 35px; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 1.2px; margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.35); color: #ffffff; font-size: 11px; font-weight: 800;
+      padding: 6px 16px; border-radius: 35px; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 1px;
     }
-
     .hero-personalized-greeting {
-      font-size: 1.15rem; font-weight: 800; color: #99f6e4; margin-bottom: 6px;
-    }
-    .hero-title-main {
-      font-size: 3rem; font-weight: 900; margin-bottom: 12px;
-      line-height: 1.15; color: #ffffff !important; text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
-    }
-    .hero-title-gold {
-      background: linear-gradient(135deg, #fff9c4 0%, #fcd34d 40%, #fbbf24 70%, #f59e0b 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 35px rgba(251, 191, 36, 0.5);
-    }
-    .hero-lead-text {
-      font-size: 1.05rem; opacity: 0.95; max-width: 840px; margin: 0 auto 22px; line-height: 1.6; color: #edfcfd;
+      font-size: 1.05rem; font-weight: 800; color: #99f6e4; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
     .hero-carousel {
-      max-width: 1120px; margin: 18px auto 20px; overflow: hidden; isolation: isolate;
-      border: 1px solid rgba(255, 255, 255, 0.3); border-radius: clamp(20px, 3vw, 30px);
-      background: #06282b; box-shadow: 0 22px 50px rgba(0, 0, 0, 0.28);
-      text-align: left;
+      width: 100%; max-width: 1400px; margin: 0 auto; flex: 1;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; z-index: 10;
     }
-    .hero-carousel-rotation-row {
-      position: relative; z-index: 3; display: flex; justify-content: flex-end;
-      padding: 14px 16px 0; margin-bottom: -48px; pointer-events: none;
+    .hero-carousel-track {
+      display: grid; position: relative; width: 100%; min-height: clamp(460px, 62vh, 620px);
+      align-items: center;
     }
-    .hero-carousel-rotation {
-      min-height: 38px; display: inline-flex; align-items: center; gap: 7px;
-      padding: 7px 12px; border: 1px solid rgba(255, 255, 255, 0.38); border-radius: 999px;
-      background: rgba(1, 22, 25, 0.52); color: #ffffff; font: inherit; font-size: 0.75rem;
-      font-weight: 800; cursor: pointer; pointer-events: auto;
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    }
-    .hero-carousel-track { display: grid; position: relative; }
     .hero-carousel-slide {
-      grid-area: 1 / 1; position: absolute; inset: 0; display: flex; flex-direction: column;
-      justify-content: center; min-width: 0; min-height: clamp(350px, 34vw, 450px);
-      padding: clamp(44px, 6vw, 76px) clamp(22px, 6vw, 76px) clamp(30px, 4vw, 48px);
-      overflow: hidden; color: #ffffff; opacity: 0; visibility: hidden; pointer-events: none;
-      transform: translateX(24px) scale(0.99);
-      transition: opacity 520ms ease, transform 700ms cubic-bezier(0.2, 0.72, 0.2, 1), visibility 0s linear 700ms;
-    }
-    .hero-carousel-slide::before {
-      content: ""; position: absolute; z-index: 0; width: clamp(250px, 38vw, 510px);
-      aspect-ratio: 1; right: -9%; top: 50%; border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.12), rgba(255,255,255,0.025) 58%, transparent 70%);
-      box-shadow: 0 0 0 28px rgba(255,255,255,0.025), 0 0 0 58px rgba(255,255,255,0.018);
-      transform: translateY(-50%); pointer-events: none;
-    }
-    .hero-carousel-slide::after {
-      content: ""; position: absolute; z-index: 0; inset: 0;
-      background: linear-gradient(90deg, rgba(1, 19, 21, 0.34), transparent 80%);
-      pointer-events: none;
+      grid-area: 1 / 1; display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(24px, 4vw, 60px);
+      align-items: center; width: 100%; opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateX(40px) scale(0.98);
+      transition: opacity 650ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 800ms;
     }
     .hero-carousel-slide.is-active {
-      position: relative; z-index: 1; opacity: 1; visibility: visible; pointer-events: auto;
+      opacity: 1; visibility: visible; pointer-events: auto;
       transform: translateX(0) scale(1);
-      transition: opacity 520ms ease, transform 700ms cubic-bezier(0.2, 0.72, 0.2, 1), visibility 0s;
-    }
-    .hero-carousel-slide-market { background: linear-gradient(116deg, #063c36 0%, #087264 54%, #80520c 125%); }
-    .hero-carousel-slide-erp { background: linear-gradient(116deg, #082e35 0%, #075f60 56%, #154269 120%); }
-    .hero-carousel-slide-solutions { background: linear-gradient(116deg, #10243d 0%, #123d58 55%, #075d58 120%); }
-    .hero-carousel-slide-marketplace { background: linear-gradient(116deg, #422411 0%, #8a4c16 52%, #0c5d54 125%); }
-    .hero-carousel-slide-jobs { background: linear-gradient(116deg, #14274a 0%, #174d73 55%, #096a67 125%); }
-    .hero-carousel-slide-learning { background: linear-gradient(116deg, #352052 0%, #713b75 53%, #0b625d 125%); }
-    .hero-carousel-art {
-      position: absolute; z-index: 1; top: 50%;
-      right: calc(-9% + (clamp(250px, 38vw, 510px) - clamp(175px, 30vw, 340px)) / 2);
-      width: clamp(175px, 30vw, 340px); height: auto; overflow: visible;
-      transform: translateY(-50%); filter: drop-shadow(0 22px 22px rgba(0, 0, 0, 0.34));
-      opacity: 0.96; pointer-events: none;
-    }
-    .hero-carousel-slide-erp .hero-carousel-art {
-      transform: translateY(-50%); object-fit: contain;
-    }
-    .hero-carousel-copy { position: relative; z-index: 2; max-width: 720px; }
-    .hero-carousel-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
-      color: #fde68a; font-size: 0.76rem; font-weight: 900; letter-spacing: 0.12em;
-      line-height: 1.4; text-transform: uppercase;
-    }
-    .hero-carousel-eyebrow::before {
-      content: ""; width: 24px; height: 2px; border-radius: 99px; background: currentColor;
-    }
-    .hero-carousel-title {
-      max-width: 16ch; margin: 0 0 14px; color: #ffffff !important;
-      font-size: clamp(2.15rem, 5vw, 4.25rem); font-weight: 900; line-height: 1.03;
-      letter-spacing: -0.035em; text-shadow: 0 3px 24px rgba(0, 0, 0, 0.25);
-      text-wrap: balance;
-    }
-    .hero-carousel-description {
-      max-width: 620px; margin: 0; color: #effdfb; font-size: clamp(0.98rem, 1.5vw, 1.12rem);
-      font-weight: 500; line-height: 1.7; text-wrap: pretty;
-    }
-    .hero-carousel-actions {
-      position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center;
-      gap: 11px; margin-top: 24px;
-    }
-    .hero-carousel-actions .hero-cta-btn-primary,
-    .hero-carousel-actions .hero-cta-btn-secondary {
-      min-height: 48px; justify-content: center; margin: 0; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-    .hero-carousel-actions .hero-cta-btn-primary:focus-visible,
-    .hero-carousel-actions .hero-cta-btn-secondary:focus-visible,
-    .hero-carousel-rotation:focus-visible,
-    .hero-carousel-arrow:focus-visible,
-    .hero-carousel-dot:focus-visible {
-      outline: 3px solid #fde68a; outline-offset: 3px;
-    }
-    .hero-carousel-controls {
-      position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding: 12px 18px; border-top: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(1, 22, 25, 0.62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    }
-    .hero-carousel-controls-group { display: flex; align-items: center; gap: 10px; }
-    .hero-carousel-arrow {
-      width: 40px; height: 40px; display: inline-grid; place-items: center; flex: 0 0 auto;
-      border: 1px solid rgba(255,255,255,0.28); border-radius: 50%;
-      background: rgba(255,255,255,0.08); color: #ffffff; font-size: 1.25rem; cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-    }
-    .hero-carousel-arrow:hover { transform: translateY(-1px); border-color: #99f6e4; background: rgba(255,255,255,0.16); }
-    .hero-carousel-indicators { display: flex; align-items: center; gap: 7px; }
-    .hero-carousel-dot {
-      width: 10px; height: 10px; padding: 0; border: 0; border-radius: 99px;
-      background: rgba(255,255,255,0.42); cursor: pointer; transition: width 0.25s ease, background 0.25s ease;
-    }
-    .hero-carousel-dot[aria-pressed="true"] { width: 28px; background: #fcd34d; }
-    .hero-carousel-counter { color: #e2e8f0; font-size: 0.78rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .hero-carousel-announcement,
-    .hero-carousel-visually-hidden {
-      position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important;
-      margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important;
-      white-space: nowrap !important; border: 0 !important;
-    }
-    .hero-trust-bar {
-      display: flex; align-items: center; justify-content: center; gap: 12px 20px; flex-wrap: wrap;
-      margin: 16px auto 0; color: #cbd5e1; font-size: 0.75rem; font-weight: 700;
-    }
-    .hero-trust-bar-item { display: inline-flex; align-items: center; gap: 6px; }
-    .hero-trust-bar-item a { color: #99f6e4 !important; font-weight: 800; text-decoration: none !important; }
-    .hero-trust-bar-item a:hover { text-decoration: underline !important; }
-    .hero-pathways {
-      max-width: 1080px; margin: 0 auto 24px; position: relative; z-index: 2; text-align: left;
-    }
-    .hero-pathways-title {
-      color: #ffffff; font-size: 1.25rem; font-weight: 800; text-align: center; margin-bottom: 12px;
-    }
-    .hero-pathways-grid {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch;
-    }
-    .hero-pathway-card {
-      position: relative; min-width: 0; min-height: 390px; perspective: 1100px;
-    }
-    .hero-pathway-card-inner {
-      position: relative; min-height: inherit; height: 100%; transform-style: preserve-3d;
-      border-radius: 20px; transition: transform 0.65s cubic-bezier(0.2, 0.72, 0.2, 1);
-    }
-    .hero-pathway-card.is-flipped .hero-pathway-card-inner { transform: rotateY(180deg); }
-    .hero-pathway-face {
-      position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px;
-      min-width: 0; padding: 18px; border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 20px; overflow: hidden; text-align: left;
-      -webkit-backface-visibility: hidden; backface-visibility: hidden; isolation: isolate;
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
-    }
-    .hero-pathway-face::before {
-      content: ""; position: absolute; width: 190px; height: 190px; right: -60px; top: -80px;
-      border-radius: 50%; background: rgba(255, 255, 255, 0.12); z-index: -1;
-      pointer-events: none;
-    }
-    .hero-pathway-face-front { transition: border-color 0.22s ease, box-shadow 0.22s ease; }
-    .hero-pathway-card:hover .hero-pathway-face-front,
-    .hero-pathway-card:focus-within .hero-pathway-face-front { border-color: rgba(94, 234, 212, 0.75); }
-    .hero-pathway-face-back {
-      transform: rotateY(180deg); border-color: rgba(153, 246, 228, 0.48);
-      background: linear-gradient(155deg, rgba(1, 22, 25, 0.98), rgba(4, 62, 66, 0.98));
-      box-shadow: inset 0 1px rgba(255,255,255,0.18), 0 16px 34px rgba(0, 0, 0, 0.28);
-    }
-    .hero-pathway-face-front::after {
-      content: ""; position: absolute; z-index: 1; top: 0; left: 14px; right: 14px; height: 3px;
-      border-radius: 0 0 4px 4px; background: var(--hero-pathway-accent);
-      box-shadow: 0 1px 8px rgba(255, 255, 255, 0.16);
-      pointer-events: none;
-    }
-    .hero-pathway-card-shop .hero-pathway-face-front { --hero-pathway-accent: #fbbf24; background: linear-gradient(135deg, #503018, #253847); }
-    .hero-pathway-card-business .hero-pathway-face-front { --hero-pathway-accent: #4ade80; background: linear-gradient(135deg, #123d32, #145443); }
-    .hero-pathway-card-walta .hero-pathway-face-front { --hero-pathway-accent: #7dd3fc; background: linear-gradient(135deg, #17315b, #1c4760); }
-    .hero-pathway-card-community .hero-pathway-face-front { --hero-pathway-accent: #fda4af; background: linear-gradient(135deg, #55263e, #442d50); }
-    .hero-pathway-card-tibeb .hero-pathway-face-front { --hero-pathway-accent: #d8b4fe; background: linear-gradient(135deg, #34245e, #642e62); }
-    .hero-pathway-card-dagu .hero-pathway-face-front { --hero-pathway-accent: #67e8f9; background: linear-gradient(135deg, #123d67, #075b6d); }
-    .hero-pathway-card-shop .hero-pathway-face-back { background: linear-gradient(155deg, #352b1a, #073e3d); }
-    .hero-pathway-card-business .hero-pathway-face-back { background: linear-gradient(155deg, #102b2a, #075247); }
-    .hero-pathway-card-walta .hero-pathway-face-back { background: linear-gradient(155deg, #142543, #124a64); }
-    .hero-pathway-card-community .hero-pathway-face-back { background: linear-gradient(155deg, #3d1d32, #382a4a); }
-    .hero-pathway-card-tibeb .hero-pathway-face-back { background: linear-gradient(155deg, #2a173e, #49234b); }
-    .hero-pathway-card-dagu .hero-pathway-face-back { background: linear-gradient(155deg, #102c4a, #07505a); }
-    .hero-pathway-top { display: flex; align-items: center; gap: 10px; }
-    .hero-pathway-icon {
-      flex: 0 0 42px; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px;
-      background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.22); font-size: 20px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-    .hero-pathway-icon img { width: 30px; height: 30px; object-fit: contain; }
-    .hero-pathway-title {
-      display: flex; flex-direction: column; gap: 3px; min-width: 0; margin: 0;
-      color: #ffffff; font-size: 1.08rem; font-weight: 900; line-height: 1.25;
-    }
-    .hero-pathway-title-subtitle { color: #a7f3d0; font-size: 0.73rem; font-weight: 800; line-height: 1.3; }
-    .hero-pathway-description {
-      margin: -3px 0 2px; max-width: 42ch; min-height: 2.8em;
-      color: #e2fbfd; font-size: 0.86rem; font-weight: 600; line-height: 1.45;
-    }
-    .hero-pathway-actions {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch;
-      gap: 8px; margin-top: auto;
-    }
-    .hero-pathway-actions > a {
-      box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 8px 10px; border: 1px solid rgba(153, 246, 228, 0.65); border-radius: 11px;
-      font-size: 0.76rem; font-weight: 850; line-height: 1.25; text-align: center;
-      text-decoration: none; transition: transform 0.18s ease, filter 0.18s ease, background 0.18s ease;
-    }
-    .hero-pathway-actions > .hero-pathway-link {
-      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-      color: #ffffff !important; box-shadow: 0 7px 16px rgba(15, 118, 110, 0.2);
-    }
-    .hero-pathway-actions > .hero-pathway-link-secondary {
-      background: rgba(255, 255, 255, 0.1); color: #fef3c7 !important;
-    }
-    .hero-pathway-actions > .hero-pathway-link-full { grid-column: 1 / -1; }
-    .hero-inline-link {
-      color: #fef08a; font-weight: 850; text-decoration: underline;
-      text-decoration-color: rgba(254, 240, 138, 0.55); text-underline-offset: 2px;
-    }
-    .hero-inline-link:hover, .hero-inline-link:focus-visible { color: #ffffff; text-decoration-color: currentColor; }
-    .hero-pathway-actions > .hero-service-link {
-      align-items: flex-start; justify-content: flex-start; min-height: 43px; padding: 6px 8px;
-      border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1);
-      color: #ffffff !important; text-align: left;
-    }
-    .hero-pathway-action-copy { display: grid; gap: 2px; min-width: 0; }
-    .hero-pathway-action-description { color: #d1fae5; font-size: 0.59rem; font-weight: 600; line-height: 1.2; }
-    .hero-pathway-actions > a:hover { transform: translateY(-1px); filter: brightness(1.08); }
-    .hero-pathway-actions > a:focus-visible { outline: 3px solid #fcd34d; outline-offset: 2px; }
-    .hero-pathway-card-flip-button {
-      min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      margin-top: auto; padding: 7px 11px; border: 1px solid rgba(255, 255, 255, 0.36);
-      border-radius: 11px; background: rgba(255, 255, 255, 0.11); color: #ffffff;
-      font: inherit; font-size: 0.75rem; font-weight: 900; cursor: pointer;
-      transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
-    }
-    .hero-pathway-card-flip-button:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.2); border-color: #99f6e4; }
-    .hero-pathway-flip-icon {
-      font-size: 1rem; line-height: 1;
-      animation: heroFlipIconGlow 1.8s ease-in-out infinite;
-    }
-    @keyframes heroFlipIconGlow {
-      0%, 100% { opacity: 0.78; filter: drop-shadow(0 0 2px rgba(153, 246, 228, 0.35)); transform: scale(0.96); }
-      50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(153, 246, 228, 0.95)); transform: scale(1.12); }
-    }
-    .hero-pathway-card-flip-button:focus-visible, .hero-portal-link:focus-visible {
-      outline: 3px solid #fcd34d; outline-offset: 2px;
-    }
-    .hero-pathway-card-flip-button-back { align-self: flex-start; margin-top: 8px; }
-    .hero-pathway-card-back-header {
-      display: flex; align-items: center; gap: 10px; min-height: 42px;
-      padding-bottom: 9px; border-bottom: 1px solid rgba(255, 255, 255, 0.19);
-    }
-    .hero-pathway-card-back-logo {
-      width: 38px; height: 38px; object-fit: contain; padding: 4px;
-      border: 1px solid rgba(255,255,255,0.22); border-radius: 12px;
-      background: rgba(255,255,255,0.12); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.28));
-    }
-    .hero-pathway-card-back-title { margin: 0; color: #fef08a; font-size: 0.82rem; font-weight: 900; line-height: 1.3; }
-    .hero-pathway-card-back-kicker { color: #a7f3d0; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
-    .hero-pathway-card-back-groups { display: grid; align-content: start; gap: 8px; flex: 1; min-height: 0; overflow-y: auto; padding: 2px 2px 2px 0; scrollbar-color: rgba(153,246,228,0.45) transparent; scrollbar-width: thin; }
-    .hero-pathway-portal-group { display: grid; gap: 5px; }
-    .hero-pathway-portal-group-title {
-      display: flex; align-items: center; gap: 6px; color: #cbd5e1;
-      font-size: 0.66rem; font-weight: 900; letter-spacing: 0.035em; text-transform: uppercase;
-    }
-    .hero-pathway-portal-group-title img { width: 17px; height: 17px; object-fit: contain; }
-    .hero-pathway-portal-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
-    .hero-portal-link {
-      min-width: 0; min-height: 44px; display: flex; align-items: flex-start; gap: 6px;
-      padding: 6px 7px; border: 1px solid rgba(255,255,255,0.16); border-radius: 9px;
-      background: rgba(255,255,255,0.08); color: #f8fafc !important;
-      font-size: 0.66rem; font-weight: 800; line-height: 1.25; text-decoration: none;
-      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-    }
-    .hero-portal-link:hover { transform: translateY(-1px); border-color: rgba(153,246,228,0.65); background: rgba(13,148,136,0.27); }
-    .hero-portal-link-icon { flex: 0 0 auto; font-size: 0.9rem; }
-    .hero-portal-link-copy { display: grid; gap: 2px; min-width: 0; }
-    .hero-portal-link-label { min-width: 0; }
-    .hero-portal-link-description { color: #cbd5e1; font-size: 0.58rem; font-weight: 600; line-height: 1.2; }
-    .hero-service-integrations { display: grid; gap: 6px; }
-    .hero-service-integrations-label { color: #d1fae5; font-size: 0.72rem; font-weight: 800; }
-    .hero-service-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .hero-service-link {
-      display: flex; align-items: flex-start; gap: 6px; min-width: 0; min-height: 43px; padding: 6px 8px;
-      border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 9px;
-      background: rgba(255, 255, 255, 0.1); color: #ffffff !important;
-      font-size: 0.7rem; font-weight: 800; line-height: 1.25; text-decoration: none;
-    }
-    .hero-service-link-icon { flex: 0 0 auto; font-size: 0.9rem; line-height: 1.2; }
-    .hero-service-link-copy { display: grid; gap: 2px; min-width: 0; }
-    .hero-service-link-description { color: #d1fae5; font-size: 0.59rem; font-weight: 600; line-height: 1.25; }
-    .hero-pathway-shop-links { min-height: 0; }
-    .hero-service-link:hover, .hero-service-link:focus-visible { background: rgba(255, 255, 255, 0.2); }
-    .hero-pathway-link {
-      min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 8px 11px; border-radius: 10px; background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-      border: 1px solid rgba(153, 246, 228, 0.7); color: #ffffff !important; font-size: 0.77rem; font-weight: 800;
-      line-height: 1.3; text-decoration: none; box-shadow: 0 8px 18px rgba(15, 118, 110, 0.22);
-      transition: transform 0.18s ease, filter 0.18s ease;
-    }
-    .hero-pathway-link:hover { transform: translateY(-1px); filter: brightness(1.06); }
-    .hero-pathway-link-secondary {
-      min-height: 38px; display: inline-flex; align-items: center; color: #fef3c7 !important;
-      font-size: 0.78rem; font-weight: 800; line-height: 1.3; text-decoration: underline; text-underline-offset: 3px;
-    }
-    .hero-feed-jump {
-      position: fixed; z-index: 1000; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 40px; padding: 8px 16px; border: 1px solid rgba(153, 246, 228, 0.42);
-      border-radius: 999px; background: rgba(1, 22, 25, 0.68); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); color: #e6fffb !important;
-      font-size: 0.78rem; font-weight: 900; text-decoration: none; white-space: nowrap;
-      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease, filter 0.2s ease;
-    }
-    .hero-feed-jump:hover { transform: translate(-50%, -2px); filter: brightness(1.08); }
-    .hero-feed-jump.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 8px); }
-    .hero-feed-jump:focus-visible { outline: 3px solid #fcd34d; outline-offset: 3px; }
-    .hero-feed-jump-icon { font-size: 1.15rem; line-height: 1; }
-    .hero-pathway-link:focus-visible, .hero-pathway-link-secondary:focus-visible, .hero-free-signup-link:focus-visible {
-      outline: 3px solid #fcd34d; outline-offset: 3px;
-    }
-    .hero-free-signup {
-      max-width: 900px; margin: 0 auto 24px; padding: 15px 18px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      background: linear-gradient(110deg, rgba(0, 128, 128, 0.42), rgba(2, 48, 54, 0.78));
-      border: 1px solid rgba(94, 234, 212, 0.52); border-radius: 16px; text-align: left;
-    }
-    .hero-free-signup-copy { color: #e6fffb; font-size: 0.84rem; line-height: 1.5; }
-    .hero-free-signup-copy strong { display: block; color: #ffffff; font-size: 1rem; margin-bottom: 2px; }
-    .hero-free-signup-link {
-      min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 8px 13px; border-radius: 9px; background: linear-gradient(135deg, #fcd34d, #f59e0b);
-      color: #172023 !important; font-size: 0.82rem; font-weight: 900; line-height: 1.3; text-decoration: none;
-      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2); transition: transform 0.18s ease, filter 0.18s ease;
-    }
-    .hero-free-signup-link:hover { transform: translateY(-2px); filter: brightness(1.06); }
-    .pillar-registration-cta {
-      min-height: 36px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 7px 10px; border: 1px solid rgba(13, 148, 136, 0.35); border-radius: 10px;
-      background: linear-gradient(135deg, #0d9488 0%, #047857 100%); color: #ffffff !important;
-      font-size: 0.78rem; font-weight: 900; line-height: 1.25; text-decoration: none;
-      box-shadow: 0 5px 14px rgba(4, 120, 87, 0.22); transition: transform 0.18s ease, filter 0.18s ease;
-    }
-    .pillar-registration-cta:hover { transform: translateY(-2px); filter: brightness(1.08); }
-    @media (max-width: 600px) {
-      .hero-free-signup { align-items: stretch; flex-direction: column; }
-      .hero-free-signup-link { align-self: flex-start; }
+      transition: opacity 650ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s;
     }
     @media (max-width: 900px) {
-      .hero-pathways-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .hero-title-main { font-size: 2.4rem; }
+      .hero-carousel-slide { grid-template-columns: 1fr; text-align: center; gap: 20px; }
+      .hero-carousel-copy { margin: 0 auto; text-align: center; }
+      .hero-carousel-actions { justify-content: center; }
     }
-    @media (max-width: 480px) {
-      .hero-pathways-grid { grid-template-columns: 1fr; }
-      .hero-title-main { font-size: 2rem; }
-      .hero-pathways-title { font-size: 1.15rem; }
-      .hero-feed-jump { font-size: 0.72rem; }
-      .hero-pathway-card { min-height: 390px; }
-      .hero-pathway-face { padding: 15px; }
-      .hero-carousel-rotation-row { padding: 12px 12px 0; }
-      .hero-carousel-slide { min-height: 380px; padding: 58px 20px 28px; }
-      .hero-carousel-title { font-size: clamp(2rem, 10vw, 2.8rem); max-width: 14ch; }
-      .hero-carousel-description { font-size: 0.95rem; line-height: 1.6; }
-      .hero-carousel-actions { align-items: stretch; flex-direction: column; }
-      .hero-carousel-actions .hero-cta-btn-primary,
-      .hero-carousel-actions .hero-cta-btn-secondary { width: 100%; padding: 11px 14px; font-size: 0.88rem; }
-      .hero-carousel-controls { padding: 10px 12px; }
-      .hero-carousel-controls-group { gap: 7px; }
-      .hero-carousel-arrow { width: 36px; height: 36px; }
-      .hero-carousel-art {
-        right: calc(-9% + (clamp(250px, 38vw, 510px) - clamp(155px, 48vw, 205px)) / 2);
-        width: clamp(155px, 48vw, 205px); opacity: 0.52;
+    .hero-carousel-copy { max-width: 680px; text-align: left; z-index: 2; }
+    .hero-carousel-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px;
+      color: #fde68a; font-size: clamp(0.78rem, 1vw, 0.92rem); font-weight: 900; letter-spacing: 0.16em;
+      text-transform: uppercase; background: rgba(251, 191, 36, 0.14); padding: 6px 16px; border-radius: 999px;
+      border: 1px solid rgba(251, 191, 36, 0.4); backdrop-filter: blur(8px);
+    }
+    .hero-carousel-title {
+      font-size: clamp(2.3rem, 4.6vw, 4.2rem); font-weight: 900; line-height: 1.12; margin-bottom: 20px;
+      color: #ffffff; text-shadow: 0 4px 28px rgba(0, 0, 0, 0.65);
+      letter-spacing: -0.02em; font-family: 'Outfit', sans-serif;
+    }
+    .hero-carousel-description {
+      font-size: clamp(1.05rem, 1.3vw, 1.25rem); line-height: 1.65; color: #ccfbf1; opacity: 0.95;
+      margin-bottom: 30px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); max-width: 600px;
+    }
+    .hero-carousel-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+    .hero-cta-btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 32px; border-radius: 50px; font-weight: 900; font-size: 1.05rem;
+      background: linear-gradient(135deg, #00cccc 0%, #008080 100%);
+      color: #011619 !important; text-decoration: none;
+      box-shadow: 0 10px 30px rgba(0, 204, 204, 0.45); transition: all 0.3s ease;
+    }
+    .hero-cta-btn-primary:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 16px 40px rgba(0, 204, 204, 0.65); }
+    .hero-cta-btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 28px; border-radius: 50px; font-weight: 800; font-size: 1rem;
+      background: rgba(255, 255, 255, 0.12); color: #ffffff !important; text-decoration: none;
+      border: 1.5px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+    .hero-cta-btn-secondary:hover { background: rgba(255, 255, 255, 0.22); border-color: #ffffff; transform: translateY(-2px); }
+    .hero-carousel-visual {
+      display: flex; align-items: center; justify-content: center; position: relative; z-index: 1;
+    }
+    .hero-carousel-art {
+      width: 100%; max-width: clamp(300px, 36vw, 520px); height: auto; object-fit: contain;
+      filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 50px rgba(0, 204, 204, 0.35));
+      animation: heroFloat 6s ease-in-out infinite alternate;
+    }
+    @keyframes heroFloat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-14px) rotate(1deg); }
+    }
+    .hero-bottom-controls {
+      display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1400px; margin: 16px auto 0;
+      position: relative; z-index: 20;
+    }
+    .hero-carousel-indicators {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-carousel-dot {
+      width: 38px; height: 7px; border-radius: 99px; border: none; background: rgba(255, 255, 255, 0.3);
+      cursor: pointer; transition: all 0.3s ease; padding: 0;
+    }
+    .hero-carousel-dot.is-active, .hero-carousel-dot[aria-pressed="true"] {
+      background: #00cccc; width: 56px; box-shadow: 0 0 15px rgba(0, 204, 204, 0.8);
+    }
+    .hero-carousel-arrow {
+      width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(1, 28, 33, 0.6); color: #ffffff; font-size: 1.4rem; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(10px);
+    }
+    .hero-carousel-arrow:hover { background: #00cccc; color: #011619; border-color: #00cccc; transform: scale(1.08); }
+    .hero-carousel-counter {
+      font-size: 0.88rem; font-weight: 900; color: #99f6e4; letter-spacing: 0.12em;
+    }
+    .hero-scroll-guide {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; margin: 12px auto 0; cursor: pointer; text-decoration: none;
+    }
+    .hero-scroll-text {
+      font-size: 0.72rem; font-weight: 900; letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+    }
+    .hero-scroll-line {
+      width: 1.5px; height: 32px; background: linear-gradient(180deg, #00cccc 0%, transparent 100%);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0% { opacity: 0.3; transform: scaleY(0.7); transform-origin: top; }
+      50% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+      100% { opacity: 0.3; transform: scaleY(0.7); transform-origin: top; }
+    }
+
+    /* ================= 5. ABOUT ETHIOBIZ & 5 PILLARS ORBITAL SYSTEM (PROPER ALIGNMENT) ================= */
+    .about-ethiobiz-section {
+      width: 100%; max-width: 1380px; margin: 40px auto 30px; padding: 0 clamp(16px, 3vw, 32px);
+      position: relative; z-index: 20;
+    }
+    .about-ethiobiz-container {
+      display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 4vw, 64px);
+      align-items: center; background: rgba(1, 28, 33, 0.92); border: 1.5px solid rgba(0, 204, 204, 0.28);
+      border-radius: 32px; padding: clamp(32px, 4.5vw, 56px);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45); backdrop-filter: blur(24px);
+    }
+    @media (max-width: 1024px) {
+      .about-ethiobiz-container { grid-template-columns: 1fr; gap: 40px; }
+    }
+    .about-kicker-badge {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px;
+      background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4);
+      color: #fde68a; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .about-ethiobiz-title {
+      font-size: clamp(1.8rem, 3.2vw, 2.6rem); font-weight: 900; color: #ffffff; line-height: 1.2;
+      margin-bottom: 16px; font-family: 'Outfit', sans-serif;
+    }
+    .about-ethiobiz-lead {
+      font-size: clamp(0.95rem, 1.1vw, 1.05rem); line-height: 1.7; color: #ccfbf1; opacity: 0.92;
+      margin-bottom: 24px;
+    }
+    .about-glance-box {
+      background: rgba(0, 20, 24, 0.75); border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px; padding: 20px 24px; margin-bottom: 28px;
+    }
+    .about-glance-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .about-glance-title {
+      font-size: 0.88rem; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .about-glance-badge {
+      font-size: 0.72rem; font-weight: 800; color: #4ade80; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .about-glance-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    }
+    .about-glance-card {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px; padding: 12px 16px; text-align: left;
+    }
+    .about-glance-num {
+      font-size: 1.5rem; font-weight: 900; color: #2dd4bf; font-family: 'Outfit', sans-serif;
+    }
+    .about-glance-label {
+      font-size: 0.8rem; font-weight: 700; color: #e2e8f0; opacity: 0.9; margin-top: 4px;
+    }
+    .about-actions-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .about-know-more-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 999px;
+      background: linear-gradient(135deg, #00cccc, #008080); color: #011619 !important; font-weight: 800;
+      font-size: 0.92rem; text-decoration: none; box-shadow: 0 8px 24px rgba(0, 204, 204, 0.35); transition: transform 0.2s;
+    }
+    .about-know-more-btn:hover { transform: translateY(-2px); }
+    .about-register-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1); border: 1.5px solid rgba(255, 255, 255, 0.3); color: #ffffff !important;
+      font-weight: 800; font-size: 0.92rem; text-decoration: none; transition: all 0.2s;
+    }
+    .about-register-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* Orbital 5 Pillars */
+    .about-ethiobiz-orbital-wrapper {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;
+    }
+    .orbital-header-label { text-align: center; margin-bottom: 24px; }
+    .orbital-label-text {
+      display: block; font-size: 0.82rem; font-weight: 900; letter-spacing: 0.2em; color: #fde68a; text-transform: uppercase;
+    }
+    .orbital-label-sub {
+      display: block; font-size: 0.75rem; color: #99f6e4; opacity: 0.85; margin-top: 4px;
+    }
+    .pillars-orbital-system {
+      position: relative; width: clamp(340px, 36vw, 460px); height: clamp(340px, 36vw, 460px);
+      margin: 0 auto; display: flex; align-items: center; justify-content: center;
+    }
+    .orbital-ring { position: absolute; border-radius: 50%; pointer-events: none; }
+    .orbital-ring-outer {
+      width: 100%; height: 100%; border: 1.5px dashed rgba(0, 204, 204, 0.35);
+      animation: orbitRotate 90s linear infinite;
+    }
+    .orbital-ring-mid {
+      width: 76%; height: 76%; border: 1px solid rgba(251, 191, 36, 0.3);
+      animation: orbitRotateRev 60s linear infinite;
+    }
+    .orbital-ring-inner { width: 52%; height: 52%; border: 1px dashed rgba(255, 255, 255, 0.2); }
+    @keyframes orbitRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes orbitRotateRev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
+    .orbital-center-core {
+      position: absolute; z-index: 10; width: 104px; height: 104px; border-radius: 50%;
+      background: radial-gradient(circle, #02383d 0%, #011b1e 75%); border: 2.5px solid #00cccc;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 0 35px rgba(0, 204, 204, 0.5), inset 0 0 15px rgba(0, 204, 204, 0.3);
+    }
+    .orbital-core-logo { width: 46px; height: 46px; object-fit: contain; }
+    .orbital-core-text { font-size: 0.65rem; font-weight: 900; letter-spacing: 0.15em; color: #ffffff; margin-top: 3px; }
+
+    .orbital-pillar-node {
+      position: absolute; z-index: 15; text-decoration: none;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .orbital-pillar-node:hover { transform: scale(1.18); z-index: 25; }
+    .pillar-node-disc {
+      width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.45rem; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+    }
+    .node-tibeb { top: 0; left: 50%; transform: translateX(-50%); }
+    .node-tibeb .pillar-node-disc { background: linear-gradient(135deg, #7c3aed, #4c1d95); border-color: #c4b5fd; }
+    .node-dagu { top: 28%; right: 0; }
+    .node-dagu .pillar-node-disc { background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #7dd3fc; }
+    .node-magala { bottom: 6%; right: 12%; }
+    .node-magala .pillar-node-disc { background: linear-gradient(135deg, #d97706, #92400e); border-color: #fcd34d; }
+    .node-walta { bottom: 6%; left: 12%; }
+    .node-walta .pillar-node-disc { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #93c5fd; }
+    .node-afocha { top: 28%; left: 0; }
+    .node-afocha .pillar-node-disc { background: linear-gradient(135deg, #e11d48, #9f1239); border-color: #fda4af; }
+
+    .pillar-node-name {
+      font-size: 0.75rem; font-weight: 800; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      white-space: nowrap; background: rgba(1, 22, 25, 0.85); padding: 3px 9px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.22);
+    }
+
+    /* ================= 6. SLICED VERTICAL ACCORDION STACKING CARDS LIKE ETHIOPIA.GOV.ET ================= */
+    .hero-pathways-section {
+      width: 100%; max-width: 1400px; margin: 40px auto 35px; padding: 0 clamp(16px, 3vw, 32px);
+      position: relative; z-index: 20;
+    }
+    .hero-pathways-header { text-align: center; margin-bottom: 28px; }
+    .hero-pathways-title {
+      font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 900; color: #ffffff; margin-bottom: 8px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .hero-pathways-subtitle {
+      font-size: 1.05rem; color: #99f6e4; opacity: 0.9;
+    }
+    .accordion-stack-container {
+      display: flex; gap: 14px; width: 100%; height: 530px; align-items: stretch;
+      position: relative;
+    }
+    @media (max-width: 900px) {
+      .accordion-stack-container {
+        height: auto; flex-direction: column; gap: 12px;
       }
-      .hero-carousel-slide-erp .hero-carousel-art {
-        opacity: 0.96;
+    }
+    .accordion-pillar-strip {
+      border-radius: 24px; position: relative; overflow: hidden; cursor: pointer;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.18);
+      transition: flex 0.65s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s ease, border-color 0.3s ease;
+      min-width: 0;
+    }
+    /* Collapsed state (Desktop) */
+    @media (min-width: 901px) {
+      .accordion-pillar-strip { flex: 0 0 76px; }
+      .accordion-pillar-strip.is-expanded { flex: 6; cursor: default; }
+    }
+    @media (max-width: 900px) {
+      .accordion-pillar-strip { flex: 1 1 auto; min-height: 80px; }
+      .accordion-pillar-strip.is-expanded { min-height: 480px; }
+    }
+    .accordion-pillar-strip:hover { border-color: rgba(0, 204, 204, 0.7); }
+
+    /* The Vertical Collapsed Tab View */
+    .pillar-strip-collapsed {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: space-between; padding: 24px 12px; transition: opacity 0.4s ease;
+      pointer-events: none; z-index: 5;
+    }
+    .accordion-pillar-strip.is-expanded .pillar-strip-collapsed { opacity: 0; pointer-events: none; }
+    .strip-collapsed-icon {
+      width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.18);
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .strip-collapsed-title {
+      font-size: 1.1rem; font-weight: 900; color: #ffffff; letter-spacing: 0.15em; text-transform: uppercase;
+      writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    @media (max-width: 900px) {
+      .pillar-strip-collapsed {
+        flex-direction: row; padding: 18px 24px;
+      }
+      .strip-collapsed-title {
+        writing-mode: horizontal-tb; transform: none;
       }
     }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-pathway-card-inner, .hero-pathway-card-flip-button, .hero-portal-link, .hero-feed-jump { transition-duration: 0.01ms; }
-      .hero-pathway-flip-icon { animation: none; filter: drop-shadow(0 0 4px rgba(153, 246, 228, 0.7)); }
-      .hero-carousel-slide, .hero-carousel-slide.is-active,
-      .hero-carousel-dot, .hero-carousel-arrow, .hero-carousel-actions a {
-        transition-duration: 0.01ms !important; scroll-behavior: auto !important;
-      }
-      .hero-carousel-slide, .hero-carousel-slide.is-active { transform: none; }
-    }
 
-    /* 5 Pillar Navigation Command Dock */
-    .hero-pillars-nav-bar {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
-      margin-bottom: 22px; position: relative; z-index: 50;
-      background: rgba(1, 22, 25, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 1.5px solid rgba(254, 240, 138, 0.4); border-radius: 36px;
-      padding: 8px 14px; max-width: 960px; margin-left: auto; margin-right: auto;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    /* The Expanded Card View with 3D Flip */
+    .pillar-strip-expanded {
+      position: absolute; inset: 0; opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease 0.15s; z-index: 10;
+      perspective: 1200px;
     }
-    .pillar-dropdown-wrap { position: relative; padding-bottom: 12px; margin-bottom: -12px; }
-    .pillar-nav-btn {
-      background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1.5px solid rgba(255, 255, 255, 0.3); color: #ffffff !important; font-size: 12.5px; font-weight: 800;
-      padding: 7px 18px; border-radius: 24px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: all 0.22s ease; font-family: inherit;
+    .accordion-pillar-strip.is-expanded .pillar-strip-expanded {
+      opacity: 1; pointer-events: auto;
     }
-    .pillar-nav-btn:hover, .pillar-dropdown-wrap:hover .pillar-nav-btn, .pillar-dropdown-wrap.is-open .pillar-nav-btn {
-      background: linear-gradient(135deg, #008080 0%, #0d9488 100%); color: #ffffff !important; transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 204, 204, 0.5); border-color: #5eead4;
+    .pillar-card-flipper {
+      position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
     }
-    .pillar-nav-btn .dropdown-arrow { font-size: 9px; transition: transform 0.2s ease; color: var(--ethio-gold); }
-    .pillar-dropdown-wrap:hover .dropdown-arrow, .pillar-dropdown-wrap.is-open .dropdown-arrow { transform: rotate(180deg); }
+    .accordion-pillar-strip.is-flipped .pillar-card-flipper {
+      transform: rotateY(180deg);
+    }
+    .pillar-card-face {
+      position: absolute; inset: 0; padding: clamp(24px, 4vw, 44px);
+      display: flex; flex-direction: column; justify-content: space-between;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      border-radius: 24px; overflow-y: auto; text-align: left;
+    }
+    .pillar-card-front {
+      background: inherit;
+    }
+    .pillar-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(155deg, rgba(2, 28, 32, 0.98), rgba(1, 15, 17, 0.98));
+      border: 1.5px solid #00cccc;
+    }
+    .pillar-card-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px;
+    }
+    .pillar-card-badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 900;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #fde68a;
+      background: rgba(0, 0, 0, 0.25); padding: 6px 14px; border-radius: 999px;
+    }
+    .pillar-card-title {
+      font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; color: #ffffff; line-height: 1.15;
+      margin-bottom: 12px; font-family: 'Outfit', sans-serif;
+    }
+    .pillar-card-desc {
+      font-size: 1.05rem; line-height: 1.65; color: #ccfbf1; opacity: 0.95; margin-bottom: 24px; max-width: 620px;
+    }
+    .pillar-card-actions {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 16px;
+    }
+    .btn-pillar-primary {
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 999px;
+      background: #ffffff; color: #011619 !important; font-weight: 900; font-size: 0.92rem;
+      text-decoration: none; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); transition: transform 0.2s;
+    }
+    .btn-pillar-primary:hover { transform: translateY(-2px); }
+    .btn-pillar-secondary {
+      display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15); border: 1.5px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff !important; font-weight: 800; font-size: 0.92rem; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-pillar-secondary:hover { background: rgba(255, 255, 255, 0.25); }
+    .btn-flip-explore {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px;
+      background: rgba(0, 204, 204, 0.2); border: 1.5px solid #00cccc; color: #00cccc;
+      font-weight: 900; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; align-self: flex-start;
+    }
+    .btn-flip-explore:hover { background: #00cccc; color: #011619; }
+    .btn-flip-back {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff;
+      font-weight: 800; font-size: 0.85rem; cursor: pointer; margin-bottom: 16px; align-self: flex-start;
+    }
+    .portal-links-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 14px;
+    }
+    .portal-link-card {
+      display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff !important; text-decoration: none; transition: all 0.2s;
+    }
+    .portal-link-card:hover {
+      background: rgba(0, 204, 204, 0.18); border-color: #00cccc; transform: translateX(4px);
+    }
+    .portal-link-icon { font-size: 1.4rem; }
+    .portal-link-title { font-size: 0.9rem; font-weight: 800; color: #ffffff; }
+    .portal-link-sub { font-size: 0.75rem; color: #99f6e4; opacity: 0.8; }
 
-    .pillar-dropdown-menu {
-      display: none; position: absolute; top: calc(100% - 6px); left: 50%; transform: translateX(-50%);
-      min-width: 240px; background: rgba(1, 28, 33, 0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1.5px solid rgba(0, 204, 204, 0.7); border-radius: 16px; padding: 8px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 204, 204, 0.3);
-      z-index: 9999 !important; text-align: left;
-    }
-    /* Invisible bridge to eliminate any gap between button and dropdown */
-    .pillar-dropdown-menu::before {
-      content: '';
-      position: absolute;
-      top: -24px;
-      left: -15px;
-      right: -15px;
-      height: 30px;
-      background: transparent;
-      pointer-events: auto;
-    }
-    .pillar-dropdown-wrap:hover .pillar-dropdown-menu,
-    .pillar-dropdown-wrap:focus-within .pillar-dropdown-menu,
-    .pillar-dropdown-wrap.is-open .pillar-dropdown-menu {
-      display: block;
-      animation: dropdownFade 0.18s ease-out forwards;
-    }
-    @keyframes dropdownFade { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }
-
-    .pillar-menu-link {
-      display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 10px;
-      color: #ffffff !important; text-decoration: none !important; font-size: 12px; font-weight: 800; transition: all 0.15s ease;
-    }
-    .pillar-menu-link:hover { background: var(--ethio-teal); color: #ffffff !important; transform: translateX(3px); }
-    .pillar-menu-link span:last-child { color: var(--ethio-gold); font-size: 11px; }
-
-    /* Platform Live Pulse Metric Cards (Distinct 4-Grid Layout) */
-    .hero-stats-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-      max-width: 920px; margin: 0 auto;
-    }
-    @media (max-width: 768px) {
-      .hero-stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    }
-    .hero-stat-card {
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1.5px solid rgba(94, 234, 212, 0.4); border-radius: 18px; padding: 10px 14px;
-      text-align: center; transition: all 0.25s ease; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    }
-    .hero-stat-card:hover {
-      transform: translateY(-3px); border-color: #5eead4; box-shadow: 0 8px 24px rgba(0, 204, 204, 0.3);
-      background: rgba(255, 255, 255, 0.16);
-    }
-    .hero-stat-num {
-      font-size: 1.45rem; font-weight: 900; color: #5eead4; line-height: 1.1; margin-bottom: 3px;
-      text-shadow: 0 0 16px rgba(94, 234, 212, 0.5);
-    }
-    .hero-stat-label {
-      font-size: 11px; font-weight: 800; color: #edfcfd; text-transform: uppercase; letter-spacing: 0.4px;
-    }
-    .hero-live-stats {
-      max-width: 920px; margin: 24px auto 0; padding-top: 16px;
-      border-top: 1px solid rgba(153, 246, 228, 0.3);
-    }
-    .hero-live-stats-title {
-      margin: 0 0 12px; color: #a7f3d0; font-size: 0.72rem; font-weight: 900;
-      letter-spacing: 0.12em; text-align: center; text-transform: uppercase;
-    }
+    /* Pillar Specific Gradients */
+    .strip-tibeb { background: linear-gradient(135deg, #2e1065 0%, #4c1d95 60%, #1e1b4b 100%); }
+    .strip-dagu { background: linear-gradient(135deg, #0e7490 0%, #155e75 60%, #083344 100%); }
+    .strip-magala { background: linear-gradient(135deg, #78350f 0%, #92400e 60%, #451a03 100%); }
+    .strip-dobiz { background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #022c22 100%); }
+    .strip-walta { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 60%, #172554 100%); }
+    .strip-afocha { background: linear-gradient(135deg, #881337 0%, #9f1239 60%, #4c0519 100%); }
 
     /* ================= 5. SLIDABLE "RECOMMENDED FOR YOU" SHELF ================= */
     .for-you-section { margin-bottom: 34px; position: relative; z-index: 10; }
@@ -1187,156 +1102,175 @@
     </div>
   </section>
 
-  <!-- 3. PERSONALIZED HERO MASTERPIECE & 5 PILLAR DROPDOWNS -->
-  <section class="hero-masterpiece">
+  
+  <!-- ================= 3. FULL-SCREEN EDGE-TO-EDGE HERO SECTION ================= -->
+  <section class="hero-masterpiece" id="hero-masterpiece">
     <div class="hero-national-ribbon" aria-hidden="true"></div>
-    <img src="/files/ethiobiz_newyear_logo_700x700.png" alt="EthioBiz Logo" class="hero-brand-logo" width="80" height="80" onerror="this.hidden=true">
-    
-    <div>
-      <div class="hero-badge-pill">
-        <span class="live-pulse-dot"></span>
-        <span data-i18n="hero-badge">🇪🇹 ETHIOPIA'S UNIFIED ENTERPRISE CLOUD</span>
+
+    <div class="hero-top-badge-row">
+      <a href="/" class="hero-brand-emblem">
+        <img src="/files/ethiobiz_butterfly_logo.png" alt="EthioBiz Butterfly Logo" class="hero-brand-logo" onerror="this.src='/files/ethiobiz_logo.png'">
+        <div class="hero-badge-pill">
+          <span class="live-pulse-dot"></span>
+          <span data-i18n="hero-badge">🇪🇹 ETHIOPIA'S UNIFIED ENTERPRISE CLOUD</span>
+        </div>
+      </a>
+      <div class="hero-personalized-greeting" id="hero-personalized-greeting" data-i18n="hero-greeting-guest">
+        Selam, welcome to EthioBiz
       </div>
     </div>
 
-    <!-- DYNAMIC SELAM {USER} GREETING -->
-    <div class="hero-personalized-greeting" id="hero-personalized-greeting" data-i18n="hero-greeting-guest">
-      Selam, welcome to EthioBiz
-    </div>
-
-    <section class="hero-carousel" id="hero-carousel" role="region" aria-roledescription="carousel" data-i18n-aria-label="hero-carousel-name" aria-label="Featured EthioBiz services">
-      <div class="hero-carousel-rotation-row">
-        <button type="button" class="hero-carousel-rotation" id="hero-carousel-rotation" aria-controls="hero-carousel-track">
-          <span aria-hidden="true" id="hero-carousel-rotation-icon">Ⅱ</span>
-          <span id="hero-carousel-rotation-label" data-i18n="hero-carousel-pause">Pause slideshow</span>
-        </button>
-      </div>
-
-      <div class="hero-carousel-track" id="hero-carousel-track" aria-live="off">
-        <article class="hero-carousel-slide hero-carousel-slide-market is-active" data-hero-slide role="group" aria-roledescription="slide" aria-label="1 of 3" aria-hidden="false">
+    <!-- CAROUSEL TRACK -->
+    <div class="hero-carousel" id="hero-carousel" role="region" aria-roledescription="carousel" aria-label="Featured EthioBiz services">
+      <div class="hero-carousel-track" id="hero-carousel-track">
+        
+        <!-- SLIDE 1: ETHIOBIZ PLATFORM (slide_1.png) -->
+        <article class="hero-carousel-slide is-active" data-hero-slide role="group" aria-label="1 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-market-eyebrow">ETHIOBIZ PLATFORM</p>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-market-eyebrow">ETHIOBIZ PLATFORM</span>
             <h1 class="hero-carousel-title" data-i18n="hero-slide-market-title">Grow your business. Reach your next customer.</h1>
             <p class="hero-carousel-description" data-i18n="hero-slide-market-description">
               Bring your business online, connect with local customers, and discover useful services, learning, and work opportunities in one Ethiopian ecosystem.
             </p>
+            <div class="hero-carousel-actions">
+              <a href="https://wa.me/251986767576?text=Selam%20EthioBiz%20Team%2C%20I%20would%20like%20to%20request%20a%20Free%20Visibility%20and%20Workflow%20Audit" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-primary">
+                <span data-i18n="hero-slide-market-primary">⚡ Get a Free Visibility &amp; Workflow Audit</span><span aria-hidden="true">➜</span>
+              </a>
+              <a href="/about_ethiobiz" class="hero-cta-btn-secondary">
+                <span data-i18n="hero-slide-market-secondary">Know more about EthioBiz</span>
+              </a>
+            </div>
           </div>
+          <div class="hero-carousel-visual">
             <img src="/files/slide_1.png" class="hero-carousel-art" alt="EthioBiz Platform" loading="eager" />
-            <div class="hero-carousel-actions">
-            <a href="https://wa.me/251986767576?text=Selam%20EthioBiz%20Team%2C%20I%20would%20like%20to%20request%20a%20Free%20Visibility%20and%20Workflow%20Audit" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-primary">
-              <span data-i18n="hero-slide-market-primary">⚡ Get a Free Visibility &amp; Workflow Audit</span><span aria-hidden="true">➜</span>
-            </a>
-            <a href="/about_ethiobiz" class="hero-cta-btn-secondary">
-              <span data-i18n="hero-slide-market-secondary">Know more about EthioBiz</span>
-            </a>
           </div>
         </article>
 
-        <article class="hero-carousel-slide hero-carousel-slide-erp" data-hero-slide role="group" aria-roledescription="slide" aria-label="2 of 3" aria-hidden="true" inert>
+        <!-- SLIDE 2: DOBIZ SMARTERP (slide_2.png) -->
+        <article class="hero-carousel-slide" data-hero-slide role="group" aria-label="2 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-erp-eyebrow">DOBIZ SMARTERP</p>
-            <h1 class="hero-carousel-title" data-i18n="hero-slide-erp-title">Run your business with clarity.</h1>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-erp-eyebrow">DOBIZ SMARTERP</span>
+            <h2 class="hero-carousel-title" data-i18n="hero-slide-erp-title">Run your business with clarity.</h2>
             <p class="hero-carousel-description" data-i18n="hero-slide-erp-description">
-              Bring sales, inventory, finance, payroll, and day-to-day operations together with practical business software.
+              Bring sales, inventory, finance, payroll, and day-to-day operations together with practical Ethiopian ERP software.
             </p>
-          </div>
-            <img class="hero-carousel-art" src="BUSINESS-svg.svg" alt="" aria-hidden="true" width="800" height="800">
             <div class="hero-carousel-actions">
-            <a href="/dobiz" class="hero-cta-btn-primary">
-              <span data-i18n="hero-slide-erp-primary">📊 Explore DOBiz ERP</span><span aria-hidden="true">➜</span>
-            </a>
-            <a href="https://calendly.com/biztechnology/bizsolutions-consultation" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-secondary">
-              <span data-i18n="hero-slide-erp-secondary">📅 Book a Demo</span>
-            </a>
+              <a href="/dobiz" class="hero-cta-btn-primary">
+                <span data-i18n="hero-slide-erp-primary">📊 Explore DOBiz ERP</span><span aria-hidden="true">➜</span>
+              </a>
+              <a href="https://calendly.com/biztechnology/bizsolutions-consultation" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-secondary">
+                <span data-i18n="hero-slide-erp-secondary">📅 Book a Demo</span>
+              </a>
+            </div>
+          </div>
+          <div class="hero-carousel-visual">
+            <img src="/files/slide_2.png" class="hero-carousel-art" alt="DOBiz SmartERP" loading="lazy" />
           </div>
         </article>
 
-        <article class="hero-carousel-slide hero-carousel-slide-solutions" data-hero-slide role="group" aria-roledescription="slide" aria-label="3 of 3" aria-hidden="true" inert>
+        <!-- SLIDE 3: BIZ TECHNOLOGY SOLUTIONS (slide_3.png) -->
+        <article class="hero-carousel-slide" data-hero-slide role="group" aria-label="3 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-solutions-eyebrow">BIZ TECHNOLOGY SOLUTIONS</p>
-            <h1 class="hero-carousel-title" data-i18n="hero-slide-solutions-title">The right technology, delivered with local support.</h1>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-solutions-eyebrow">BIZ TECHNOLOGY SOLUTIONS</span>
+            <h2 class="hero-carousel-title" data-i18n="hero-slide-solutions-title">The right technology, delivered with local support.</h2>
             <p class="hero-carousel-description" data-i18n="hero-slide-solutions-description">
               Build custom software, connect enterprise systems, automate workflows, and get practical IT support with accountable delivery.
             </p>
-          </div>
-            <img src="/files/slide_2.png" class="hero-carousel-art" alt="DOBiz SmartERP" loading="lazy" />
             <div class="hero-carousel-actions">
-            <a href="https://biztechnology.et" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-primary">
-              <span data-i18n="hero-slide-solutions-primary">Know more about Biz Technology</span><span aria-hidden="true">➜</span>
-            </a>
-            <a href="tel:+251986767576" class="hero-cta-btn-secondary">
-              <span data-i18n="hero-slide-solutions-secondary">📞 Talk to the Biz Technology team</span>
-            </a>
+              <a href="https://biztechnology.et" target="_blank" rel="noopener noreferrer" class="hero-cta-btn-primary">
+                <span data-i18n="hero-slide-solutions-primary">Know more about Biz Technology</span><span aria-hidden="true">➜</span>
+              </a>
+              <a href="tel:+251986767576" class="hero-cta-btn-secondary">
+                <span data-i18n="hero-slide-solutions-secondary">📞 Talk to Biz Technology</span>
+              </a>
+            </div>
+          </div>
+          <div class="hero-carousel-visual">
+            <img src="/files/slide_3.png" class="hero-carousel-art" alt="Biz Technology Solutions" loading="lazy" />
           </div>
         </article>
 
-        <article class="hero-carousel-slide hero-carousel-slide-marketplace" data-hero-slide role="group" aria-roledescription="slide" aria-label="4 of 6" aria-hidden="true" inert>
+        <!-- SLIDE 4: MAGALA MARKETPLACE (slide_4.png) -->
+        <article class="hero-carousel-slide" data-hero-slide role="group" aria-label="4 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-marketplace-eyebrow">MAGALA MARKETPLACE</p>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-marketplace-eyebrow">MAGALA MARKETPLACE</span>
             <h2 class="hero-carousel-title" data-i18n="hero-slide-marketplace-title">Discover local finds. Shop with confidence.</h2>
-            <p class="hero-carousel-description" data-i18n="hero-slide-marketplace-description">Explore products from local sellers and find trusted services for everyday needs, all within the EthioBiz ecosystem.</p>
+            <p class="hero-carousel-description" data-i18n="hero-slide-marketplace-description">
+              Explore products from local sellers and find trusted services for everyday needs, all within the verified EthioBiz marketplace.
+            </p>
+            <div class="hero-carousel-actions">
+              <a href="/shop" class="hero-cta-btn-primary"><span data-i18n="hero-slide-marketplace-primary">🛍️ Shop Local Products</span><span aria-hidden="true">➜</span></a>
+              <a href="/magala" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-marketplace-secondary">Explore Magala</span></a>
+            </div>
           </div>
-          <img src="/files/slide_3.png" class="hero-carousel-art" alt="Biz Technology Solutions" loading="lazy" />
-          <div class="hero-carousel-actions">
-            <a href="/shop" class="hero-cta-btn-primary"><span data-i18n="hero-slide-marketplace-primary">🛍️ Shop Local Products</span><span aria-hidden="true">➜</span></a>
-            <a href="/magala" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-marketplace-secondary">Explore Magala</span></a>
+          <div class="hero-carousel-visual">
+            <img src="/files/slide_4.png" class="hero-carousel-art" alt="Magala Marketplace" loading="lazy" />
           </div>
         </article>
 
-        <article class="hero-carousel-slide hero-carousel-slide-jobs" data-hero-slide role="group" aria-roledescription="slide" aria-label="5 of 6" aria-hidden="true" inert>
+        <!-- SLIDE 5: OOSOO JOBS (slide_5.png) -->
+        <article class="hero-carousel-slide" data-hero-slide role="group" aria-label="5 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-jobs-eyebrow">OOSOO JOBS</p>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-jobs-eyebrow">OOSOO JOBS</span>
             <h2 class="hero-carousel-title" data-i18n="hero-slide-jobs-title">Find work that moves you forward.</h2>
-            <p class="hero-carousel-description" data-i18n="hero-slide-jobs-description">Explore career opportunities, discover roles that fit your skills, and take your next step with EthioBiz.</p>
+            <p class="hero-carousel-description" data-i18n="hero-slide-jobs-description">
+              Explore career opportunities, discover roles that fit your skills, and take your next step with Ethiopia's talent platform.
+            </p>
+            <div class="hero-carousel-actions">
+              <a href="/jobs" class="hero-cta-btn-primary"><span data-i18n="hero-slide-jobs-primary">💼 Explore Oosoo Jobs</span><span aria-hidden="true">➜</span></a>
+              <a href="/login#signup" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-jobs-secondary">Create a Free Account</span></a>
+            </div>
           </div>
-          <img src="/files/slide_4.png" class="hero-carousel-art" alt="Magala Marketplace" loading="lazy" />
-          <div class="hero-carousel-actions">
-            <a href="/jobs" class="hero-cta-btn-primary"><span data-i18n="hero-slide-jobs-primary">💼 Explore Oosoo Jobs</span><span aria-hidden="true">➜</span></a>
-            <a href="/login#signup" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-jobs-secondary">Create a Free Account</span></a>
+          <div class="hero-carousel-visual">
+            <img src="/files/slide_5.png" class="hero-carousel-art" alt="Oosoo Jobs" loading="lazy" />
           </div>
         </article>
 
-        <article class="hero-carousel-slide hero-carousel-slide-learning" data-hero-slide role="group" aria-roledescription="slide" aria-label="6 of 6" aria-hidden="true" inert>
+        <!-- SLIDE 6: DAGU ACADEMY (slide_6.png) -->
+        <article class="hero-carousel-slide" data-hero-slide role="group" aria-label="6 of 6">
           <div class="hero-carousel-copy">
-            <p class="hero-carousel-eyebrow" data-i18n="hero-slide-learning-eyebrow">DAGU ACADEMY</p>
+            <span class="hero-carousel-eyebrow" data-i18n="hero-slide-learning-eyebrow">DAGU ACADEMY</span>
             <h2 class="hero-carousel-title" data-i18n="hero-slide-learning-title">Learn a skill. Put knowledge to work.</h2>
-            <p class="hero-carousel-description" data-i18n="hero-slide-learning-description">Build practical skills with learning pathways designed to help you grow, teach, and turn knowledge into opportunity.</p>
+            <p class="hero-carousel-description" data-i18n="hero-slide-learning-description">
+              Build practical skills with learning pathways designed to help you grow, teach, and turn knowledge into opportunity.
+            </p>
+            <div class="hero-carousel-actions">
+              <a href="/courses" class="hero-cta-btn-primary"><span data-i18n="hero-slide-learning-primary">🎓 Explore Dagu Courses</span><span aria-hidden="true">➜</span></a>
+              <a href="/dagu" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-learning-secondary">Visit Dagu Academy</span></a>
+            </div>
           </div>
-          <img src="/files/slide_5.png" class="hero-carousel-art" alt="Oosoo Jobs" loading="lazy" />
-          <div class="hero-carousel-actions">
-            <a href="/courses" class="hero-cta-btn-primary"><span data-i18n="hero-slide-learning-primary">🎓 Explore Dagu Courses</span><span aria-hidden="true">➜</span></a>
-            <a href="/dagu" class="hero-cta-btn-secondary"><span data-i18n="hero-slide-learning-secondary">Visit Dagu Academy</span></a>
+          <div class="hero-carousel-visual">
+            <img src="/files/slide_6.png" class="hero-carousel-art" alt="Dagu Academy" loading="lazy" />
           </div>
         </article>
-      </div>
 
-      <div class="hero-carousel-controls">
-        <div class="hero-carousel-controls-group">
-          <button type="button" class="hero-carousel-arrow" id="hero-carousel-previous" data-i18n-aria-label="hero-carousel-previous" aria-label="Previous slide" aria-controls="hero-carousel-track"><span aria-hidden="true">‹</span></button>
-          <div class="hero-carousel-indicators" role="group" data-i18n-aria-label="hero-carousel-select-slide" aria-label="Choose a slide">
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="0" data-i18n-aria-label="hero-carousel-show-market" aria-label="Show the EthioBiz platform slide" aria-controls="hero-carousel-track" aria-pressed="true"></button>
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="1" data-i18n-aria-label="hero-carousel-show-erp" aria-label="Show the DOBiz SmartERP slide" aria-controls="hero-carousel-track" aria-pressed="false"></button>
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="2" data-i18n-aria-label="hero-carousel-show-solutions" aria-label="Show the Biz Technology Solutions slide" aria-controls="hero-carousel-track" aria-pressed="false"></button>
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="3" data-i18n-aria-label="hero-carousel-show-marketplace" aria-label="Show the Magala Marketplace slide" aria-controls="hero-carousel-track" aria-pressed="false"></button>
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="4" data-i18n-aria-label="hero-carousel-show-jobs" aria-label="Show the Oosoo Jobs slide" aria-controls="hero-carousel-track" aria-pressed="false"></button>
-            <button type="button" class="hero-carousel-dot" data-hero-slide-target="5" data-i18n-aria-label="hero-carousel-show-learning" aria-label="Show the Dagu Academy slide" aria-controls="hero-carousel-track" aria-pressed="false"></button>
-          </div>
-          <button type="button" class="hero-carousel-arrow" id="hero-carousel-next" data-i18n-aria-label="hero-carousel-next" aria-label="Next slide" aria-controls="hero-carousel-track"><span aria-hidden="true">›</span></button>
-        </div>
-        <span class="hero-carousel-counter" id="hero-carousel-counter" aria-hidden="true">01 / 06</span>
       </div>
-      <p class="hero-carousel-announcement" id="hero-carousel-announcement" aria-live="polite" aria-atomic="true"></p>
-    </section>
-
-    <!-- Direct Trust Strip -->
-    <div class="hero-trust-bar">
-      <span class="hero-trust-bar-item">📞 <span data-i18n="hero-trust-assistance-label">Direct Assistance:</span> <a href="tel:+251986767576">+251 98 676 7576</a> / <a href="https://wa.me/251986767576" target="_blank" rel="noopener noreferrer" data-i18n="hero-trust-whatsapp">WhatsApp Us</a></span>
-      <span class="hero-trust-bar-item">⏱️ <span data-i18n="hero-trust-onboarding">Onboarding &amp; local support in hours, not months</span></span>
     </div>
+
+    <!-- BOTTOM CONTROLS & SCROLL GUIDE -->
+    <div class="hero-bottom-controls">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button type="button" class="hero-carousel-arrow" id="hero-carousel-previous" aria-label="Previous slide">‹</button>
+        <div class="hero-carousel-indicators" role="group" aria-label="Select slide">
+          <button type="button" class="hero-carousel-dot is-active" data-hero-slide-target="0" aria-label="Slide 1" aria-pressed="true"></button>
+          <button type="button" class="hero-carousel-dot" data-hero-slide-target="1" aria-label="Slide 2" aria-pressed="false"></button>
+          <button type="button" class="hero-carousel-dot" data-hero-slide-target="2" aria-label="Slide 3" aria-pressed="false"></button>
+          <button type="button" class="hero-carousel-dot" data-hero-slide-target="3" aria-label="Slide 4" aria-pressed="false"></button>
+          <button type="button" class="hero-carousel-dot" data-hero-slide-target="4" aria-label="Slide 5" aria-pressed="false"></button>
+          <button type="button" class="hero-carousel-dot" data-hero-slide-target="5" aria-label="Slide 6" aria-pressed="false"></button>
+        </div>
+        <button type="button" class="hero-carousel-arrow" id="hero-carousel-next" aria-label="Next slide">›</button>
+      </div>
+
+      <span class="hero-carousel-counter" id="hero-carousel-counter">01 / 06</span>
+    </div>
+
+    <a href="#about-ethiobiz" class="hero-scroll-guide" aria-label="Scroll to explore">
+      <span class="hero-scroll-text">SCROLL</span>
+      <span class="hero-scroll-line"></span>
+    </a>
   </section>
 
-  <!-- 4. ECOSYSTEM PATHWAYS & PORTALS (MOVED BELOW HERO BEAUTIFULLY & CREATIVELY) -->
-  
   <!-- ===================================================================== -->
   <!-- 3.5 ABOUT ETHIOBIZ SPLIT SECTION WITH CIRCULAR 5 PILLARS ORBITAL SYSTEM -->
   <!-- ===================================================================== -->
@@ -1490,347 +1424,337 @@
       </p>
     </div>
 
-    <nav class="hero-pathways" aria-labelledby="hero-pathways-title">
-      <h2 class="hero-pathways-title" id="hero-pathways-title" data-i18n="hero-pathways-title">Start with what you need</h2>
-      <div class="hero-pathways-grid">
-        <article class="hero-pathway-card hero-pathway-card-tibeb">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top"><span class="hero-pathway-icon"><img src="/files/tibeb_logo.png" alt="Tibeb logo" onerror="this.src='/files/tibeb.png'"></span><h3 class="hero-pathway-title"><span data-i18n="hero-pathway-tibeb-title">Tibeb</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-tibeb-subtitle">Wisdom • Reflection • Meaning</span></h3></div>
-              <p class="hero-pathway-description" data-i18n="hero-pathway-tibeb-description">Pause for fresh perspectives, spiritual insight, and ideas that bring meaning to everyday life.</p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link" href="/tibeb-mentor-subscriber"><span data-i18n="tibeb-mentor-cta">Join as a Tibeb mentor or subscriber</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary" href="/tibeb" data-i18n="tibeb-explore-cta">Explore Tibeb</a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-tibeb" aria-label="Explore wisdom and insight" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-tibeb">Explore wisdom and insight</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <img src="/files/tibeb_logo.png" alt="" class="hero-pathway-card-back-logo" width="38" height="38" onerror="this.src='/files/tibeb.png'">
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="hero-portal-tibeb">Tibeb Portals</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><img src="/files/tibeb_logo.png" alt="" onerror="this.src='/files/tibeb.png'"><span data-i18n="hero-portal-tibeb">Tibeb Portals</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/tibeb" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🏛️</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-tibeb-home">Tibeb Home</span><span class="hero-portal-link-description" data-i18n="portal-tibeb-home-description">Explore Tibeb wisdom and insight</span></span></a>
-                    <a href="/blog" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">📝</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-tibeb-articles">Tibebs (Articles)</span><span class="hero-portal-link-description" data-i18n="portal-tibeb-articles-description">Read reflections and inspiring ideas</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-        <article class="hero-pathway-card hero-pathway-card-dagu">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top"><span class="hero-pathway-icon"><img src="/files/dagu_logo.png" alt="Dagu Academy logo" onerror="this.src='/files/dagu.png'"></span><h3 class="hero-pathway-title"><span data-i18n="hero-pathway-dagu-title">Dagu Academy</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-dagu-subtitle">Learn • Earn • Serve</span></h3></div>
-              <p class="hero-pathway-description" data-i18n="hero-pathway-dagu-description">Turn what you learn into practical skills, meaningful work, and ways to serve with confidence.</p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link-secondary" href="/courses" data-i18n="dagu-explore-cta">Explore Dagu courses</a>
-                <a class="hero-pathway-link" href="/jobs"><span data-i18n="hero-pathway-career-primary">Search jobs</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary hero-pathway-link-full" href="/dagu" data-i18n="hero-pathway-dagu-home">Dagu Academy Home</a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-dagu" aria-label="Learn and find ways to serve" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-dagu">Learn, work, and serve</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <img src="/files/dagu_logo.png" alt="" class="hero-pathway-card-back-logo" width="38" height="38" onerror="this.src='/files/dagu.png'">
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="hero-portal-dagu">Dagu Academy</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><img src="/files/dagu_logo.png" alt="" onerror="this.src='/files/dagu.png'"><span data-i18n="hero-portal-dagu">Dagu Academy</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/dagu" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🎓</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-dagu-home">Dagu Home</span><span class="hero-portal-link-description" data-i18n="portal-dagu-home-description">Explore learning and instructor paths</span></span></a>
-                    <a href="/courses" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">📚</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-dagu-courses">Dagu Courses</span><span class="hero-portal-link-description" data-i18n="portal-dagu-courses-description">Build practical skills step by step</span></span></a>
-                    <a href="/dagu-instructor-registration" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">👩‍🏫</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="dagu-instructor-registration-cta">Register as a Dagu instructor</span><span class="hero-portal-link-description" data-i18n="portal-dagu-instructor-description">Share what you know with learners</span></span></a>
-                  </div>
-                </div>
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><span aria-hidden="true">💼</span><span data-i18n="portal-jobs">Oosoo Jobs</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/jobs" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">💼</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-jobs">Oosoo Jobs</span><span class="hero-portal-link-description" data-i18n="portal-jobs-description">Find work that puts your skills to use</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-        <article class="hero-pathway-card hero-pathway-card-shop">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top">
-                <span class="hero-pathway-icon"><img src="/files/magala_logo.png" alt="Magala Market logo" onerror="this.src='/files/magala.png'"></span>
-                <h3 class="hero-pathway-title"><span data-i18n="hero-pathway-shop-title">Magala Market</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-shop-subtitle">Shop • Services • Local Finds</span></h3>
-              </div>
-              <p class="hero-pathway-description hero-pathway-shop-links">
-                <span data-i18n="hero-pathway-shop-copy-before">Make everyday tasks easier with Magala: </span><a class="hero-inline-link" href="/shop" data-i18n="hero-pathway-shop-link-products">shop products from local sellers</a>, <a class="hero-inline-link" href="/bizservices" data-i18n="hero-pathway-shop-link-services">find and book trusted local services</a>, <a class="hero-inline-link" href="/bizhome" data-i18n="hero-pathway-shop-link-homes">explore homes and property</a>, <a class="hero-inline-link" href="/bizhealth" data-i18n="hero-pathway-shop-link-health">connect with health services</a>, <a class="hero-inline-link" href="/bizride" data-i18n="hero-pathway-shop-link-rides">arrange rides and delivery</a>, <span data-i18n="hero-pathway-shop-copy-and">and</span> <a class="hero-inline-link" href="/bizfix" data-i18n="hero-pathway-shop-link-repairs">get help with repairs and maintenance</a>.
-              </p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link" href="/magala"><span data-i18n="hero-pathway-shop-landing">Explore Magala</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary" href="/login#signup"><span data-i18n="hero-pathway-shop-signup">Sign up free</span></a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-shop" aria-label="Explore Magala Market" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-shop">Discover Magala Market</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <img src="/files/magala_logo.png" alt="" class="hero-pathway-card-back-logo" width="38" height="38" onerror="this.src='/files/magala.png'">
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="hero-portal-magala">Magala Systems</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><img src="/files/magala_logo.png" alt="" onerror="this.src='/files/magala.png'"><span data-i18n="hero-portal-magala">Magala Systems</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/magala" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🛍️</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-magala-home">Magala Home</span><span class="hero-portal-link-description" data-i18n="portal-magala-home-description">Explore the full marketplace</span></span></a>
-                    <a href="https://ethiobiz.et/app" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">📈</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-dobiz-erp">DOBiz Smart ERP</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-erp-description">Manage and grow your business</span></span></a>
-                    <a href="/shop" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🛒</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-shop">Dikka Shop</span><span class="hero-portal-link-description" data-i18n="portal-shop-description">Shop products from local sellers</span></span></a>
-                    <a href="/map" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🗺️</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-business-map">Business Map</span><span class="hero-portal-link-description" data-i18n="portal-business-map-description">Find businesses around you</span></span></a>
-                    <a href="/bizservices" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">⚡</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-bizservices">BizServices</span><span class="hero-portal-link-description" data-i18n="portal-bizservices-description">Discover and book local services</span></span></a>
-                    <a href="/bizhome" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🏠</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-bizhome">BizHome Real Estate</span><span class="hero-portal-link-description" data-i18n="portal-bizhome-description">Explore homes and property</span></span></a>
-                    <a href="/bizhealth" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🩺</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-bizhealth">BizHealth Clinic</span><span class="hero-portal-link-description" data-i18n="portal-bizhealth-description">Connect with health services</span></span></a>
-                    <a href="/bizfix" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🔧</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-bizfix">BizFix Maintenance</span><span class="hero-portal-link-description" data-i18n="portal-bizfix-description">Get repair and maintenance help</span></span></a>
-                    <a href="/bizride" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🚗</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-bizride">BizRide Dispatch</span><span class="hero-portal-link-description" data-i18n="portal-bizride-description">Request a ride or delivery</span></span></a>
-                    <a href="/jobs" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">💼</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-jobs">Oosoo Jobs</span><span class="hero-portal-link-description" data-i18n="portal-jobs-description">Find work that puts your skills to use</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-        <article class="hero-pathway-card hero-pathway-card-business">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top"><span class="hero-pathway-icon"><img src="https://ethiobiz.et/files/dobiz_3d_icon.png" alt="DOBiz SmartERP logo"></span><h3 class="hero-pathway-title"><span data-i18n="hero-pathway-business-title">DOBiz SmartERP</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-business-subtitle">Grow your business</span></h3></div>
-              <p class="hero-pathway-description"><span data-i18n="hero-pathway-business-industries-intro">Manage operations, track performance, and grow with one smart ERP built for:</span>
-                <a class="hero-inline-link" href="/dobiz-retail" data-i18n="industry-retail">Retail</a>,
-                <a class="hero-inline-link" href="/dobiz-service" data-i18n="industry-service">Service</a>,
-                <a class="hero-inline-link" href="/dobiz-manufacturing" data-i18n="industry-manufacturing">Manufacturing</a>,
-                <a class="hero-inline-link" href="/dobiz-health" data-i18n="industry-healthcare">Healthcare</a>,
-                <a class="hero-inline-link" href="/dobiz-education" data-i18n="industry-education">Education</a>,
-                <a class="hero-inline-link" href="/bizhome" data-i18n="industry-real-estate">Real Estate</a>, <span data-i18n="hero-pathway-business-industries-and">and</span>
-                <a class="hero-inline-link" href="/bizservices" data-i18n="industry-hospitality">Hospitality</a>.
-              </p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link" href="/dobiz-signup"><span data-i18n="dobiz-subscription-cta">Sign up for DOBiz</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link" href="/trial"><span data-i18n="dobiz-trial-cta">Start DOBiz Trial</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary" href="/dobiz" data-i18n="hero-pathway-business-more">Know more about DOBiz</a>
-                <a class="hero-pathway-link-secondary" href="/app" data-i18n="hero-pathway-business-app">Go to DOBiz</a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-business" aria-label="Explore DOBiz solutions" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-business">Explore DOBiz solutions</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <span class="hero-pathway-icon"><img src="https://ethiobiz.et/files/dobiz_3d_icon.png" alt="DOBiz SmartERP logo"></span>
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="dobiz-smart-erp-grow">DOBiz SmartERP</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><span aria-hidden="true">📈</span><span data-i18n="dobiz-industry-group">DOBiz industry solutions</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/dobiz" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">📈</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-dobiz-erp-label">DOBiz SmartERP</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-landing-description">Explore the full DOBiz platform</span></span></a>
-                    <a href="/dobiz-retail" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🛍️</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-retail">Retail</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-retail-description">Manage sales, stock, and customers</span></span></a>
-                    <a href="/dobiz-service" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">⚡</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-service">Service</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-service-description">Organize bookings and service work</span></span></a>
-                    <a href="/dobiz-manufacturing" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🏭</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-manufacturing">Manufacturing</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-manufacturing-description">Plan production and materials</span></span></a>
-                    <a href="/dobiz-health" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🩺</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-healthcare">Healthcare</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-healthcare-description">Coordinate care and clinic operations</span></span></a>
-                    <a href="/dobiz-education" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🎓</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-education">Education</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-education-description">Manage learning and administration</span></span></a>
-                    <a href="/bizhome" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🏠</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-real-estate">Real Estate</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-real-estate-description">Oversee property and listings</span></span></a>
-                    <a href="/bizservices" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🏨</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="industry-hospitality">Hospitality</span><span class="hero-portal-link-description" data-i18n="portal-dobiz-hospitality-description">Streamline guest services</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-        <article class="hero-pathway-card hero-pathway-card-walta">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top"><span class="hero-pathway-icon"><img src="/files/walta_logo.png" alt="Walta Support logo" onerror="this.src='/files/walta.png'"></span><h3 class="hero-pathway-title"><span data-i18n="hero-pathway-walta-title">Walta Support</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-walta-subtitle">Guidance • Help • Resolution</span></h3></div>
-              <p class="hero-pathway-description" data-i18n="hero-pathway-walta-description">Get reliable help, track support requests, and find guidance when you need it.</p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link" href="/walta-main"><span data-i18n="hero-pathway-walta-home">Walta Home</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary" href="/issues" data-i18n="hero-pathway-walta-primary">Get support</a>
-                <a class="hero-pathway-link-secondary hero-pathway-link-full" href="/support" data-i18n="hero-pathway-walta-secondary">Help resources</a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-walta" aria-label="Explore Walta Support" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-walta">Explore support options</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <img src="/files/walta_logo.png" alt="Walta Support logo" class="hero-pathway-card-back-logo" width="38" height="38" onerror="this.src='/files/walta.png'">
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="hero-portal-walta">Walta Support</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><img src="/files/walta_logo.png" alt="" onerror="this.src='/files/walta.png'"><span data-i18n="hero-portal-walta">Walta Support</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/walta-main" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🛡️</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-walta-home">Walta Home</span><span class="hero-portal-link-description" data-i18n="portal-walta-home-description">Visit the Walta support center</span></span></a>
-                    <a href="/issues" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🎫</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-walta-tickets">Walta Tickets</span><span class="hero-portal-link-description" data-i18n="portal-walta-tickets-description">Submit and track support requests</span></span></a>
-                    <a href="/support" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">📖</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-walta-docs">Walta Docs</span><span class="hero-portal-link-description" data-i18n="portal-walta-docs-description">Find guides and helpful answers</span></span></a>
-                    <a href="/forum" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">💬</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-walta-forum">Walta Forum</span><span class="hero-portal-link-description" data-i18n="portal-walta-forum-description">Ask questions and share solutions</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-        <article class="hero-pathway-card hero-pathway-card-community">
-          <div class="hero-pathway-card-inner">
-            <div class="hero-pathway-face hero-pathway-face-front">
-              <div class="hero-pathway-top"><span class="hero-pathway-icon"><img src="/files/afocha_logo.png" alt="Afocha Social logo" onerror="this.src='/files/afocha.png'"></span><h3 class="hero-pathway-title"><span data-i18n="hero-pathway-community-title">Afocha Social</span><span class="hero-pathway-title-subtitle" data-i18n="hero-pathway-community-subtitle">Connect • Share • Belong</span></h3></div>
-              <p class="hero-pathway-description" data-i18n="hero-pathway-community-description">Meet your community, share stories, and build meaningful connections together.</p>
-              <div class="hero-pathway-actions">
-                <a class="hero-pathway-link" href="/social"><span data-i18n="hero-pathway-community-primary">Join Afocha</span><span aria-hidden="true">➜</span></a>
-                <a class="hero-pathway-link-secondary" href="/afocha" data-i18n="hero-pathway-community-secondary">Explore Afocha</a>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button" data-i18n-aria-label="hero-flip-community" aria-label="Join the conversation" aria-pressed="false">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">✦</span><span data-i18n="hero-flip-community">Join the conversation</span>
-              </button>
-            </div>
-            <div class="hero-pathway-face hero-pathway-face-back" aria-hidden="true" inert>
-              <div class="hero-pathway-card-back-header">
-                <img src="/files/afocha_logo.png" alt="" class="hero-pathway-card-back-logo" width="38" height="38" onerror="this.src='/files/afocha.png'">
-                <div><span class="hero-pathway-card-back-kicker" data-i18n="hero-flip-kicker">System portals</span><h3 class="hero-pathway-card-back-title" data-i18n="hero-portal-afocha">Afocha Social</h3></div>
-              </div>
-              <div class="hero-pathway-card-back-groups">
-                <div class="hero-pathway-portal-group">
-                  <div class="hero-pathway-portal-group-title"><img src="/files/afocha_logo.png" alt="" onerror="this.src='/files/afocha.png'"><span data-i18n="hero-portal-afocha">Afocha Social</span></div>
-                  <div class="hero-pathway-portal-links">
-                    <a href="/afocha" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">🌟</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-afocha-home">Afocha Home</span><span class="hero-portal-link-description" data-i18n="portal-afocha-home-description">Visit the Afocha community hub</span></span></a>
-                    <a href="/social" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">💬</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="portal-afocha-social">Afocha Social</span><span class="hero-portal-link-description" data-i18n="portal-afocha-social-description">Connect and share with others</span></span></a>
-                    <a href="/login#signup" class="hero-portal-link"><span class="hero-portal-link-icon" aria-hidden="true">✨</span><span class="hero-portal-link-copy"><span class="hero-portal-link-label" data-i18n="pillar-registration-cta">Join EthioBiz free</span><span class="hero-portal-link-description" data-i18n="portal-afocha-signup-description">Create an account to take part</span></span></a>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="hero-pathway-card-flip-button hero-pathway-card-flip-button-back" data-i18n-aria-label="hero-flip-close" aria-label="Back to overview" aria-pressed="true">
-                <span class="hero-pathway-flip-icon" aria-hidden="true">↶</span><span data-i18n="hero-flip-close">Back to overview</span>
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </nav>
-
-    <div class="hero-free-signup">
-      <p class="hero-free-signup-copy">
-        <strong data-i18n="free-signup-title">One free account. A world of EthioBiz.</strong>
-        <span data-i18n="free-signup-description">Learn with Dagu, shop products and services, follow the Walta ticker and forum, and connect on Afocha Social.</span>
-      </p>
-      <a class="hero-free-signup-link" href="/login#signup">
-        <span data-i18n="free-signup-cta">Create your free account</span><span aria-hidden="true">➜</span>
-      </a>
+    
+  <!-- ================= 6. SLICED VERTICAL ACCORDION STACKING CARDS LIKE ETHIOPIA.GOV.ET ================= -->
+  <section class="hero-pathways-section" id="pathways-accordion">
+    <div class="hero-pathways-header">
+      <h2 class="hero-pathways-title" data-i18n="hero-pathways-title">Start with what you need</h2>
+      <p class="hero-pathways-subtitle">Explore the 5 Sacred Pillars &amp; Enterprise Core of EthioBiz</p>
     </div>
 
-    <!-- 5 EthioBiz Pillars with Clean Dropdowns -->
-    <div class="hero-pillars-nav-bar">
-      <!-- 1. TIBEB -->
-      <div class="pillar-dropdown-wrap">
-        <button class="pillar-nav-btn"><span>🎨 TIBEB</span> <span class="dropdown-arrow">▼</span></button>
-        <div class="pillar-dropdown-menu">
-          <a href="/tibeb" class="pillar-menu-link"><span>🏛️ Tibeb Home</span> <span>➔</span></a>
-          <a href="/blog" class="pillar-menu-link"><span>📝 Tibebs (Articles)</span> <span>➔</span></a>
+    <div class="accordion-stack-container" id="accordion-stack-container">
+      
+      <!-- 1. TIBEB (PURPLE) -->
+      <div class="accordion-pillar-strip strip-tibeb is-expanded" data-pillar-index="0">
+        <!-- Collapsed vertical tab -->
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">📖</div>
+          <div class="strip-collapsed-title">TIBEB WISDOM • SCRIPTURES</div>
+          <div style="font-size:12px; color:#c4b5fd;">01</div>
+        </div>
+        <!-- Expanded Card View with 3D Flip -->
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <!-- FRONT FACE -->
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ SACRED PILLAR I</span>
+                  <span style="font-size:1.8rem;">📖</span>
+                </div>
+                <h3 class="pillar-card-title">Tibeb (ጥበብ)</h3>
+                <p style="font-size:0.95rem; color:#fde68a; font-weight:800; margin-bottom:12px;">Wisdom • Reflection • Meaning • Scriptures</p>
+                <p class="pillar-card-desc">
+                  Pause for fresh perspectives, spiritual insight, and divine scripture reader that brings meaning to everyday life across Ethiopia's holy traditions.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/tibeb" class="btn-pillar-primary">📖 Open Holy Scriptures Reader ➔</a>
+                  <a href="/tibeb-mentor-subscriber" class="btn-pillar-secondary">Join as Mentor / Subscriber</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="0">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <!-- BACK FACE (3D FLIP) -->
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="0">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#fde68a; margin-bottom:8px;">Tibeb Portals &amp; Scriptures</h4>
+                <p style="font-size:0.85rem; color:#ccfbf1; margin-bottom:14px;">Direct access to scriptures, reflections, and spiritual guidance.</p>
+                <div class="portal-links-grid">
+                  <a href="/tibeb" class="portal-link-card">
+                    <span class="portal-link-icon">🏛️</span>
+                    <div><div class="portal-link-title">Tibeb Home &amp; Reader</div><div class="portal-link-sub">Full Holy Scriptures</div></div>
+                  </a>
+                  <a href="/blog" class="portal-link-card">
+                    <span class="portal-link-icon">📝</span>
+                    <div><div class="portal-link-title">Tibeb Articles</div><div class="portal-link-sub">Reflections &amp; Wisdom</div></div>
+                  </a>
+                  <a href="/tibeb-mentor-subscriber" class="portal-link-card">
+                    <span class="portal-link-icon">🕊️</span>
+                    <div><div class="portal-link-title">Mentorship Circle</div><div class="portal-link-sub">Connect with scholars</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 2. DAGU ACADEMY -->
-      <div class="pillar-dropdown-wrap">
-        <button class="pillar-nav-btn"><span>🎓 DAGU ACADEMY</span> <span class="dropdown-arrow">▼</span></button>
-        <div class="pillar-dropdown-menu">
-          <a href="/dagu" class="pillar-menu-link"><span>🎓 Dagu Home</span> <span>➔</span></a>
-          <a href="/courses" class="pillar-menu-link"><span>📚 Dagu Courses</span> <span>➔</span></a>
+      <!-- 2. DAGU ACADEMY (CYAN/BLUE) -->
+      <div class="accordion-pillar-strip strip-dagu" data-pillar-index="1">
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">🎓</div>
+          <div class="strip-collapsed-title">DAGU ACADEMY • CAREERS</div>
+          <div style="font-size:12px; color:#7dd3fc;">02</div>
+        </div>
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ SACRED PILLAR II</span>
+                  <span style="font-size:1.8rem;">🎓</span>
+                </div>
+                <h3 class="pillar-card-title">Dagu Academy &amp; Oosoo Jobs</h3>
+                <p style="font-size:0.95rem; color:#7dd3fc; font-weight:800; margin-bottom:12px;">Learn • Earn • Serve • Talent Careers</p>
+                <p class="pillar-card-desc">
+                  Turn what you learn into practical skills, meaningful work, and ways to serve with confidence. Discover accredited courses and verified job openings.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/courses" class="btn-pillar-primary">🎓 Explore Practical Courses ➔</a>
+                  <a href="/jobs" class="btn-pillar-secondary">💼 Search Job Openings</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="1">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="1">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#7dd3fc; margin-bottom:8px;">Dagu &amp; Careers Portals</h4>
+                <div class="portal-links-grid">
+                  <a href="/dagu" class="portal-link-card">
+                    <span class="portal-link-icon">🎓</span>
+                    <div><div class="portal-link-title">Dagu Home</div><div class="portal-link-sub">Learning Ecosystem</div></div>
+                  </a>
+                  <a href="/courses" class="portal-link-card">
+                    <span class="portal-link-icon">📚</span>
+                    <div><div class="portal-link-title">All Courses</div><div class="portal-link-sub">Practical ERP &amp; Tech</div></div>
+                  </a>
+                  <a href="/jobs" class="portal-link-card">
+                    <span class="portal-link-icon">💼</span>
+                    <div><div class="portal-link-title">Oosoo Jobs</div><div class="portal-link-sub">Verified Ethiopian Roles</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 3. MAGALA MARKETPLACE -->
-      <div class="pillar-dropdown-wrap">
-        <button class="pillar-nav-btn"><span>🛍️ MAGALA MARKETPLACE</span> <span class="dropdown-arrow">▼</span></button>
-        <div class="pillar-dropdown-menu">
-          <a href="/magala" class="pillar-menu-link"><span>🛍️ Magala Home</span> <span>➔</span></a>
-          <a href="https://ethiobiz.et/app" class="pillar-menu-link"><span>💼 DOBiz Smart ERP</span> <span>➔</span></a>
-          <a href="/shop" class="pillar-menu-link"><span>🛒 Dikka Shop</span> <span>➔</span></a>
-          <a href="/jobs" class="pillar-menu-link"><span>💼 Oosoo Jobs</span> <span>➔</span></a>
-          <a href="/map" class="pillar-menu-link"><span>🗺️ Business Map</span> <span>➔</span></a>
-          <a href="/bizservices" class="pillar-menu-link"><span>⚡ BizServices</span> <span>➔</span></a>
-          <a href="/bizhome" class="pillar-menu-link"><span>🏠 BizHome</span> <span>➔</span></a>
-          <a href="/bizhealth" class="pillar-menu-link"><span>🩺 BizHealth</span> <span>➔</span></a>
-          <a href="/bizfix" class="pillar-menu-link"><span>🔧 BizFix</span> <span>➔</span></a>
-          <a href="/bizride" class="pillar-menu-link"><span>🚗 BizRide</span> <span>➔</span></a>
+      <!-- 3. MAGALA MARKETPLACE (AMBER) -->
+      <div class="accordion-pillar-strip strip-magala" data-pillar-index="2">
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">🛍️</div>
+          <div class="strip-collapsed-title">MAGALA MARKETPLACE • COMMERCE</div>
+          <div style="font-size:12px; color:#fcd34d;">03</div>
+        </div>
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ SACRED PILLAR III</span>
+                  <span style="font-size:1.8rem;">🛍️</span>
+                </div>
+                <h3 class="pillar-card-title">Magala Market</h3>
+                <p style="font-size:0.95rem; color:#fcd34d; font-weight:800; margin-bottom:12px;">Shop Local • Verified Sellers • BizServices</p>
+                <p class="pillar-card-desc">
+                  Shop authentic Ethiopian products from verified merchants, find trusted local services, arrange on-demand bookings, and trade with confidence.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/shop" class="btn-pillar-primary">🛍️ Shop Products ➔</a>
+                  <a href="/bizservices" class="btn-pillar-secondary">⚡ Book BizServices</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="2">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="2">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#fcd34d; margin-bottom:8px;">Magala Commerce Portals</h4>
+                <div class="portal-links-grid">
+                  <a href="/shop" class="portal-link-card">
+                    <span class="portal-link-icon">🛍️</span>
+                    <div><div class="portal-link-title">Online Store</div><div class="portal-link-sub">Verified Merchants</div></div>
+                  </a>
+                  <a href="/bizservices" class="portal-link-card">
+                    <span class="portal-link-icon">⚡</span>
+                    <div><div class="portal-link-title">BizServices</div><div class="portal-link-sub">Instant Booking</div></div>
+                  </a>
+                  <a href="/magala" class="portal-link-card">
+                    <span class="portal-link-icon">🏪</span>
+                    <div><div class="portal-link-title">Merchant Hub</div><div class="portal-link-sub">Sell on Magala</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 4. WALTA SUPPORT -->
-      <div class="pillar-dropdown-wrap">
-        <button class="pillar-nav-btn"><span>🛡️ WALTA SUPPORT</span> <span class="dropdown-arrow">▼</span></button>
-        <div class="pillar-dropdown-menu">
-          <a href="/walta-main" class="pillar-menu-link"><span>🛡️ Walta Home</span> <span>➔</span></a>
-          <a href="/issues" class="pillar-menu-link"><span>🎫 Walta Tickets</span> <span>➔</span></a>
-          <a href="/support" class="pillar-menu-link"><span>📖 Walta Docs</span> <span>➔</span></a>
-          <a href="/forum" class="pillar-menu-link"><span>💬 Walta Forum</span> <span>➔</span></a>
+      <!-- 4. DOBIZ SMARTERP (EMERALD GREEN) -->
+      <div class="accordion-pillar-strip strip-dobiz" data-pillar-index="3">
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">📊</div>
+          <div class="strip-collapsed-title">DOBIZ SMARTERP • ENTERPRISE</div>
+          <div style="font-size:12px; color:#6ee7b7;">04</div>
+        </div>
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ ENTERPRISE CORE</span>
+                  <span style="font-size:1.8rem;">📊</span>
+                </div>
+                <h3 class="pillar-card-title">DOBiz SmartERP</h3>
+                <p style="font-size:0.95rem; color:#6ee7b7; font-weight:800; margin-bottom:12px;">Grow Your Business • Local Compliance • POS &amp; Payroll</p>
+                <p class="pillar-card-desc">
+                  Manage operations, track performance, and grow with one smart ERP built for Retail, Services, Manufacturing, Healthcare, Education, and Real Estate.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/dobiz" class="btn-pillar-primary">📊 Explore DOBiz ERP ➔</a>
+                  <a href="https://calendly.com/biztechnology/bizsolutions-consultation" target="_blank" rel="noopener noreferrer" class="btn-pillar-secondary">Start Free Trial / Demo</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="3">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="3">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#6ee7b7; margin-bottom:8px;">DOBiz Industry Solutions</h4>
+                <div class="portal-links-grid">
+                  <a href="/dobiz-retail" class="portal-link-card">
+                    <span class="portal-link-icon">🛒</span>
+                    <div><div class="portal-link-title">Retail &amp; POS</div><div class="portal-link-sub">Smart Store Management</div></div>
+                  </a>
+                  <a href="/dobiz-health" class="portal-link-card">
+                    <span class="portal-link-icon">🏥</span>
+                    <div><div class="portal-link-title">Healthcare ERP</div><div class="portal-link-sub">Clinics &amp; Pharmacies</div></div>
+                  </a>
+                  <a href="/dobiz-manufacturing" class="portal-link-card">
+                    <span class="portal-link-icon">🏭</span>
+                    <div><div class="portal-link-title">Manufacturing</div><div class="portal-link-sub">BOM &amp; Work Orders</div></div>
+                  </a>
+                  <a href="/dobiz-education" class="portal-link-card">
+                    <span class="portal-link-icon">🏫</span>
+                    <div><div class="portal-link-title">Education ERP</div><div class="portal-link-sub">Schools &amp; Institutes</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 5. AFOCHA SOCIAL -->
-      <div class="pillar-dropdown-wrap">
-        <button class="pillar-nav-btn"><span>🌟 AFOCHA SOCIAL</span> <span class="dropdown-arrow">▼</span></button>
-        <div class="pillar-dropdown-menu">
-          <a href="/afocha" class="pillar-menu-link"><span>🌟 Afocha Home</span> <span>➔</span></a>
-          <a href="/social" class="pillar-menu-link"><span>💬 Afocha Social</span> <span>➔</span></a>
+      <!-- 5. WALTA SUPPORT (SAPPHIRE BLUE) -->
+      <div class="accordion-pillar-strip strip-walta" data-pillar-index="4">
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">🛡️</div>
+          <div class="strip-collapsed-title">WALTA SUPPORT • SHIELD</div>
+          <div style="font-size:12px; color:#93c5fd;">05</div>
+        </div>
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ SACRED PILLAR IV</span>
+                  <span style="font-size:1.8rem;">🛡️</span>
+                </div>
+                <h3 class="pillar-card-title">Walta Support Center</h3>
+                <p style="font-size:0.95rem; color:#93c5fd; font-weight:800; margin-bottom:12px;">Guidance • Help • Resolution • Accountable SLA</p>
+                <p class="pillar-card-desc">
+                  Get reliable help, track support requests, and find guidance when you need it. Local engineering teams on call for your business continuity.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/walta-main" class="btn-pillar-primary">🛡️ Walta Support Home ➔</a>
+                  <a href="tel:+251986767576" class="btn-pillar-secondary">📞 Call Support</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="4">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="4">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#93c5fd; margin-bottom:8px;">Walta Help Resources</h4>
+                <div class="portal-links-grid">
+                  <a href="/walta-main" class="portal-link-card">
+                    <span class="portal-link-icon">🛡️</span>
+                    <div><div class="portal-link-title">Help Center</div><div class="portal-link-sub">Submit &amp; Track Tickets</div></div>
+                  </a>
+                  <a href="/help" class="portal-link-card">
+                    <span class="portal-link-icon">❓</span>
+                    <div><div class="portal-link-title">FAQ &amp; Knowledgebase</div><div class="portal-link-sub">Guides &amp; Tutorials</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- 6. AFOCHA SOCIAL (CRIMSON/ROSE) -->
+      <div class="accordion-pillar-strip strip-afocha" data-pillar-index="5">
+        <div class="pillar-strip-collapsed">
+          <div class="strip-collapsed-icon">⭐</div>
+          <div class="strip-collapsed-title">AFOCHA SOCIAL • COMMUNITY</div>
+          <div style="font-size:12px; color:#fda4af;">06</div>
+        </div>
+        <div class="pillar-strip-expanded">
+          <div class="pillar-card-flipper">
+            <div class="pillar-card-face pillar-card-front">
+              <div>
+                <div class="pillar-card-header">
+                  <span class="pillar-card-badge">✦ SACRED PILLAR V</span>
+                  <span style="font-size:1.8rem;">⭐</span>
+                </div>
+                <h3 class="pillar-card-title">Afocha Social</h3>
+                <p style="font-size:0.95rem; color:#fda4af; font-weight:800; margin-bottom:12px;">Connect • Share • Belong • Civic Dialogue</p>
+                <p class="pillar-card-desc">
+                  Meet your community, share stories, and build meaningful professional and civic connections across Ethiopia and the global diaspora.
+                </p>
+                <div class="pillar-card-actions">
+                  <a href="/afocha" class="btn-pillar-primary">⭐ Join Afocha Social ➔</a>
+                  <a href="/login#signup" class="btn-pillar-secondary">Create Free Account</a>
+                </div>
+              </div>
+              <button type="button" class="btn-flip-explore" data-flip-target="5">
+                <span>✦ Explore System Portals (Flip 3D)</span>
+              </button>
+            </div>
+            <div class="pillar-card-face pillar-card-back">
+              <div>
+                <button type="button" class="btn-flip-back" data-flip-target="5">↶ Back to Overview</button>
+                <h4 style="font-size:1.2rem; font-weight:900; color:#fda4af; margin-bottom:8px;">Afocha Community Portals</h4>
+                <div class="portal-links-grid">
+                  <a href="/afocha" class="portal-link-card">
+                    <span class="portal-link-icon">⭐</span>
+                    <div><div class="portal-link-title">Afocha Feed</div><div class="portal-link-sub">Stories &amp; Connections</div></div>
+                  </a>
+                  <a href="/groups" class="portal-link-card">
+                    <span class="portal-link-icon">👥</span>
+                    <div><div class="portal-link-title">Community Groups</div><div class="portal-link-sub">Interest &amp; Trade Circles</div></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-
-    <!-- Live Ecosystem Metric Pulse Cards -->
-    <section class="hero-live-stats" aria-labelledby="hero-live-stats-title">
-      <h2 class="hero-live-stats-title" id="hero-live-stats-title" data-i18n="hero-live-stats-title">EthioBiz at a glance</h2>
-      <div class="hero-stats-row">
-        <div class="hero-stat-card">
-          <div class="hero-stat-num" id="stat-companies-num" data-stat-state="loading" aria-live="polite" aria-busy="true">…</div>
-          <div class="hero-stat-label" data-i18n="stat-1">🏢 Verified Companies</div>
-        </div>
-        <div class="hero-stat-card">
-          <div class="hero-stat-num" id="stat-products-num" data-stat-state="loading" aria-live="polite" aria-busy="true">…</div>
-          <div class="hero-stat-label" data-i18n="stat-2">🛍️ Multi-Vendor Products</div>
-        </div>
-        <div class="hero-stat-card">
-          <div class="hero-stat-num" id="stat-jobs-num" data-stat-state="loading" aria-live="polite" aria-busy="true">…</div>
-          <div class="hero-stat-label" data-i18n="stat-3">💼 Talent Careers</div>
-        </div>
-        <div class="hero-stat-card">
-          <div class="hero-stat-num" id="stat-services-num" data-stat-state="loading" aria-live="polite" aria-busy="true">…</div>
-          <div class="hero-stat-label" data-i18n="stat-4">⚡ Verified BizServices</div>
-        </div>
-      </div>
-      <p class="hero-stats-status" id="hero-stats-status" data-stat-state="loading" role="status" aria-live="polite" data-i18n="stats-loading">Loading live totals</p>
-    </section>
   </section>
-  <a class="hero-feed-jump" href="#live-feed" data-i18n-aria-label="feed-jump-label" aria-label="Jump to live feed">
-    <span class="hero-feed-jump-icon" aria-hidden="true">↓</span>
-    <span data-i18n="feed-jump-label">Explore live updates</span>
-  </a>
 
   <!-- 4. SLIDABLE "RECOMMENDED FOR YOU" CAROUSEL -->
   <section class="for-you-section" id="for-you-shelf">
@@ -4152,6 +4076,62 @@ applyLanguage(currentLang);
   }, { passive: true });
   if (btt) btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 })();
+</script>
+<script>
+  // =========================================================================
+  // SLICED VERTICAL ACCORDION CONTROLLER (ETHIOPIA.GOV.ET STYLE)
+  // =========================================================================
+  const accordionContainer = document.getElementById('accordion-stack-container');
+  if (accordionContainer) {
+    const strips = Array.from(accordionContainer.querySelectorAll('.accordion-pillar-strip'));
+
+    // Expand strip on hover or click
+    strips.forEach(strip => {
+      const expandStrip = () => {
+        strips.forEach(s => {
+          if (s !== strip) {
+            s.classList.remove('is-expanded');
+            s.classList.remove('is-flipped');
+          }
+        });
+        strip.classList.add('is-expanded');
+      };
+
+      strip.addEventListener('mouseenter', expandStrip);
+      strip.addEventListener('click', (e) => {
+        if (!strip.classList.contains('is-expanded')) {
+          expandStrip();
+        }
+      });
+    });
+
+    // 3D Flip handlers for "Explore" buttons
+    accordionContainer.querySelectorAll('.btn-flip-explore').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const strip = btn.closest('.accordion-pillar-strip');
+        if (strip) strip.classList.add('is-flipped');
+      });
+    });
+
+    // Flip back handlers
+    accordionContainer.querySelectorAll('.btn-flip-back').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const strip = btn.closest('.accordion-pillar-strip');
+        if (strip) strip.classList.remove('is-flipped');
+      });
+    });
+  }
+
+  // =========================================================================
+  // CALL STATS AND DISPLAY REAL NUMBERS (FIX ... LOADING STATE)
+  // =========================================================================
+  if (typeof fetchHeroStats === 'function') {
+    fetchHeroStats();
+  }
 </script>
 </body>
 </html>
