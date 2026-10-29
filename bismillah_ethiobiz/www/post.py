@@ -40,7 +40,7 @@ SUPPORTED_DOCTYPES = {
         "desc_field": "description",
         "category_field": "property_type",
         "cta_label": "Schedule Property Tour",
-        "cta_icon": "🏡",
+        "cta_icon": "🏠",
         "portal_route": "/bizhome"
     },
     "BizService Listing": {
@@ -64,10 +64,10 @@ SUPPORTED_DOCTYPES = {
         "desc_field": "content",
         "category_field": "blog_category",
         "cta_label": "Explore More Articles",
-        "cta_icon": "📰",
+        "cta_icon": "📖",
         "portal_route": "/blog"
     },
-        "Walta Forum Topic": {
+    "Walta Forum Topic": {
         "title_field": "title",
         "desc_field": "content",
         "category_field": "category",
@@ -95,16 +95,16 @@ def get_context(context):
     if not doctype and ":" in name:
         doctype, name = name.split(":", 1)
 
-        # Allow custom table Walta Forum Topic
     is_forum = (doctype == "Walta Forum Topic")
+
     if not is_forum and (not doctype or not name or not frappe.db.exists("DocType", doctype)):
         context.post_found = False
         context.title = "Explore Stories & Opportunities | EthioBiz"
         _load_featured_fallback(context)
         return context
 
-        if is_forum:
-        topic_exists = frappe.db.sql("SELECT name FROM \`tabWalta Forum Topic\` WHERE name = %s", name)
+    if is_forum:
+        topic_exists = frappe.db.sql("SELECT name FROM `tabWalta Forum Topic` WHERE name = %s", (name,))
         if not topic_exists:
             context.post_found = False
             context.title = "Discussion Not Found | EthioBiz"
@@ -117,201 +117,132 @@ def get_context(context):
         return context
 
     try:
-            if is_forum:
-        f_row = frappe.db.sql("""
-            SELECT name, title, category, author_name, company, content, image, replies_count, likes_count, creation
-            FROM \`tabWalta Forum Topic\` WHERE name = %s
-        """, name, as_dict=True)
-        if not f_row:
-            context.post_found = False
-            _load_featured_fallback(context)
-            return context
-        row = f_row[0]
-        doc = frappe._dict(row)
-        doc.doctype = "Walta Forum Topic"
-    else:
-        doc = frappe.get_doc(doctype, name)
-    except Exception:
-        context.post_found = False
-        _load_featured_fallback(context)
-        return context
+        if is_forum:
+            f_row = frappe.db.sql("""
+                SELECT name, title, category, author_name, company, content, image, replies_count, likes_count, creation
+                FROM `tabWalta Forum Topic` WHERE name = %s
+            """, (name,), as_dict=True)
+            if not f_row:
+                context.post_found = False
+                _load_featured_fallback(context)
+                return context
+            row = f_row[0]
+            doc = frappe._dict(row)
+            doc.doctype = "Walta Forum Topic"
+        else:
+            doc = frappe.get_doc(doctype, name)
 
-    meta_info = SUPPORTED_DOCTYPES.get(doctype, {
-        "title_field": "title",
-        "desc_field": "description",
-        "category_field": "category",
-        "cta_label": "View Details",
-        "cta_icon": "✨",
-        "portal_route": "/"
-    })
+        cfg = SUPPORTED_DOCTYPES.get(doctype, {
+            "title_field": "title",
+            "desc_field": "description",
+            "category_field": "category",
+            "cta_label": "View Details",
+            "cta_icon": "➔",
+            "portal_route": "/feed"
+        })
 
-    # Title resolution
-    raw_title = getattr(doc, meta_info["title_field"], None) or getattr(doc, "name", "Story")
-    if doctype == "Afocha Post":
-        raw_title = strip_html_tags(raw_title or "")[:70] + ("..." if len(strip_html_tags(raw_title or "")) > 70 else "")
-    title = str(raw_title).strip()
+        title = doc.get(cfg["title_field"]) or doc.get("name")
+        description = doc.get(cfg["desc_field"]) or doc.get("content") or ""
+        category = doc.get(cfg["category_field"]) or "Community"
 
-    # Content / Body resolution
-    body = getattr(doc, meta_info["desc_field"], None) or getattr(doc, "description", None) or getattr(doc, "content", "")
+        # Resolve image
+        image = None
+        for img_field in ["image", "item_image", "company_logo", "banner_image"]:
+            if doc.get(img_field):
+                image = doc.get(img_field)
+                break
 
-    # Image resolution
-    image = (
-        getattr(doc, "image", None)
-        or getattr(doc, "website_image", None)
-        or getattr(doc, "hero_image", None)
-        or getattr(doc, "banner", None)
-        or getattr(doc, "thumbnail", None)
-    )
+        # Resolve author and company
+        author_name = doc.get("author_name") or doc.get("owner") or "EthioBiz Member"
+        author_company = doc.get("company") or "EthioBiz Cloud Ecosystem"
+        author_avatar = "/assets/frappe/images/default-avatar.png"
 
-    # Category / Kicker
-    category = getattr(doc, meta_info["category_field"], None) or doctype
+        # Date formatting
+        creation_dt = doc.get("creation")
+        time_ago = pretty_date(creation_dt) if creation_dt else "Recently"
 
-    # Author / Entity
-    author_name = "EthioBiz Community"
-    author_avatar = "/assets/bismillah_ethiobiz/img/walta_real_logo.png"
-    company_name = getattr(doc, "company", None)
+        # Counts
+        likes_count = cint(doc.get("likes_count") or 0)
+        comments_count = cint(doc.get("comments_count") or doc.get("replies_count") or 0)
 
-    if company_name and frappe.db.exists("Company", company_name):
-        comp = frappe.get_cached_value("Company", company_name, ["company_name", "company_logo"], as_dict=True)
-        if comp:
-            author_name = comp.company_name or company_name
-            if comp.company_logo:
-                author_avatar = comp.company_logo
-    elif getattr(doc, "owner", None):
-        user = getattr(doc, "owner")
-        if user and user != "Guest":
-            u_doc = frappe.get_cached_value("User", user, ["full_name", "user_image"], as_dict=True)
-            if u_doc:
-                author_name = u_doc.full_name or user
-                if u_doc.user_image:
-                    author_avatar = u_doc.user_image
-
-    # Date
-    created_dt = getattr(doc, "creation", None)
-    date_str = pretty_date(created_dt) if created_dt else "Recent"
-
-    # Engagement counts from Frappe Comment table
-    likes_count = 0
-    comments_count = 0
-    reposts_count = 0
-    user_liked = False
-
-    try:
-        counts = frappe.db.sql(
-            """
-            SELECT comment_type, count(name) as cnt
-            FROM `tabComment`
-            WHERE reference_doctype = %s AND reference_name = %s
-            GROUP BY comment_type
-            """,
-            (doctype, name),
-            as_dict=True
-        )
-        for r in counts:
-            if r.comment_type == "Like":
-                likes_count = r.cnt
-            elif r.comment_type == "Comment":
-                comments_count = r.cnt
-            elif r.comment_type == "Shared":
-                reposts_count = r.cnt
-
-        current_user = frappe.session.user if (frappe.session and frappe.session.user != "Guest") else None
-        if current_user:
-            user_liked = bool(frappe.db.exists("Comment", {
-                "reference_doctype": doctype,
-                "reference_name": name,
-                "comment_type": "Like",
-                "owner": current_user
-            }))
-    except Exception:
-        pass
-
-    # Fetch initial comments (top 20)
-    comments = []
-    try:
-        raw_comments = frappe.get_all(
-            "Comment",
-            filters={
-                "reference_doctype": doctype,
-                "reference_name": name,
-                "comment_type": "Comment"
-            },
-            fields=["name", "comment_by", "content", "creation", "owner"],
-            order_by="creation desc",
-            limit=20
-        )
-        for c in raw_comments:
-            c_owner = c.owner
-            avatar = "/assets/bismillah_ethiobiz/img/walta_real_logo.png"
-            full_name = c.comment_by or c_owner
-            if c_owner and c_owner != "Guest" and frappe.db.exists("User", c_owner):
-                u = frappe.get_cached_value("User", c_owner, ["full_name", "user_image"], as_dict=True)
-                if u:
-                    full_name = u.full_name or full_name
-                    if u.user_image:
-                        avatar = u.user_image
-            comments.append({
-                "id": c.name,
-                "author": full_name,
-                "avatar": avatar,
-                "content": c.content,
-                "time": pretty_date(c.creation)
-            })
-    except Exception:
+        # Comments fetching
         comments = []
+        if is_forum:
+            replies = frappe.db.sql("""
+                SELECT name, reply_text as content, author_name as author, creation, company
+                FROM `tabWalta Forum Reply` WHERE topic = %s ORDER BY creation asc
+            """, (name,), as_dict=True) if frappe.db.table_exists("Walta Forum Reply") else []
+            for r in replies:
+                comments.append({
+                    "author": r.author or "Community Member",
+                    "content": r.content or "",
+                    "time": pretty_date(r.creation) if r.creation else "Recently",
+                    "avatar": "/assets/frappe/images/default-avatar.png"
+                })
+        else:
+            frappe_comments = frappe.get_all(
+                "Comment",
+                filters={"reference_doctype": doctype, "reference_name": name, "comment_type": "Comment"},
+                fields=["content", "comment_by", "creation"],
+                order_by="creation asc",
+                limit=30
+            )
+            for c in frappe_comments:
+                comments.append({
+                    "author": c.comment_by or "Verified User",
+                    "content": strip_html_tags(c.content or ""),
+                    "time": pretty_date(c.creation) if c.creation else "Recently",
+                    "avatar": "/assets/frappe/images/default-avatar.png"
+                })
 
-    # Post-specific extras
-    extras = {}
-    if doctype == "Job Opening":
-        salary = "Competitive Compensation"
-        if getattr(doc, "lower_range", None) and getattr(doc, "upper_range", None):
-            salary = f"{doc.lower_range:,.0f} - {doc.upper_range:,.0f} {doc.currency or 'ETB'} / {doc.salary_per or 'mo'}"
-        elif getattr(doc, "lower_range", None):
-            salary = f"{doc.lower_range:,.0f} {doc.currency or 'ETB'} / {doc.salary_per or 'mo'}"
-        extras["Salary"] = salary
-        extras["Location"] = getattr(doc, "location", "Hawassa / Addis Ababa")
-        extras["Employment Type"] = getattr(doc, "employment_type", "Full Time")
-    elif doctype == "Item":
-        rate = getattr(doc, "standard_rate", 0)
-        extras["Price"] = f"{flt(rate):,.2f} ETB" if rate else "Inquire for Price"
-        extras["Item Code"] = getattr(doc, "item_code", name)
-    elif doctype == "Property":
-        extras["Price"] = f"{flt(getattr(doc, 'price', 0)):,.0f} ETB" if getattr(doc, "price", 0) else "Contact Agent"
-        extras["Location"] = getattr(doc, "location", "Ethiopia")
-        extras["Bedrooms"] = getattr(doc, "bedrooms", "N/A")
+        context.post_found = True
+        context.doctype = doctype
+        context.name = name
+        context.title = f"{title} | EthioBiz"
+        context.post = {
+            "title": title,
+            "description": description,
+            "category": category,
+            "image": image,
+            "author_name": author_name,
+            "author_company": author_company,
+            "author_avatar": author_avatar,
+            "time_ago": time_ago,
+            "likes_count": likes_count,
+            "comments_count": len(comments) if comments else comments_count,
+            "comments": comments,
+            "cta_label": cfg["cta_label"],
+            "cta_icon": cfg["cta_icon"],
+            "portal_route": cfg["portal_route"]
+        }
 
-    context.post_found = True
-    context.title = f"{title} | EthioBiz"
-    context.post = {
-        "doctype": doctype,
-        "name": name,
-        "title": title,
-        "category": category,
-        "body": body,
-        "image": image,
-        "author_name": author_name,
-        "author_avatar": author_avatar,
-        "company_name": company_name,
-        "date_str": date_str,
-        "likes_count": likes_count,
-        "comments_count": comments_count,
-        "reposts_count": reposts_count,
-        "user_liked": user_liked,
-        "cta_label": meta_info["cta_label"],
-        "cta_icon": meta_info["cta_icon"],
-        "portal_route": meta_info["portal_route"],
-        "extras": extras,
-        "comments": comments
-    }
+    except Exception as e:
+        frappe.log_error(f"Error loading post {doctype}:{name}: {str(e)}", "EthioBiz Post View")
+        context.post_found = False
+        context.title = "Post Unavailable | EthioBiz"
+        _load_featured_fallback(context)
 
     return context
 
 
 def _load_featured_fallback(context):
-    """Fallback feed items if specific post not found."""
-    try:
-        from bismillah_ethiobiz import smart_feed_api
-        res = smart_feed_api.get_personalized_feed(limit=6)
-        context.fallback_items = res.get("feed") or []
-    except Exception:
-        context.fallback_items = []
+    context.fallback_posts = [
+        {
+            "title": "Empowering Ethiopian Enterprise with DOBiz Cloud ERP",
+            "category": "Technology",
+            "url": "/dobiz",
+            "icon": "📊"
+        },
+        {
+            "title": "Explore Local Vendors & Supermarket Finds on Magala",
+            "category": "Commerce",
+            "url": "/shop",
+            "icon": "🛍️"
+        },
+        {
+            "title": "Connect with Certified Health Practitioners on BizHealth",
+            "category": "Healthcare",
+            "url": "/bizhealth",
+            "icon": "🩺"
+        }
+    ]
