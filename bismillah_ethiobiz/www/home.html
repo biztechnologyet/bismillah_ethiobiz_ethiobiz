@@ -488,6 +488,7 @@
       transition: all 0.3s ease;
     }
     .node-tibeb { top: 0; left: 50%; transform: translateX(-50%); }
+    .node-tibeb:hover { transform: translateX(-50%) scale(1.18) !important; }
     .node-tibeb .pillar-node-disc { background: linear-gradient(135deg, #7c3aed, #4c1d95); border-color: #c4b5fd; }
     .node-dagu { top: 28%; right: 0; }
     .node-dagu .pillar-node-disc { background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #7dd3fc; }
@@ -518,7 +519,7 @@
       font-size: 1.05rem; color: #99f6e4; opacity: 0.9;
     }
     .accordion-stack-container {
-      display: flex; gap: 14px; width: 100%; height: 530px; align-items: stretch;
+      display: flex; gap: 14px; width: 100%; height: 660px; align-items: stretch;
       position: relative;
     }
     @media (max-width: 900px) {
@@ -539,7 +540,7 @@
     }
     @media (max-width: 900px) {
       .accordion-pillar-strip { flex: 1 1 auto; min-height: 80px; }
-      .accordion-pillar-strip.is-expanded { min-height: 480px; }
+      .accordion-pillar-strip.is-expanded { min-height: 580px; }
     }
     .accordion-pillar-strip:hover { border-color: rgba(0, 204, 204, 0.7); }
 
@@ -1142,7 +1143,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_1.png" class="hero-carousel-art" alt="EthioBiz Platform" loading="eager" />
+            <img src="/files/slide_1.svg" onerror="this.onerror=null; this.src='/files/slide_1.png';" class="hero-carousel-art" alt="EthioBiz Platform" loading="eager" />
           </div>
         </article>
 
@@ -1164,7 +1165,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_2.png" class="hero-carousel-art" alt="DOBiz SmartERP" loading="lazy" />
+            <img src="/files/slide_2.svg" onerror="this.onerror=null; this.src='/files/slide_2.png';" class="hero-carousel-art" alt="DOBiz SmartERP" loading="lazy" />
           </div>
         </article>
 
@@ -1186,7 +1187,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_3.png" class="hero-carousel-art" alt="Biz Technology Solutions" loading="lazy" />
+            <img src="/files/slide_3.svg" onerror="this.onerror=null; this.src='/files/slide_3.png';" class="hero-carousel-art" alt="Biz Technology Solutions" loading="lazy" />
           </div>
         </article>
 
@@ -1204,7 +1205,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_4.png" class="hero-carousel-art" alt="Magala Marketplace" loading="lazy" />
+            <img src="/files/slide_4.svg" onerror="this.onerror=null; this.src='/files/slide_4.png';" class="hero-carousel-art" alt="Magala Marketplace" loading="lazy" />
           </div>
         </article>
 
@@ -1222,7 +1223,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_5.png" class="hero-carousel-art" alt="Oosoo Jobs" loading="lazy" />
+            <img src="/files/slide_5.svg" onerror="this.onerror=null; this.src='/files/slide_5.png';" class="hero-carousel-art" alt="Oosoo Jobs" loading="lazy" />
           </div>
         </article>
 
@@ -1240,7 +1241,7 @@
             </div>
           </div>
           <div class="hero-carousel-visual">
-            <img src="/files/slide_6.png" class="hero-carousel-art" alt="Dagu Academy" loading="lazy" />
+            <img src="/files/slide_6.svg" onerror="this.onerror=null; this.src='/files/slide_6.png';" class="hero-carousel-art" alt="Dagu Academy" loading="lazy" />
           </div>
         </article>
 
@@ -1263,6 +1264,7 @@
       </div>
 
       <span class="hero-carousel-counter" id="hero-carousel-counter">01 / 06</span>
+      <div id="hero-carousel-announcement" class="sr-only" aria-live="polite" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);"></div>
     </div>
 
     <a href="#about-ethiobiz" class="hero-scroll-guide" aria-label="Scroll to explore">
@@ -1438,7 +1440,7 @@
       <div class="accordion-pillar-strip strip-tibeb is-expanded" data-pillar-index="0">
         <!-- Collapsed vertical tab -->
         <div class="pillar-strip-collapsed">
-          <div class="strip-collapsed-icon">📖</div>
+          <div class="strip-collapsed-icon"><img src="/files/tibeb_logo.png" alt="Tibeb" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" /><span style="display:none; font-size:1.6rem;">📖</span></div>
           <div class="strip-collapsed-title">TIBEB WISDOM • SCRIPTURES</div>
           <div style="font-size:12px; color:#c4b5fd;">01</div>
         </div>
@@ -1463,7 +1465,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="0">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <!-- BACK FACE (3D FLIP) -->
@@ -1495,7 +1497,7 @@
       <!-- 2. DAGU ACADEMY (CYAN/BLUE) -->
       <div class="accordion-pillar-strip strip-dagu" data-pillar-index="1">
         <div class="pillar-strip-collapsed">
-          <div class="strip-collapsed-icon">🎓</div>
+          <div class="strip-collapsed-icon"><img src="/files/dagu_logo.png" alt="Dagu" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" /><span style="display:none; font-size:1.6rem;">🎓</span></div>
           <div class="strip-collapsed-title">DAGU ACADEMY • CAREERS</div>
           <div style="font-size:12px; color:#7dd3fc;">02</div>
         </div>
@@ -1518,7 +1520,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="1">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <div class="pillar-card-face pillar-card-back">
@@ -1548,7 +1550,7 @@
       <!-- 3. MAGALA MARKETPLACE (AMBER) -->
       <div class="accordion-pillar-strip strip-magala" data-pillar-index="2">
         <div class="pillar-strip-collapsed">
-          <div class="strip-collapsed-icon">🛍️</div>
+          <div class="strip-collapsed-icon"><img src="/files/magala_logo.png" alt="Magala" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" /><span style="display:none; font-size:1.6rem;">🛍️</span></div>
           <div class="strip-collapsed-title">MAGALA MARKETPLACE • COMMERCE</div>
           <div style="font-size:12px; color:#fcd34d;">03</div>
         </div>
@@ -1571,7 +1573,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="2">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <div class="pillar-card-face pillar-card-back">
@@ -1601,7 +1603,7 @@
       <!-- 4. DOBIZ SMARTERP (EMERALD GREEN) -->
       <div class="accordion-pillar-strip strip-dobiz" data-pillar-index="3">
         <div class="pillar-strip-collapsed">
-          <div class="strip-collapsed-icon">📊</div>
+          <div class="strip-collapsed-icon"><img src="/files/dobiz_3d_icon.png" alt="DOBiz" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" /><span style="display:none; font-size:1.6rem;">📊</span></div>
           <div class="strip-collapsed-title">DOBIZ SMARTERP • ENTERPRISE</div>
           <div style="font-size:12px; color:#6ee7b7;">04</div>
         </div>
@@ -1624,7 +1626,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="3">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <div class="pillar-card-face pillar-card-back">
@@ -1658,7 +1660,7 @@
       <!-- 5. WALTA SUPPORT (SAPPHIRE BLUE) -->
       <div class="accordion-pillar-strip strip-walta" data-pillar-index="4">
         <div class="pillar-strip-collapsed">
-          <div class="strip-collapsed-icon">🛡️</div>
+          <div class="strip-collapsed-icon"><img src="/files/walta_logo.png" alt="Walta" style="width:36px; height:36px; object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" /><span style="display:none; font-size:1.6rem;">🛡️</span></div>
           <div class="strip-collapsed-title">WALTA SUPPORT • SHIELD</div>
           <div style="font-size:12px; color:#93c5fd;">05</div>
         </div>
@@ -1681,7 +1683,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="4">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <div class="pillar-card-face pillar-card-back">
@@ -1730,7 +1732,7 @@
                 </div>
               </div>
               <button type="button" class="btn-flip-explore" data-flip-target="5">
-                <span>✦ Explore System Portals (Flip 3D)</span>
+                <span>✦ Explore System Portals </span>
               </button>
             </div>
             <div class="pillar-card-face pillar-card-back">
@@ -4100,6 +4102,7 @@ applyLanguage(currentLang);
       strip.addEventListener('mouseenter', expandStrip);
       strip.addEventListener('click', (e) => {
         if (!strip.classList.contains('is-expanded')) {
+          strip.classList.remove('is-flipped');
           expandStrip();
         }
       });

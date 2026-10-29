@@ -67,6 +67,14 @@ SUPPORTED_DOCTYPES = {
         "cta_icon": "📰",
         "portal_route": "/blog"
     },
+        "Walta Forum Topic": {
+        "title_field": "title",
+        "desc_field": "content",
+        "category_field": "category",
+        "cta_label": "Join Topic on Walta",
+        "cta_icon": "💬",
+        "portal_route": "/forum"
+    },
     "LMS Course": {
         "title_field": "title",
         "desc_field": "description",
@@ -87,19 +95,41 @@ def get_context(context):
     if not doctype and ":" in name:
         doctype, name = name.split(":", 1)
 
-    if not doctype or not name or not frappe.db.exists("DocType", doctype):
+        # Allow custom table Walta Forum Topic
+    is_forum = (doctype == "Walta Forum Topic")
+    if not is_forum and (not doctype or not name or not frappe.db.exists("DocType", doctype)):
         context.post_found = False
         context.title = "Explore Stories & Opportunities | EthioBiz"
         _load_featured_fallback(context)
         return context
 
-    if not frappe.db.exists(doctype, name):
+        if is_forum:
+        topic_exists = frappe.db.sql("SELECT name FROM \`tabWalta Forum Topic\` WHERE name = %s", name)
+        if not topic_exists:
+            context.post_found = False
+            context.title = "Discussion Not Found | EthioBiz"
+            _load_featured_fallback(context)
+            return context
+    elif not frappe.db.exists(doctype, name):
         context.post_found = False
         context.title = "Story Not Found | EthioBiz"
         _load_featured_fallback(context)
         return context
 
     try:
+            if is_forum:
+        f_row = frappe.db.sql("""
+            SELECT name, title, category, author_name, company, content, image, replies_count, likes_count, creation
+            FROM \`tabWalta Forum Topic\` WHERE name = %s
+        """, name, as_dict=True)
+        if not f_row:
+            context.post_found = False
+            _load_featured_fallback(context)
+            return context
+        row = f_row[0]
+        doc = frappe._dict(row)
+        doc.doctype = "Walta Forum Topic"
+    else:
         doc = frappe.get_doc(doctype, name)
     except Exception:
         context.post_found = False

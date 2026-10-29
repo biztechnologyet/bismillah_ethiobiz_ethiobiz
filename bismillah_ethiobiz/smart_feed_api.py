@@ -1525,8 +1525,8 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                         "action_url": f"/forum?topic={ft.name}",
                         "action_label": "Join Topic ➔",
                         # Discussion already lives in /forum with its own reply thread.
-                        "doctype": None,
-                        "docname": None,
+                        "doctype": "Walta Forum Topic",
+                        "docname": ft.name,
                         "commentable": False,
                         "is_booking": False
                     })
