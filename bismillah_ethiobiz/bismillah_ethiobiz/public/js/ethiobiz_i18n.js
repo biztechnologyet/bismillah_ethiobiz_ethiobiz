@@ -1,4 +1,4 @@
-// BISMALLAH ETHIOBIZ UNIFIED AMHARIC & ENGLISH I18N SYSTEM (Insha'Allah)
+﻿// BISMALLAH ETHIOBIZ UNIFIED AMHARIC & ENGLISH I18N SYSTEM (Insha'Allah)
 // Centralized bilingual engine for all pages: Homepage, /shop, /jobs, /map, /social, /post, /tibeb, /dagu, /walta, /bizhome, /bizhealth, /bizservices, /bizfix
 
 (function() {
@@ -177,6 +177,7 @@
 
         applyTranslations();
         updateToggleButtons();
+        checkWelcomeLanguageModal();
 
         // Dispatch events for all page scripts
         window.dispatchEvent(new CustomEvent('ethiobiz-lang-changed', { detail: { lang: currentLang } }));

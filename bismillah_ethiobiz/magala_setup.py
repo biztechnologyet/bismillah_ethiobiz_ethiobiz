@@ -3,7 +3,7 @@
 Bismallah EthioBiz Magala Marketplace & Map Setup
 Bismillah Ar-Rahman Ar-Rahim
 
-Creates all custom DocTypes, fields, and seeds Ethiopian Regions for the Dikka Shop mega-upgrade.
+Creates all custom DocTypes, fields, and seeds Ethiopian Regions for the Dikko Shop mega-upgrade.
 """
 
 import frappe

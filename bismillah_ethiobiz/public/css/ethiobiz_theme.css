@@ -2108,6 +2108,7 @@ body[data-route^="Form"] .form-tab-content,
 
 .btn-prev,
 .btn-next,
+.btn-page,
 .pagination .btn,
 .product-paging-area .btn,
 .web-pagination .btn {
@@ -2129,6 +2130,7 @@ body[data-route^="Form"] .form-tab-content,
 
 .btn-prev:hover,
 .btn-next:hover,
+.btn-page:hover,
 .pagination .btn:hover,
 .product-paging-area .btn:hover {
     background: #006666 !important;
@@ -2138,6 +2140,7 @@ body[data-route^="Form"] .form-tab-content,
 
 .btn-prev[disabled],
 .btn-next[disabled],
+.btn-page[disabled],
 .pagination .btn.disabled {
     background: #e2e8f0 !important;
     color: #94a3b8 !important;
@@ -2145,6 +2148,14 @@ body[data-route^="Form"] .form-tab-content,
     box-shadow: none !important;
     cursor: not-allowed !important;
     transform: none !important;
+}
+
+.btn-page.active,
+.btn-page[aria-current="page"] {
+    background: #0f172a !important;
+    border-color: #0f172a !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28) !important;
 }
 
 /* Hide orphaned Prev/Next when viewing Maps */

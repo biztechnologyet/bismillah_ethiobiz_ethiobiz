@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 BISMALLAH AR-RAHMAN AR-RAHIM
 EthioBiz Smart Feed Personalization & User Interaction Logging API
@@ -1044,7 +1044,7 @@ def _repost_feed_items(pool, filter_type, search):
 def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     """
     Omnichannel Algorithmic Hybrid Feed Engine:
-    Aggregates Afocha Social, Tibeb Knowledge, Dikka Products, Jobs, Courses, Forums,
+    Aggregates Afocha Social, Tibeb Knowledge, Dikko Products, Jobs, Courses, Forums,
     BizHealth Doctors, BizFix Maintenance, Booking Lodging, BizHome Properties, and Promoted Ad Campaigns.
     Ranks items dynamically based on the current user's preferences, engagement velocity, and recency.
     """
@@ -1054,15 +1054,27 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     search = (search or "").lower().strip()
     user = frappe.session.user if (frappe.session and frappe.session.user != "Guest") else None
 
-    # 1. Fetch User Affinity
+    # 1. Fetch User Affinity & Subsystem Settings
+    from bismillah_ethiobiz.home_api import get_subsystem_settings
+    subsystems = get_subsystem_settings()
+
     pref = compute_user_preferences(user)
     cat_affinities = pref.get("categories", {})
     type_affinities = pref.get("content_types", {})
 
+    # Extract client-reported seen card IDs for unseen prioritization
+    seen_ids = set()
+    raw_seen = frappe.form_dict.get("seen_ids")
+    if raw_seen:
+        try:
+            seen_ids = set(frappe.parse_json(raw_seen))
+        except Exception:
+            pass
+
     items = []
 
     # 2. SOURCE A: Products (Website Item / Item)
-    if filter_type in ["all", "products", "goods", "shop"]:
+    if filter_type in ["all", "products", "goods", "shop"] and subsystems.get("enable_dikka_shop", 1):
         p_query = {"disabled": 0}
         if search:
             p_query["item_name"] = ["like", f"%{search}%"]
@@ -1110,7 +1122,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             })
 
     # 3. SOURCE B: Jobs & Careers
-    if filter_type in ["all", "jobs", "careers", "career"]:
+    if filter_type in ["all", "jobs", "careers", "career"] and subsystems.get("enable_oosoo_jobs", 1):
         if frappe.db.exists("DocType", "Job Opening"):
             j_query = {"status": "Open"}
             if search:
@@ -1650,7 +1662,9 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         # Exploration diversity jitter to ensure fresh organic feed rotation on refresh
         diversity_jitter = round(random.uniform(0.01, 0.08), 4)
 
+        unseen_boost = 3.0 if (it.get("id") and str(it.get("id")) not in seen_ids) else 0.0
         it["feed_score"] = round(
+            unseen_boost +
             (0.35 * affinity_score) +
             (0.25 * engagement_score) +
             (0.20 * recency_score) +

@@ -169,7 +169,7 @@ def seed_sample_vertical_records():
 
     # 3. Ad Campaigns
     ads = [
-        ("CAMP-DIKKA-FLASH-SALE", "Dikka Shop 50% Tech Flash Sale", "https://ethiobiz.et/shop?category=Electronics", "/assets/bismillah_ethiobiz/img/walta_real_logo.png", 5000.0, 1000.0),
+        ("CAMP-DIKKA-FLASH-SALE", "Dikko Shop 50% Tech Flash Sale", "https://ethiobiz.et/shop?category=Electronics", "/assets/bismillah_ethiobiz/img/walta_real_logo.png", 5000.0, 1000.0),
         ("CAMP-BIZHEALTH-CHECKUP", "Comprehensive Annual Health Checkup", "https://ethiobiz.et/bizhealth", "/assets/bismillah_ethiobiz/img/walta_real_logo.png", 4000.0, 800.0),
         ("CAMP-BIZFIX-EMERGENCY", "24/7 Certified Electrical & Plumbing Fix", "https://ethiobiz.et/bizfix", "/assets/bismillah_ethiobiz/img/walta_real_logo.png", 3000.0, 600.0)
     ]

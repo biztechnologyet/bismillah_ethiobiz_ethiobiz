@@ -1,0 +1,89 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "creation": "2026-10-30 22:50:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "pillar",
+    "title",
+    "subtitle",
+    "url",
+    "icon",
+    "subsystem_key",
+    "is_enabled",
+    "sort_order"
+  ],
+  "fields": [
+    {
+      "fieldname": "pillar",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Brand Pillar",
+      "options": "Tibeb\nDagu\nMagala\nDOBiz\nWalta\nAfocha",
+      "reqd": 1
+    },
+    {
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Portal Title",
+      "reqd": 1
+    },
+    {
+      "fieldname": "subtitle",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Subtitle / Description"
+    },
+    {
+      "fieldname": "url",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Target URL",
+      "reqd": 1
+    },
+    {
+      "default": "🌐",
+      "fieldname": "icon",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Icon (Emoji / Text / SVG)"
+    },
+    {
+      "default": "none",
+      "fieldname": "subsystem_key",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Associated Subsystem Toggle",
+      "options": "none\nshop\njobs\nbizservices\nbizhealth\nbizhome\nbizfix\ndagu\ntibeb\nafocha\nwalta\nnews"
+    },
+    {
+      "default": "1",
+      "fieldname": "is_enabled",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Enabled"
+    },
+    {
+      "default": "0",
+      "fieldname": "sort_order",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Sort Order"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2026-10-30 22:50:00.000000",
+  "modified_by": "Administrator",
+  "module": "EthioBiz Theme",
+  "name": "EthioBiz Card Portal Item",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "sort_order",
+  "sort_order": "ASC",
+  "states": [],
+  "track_changes": 1
+}

@@ -89,7 +89,7 @@ SUPPORTED_DOCTYPES = {
 def get_context(context):
     context.no_cache = 1
     doctype = frappe.form_dict.get("doctype") or ""
-    name = frappe.form_dict.get("name") or frappe.form_dict.get("id") or ""
+    name = frappe.form_dict.get("name") or frappe.form_dict.get("docname") or frappe.form_dict.get("id") or ""
 
     # Parse combined id if formatted as "DocType:DocName"
     if not doctype and ":" in name:
@@ -169,7 +169,7 @@ def get_context(context):
         comments = []
         if is_forum:
             replies = frappe.db.sql("""
-                SELECT name, reply_text as content, author_name as author, creation, company
+                SELECT name, reply_text as content, author_name as author, creation, author_image as avatar
                 FROM `tabWalta Forum Reply` WHERE topic = %s ORDER BY creation asc
             """, (name,), as_dict=True) if frappe.db.table_exists("Walta Forum Reply") else []
             for r in replies:
@@ -177,7 +177,7 @@ def get_context(context):
                     "author": r.author or "Community Member",
                     "content": r.content or "",
                     "time": pretty_date(r.creation) if r.creation else "Recently",
-                    "avatar": "/assets/frappe/images/default-avatar.png"
+                    "avatar": r.avatar or "/assets/frappe/images/default-avatar.png"
                 })
         else:
             frappe_comments = frappe.get_all(

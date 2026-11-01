@@ -1,4 +1,4 @@
-/* Magala checkout website JS — cart badge, listing CTAs, /cart payment panel */
+﻿/* Magala checkout website JS — cart badge, listing CTAs, /cart payment panel */
 (function () {
     const API = {
         cart: "/api/method/bismillah_ethiobiz.magala_checkout.get_cart",
@@ -67,18 +67,24 @@
     }
 
     function renderBadge(cart) {
-        let badge = document.getElementById("magala-cart-badge");
-        if (!badge) {
-            badge = document.createElement("a");
-            badge.id = "magala-cart-badge";
-            badge.className = "magala-cart-badge";
-            badge.href = "/cart";
-            const nav = document.querySelector(".navbar .navbar-nav, .web-footer, header nav, .navbar");
-            const host = document.querySelector(".navbar-collapse") || document.querySelector("header") || document.body;
-            host.appendChild(badge);
-        }
         const count = (cart && cart.count) || 0;
-        badge.innerHTML = `🛒 Cart <span class="magala-cart-count">${count}</span>`;
+        // Update middle navbar cart badge
+        const middleCount = document.getElementById("cart-count");
+        if (middleCount) {
+            middleCount.textContent = count;
+            const parentCart = middleCount.closest(".shopping-cart, .cart-icon");
+            if (parentCart) {
+                parentCart.classList.remove("hidden");
+                parentCart.style.display = "inline-flex";
+            }
+        }
+        // Update drawer count if present on page
+        const drawerCount = document.getElementById("cart-drawer-count");
+        if (drawerCount) drawerCount.innerText = count;
+
+        // Remove redundant duplicate badge if it exists
+        const oldBadge = document.getElementById("magala-cart-badge");
+        if (oldBadge) oldBadge.remove();
     }
 
     window.MagalaCart = {

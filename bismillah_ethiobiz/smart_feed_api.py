@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 BISMALLAH AR-RAHMAN AR-RAHIM
 EthioBiz Smart Feed Personalization & User Interaction Logging API
@@ -1044,7 +1044,7 @@ def _repost_feed_items(pool, filter_type, search):
 def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     """
     Omnichannel Algorithmic Hybrid Feed Engine:
-    Aggregates Afocha Social, Tibeb Knowledge, Dikka Products, Jobs, Courses, Forums,
+    Aggregates Afocha Social, Tibeb Knowledge, Dikko Products, Jobs, Courses, Forums,
     BizHealth Doctors, BizFix Maintenance, Booking Lodging, BizHome Properties, and Promoted Ad Campaigns.
     Ranks items dynamically based on the current user's preferences, engagement velocity, and recency.
     """
@@ -1054,15 +1054,27 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     search = (search or "").lower().strip()
     user = frappe.session.user if (frappe.session and frappe.session.user != "Guest") else None
 
-    # 1. Fetch User Affinity
+    # 1. Fetch User Affinity & Subsystem Settings
+    from bismillah_ethiobiz.home_api import get_subsystem_settings
+    subsystems = get_subsystem_settings()
+
     pref = compute_user_preferences(user)
     cat_affinities = pref.get("categories", {})
     type_affinities = pref.get("content_types", {})
 
+    # Extract client-reported seen card IDs for unseen prioritization
+    seen_ids = set()
+    raw_seen = frappe.form_dict.get("seen_ids")
+    if raw_seen:
+        try:
+            seen_ids = set(frappe.parse_json(raw_seen))
+        except Exception:
+            pass
+
     items = []
 
     # 2. SOURCE A: Products (Website Item / Item)
-    if filter_type in ["all", "products", "goods", "shop"]:
+    if filter_type in ["all", "products", "goods", "shop"] and subsystems.get("enable_dikka_shop", 1):
         p_query = {"disabled": 0}
         if search:
             p_query["item_name"] = ["like", f"%{search}%"]
@@ -1110,7 +1122,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             })
 
     # 3. SOURCE B: Jobs & Careers
-    if filter_type in ["all", "jobs", "careers", "career"]:
+    if filter_type in ["all", "jobs", "careers", "career"] and subsystems.get("enable_oosoo_jobs", 1):
         if frappe.db.exists("DocType", "Job Opening"):
             j_query = {"status": "Open"}
             if search:
@@ -1157,7 +1169,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 4. SOURCE C: BizHealth Doctors & Clinics
-    if filter_type in ["all", "health", "doctors", "clinics", "bizhealth"]:
+    if filter_type in ["all", "health", "doctors", "clinics", "bizhealth"] and subsystems.get("enable_bizhealth", 1):
         if frappe.db.exists("DocType", "Healthcare Practitioner"):
             doc_query = {}
             if search:
@@ -1207,7 +1219,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 5. SOURCE D: BizFix Maintenance Services
-    if filter_type in ["all", "fix", "bizfix", "maintenance", "repair", "services", "bizservices"]:
+    if filter_type in ["all", "fix", "bizfix", "maintenance", "repair", "services", "bizservices"] and subsystems.get("enable_bizfix", 1):
         if frappe.db.exists("DocType", "BizService Listing"):
             srv_query = {"is_active": 1}
             if search:
@@ -1254,7 +1266,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 6. SOURCE E: BizBooking (Hotels, Salons, Workspaces, Rentals)
-    if filter_type in ["all", "services", "bizservices", "bookings", "booking", "hotels", "salons", "spaces", "rentals"]:
+    if filter_type in ["all", "services", "bizservices", "bookings", "booking", "hotels", "salons", "spaces", "rentals"] and subsystems.get("enable_bizservices", 1):
         if frappe.db.exists("DocType", "BizBooking Resource"):
             res_query = {"is_active": 1}
             if search:
@@ -1308,7 +1320,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 7. SOURCE F: BizHome Properties & Lodging
-    if filter_type in ["all", "home", "bizhome", "property", "lodging", "realestate"]:
+    if filter_type in ["all", "home", "bizhome", "property", "lodging", "realestate"] and subsystems.get("enable_bizhome", 1):
         try:
             from bismillah_ethiobiz.bizhome_api import search_properties
             props_res = search_properties(city=search if search else None, limit=12)
@@ -1345,7 +1357,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             frappe.log_error(f"BizHome feed source error: {str(e)}")
 
     # 8. SOURCE G: Afocha Social Posts
-    if filter_type in ["all", "social", "afocha"]:
+    if filter_type in ["all", "social", "afocha"] and subsystems.get("enable_afocha_social", 1):
         if frappe.db.exists("DocType", "Afocha Post"):
             soc_query = {}
             if search:
@@ -1389,7 +1401,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 9. SOURCE H: Tibeb Knowledge Articles
-    if filter_type in ["all", "blogs", "tibeb", "articles"]:
+    if filter_type in ["all", "blogs", "tibeb", "articles"] and subsystems.get("enable_tibebs", 1):
         b_query = {"published": 1}
         if search:
             b_query["title"] = ["like", f"%{search}%"]
@@ -1433,7 +1445,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             })
 
     # 10. SOURCE I: Dagu LMS Courses
-    if filter_type in ["all", "courses", "dagu", "academy"]:
+    if filter_type in ["all", "courses", "dagu", "academy"] and subsystems.get("enable_dagu_academy", 1):
         if frappe.db.exists("DocType", "LMS Course"):
             c_query = {"published": 1}
             if search:
@@ -1480,7 +1492,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 11. SOURCE J: Walta Forum Discussions
-    if filter_type in ["all", "forums", "forum", "walta", "discussions"]:
+    if filter_type in ["all", "forums", "forum", "walta", "discussions"] and subsystems.get("enable_walta_forum", 1):
         if frappe.db.table_exists("Walta Forum Topic") or frappe.db.exists("DocType", "Walta Forum Topic"):
             try:
                 forum_cond = []
@@ -1534,7 +1546,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 pass
 
     # 12. SOURCE K: Promoted Ad Campaigns (From Desk Ad Management)
-    if filter_type in ["all", "products", "shop"]:
+    if filter_type in ["all", "products", "shop"] and subsystems.get("enable_dikka_shop", 1):
         try:
             ads = get_ad_campaigns()
             for ad in ads:
@@ -1568,7 +1580,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             pass
 
     # 12c. SOURCE: Live News Feeds (Deduplicated, with genuine source images)
-    if filter_type in ["all", "news"]:
+    if filter_type in ["all", "news"] and subsystems.get("enable_live_news", 1):
         try:
             from bismillah_ethiobiz.news_api import get_live_news
             n_res = get_live_news(limit=8, page=1)
@@ -1608,6 +1620,29 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     # already assembled this round are reused from the pool; anything else is
     # hydrated on demand and skipped when it cannot be built.
     items.extend(_repost_feed_items(items, filter_type, search))
+
+    # 12d. Enforce EthioBiz Theme subsystem toggles across EVERY source,
+    # including reposts hydrated above. Source-level guards already avoid the
+    # expensive queries; this final gate guarantees a disabled vertical can
+    # never leak a card (or a repost of one) into the stream.
+    subsystem_type_map = {
+        "product": "enable_dikka_shop",
+        "job": "enable_oosoo_jobs",
+        "doctor": "enable_bizhealth",
+        "fix_service": "enable_bizfix",
+        "booking": "enable_bizservices",
+        "property": "enable_bizhome",
+        "social": "enable_afocha_social",
+        "blog": "enable_tibebs",
+        "course": "enable_dagu_academy",
+        "forum": "enable_walta_forum",
+        "news": "enable_live_news",
+    }
+    items = [
+        it for it in items
+        if not subsystem_type_map.get(it.get("type"))
+        or int(subsystems.get(subsystem_type_map[it.get("type")], 1) or 0) != 0
+    ]
 
     # 13. Apply Personalization Algorithm (Facebook/TikTok/LinkedIn/Amazon Hybrid Scorer)
     # Real engagement counts first: every source above seeds likes/comments as 0
@@ -1650,7 +1685,9 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         # Exploration diversity jitter to ensure fresh organic feed rotation on refresh
         diversity_jitter = round(random.uniform(0.01, 0.08), 4)
 
+        unseen_boost = 3.0 if (it.get("id") and str(it.get("id")) not in seen_ids) else 0.0
         it["feed_score"] = round(
+            unseen_boost +
             (0.35 * affinity_score) +
             (0.25 * engagement_score) +
             (0.20 * recency_score) +

@@ -1,4 +1,4 @@
-{% extends "templates/web.html" %}
+﻿{% extends "templates/web.html" %}
 
 {% block title %}DOBiz Smart ERP Enterprise Signup | EthioBiz{% endblock %}
 
@@ -1311,7 +1311,7 @@
     // ===== EthioBiz Vertical Showcase — a curated home on the platform per industry =====
     // Each entry: vertical page name, live tagline, link(s), and tailored benefit chips.
     const DOB_ECO_VERTICALS = [
-        { name: 'Dikka Shop · Magala', icon: '🛍️', url: '/shop' },
+        { name: 'Dikko Shop · Magala', icon: '🛍️', url: '/shop' },
         { name: 'BizHealth', icon: '🏥', url: '/bizhealth' },
         { name: 'BizHome', icon: '🏠', url: '/bizhome' },
         { name: 'BizRide', icon: '🛵', url: '/bizride' },
@@ -1334,7 +1334,7 @@
             chips: ['Lodging listings', 'Room availability', 'Guest bookings']
         },
         'Restaurant': {
-            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            vert: 'Dikko Shop · Magala', tag: 'Magala Marketplace & Supermarket',
             url: '/shop', icon: '🍽️',
             desc: 'List your menu and start receiving digital orders through the Magala marketplace — food to your customers, straight from your kitchen.',
             chips: ['Online ordering', 'Menu publishing', 'Delivery-ready']
@@ -1346,7 +1346,7 @@
             chips: ['Property listings', 'Rental & sales leads', 'Agent reach']
         },
         'Manufacturing': {
-            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            vert: 'Dikko Shop · Magala', tag: 'Magala Marketplace & Supermarket',
             url: '/shop', icon: '🏭',
             desc: 'Sell your manufactured goods on the national marketplace — reach business buyers and consumers across Ethiopia, B2B or B2C.',
             chips: ['B2B / B2C selling', 'Product catalog', 'Order pipeline']
@@ -1359,7 +1359,7 @@
             explore2: 'Explore /jobs'
         },
         'Retail & Wholesale': {
-            vert: 'Dikka Shop', tag: 'Magala Marketplace & Supermarket',
+            vert: 'Dikko Shop', tag: 'Magala Marketplace & Supermarket',
             url: '/shop', icon: '📦',
             desc: 'The marketplace built for retailers — publish your products, sync your stock and sell to customers across the nation.',
             chips: ['Product publishing', 'Online orders', 'Stock sync']
@@ -1383,7 +1383,7 @@
             chips: ['On-demand delivery', 'Fleet dispatch', 'Courier jobs']
         },
         'Agriculture': {
-            vert: 'Dikka Shop · Magala', tag: 'Magala Marketplace & Supermarket',
+            vert: 'Dikko Shop · Magala', tag: 'Magala Marketplace & Supermarket',
             url: '/shop', icon: '🌾',
             desc: 'From farm to marketplace — sell produce and agribusiness products nationwide and shorten the road from harvest to buyer.',
             chips: ['Produce selling', 'Market reach', 'Agri supplies']
@@ -1882,6 +1882,74 @@
 
     renderVertical(state.industry);
     loadConfig(state.industry);
+})();
+</script>
+<script>
+// Subsystem-aware industry filtering for DOBiz signup.
+// The ERP itself is always available; only verticals that map to a disabled
+// EthioBiz subsystem are hidden so a member cannot choose a module that has
+// been switched off in EthioBiz Theme.
+(function initSubsystemIndustryFilter() {
+    const INDUSTRY_FLAGS = {
+        'Healthcare': 'enable_bizhealth',
+        'Education': 'enable_dagu_academy',
+        'Retail & Wholesale': 'enable_dikka_shop',
+        'Property Management': 'enable_bizhome',
+        'Maintenance': 'enable_bizfix'
+    };
+    const ROUTE_FLAGS = {
+        '/shop': 'enable_dikka_shop',
+        '/bizhealth': 'enable_bizhealth',
+        '/bizhome': 'enable_bizhome',
+        '/bizfix': 'enable_bizfix',
+        '/bizservice': 'enable_bizservices',
+        '/bizservices': 'enable_bizservices',
+        '/lms': 'enable_dagu_academy',
+        '/courses': 'enable_dagu_academy',
+        '/jobs': 'enable_oosoo_jobs'
+    };
+    fetch('/api/method/bismillah_ethiobiz.home_api.get_subsystem_settings', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            const s = (res && res.message) || {};
+
+            document.querySelectorAll('.dob-ind-btn[data-ind]').forEach(function (btn) {
+                const key = INDUSTRY_FLAGS[btn.getAttribute('data-ind')];
+                if (key && Number(s[key]) === 0) {
+                    btn.style.display = 'none';
+                    btn.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            const active = document.querySelector('.dob-ind-btn.active');
+            if (!active || active.style.display === 'none') {
+                const firstVisible = Array.prototype.find.call(
+                    document.querySelectorAll('.dob-ind-btn'),
+                    function (b) { return b.style.display !== 'none'; }
+                );
+                if (firstVisible) firstVisible.click();
+            }
+
+            const hideRoutes = Object.keys(ROUTE_FLAGS).filter(function (route) {
+                return Number(s[ROUTE_FLAGS[route]]) === 0;
+            });
+            if (hideRoutes.length) {
+                const prune = function () {
+                    document.querySelectorAll('#dob-vertical-showcase a').forEach(function (a) {
+                        const href = a.getAttribute('href') || '';
+                        if (hideRoutes.some(function (r) { return href === r || href.indexOf(r + '?') === 0; })) {
+                            a.style.display = 'none';
+                        }
+                    });
+                };
+                prune();
+                const showcase = document.getElementById('dob-vertical-showcase');
+                if (showcase && 'MutationObserver' in window) {
+                    new MutationObserver(prune).observe(showcase, { childList: true, subtree: true });
+                }
+            }
+        })
+        .catch(function () {});
 })();
 </script>
 {% endblock %}

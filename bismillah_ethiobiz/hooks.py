@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -64,7 +64,7 @@ app_include_js = [
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
@@ -84,7 +84,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.0",
 ]
 
 # ============================================
@@ -135,6 +135,10 @@ on_session_creation = [
 
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
+
+# Guest-safe webshop cart (prevents HTTP 500 on /cart for visitors without a
+# Customer party). See bismillah_ethiobiz/webshop_guest_cart.py.
+before_request = ["bismillah_ethiobiz.webshop_guest_cart.apply"]
 
 # ============================================
 # DOC EVENTS
