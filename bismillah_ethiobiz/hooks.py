@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
 
 Static theme deployment for EthioBiz ERPNext ecosystem.
-© 2025 EthioBiz | Powered by Biz Technology Solutions
+Â© 2025 EthioBiz | Powered by Biz Technology Solutions
 """
 
 from __future__ import unicode_literals
@@ -84,7 +84,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.1",
 ]
 
 # ============================================

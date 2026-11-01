@@ -884,6 +884,17 @@
         }
     }
 
+    // The label without icons/SVGs/line breaks. Used both for dictionary lookup
+    // and for the stored English original, so AM -> EN never duplicates a glyph.
+    function getTranslatableText(el) {
+        const clone = el.cloneNode(true);
+        Array.prototype.forEach.call(
+            clone.querySelectorAll('svg, br, .dob-ind-icon'),
+            function (node) { node.remove(); }
+        );
+        return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
     function applyTranslations() {
         // Home owns a larger key-based dictionary (window.ethioBizTranslations).
         // Let home apply its own copy so the two dictionaries never fight over
@@ -913,7 +924,7 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (!el.hasAttribute('data-i18n-orig')) {
-                    el.setAttribute('data-i18n-orig', (el.textContent || '').trim());
+                    el.setAttribute('data-i18n-orig', getTranslatableText(el));
                 }
                 if (dict[key]) {
                     setTextPreservingDecor(el, dict[key]);
@@ -946,10 +957,10 @@
                 }
 
                 const orig = el.getAttribute('data-i18n-orig');
-                const source = orig || (el.textContent || '').trim();
+                const source = orig || getTranslatableText(el);
                 const translated = lookupTranslation(source);
                 if (!translated) return;
-                if (!orig) el.setAttribute('data-i18n-orig', (el.textContent || '').trim());
+                if (!orig) el.setAttribute('data-i18n-orig', getTranslatableText(el));
                 setTextPreservingDecor(el, translated);
             });
 
