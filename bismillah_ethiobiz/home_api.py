@@ -565,173 +565,209 @@ def get_home_recommendations():
 
     return recs
 
+def _as_bool(value, default=True):
+    """Read a Frappe Check safely (DB values may be ``"0"``/``"1"`` strings)."""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        return value.strip().lower() not in ("", "0", "none", "false", "no")
+    return bool(value)
+
 
 @frappe.whitelist(allow_guest=True)
 def get_subsystem_settings():
-    """
-    Returns the enabled/disabled state of all 11 EthioBiz subsystems from EthioBiz Theme.
-    """
+    """Return the enabled/disabled state of all EthioBiz subsystems."""
+    flag_names = [
+        "enable_dikka_shop",
+        "enable_oosoo_jobs",
+        "enable_bizservices",
+        "enable_bizhealth",
+        "enable_bizhome",
+        "enable_bizfix",
+        "enable_bizride",
+        "enable_dagu_academy",
+        "enable_tibebs",
+        "enable_afocha_social",
+        "enable_walta_forum",
+        "enable_live_news",
+    ]
     try:
         theme = frappe.get_cached_doc("EthioBiz Theme", "EthioBiz Theme")
-        return {
-            "enable_dikka_shop": int(getattr(theme, "enable_dikka_shop", 1) if getattr(theme, "enable_dikka_shop", None) is not None else 1),
-            "enable_oosoo_jobs": int(getattr(theme, "enable_oosoo_jobs", 1) if getattr(theme, "enable_oosoo_jobs", None) is not None else 1),
-            "enable_bizservices": int(getattr(theme, "enable_bizservices", 1) if getattr(theme, "enable_bizservices", None) is not None else 1),
-            "enable_bizhealth": int(getattr(theme, "enable_bizhealth", 1) if getattr(theme, "enable_bizhealth", None) is not None else 1),
-            "enable_bizhome": int(getattr(theme, "enable_bizhome", 1) if getattr(theme, "enable_bizhome", None) is not None else 1),
-            "enable_bizfix": int(getattr(theme, "enable_bizfix", 1) if getattr(theme, "enable_bizfix", None) is not None else 1),
-            "enable_dagu_academy": int(getattr(theme, "enable_dagu_academy", 1) if getattr(theme, "enable_dagu_academy", None) is not None else 1),
-            "enable_tibebs": int(getattr(theme, "enable_tibebs", 1) if getattr(theme, "enable_tibebs", None) is not None else 1),
-            "enable_afocha_social": int(getattr(theme, "enable_afocha_social", 1) if getattr(theme, "enable_afocha_social", None) is not None else 1),
-            "enable_walta_forum": int(getattr(theme, "enable_walta_forum", 1) if getattr(theme, "enable_walta_forum", None) is not None else 1),
-            "enable_live_news": int(getattr(theme, "enable_live_news", 1) if getattr(theme, "enable_live_news", None) is not None else 1),
-        }
+        settings = {}
+        for name in flag_names:
+            settings[name] = 1 if _as_bool(getattr(theme, name, None), True) else 0
+        return settings
     except Exception as e:
         frappe.log_error(f"Error fetching EthioBiz Theme subsystem settings: {str(e)}")
-        return {
-            "enable_dikka_shop": 1,
-            "enable_oosoo_jobs": 1,
-            "enable_bizservices": 1,
-            "enable_bizhealth": 1,
-            "enable_bizhome": 1,
-            "enable_bizfix": 1,
-            "enable_dagu_academy": 1,
-            "enable_tibebs": 1,
-            "enable_afocha_social": 1,
-            "enable_walta_forum": 1,
-            "enable_live_news": 1,
-        }
+        return {name: 1 for name in flag_names}
+
+
+SUBSYSTEM_FLAG_BY_KEY = {
+    "shop": "enable_dikka_shop",
+    "jobs": "enable_oosoo_jobs",
+    "bizservices": "enable_bizservices",
+    "bizhealth": "enable_bizhealth",
+    "bizhome": "enable_bizhome",
+    "bizfix": "enable_bizfix",
+    "bizride": "enable_bizride",
+    "dagu": "enable_dagu_academy",
+    "tibeb": "enable_tibebs",
+    "afocha": "enable_afocha_social",
+    "walta": "enable_walta_forum",
+    "news": "enable_live_news",
+}
+
+SYSTEM_KEY_BY_PILLAR = {
+    "Tibeb": "tibeb",
+    "Dagu": "dagu",
+    "Magala": "magala",
+    "DOBiz": "dobiz",
+    "Walta": "walta",
+    "Afocha": "afocha",
+}
+
+
+def _is_subsystem_enabled(key, subsystems):
+    if not key or key == "none":
+        return True
+    flag = SUBSYSTEM_FLAG_BY_KEY.get(key)
+    return bool(subsystems.get(flag, 1)) if flag else True
+
+
+def _bilingual_fields(title, subtitle, title_am=None, subtitle_am=None):
+    from bismillah_ethiobiz.ethiobiz_theme.home_system_defaults import split_bilingual
+
+    if not title_am:
+        _, split_am = split_bilingual(title)
+        title_am = title_am or split_am
+    if not subtitle_am:
+        _, split_sub_am = split_bilingual(subtitle)
+        subtitle_am = subtitle_am or split_sub_am
+    if " | " in (title or ""):
+        title, _ = split_bilingual(title)
+    if " | " in (subtitle or ""):
+        subtitle, _ = split_bilingual(subtitle)
+    return {
+        "title": title or "",
+        "title_en": title or "",
+        "title_am": title_am or "",
+        "subtitle": subtitle or "",
+        "subtitle_en": subtitle or "",
+        "subtitle_am": subtitle_am or "",
+    }
+
 
 @frappe.whitelist(allow_guest=True)
 def get_card_portals_and_subsystems():
-    """
-    Returns subsystem settings and active card back portal items grouped by pillar.
-    If no portal items are saved in the DB child table yet, returns calibrated defaults
-    matching all 6 EthioBiz pillar card backs.
-    """
+    """Return subsystem flags, bilingual home cards, and card-back portals."""
     subsystems = get_subsystem_settings()
-
-    portals_by_pillar = {
-        "Tibeb": [],
-        "Dagu": [],
-        "Magala": [],
-        "DOBiz": [],
-        "Walta": [],
-        "Afocha": []
-    }
+    portals_by_pillar = {pillar: [] for pillar in SYSTEM_KEY_BY_PILLAR}
+    systems = []
+    pillar_rows = []
+    portal_rows = []
 
     try:
         theme = frappe.get_cached_doc("EthioBiz Theme", "EthioBiz Theme")
-        items = getattr(theme, "card_portal_items", []) or []
-        for item in items:
-            if not getattr(item, "is_enabled", 1):
+        pillar_rows = list(getattr(theme, "pillars", []) or [])
+        portal_rows = list(getattr(theme, "card_portal_items", []) or [])
+        for row in pillar_rows:
+            if not _as_bool(getattr(row, "is_enabled", 1), True):
                 continue
-            key = getattr(item, "subsystem_key", "none") or "none"
-            if key == "shop" and not subsystems.get("enable_dikka_shop"):
+            subsystem_key = getattr(row, "subsystem_key", "none") or "none"
+            if not _is_subsystem_enabled(subsystem_key, subsystems):
                 continue
-            if key == "jobs" and not subsystems.get("enable_oosoo_jobs"):
+            pillar_key = (getattr(row, "pillar_key", "") or getattr(row, "pillar_name", "") or "").strip()
+            if pillar_key not in SYSTEM_KEY_BY_PILLAR:
                 continue
-            if key == "bizservices" and not subsystems.get("enable_bizservices"):
-                continue
-            if key == "bizhealth" and not subsystems.get("enable_bizhealth"):
-                continue
-            if key == "bizhome" and not subsystems.get("enable_bizhome"):
-                continue
-            if key == "bizfix" and not subsystems.get("enable_bizfix"):
-                continue
-            if key == "dagu" and not subsystems.get("enable_dagu_academy"):
-                continue
-            if key == "tibeb" and not subsystems.get("enable_tibebs"):
-                continue
-            if key == "afocha" and not subsystems.get("enable_afocha_social"):
-                continue
-            if key == "walta" and not subsystems.get("enable_walta_forum"):
-                continue
-            if key == "news" and not subsystems.get("enable_live_news"):
-                continue
+            systems.append(
+                {
+                    "pillar_key": pillar_key,
+                    "pillar_name": getattr(row, "pillar_name", pillar_key),
+                    "system_key": getattr(row, "system_key", "") or SYSTEM_KEY_BY_PILLAR[pillar_key],
+                    "subsystem_key": subsystem_key,
+                    "sort_order": int(getattr(row, "sort_order", 0) or 0),
+                    "collapsed_title_en": getattr(row, "collapsed_title_en", "") or "",
+                    "collapsed_title_am": getattr(row, "collapsed_title_am", "") or "",
+                    "badge_en": getattr(row, "badge_en", "") or "",
+                    "badge_am": getattr(row, "badge_am", "") or "",
+                    "title_en": getattr(row, "title_en", "") or "",
+                    "title_am": getattr(row, "title_am", "") or "",
+                    "subtitle_en": getattr(row, "subtitle_en", "") or "",
+                    "subtitle_am": getattr(row, "subtitle_am", "") or "",
+                    "description_en": getattr(row, "description_en", "") or "",
+                    "description_am": getattr(row, "description_am", "") or "",
+                    "primary_cta_label_en": getattr(row, "primary_cta_label_en", "") or "",
+                    "primary_cta_label_am": getattr(row, "primary_cta_label_am", "") or "",
+                    "primary_cta_url": getattr(row, "primary_cta_url", "") or "",
+                    "secondary_cta_label_en": getattr(row, "secondary_cta_label_en", "") or "",
+                    "secondary_cta_label_am": getattr(row, "secondary_cta_label_am", "") or "",
+                    "secondary_cta_url": getattr(row, "secondary_cta_url", "") or "",
+                    "back_title_en": getattr(row, "back_title_en", "") or "",
+                    "back_title_am": getattr(row, "back_title_am", "") or "",
+                    "back_subtitle_en": getattr(row, "back_subtitle_en", "") or "",
+                    "back_subtitle_am": getattr(row, "back_subtitle_am", "") or "",
+                    "icon": getattr(row, "icon", "") or "",
+                    "logo": getattr(row, "pillar_logo", "") or "",
+                    "accent_color": getattr(row, "supporting_color", "") or "",
+                }
+            )
 
-            p = getattr(item, "pillar", "")
-            if p in portals_by_pillar:
-                portals_by_pillar[p].append({
-                    "title": getattr(item, "title", ""),
-                    "subtitle": getattr(item, "subtitle", ""),
-                    "url": getattr(item, "url", ""),
-                    "icon": getattr(item, "icon", "🌐"),
-                    "subsystem_key": key
-                })
+        seen_portals = set()
+        for item in portal_rows:
+            if not _as_bool(getattr(item, "is_enabled", 1), True):
+                continue
+            subsystem_key = getattr(item, "subsystem_key", "none") or "none"
+            if not _is_subsystem_enabled(subsystem_key, subsystems):
+                continue
+            pillar = (getattr(item, "pillar", "") or "").strip()
+            if pillar not in portals_by_pillar:
+                continue
+            identity = (pillar, getattr(item, "url", "") or "", getattr(item, "title", "") or "")
+            if identity in seen_portals:
+                continue
+            seen_portals.add(identity)
+            fields = _bilingual_fields(
+                getattr(item, "title", "") or "",
+                getattr(item, "subtitle", "") or "",
+                getattr(item, "title_am", "") or "",
+                getattr(item, "subtitle_am", "") or "",
+            )
+            portals_by_pillar[pillar].append(
+                {
+                    **fields,
+                    "url": getattr(item, "url", "") or "",
+                    "icon": getattr(item, "icon", "") or "🌐",
+                    "subsystem_key": subsystem_key,
+                    "sort_order": int(getattr(item, "sort_order", 0) or 0),
+                }
+            )
     except Exception as e:
         frappe.log_error(f"Error fetching card portal items: {str(e)}")
 
-    has_items = any(len(v) > 0 for v in portals_by_pillar.values())
-    if not has_items:
-        defaults = {
-            "Tibeb": [
-                {"title": "Tibeb Home", "subtitle": "Universal Wisdom & Heritage", "url": "/tibeb", "icon": "🏛️", "subsystem_key": "tibeb"},
-                {"title": "Sacred Scriptures Reader", "subtitle": "Quran, Gospel, Psalms, Torah, Hadith", "url": "/tibeb", "icon": "📖", "subsystem_key": "tibeb"},
-                {"title": "Tibeb Articles", "subtitle": "Reflections & Inspiring Ideas", "url": "/blog", "icon": "📝", "subsystem_key": "tibeb"},
-                {"title": "Mentorship Circle", "subtitle": "Connect with scholars & mentors", "url": "/tibeb-mentor-subscriber", "icon": "🕊️", "subsystem_key": "tibeb"}
-            ],
-            "Dagu": [
-                {"title": "Dagu Home", "subtitle": "Learning & Instructor Paths", "url": "/dagu", "icon": "🎓", "subsystem_key": "dagu"},
-                {"title": "Dagu Courses", "subtitle": "Practical ERP, Tech & Vocational", "url": "/courses", "icon": "📚", "subsystem_key": "dagu"},
-                {"title": "Become an Instructor", "subtitle": "Share skills & earn with Dagu", "url": "/dagu-instructor-registration", "icon": "👩‍🏫", "subsystem_key": "dagu"},
-                {"title": "Oosoo Jobs", "subtitle": "Find work & career opportunities", "url": "/jobs", "icon": "💼", "subsystem_key": "jobs"},
-                {"title": "Post a Vacancy", "subtitle": "Hire verified talent", "url": "/dobiz-signup?intent=post_vacancy", "icon": "📢", "subsystem_key": "jobs"}
-            ],
-            "Magala": [
-                {"title": "Online Store", "subtitle": "Products from local sellers", "url": "/shop", "icon": "🛍️", "subsystem_key": "shop"},
-                {"title": "BizServices", "subtitle": "Book verified local professionals", "url": "/bizservices", "icon": "⚡", "subsystem_key": "bizservices"},
-                {"title": "BizHome & Properties", "subtitle": "Commercial & residential listings", "url": "/bizhome", "icon": "🏠", "subsystem_key": "bizhome"},
-                {"title": "BizFix Repairs", "subtitle": "Technical repairs & maintenance", "url": "/bizfix", "icon": "🔧", "subsystem_key": "bizfix"}
-            ],
-            "DOBiz": [
-                {"title": "Retail & POS", "subtitle": "Smart Store Management", "url": "/dobiz-retail", "icon": "🛒", "subsystem_key": "none"},
-                {"title": "Professional Services", "subtitle": "Billing, Clients & Tasks", "url": "/dobiz-service", "icon": "💼", "subsystem_key": "none"},
-                {"title": "Manufacturing & Distribution", "subtitle": "Production & Batch Tracking", "url": "/dobiz-manufacturing", "icon": "🏭", "subsystem_key": "none"},
-                {"title": "Healthcare ERP", "subtitle": "Clinics, labs & pharmacies", "url": "/dobiz-health", "icon": "🏥", "subsystem_key": "bizhealth"},
-                {"title": "Education ERP", "subtitle": "Schools, colleges & academies", "url": "/dobiz-education", "icon": "🏫", "subsystem_key": "dagu"}
-            ],
-            "Walta": [
-                {"title": "Walta Support Center", "subtitle": "Enterprise helpdesk & guidance", "url": "/walta-main", "icon": "🛡️", "subsystem_key": "none"},
-                {"title": "Walta Tickets", "subtitle": "Submit & track support requests", "url": "/issues", "icon": "🎫", "subsystem_key": "none"},
-                {"title": "Walta Docs & FAQ", "subtitle": "Knowledgebase & tutorials", "url": "/support", "icon": "📖", "subsystem_key": "none"},
-                {"title": "Walta Forum", "subtitle": "Ask questions & share solutions", "url": "/forum", "icon": "💬", "subsystem_key": "walta"}
-            ],
-            "Afocha": [
-                {"title": "Afocha Hub", "subtitle": "Community feed & stories", "url": "/afocha", "icon": "🌟", "subsystem_key": "afocha"},
-                {"title": "Afocha Social", "subtitle": "Connect, post & share insights", "url": "/social", "icon": "💬", "subsystem_key": "afocha"},
-                {"title": "Community Groups", "subtitle": "Local business & civic circles", "url": "/groups", "icon": "👥", "subsystem_key": "afocha"},
-                {"title": "Join EthioBiz Free", "subtitle": "Create your account to participate", "url": "/login#signup", "icon": "✨", "subsystem_key": "none"}
-            ]
-        }
-        for pillar, items_list in defaults.items():
-            for item in items_list:
-                k = item["subsystem_key"]
-                if k == "shop" and not subsystems.get("enable_dikka_shop"):
+    # Only use defaults when the registry is genuinely uninitialised. If rows
+    # exist but every card/portal is disabled, an empty result is intentional.
+    if not systems and not pillar_rows:
+        from bismillah_ethiobiz.ethiobiz_theme.home_system_defaults import SYSTEM_DEFAULTS
+
+        for item in SYSTEM_DEFAULTS:
+            if _is_subsystem_enabled(item["subsystem_key"], subsystems):
+                systems.append(dict(item))
+
+    systems.sort(key=lambda row: (row.get("sort_order", 0), row.get("pillar_key", "")))
+    for pillar in portals_by_pillar:
+        portals_by_pillar[pillar].sort(key=lambda row: (row.get("sort_order", 0), row.get("title", "")))
+
+    if not any(portals_by_pillar.values()) and not portal_rows:
+        from bismillah_ethiobiz.ethiobiz_theme.home_system_defaults import PORTAL_DEFAULTS
+
+        for pillar, defaults in PORTAL_DEFAULTS.items():
+            for index, item in enumerate(defaults):
+                if not _is_subsystem_enabled(item["subsystem_key"], subsystems):
                     continue
-                if k == "jobs" and not subsystems.get("enable_oosoo_jobs"):
-                    continue
-                if k == "bizservices" and not subsystems.get("enable_bizservices"):
-                    continue
-                if k == "bizhealth" and not subsystems.get("enable_bizhealth"):
-                    continue
-                if k == "bizhome" and not subsystems.get("enable_bizhome"):
-                    continue
-                if k == "bizfix" and not subsystems.get("enable_bizfix"):
-                    continue
-                if k == "dagu" and not subsystems.get("enable_dagu_academy"):
-                    continue
-                if k == "tibeb" and not subsystems.get("enable_tibebs"):
-                    continue
-                if k == "afocha" and not subsystems.get("enable_afocha_social"):
-                    continue
-                if k == "walta" and not subsystems.get("enable_walta_forum"):
-                    continue
-                if k == "news" and not subsystems.get("enable_live_news"):
-                    continue
-                portals_by_pillar[pillar].append(item)
+                portals_by_pillar[pillar].append({**item, "sort_order": index + 1})
 
     return {
         "subsystems": subsystems,
-        "portals": portals_by_pillar
+        "systems": systems,
+        "portals": portals_by_pillar,
     }

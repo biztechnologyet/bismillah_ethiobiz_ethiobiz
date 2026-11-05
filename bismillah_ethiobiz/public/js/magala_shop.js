@@ -678,19 +678,61 @@ document.addEventListener("DOMContentLoaded", function() {
     // 8. COMPLETE SHOPPING CART & DRAWER SYSTEM
     window.addToCart = function(itemCode) {
         if (window.MagalaCart && window.MagalaCart.add) {
-            window.MagalaCart.add(itemCode, 1);
-        } else {
-            fetch("/api/method/bismillah_ethiobiz.magala_checkout.add_to_cart", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-Frappe-CSRF-Token": frappe.csrf_token || "" },
-                body: JSON.stringify({ item_code: itemCode, qty: 1 })
-            }).then(r => r.json()).then(res => {
-                window.renderShopCartDrawer(res.message);
-                const drawer = document.getElementById("magala-cart-drawer");
-                if (drawer) drawer.classList.add("open");
-            });
+            return window.MagalaCart.add(itemCode, 1);
         }
+
+        // Fallback only when the shared cart controller did not load.
+        return fetch("/api/method/bismillah_ethiobiz.magala_checkout.add_to_cart", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "X-Frappe-CSRF-Token": (window.frappe && frappe.csrf_token) || ""
+            },
+            body: new URLSearchParams({ item_code: itemCode, qty: 1 })
+        }).then(function(r) {
+            return r.json();
+        }).then(function(res) {
+            const cart = (res && res.message) || {};
+            window.renderShopCartDrawer(cart);
+            if (window.MagalaCart && window.MagalaCart.open) window.MagalaCart.open();
+            return cart;
+        }).catch(function() {
+            // Keep the failure visible rather than silently doing nothing.
+            if (window.MagalaCart && window.MagalaCart.refresh) window.MagalaCart.refresh();
+        });
     };
+
+    function closeShopCartDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (drawer) {
+            drawer.classList.remove("open");
+            drawer.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.remove("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.remove("open");
+            backdrop.setAttribute("aria-hidden", "true");
+        }
+    }
+
+    function openShopCartDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (!drawer) return false;
+        drawer.classList.add("open");
+        drawer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.add("open");
+            backdrop.setAttribute("aria-hidden", "false");
+        }
+        if (window.MagalaCart && window.MagalaCart.refresh) {
+            window.MagalaCart.refresh();
+        }
+        return true;
+    }
 
     window.renderShopCartDrawer = function(cart) {
         const drawerItems = document.getElementById("cart-drawer-items");
@@ -699,32 +741,36 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!drawerItems) return;
 
         const items = (cart && cart.items) || [];
-        const count = (cart && cart.count) || items.length || 0;
+        const count = (cart && cart.count) || items.reduce(function(sum, it) { return sum + Number(it.qty || 0); }, 0);
         const total = (cart && cart.total) || 0;
 
         if (countBadge) countBadge.innerText = count;
         if (drawerTotal) drawerTotal.innerText = Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
 
         if (!items || items.length === 0) {
-            drawerItems.innerHTML = `<p class="empty-cart-msg" style="padding:30px 16px; text-align:center; color:#94a3b8; font-size:14px;">Your cart is empty. Explore items to add!</p>`;
+            drawerItems.innerHTML = '<p class="empty-cart-msg" style="padding:30px 16px; text-align:center; color:#94a3b8; font-size:14px;">Your cart is empty. Explore items to add!</p>';
             return;
         }
 
         let html = '<div class="cart-items-list" style="display:flex; flex-direction:column; gap:12px; padding:12px 0;">';
-        items.forEach(it => {
-            const itemImg = it.image || "/files/ethiobiz_butterfly_logo.png";
-            const itemPrice = Number(it.rate || it.price || 0).toLocaleString("en-US", { minimumFractionDigits: 2 }) + " ETB";
+        items.forEach(function(it) {
+            const itemCode = escapeHtml(it.item_code || "");
+            const itemName = escapeHtml(it.item_name || it.item_code || "Item");
+            const itemImg = escapeHtml(it.image || "/files/ethiobiz_butterfly_logo.png");
+            const itemPrice = Number(it.amount || (Number(it.qty || 1) * Number(it.rate || it.price || 0)) || 0)
+                .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
+            const qty = Number(it.qty || 1);
             html += `
-                <div class="cart-drawer-card" style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12);">
-                    <img src="${itemImg}" alt="${escapeHtml(it.item_name || it.item_code)}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; background:#fff;">
+                <div class="cart-drawer-card" data-item-code="${itemCode}" style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12);">
+                    <img src="${itemImg}" alt="${itemName}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; background:#fff;">
                     <div style="flex:1; min-width:0;">
-                        <div style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(it.item_name || it.item_code)}</div>
+                        <div style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${itemName}</div>
                         <div style="font-size:12px; color:#5eead4; font-weight:800; margin-top:2px;">${itemPrice}</div>
                         <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                            <button type="button" onclick="window.MagalaCart.updateQty('${it.item_code}', ${Math.max(0, (it.qty || 1) - 1)})" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">-</button>
-                            <span style="font-size:12px; font-weight:700; color:#fff;">${it.qty || 1}</span>
-                            <button type="button" onclick="window.MagalaCart.updateQty('${it.item_code}', ${(it.qty || 1) + 1})" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">+</button>
-                            <button type="button" onclick="window.MagalaCart.updateQty('${it.item_code}', 0)" style="margin-left:auto; background:none; border:none; color:#f87171; cursor:pointer; font-size:13px;" title="Remove">✕</button>
+                            <button type="button" data-cart-action="dec" data-code="${itemCode}" aria-label="Decrease quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">-</button>
+                            <span data-cart-qty style="font-size:12px; font-weight:700; color:#fff;">${qty}</span>
+                            <button type="button" data-cart-action="inc" data-code="${itemCode}" aria-label="Increase quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">+</button>
+                            <button type="button" data-cart-action="remove" data-code="${itemCode}" aria-label="Remove item" style="margin-left:auto; background:none; border:none; color:#f87171; cursor:pointer; font-size:13px;" title="Remove">&#10005;</button>
                         </div>
                     </div>
                 </div>
@@ -735,33 +781,65 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     function initCart() {
-        if (window.MagalaCart && window.MagalaCart.refresh) {
-            window.MagalaCart.refresh();
+        const drawer = document.getElementById("magala-cart-drawer");
+        const drawerItems = document.getElementById("cart-drawer-items");
+
+        if (drawerItems) {
+            drawerItems.addEventListener("click", function(e) {
+                const btn = e.target.closest("[data-cart-action]");
+                if (!btn || !window.MagalaCart || !window.MagalaCart.updateQty) return;
+                const code = btn.getAttribute("data-code");
+                const row = btn.closest("[data-item-code]");
+                const qtyText = row ? row.querySelector("[data-cart-qty]") : null;
+                const qty = Number(qtyText ? qtyText.textContent : 1) || 1;
+                let next = qty;
+                if (btn.getAttribute("data-cart-action") === "inc") next = qty + 1;
+                if (btn.getAttribute("data-cart-action") === "dec") next = Math.max(0, qty - 1);
+                if (btn.getAttribute("data-cart-action") === "remove") next = 0;
+
+                btn.disabled = true;
+                window.MagalaCart.updateQty(code, next).finally(function() {
+                    btn.disabled = false;
+                });
+            });
         }
 
         const closeBtn = document.getElementById("close-cart-drawer");
-        if (closeBtn) {
-            closeBtn.addEventListener("click", function() {
-                const drawer = document.getElementById("magala-cart-drawer");
-                if (drawer) drawer.classList.remove("open");
+        if (closeBtn) closeBtn.addEventListener("click", closeShopCartDrawer);
+
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) backdrop.addEventListener("click", closeShopCartDrawer);
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") closeShopCartDrawer();
+        });
+
+        // Attach the middle navbar cart to the drawer. Never bind to the
+        // duplicate legacy badge or a count span.
+        const navCart = document.querySelector("a.shopping-cart, .shopping-cart a, a.cart-icon, .cart-icon a");
+        const navFallback = document.querySelector(".shopping-cart, .cart-icon");
+        const clickable = navCart || navFallback;
+        if (clickable && drawer) {
+            clickable.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (drawer.classList.contains("open")) {
+                    closeShopCartDrawer();
+                } else {
+                    openShopCartDrawer();
+                }
             });
         }
 
-        // Attach middle navbar cart icon to open drawer on shop page
-        const navCart = document.querySelector(".shopping-cart, .cart-icon, #cart-count");
-        if (navCart) {
-            const clickable = navCart.closest("li, a") || navCart;
-            clickable.addEventListener("click", function(e) {
-                const drawer = document.getElementById("magala-cart-drawer");
-                if (drawer) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    drawer.classList.toggle("open");
-                    if (drawer.classList.contains("open") && window.MagalaCart) {
-                        window.MagalaCart.refresh();
-                    }
-                }
-            });
+        if (window.MagalaCart && window.MagalaCart.refresh) {
+            window.MagalaCart.refresh();
+        } else {
+            // Keep the drawer populated even if the shared controller is not
+            // present on this page build.
+            fetch("/api/method/bismillah_ethiobiz.magala_checkout.get_cart", { credentials: "same-origin" })
+                .then(function(r) { return r.json(); })
+                .then(function(res) { window.renderShopCartDrawer((res && res.message) || {}); })
+                .catch(function() {});
         }
     }
 

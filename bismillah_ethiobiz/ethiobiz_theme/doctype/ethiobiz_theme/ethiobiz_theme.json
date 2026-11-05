@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "EthioBiz Theme",
   "module": "EthioBiz Theme",
   "custom": 1,
@@ -77,12 +77,13 @@
     {
       "fieldname": "section_pillars_tab1",
       "fieldtype": "Section Break",
-      "label": "Brand Pillars"
+      "label": "Home Flip Cards / Brand Pillars",
+      "description": "These six rows control the home flipped cards. English is the fallback; Amharic is displayed when the site language is Amharic. A card is hidden when Enabled is off or when its subsystem master toggle is off."
     },
     {
       "fieldname": "pillars",
       "fieldtype": "Table",
-      "label": "Brand Pillars",
+      "label": "Home Flip Cards / Brand Pillars",
       "options": "EthioBiz Pillar Settings"
     },
     {
@@ -131,6 +132,12 @@
       "fieldname": "enable_bizfix",
       "fieldtype": "Check",
       "label": "🔧 Enable BizFix (Technical Repairs & Maintenance)"
+    },
+    {
+      "default": "1",
+      "fieldname": "enable_bizride",
+      "fieldtype": "Check",
+      "label": "🚗 Enable BizRide (Transport & Logistics)"
     },
     {
       "fieldname": "col_break_subsystems_1",
@@ -478,6 +485,7 @@
     "enable_bizhealth",
     "enable_bizhome",
     "enable_bizfix",
+    "enable_bizride",
     "col_break_subsystems_1",
     "enable_dagu_academy",
     "enable_tibebs",

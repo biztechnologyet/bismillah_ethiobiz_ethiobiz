@@ -8,7 +8,9 @@
   "field_order": [
     "pillar",
     "title",
+    "title_am",
     "subtitle",
+    "subtitle_am",
     "url",
     "icon",
     "subsystem_key",
@@ -28,14 +30,25 @@
       "fieldname": "title",
       "fieldtype": "Data",
       "in_list_view": 1,
-      "label": "Portal Title",
+      "label": "Portal Title (English)",
       "reqd": 1
+    },
+    {
+      "fieldname": "title_am",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Portal Title (Amharic)"
     },
     {
       "fieldname": "subtitle",
       "fieldtype": "Data",
       "in_list_view": 1,
-      "label": "Subtitle / Description"
+      "label": "Subtitle / Description (English)"
+    },
+    {
+      "fieldname": "subtitle_am",
+      "fieldtype": "Data",
+      "label": "Subtitle / Description (Amharic)"
     },
     {
       "fieldname": "url",
@@ -57,7 +70,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Associated Subsystem Toggle",
-      "options": "none\nshop\njobs\nbizservices\nbizhealth\nbizhome\nbizfix\ndagu\ntibeb\nafocha\nwalta\nnews"
+      "options": "none\nshop\njobs\nbizservices\nbizhealth\nbizhome\nbizfix\nbizride\ndagu\ntibeb\nafocha\nwalta\nnews"
     },
     {
       "default": "1",

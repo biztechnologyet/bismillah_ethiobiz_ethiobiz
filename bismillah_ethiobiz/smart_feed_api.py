@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 BISMALLAH AR-RAHMAN AR-RAHIM
 EthioBiz Smart Feed Personalization & User Interaction Logging API
@@ -1219,7 +1219,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 })
 
     # 5. SOURCE D: BizFix Maintenance Services
-    if filter_type in ["all", "fix", "bizfix", "maintenance", "repair", "services", "bizservices"] and subsystems.get("enable_bizfix", 1):
+    if filter_type in ["all", "fix", "bizfix", "maintenance", "repair"] and subsystems.get("enable_bizfix", 1):
         if frappe.db.exists("DocType", "BizService Listing"):
             srv_query = {"is_active": 1}
             if search:

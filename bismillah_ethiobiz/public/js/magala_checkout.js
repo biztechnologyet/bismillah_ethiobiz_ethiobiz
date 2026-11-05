@@ -67,7 +67,7 @@
     }
 
     function renderBadge(cart) {
-        const count = (cart && cart.count) || 0;
+        const count = Number((cart && cart.count) || 0);
         // Update middle navbar cart badge
         const middleCount = document.getElementById("cart-count");
         if (middleCount) {
@@ -82,36 +82,111 @@
         const drawerCount = document.getElementById("cart-drawer-count");
         if (drawerCount) drawerCount.innerText = count;
 
-        // Remove redundant duplicate badge if it exists
+        // Remove redundant duplicate badge if it exists. The middle navbar
+        // cart control is the only supported cart entry point.
         const oldBadge = document.getElementById("magala-cart-badge");
         if (oldBadge) oldBadge.remove();
+    }
+
+    function renderDrawer(cart) {
+        if (typeof window.renderShopCartDrawer === "function") {
+            try {
+                window.renderShopCartDrawer(cart || { items: [], count: 0, total: 0 });
+            } catch (e) {
+                // A drawer render failure must not prevent the badge/API from
+                // remaining functional.
+            }
+        }
+    }
+
+    function openDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (!drawer) return false;
+        drawer.classList.add("open");
+        drawer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.add("open");
+            backdrop.setAttribute("aria-hidden", "false");
+        }
+        return true;
+    }
+
+    function closeDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (!drawer) return;
+        drawer.classList.remove("open");
+        drawer.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.remove("open");
+            backdrop.setAttribute("aria-hidden", "true");
+        }
+    }
+
+    function cleanError(e) {
+        const raw = (e && e.message) ? String(e.message) : "Could not update the cart.";
+        return raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 260);
+    }
+
+    function handleCartError(e, fallback) {
+        const msg = cleanError(e) || fallback;
+        if (/log in|login required/i.test(msg)) {
+            window.location.href = "/login?redirect-to=" + encodeURIComponent(location.pathname + location.search);
+            return;
+        }
+        toast(escapeHtml(msg));
+        throw e;
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
     window.MagalaCart = {
         refresh() {
             return get(API.cart).then((cart) => {
                 renderBadge(cart);
+                renderDrawer(cart);
                 return cart;
             }).catch(() => ({ items: [], count: 0, total: 0 }));
         },
         add(itemCode, qty) {
             return post(API.add, { item_code: itemCode, qty: qty || 1 }).then((cart) => {
                 renderBadge(cart);
-                toast(`Added to cart. <a href="/cart" style="color:#5eead4;font-weight:800;">Checkout →</a>`);
-                if (location.pathname.replace(/\/$/, "") === "/cart") {
-                    window.location.reload();
+                renderDrawer(cart);
+                openDrawer();
+                toast('Added to cart. <a href="/cart" style="color:#5eead4;font-weight:800;">Checkout \u2192</a>');
+                return cart;
+            }).catch((e) => handleCartError(e, "Could not add to cart"));
+        },
+        updateQty(itemCode, qty) {
+            if (!itemCode) return Promise.resolve();
+            return post(API.qty, { item_code: itemCode, qty: qty }).then((cart) => {
+                renderBadge(cart);
+                renderDrawer(cart);
+                if (openDrawer()) {
+                    // Keep the drawer open after a quantity change.
+                }
+                if (Number(qty) <= 0) {
+                    toast("Item removed from cart.");
                 }
                 return cart;
-            }).catch((e) => {
-                const msg = (e && e.message) ? String(e.message).replace(/<[^>]+>/g, " ").slice(0, 220) : "Could not add to cart";
-                if (/log in/i.test(msg)) {
-                    window.location.href = "/login?redirect-to=" + encodeURIComponent(location.pathname + location.search);
-                    return;
-                }
-                alert(msg);
-                throw e;
-            });
+            }).catch((e) => handleCartError(e, "Could not update cart quantity"));
         },
+        remove(itemCode) {
+            return this.updateQty(itemCode, 0);
+        },
+        open: openDrawer,
+        close: closeDrawer,
     };
 
     function extractItemCode(card) {

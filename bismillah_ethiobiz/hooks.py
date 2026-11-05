@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
@@ -68,7 +68,7 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
-    "/assets/bismillah_ethiobiz/css/magala_shop.css",
+    "/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.6.0",
     "/assets/bismillah_ethiobiz/css/ethiobiz_map.css",
 ]
 
@@ -83,7 +83,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
-    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
     "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.1",
 ]
 
