@@ -88,7 +88,43 @@ BLUR_VALUES = {
 
 class EthioBizTheme(Document):
     def validate(self):
+        self.validate_home_cards()
         self.generate_theme_css()
+
+    def validate_home_cards(self):
+        """Keep the home flip-card registry unambiguous."""
+        seen = set()
+        seen_systems = set()
+        system_by_pillar = {
+            "Tibeb": "tibeb",
+            "Dagu": "dagu",
+            "Magala": "magala",
+            "DOBiz": "dobiz",
+            "Walta": "walta",
+            "Afocha": "afocha",
+        }
+        allowed_systems = set(system_by_pillar.values())
+        allowed = {"none", "shop", "jobs", "bizservices", "bizhealth", "bizhome", "bizfix", "bizride", "dagu", "tibeb", "afocha", "walta", "news"}
+        for row in self.pillars or []:
+            key = (row.pillar_key or "").strip()
+            if key:
+                if key in seen:
+                    frappe.throw(f"Duplicate home flip card pillar key: {key}")
+                seen.add(key)
+            system_key = (row.system_key or "").strip()
+            if not system_key:
+                system_key = system_by_pillar.get(key, "")
+                if system_key:
+                    row.system_key = system_key
+            if system_key:
+                if system_key not in allowed_systems:
+                    frappe.throw(f"Invalid system key '{system_key}' on home flip card {key or row.pillar_name}")
+                if system_key in seen_systems:
+                    frappe.throw(f"Duplicate home flip card system key: {system_key}")
+                seen_systems.add(system_key)
+            subsystem = (row.subsystem_key or "none").strip()
+            if subsystem not in allowed:
+                frappe.throw(f"Invalid subsystem key '{subsystem}' on home flip card {key or row.pillar_name}")
 
     def generate_theme_css(self):
         """Compile and generate dynamic theme CSS variables and atmosphere rules."""

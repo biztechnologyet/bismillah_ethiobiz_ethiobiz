@@ -1,4 +1,4 @@
-import frappe
+﻿import frappe
 import requests
 import json
 import re
@@ -89,6 +89,22 @@ def _get_user_language(user):
         return _get_hadeeda_settings().default_language or "en"
     except Exception:
         return "en"
+
+
+@frappe.whitelist(allow_guest=True)
+def set_user_language(lang):
+    """Persists user language preference for logged-in users and sets session cookie."""
+    lang = "am" if lang in ("am", "amharic", "amh") else "en"
+    user = frappe.session.user
+    if user and user != "Guest":
+        try:
+            frappe.db.set_value("User", user, "language", lang, update_modified=False)
+            frappe.db.commit()
+        except Exception as e:
+            frappe.log_error(f"Error updating user language: {e}")
+    if hasattr(frappe.local, "cookie_manager") and frappe.local.cookie_manager:
+        frappe.local.cookie_manager.set_cookie("preferred_language", lang)
+    return {"status": "success", "language": lang, "user": user}
 
 
 
@@ -623,7 +639,7 @@ def update_website_context(context):
         context.web_include_css = []
 
     css_files = [
-        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
+        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
         "/assets/bismillah_ethiobiz/css/walta.css",
         "/assets/bismillah_ethiobiz/css/magala_checkout.css",
     ]
@@ -652,6 +668,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
         "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.1",
     ]
     for js in js_files:
         base = js.split("?")[0]

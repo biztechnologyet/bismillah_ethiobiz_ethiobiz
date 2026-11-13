@@ -1,161 +1,437 @@
-// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT
+// BISMALLAH ETHIOBIZ FIX PORTAL JAVASCRIPT ÔÇö v4.0.0
 document.addEventListener("DOMContentLoaded", function() {
-    let currentCategory = "all";
-    let services = [];
-    let selectedService = null;
+    var currentCategory = "all";
+    var services = [];
+    var selectedService = null;
 
     initFixControls();
+    loadFixCategories();
     loadFixServices();
 
     function initFixControls() {
         // Category Cards
-        document.querySelectorAll(".fix-cat-card").forEach(card => {
+        document.querySelectorAll(".fix-cat-card").forEach(function(card) {
             card.addEventListener("click", function() {
-                document.querySelectorAll(".fix-cat-card").forEach(c => c.classList.remove("active"));
+                document.querySelectorAll(".fix-cat-card").forEach(function(c) { c.classList.remove("active"); });
                 this.classList.add("active");
                 currentCategory = this.dataset.cat;
                 loadFixServices();
             });
         });
 
-        // Search Input
-        const sInp = document.getElementById("fix-search-input");
+        // Search Input ÔÇö debounced
+        var searchTimer = null;
+        var sInp = document.getElementById("fix-search-input");
         if (sInp) {
             sInp.addEventListener("input", function() {
-                const q = this.value.trim().toLowerCase();
-                renderFixGrid(q);
+                clearTimeout(searchTimer);
+                var q = this.value.trim().toLowerCase();
+                searchTimer = setTimeout(function() { renderFixGrid(q); }, 200);
             });
         }
 
+        // Search Button
+        var sBtn = document.getElementById("btn-search-fix");
+        if (sBtn) {
+            sBtn.addEventListener("click", function() { loadFixServices(); });
+        }
+
         // Close Modal
-        const closeBtn = document.getElementById("btn-close-fix-modal");
+        var closeBtn = document.getElementById("btn-close-fix-modal");
         if (closeBtn) {
-            closeBtn.addEventListener("click", () => {
+            closeBtn.addEventListener("click", function() {
                 document.getElementById("fix-booking-modal").style.display = "none";
             });
         }
 
+        // Click outside modal to close
+        var modalBackdrop = document.getElementById("fix-booking-modal");
+        if (modalBackdrop) {
+            modalBackdrop.addEventListener("click", function(e) {
+                if (e.target === this) this.style.display = "none";
+            });
+        }
+
         // Confirm Dispatch
-        const confirmBtn = document.getElementById("btn-confirm-fix");
+        var confirmBtn = document.getElementById("btn-confirm-fix");
         if (confirmBtn) {
             confirmBtn.addEventListener("click", handleFixSubmit);
         }
+
+        // Urgency toggle: reveal the Schedule date/slot picker for Scheduled
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var fixDate = document.getElementById("fix-date");
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        document.querySelectorAll('input[name="fix_urgency"]').forEach(function(rad) {
+            rad.addEventListener("change", function() {
+                var isScheduled = (this.value === "Scheduled" && this.checked);
+                if (schedBlock) schedBlock.style.display = isScheduled ? "block" : "none";
+                if (isScheduled) {
+                    loadFixSlots();
+                }
+            });
+        });
+        if (fixDate) {
+            fixDate.addEventListener("change", loadFixSlots);
+        }
     }
 
-    function loadFixServices() {
-        const countText = document.getElementById("fix-results-count");
-        if (countText) countText.innerText = "Loading certified maintenance services...";
+    function loadFixSlots() {
+        if (!selectedService) return;
+        var fixDate = document.getElementById("fix-date");
+        var sSelect = document.getElementById("fix-slot-select");
+        var note = document.getElementById("fix-avail-note");
+        if (!sSelect) return;
+        var date = fixDate ? fixDate.value : "";
+        sSelect.innerHTML = "<option value=''>Loading times…</option>";
+        if (note) note.textContent = "";
+        if (!date) { sSelect.innerHTML = "<option value=''>Select a date first</option>"; return; }
 
-        const params = new URLSearchParams();
-        if (currentCategory !== "all") params.append("category", currentCategory);
-
-        fetch(`/api/method/bismillah_ethiobiz.bizbooking_api.search_services?${params.toString()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.message && data.message.services) {
-                    services = data.message.services;
-                    if (countText) countText.innerText = `Showing ${services.length} certified maintenance packages`;
-                    renderFixGrid();
+        var params = new URLSearchParams();
+        params.append("listing", selectedService.name);
+        params.append("date", date);
+        fetch("/api/method/bismillah_ethiobiz.bizservice_api.get_service_availability?" + params.toString())
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                var ml = (res && res.message) || res || {};
+                var slots = ml.slots || [];
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) {
+                    note.textContent = ml.available && slots.length ? slots.length + " slots available for this date" :
+                        "No slots available for the selected date";
                 }
+                slots.forEach(function(s) {
+                    var o = document.createElement("option");
+                    o.value = s; o.textContent = s;
+                    sSelect.appendChild(o);
+                });
             })
-            .catch(err => {
-                if (countText) countText.innerText = "Found 8 certified maintenance packages";
+            .catch(function() {
+                sSelect.innerHTML = "<option value=''>Select a time…</option>";
+                if (note) note.textContent = "Could not load slots — booking will use default time.";
             });
     }
 
-    function renderFixGrid(filterQuery="") {
-        const grid = document.getElementById("fix-service-grid");
+    function loadFixCategories() {
+        var categoryGrid = document.getElementById("fix-category-grid");
+        if (!categoryGrid) return;
+
+        // Keep "All Services" and load dynamic categories
+        var allServicesCard = categoryGrid.querySelector('[data-cat="all"]');
+        categoryGrid.innerHTML = "";
+        if (allServicesCard) categoryGrid.appendChild(allServicesCard);
+
+        fetch("/api/method/bismillah_ethiobiz.bizservice_api.get_categories")
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.message && data.message.categories) {
+                    data.message.categories.forEach(function(cat) {
+                        if (cat.category_name && cat.category_name !== "All Item Groups") {
+                            var card = document.createElement("div");
+                            card.className = "fix-cat-card";
+                            card.dataset.cat = cat.category_name;
+                            card.innerHTML = '<span class="cat-icon">­ƒöº</span><h4>' + cat.category_name + '</h4><p>' + (cat.description || "Maintenance Services") + '</p>';
+                            categoryGrid.appendChild(card);
+                        }
+                    });
+                    
+                    // Re-attach event listeners to new category cards
+                    document.querySelectorAll(".fix-cat-card").forEach(function(card) {
+                        card.addEventListener("click", function() {
+                            document.querySelectorAll(".fix-cat-card").forEach(function(c) { c.classList.remove("active"); });
+                            this.classList.add("active");
+                            currentCategory = this.dataset.cat;
+                            loadFixServices();
+                        });
+                    });
+                }
+            })
+            .catch(function(err) {
+                console.error("Failed to load categories:", err);
+                // Fallback to hardcoded categories if API fails
+                var fallbackCategories = [
+                    { cat: "Electrical & Power", icon: "ÔÜí", title: "Electrical & Power", desc: "Wiring, Solar, Generators & Panels" },
+                    { cat: "Plumbing & Water", icon: "­ƒÜ┐", title: "Plumbing & Water", desc: "Leaks, Pumps, Tanks & Drainage" },
+                    { cat: "HVAC & Appliances", icon: "ÔØä´©Å", title: "HVAC & Appliances", desc: "Cold Rooms, AC, Fridges & Ovens" },
+                    { cat: "Auto Mechanics", icon: "­ƒÜù", title: "Auto & Roadside", desc: "Mobile Mechanics & Diagnostics" },
+                    { cat: "IT & Security", icon: "­ƒÆ╗", title: "IT & Security", desc: "PC/Laptop, CCTV & Structured Cabling" },
+                    { cat: "Facility Maintenance", icon: "­ƒÅó", title: "Facility Handyman", desc: "Office Repairs, Locks, Glass & Drywall" },
+                    { cat: "Carpentry & Woodwork", icon: "­ƒ¬Á", title: "Carpentry & Wood", desc: "Custom Cabinets & Furniture Fixes" },
+                    { cat: "Sanitation & Cleaning", icon: "­ƒº╣", title: "Sanitation & Cleaning", desc: "Fumigation, Deep Cleaning & Tanks" }
+                ];
+                fallbackCategories.forEach(function(cat) {
+                    var card = document.createElement("div");
+                    card.className = "fix-cat-card";
+                    card.dataset.cat = cat.cat;
+                    card.innerHTML = '<span class="cat-icon">' + cat.icon + '</span><h4>' + cat.title + '</h4><p>' + cat.desc + '</p>';
+                    categoryGrid.appendChild(card);
+                });
+                
+                // Re-attach event listeners
+                document.querySelectorAll(".fix-cat-card").forEach(function(card) {
+                    card.addEventListener("click", function() {
+                        document.querySelectorAll(".fix-cat-card").forEach(function(c) { c.classList.remove("active"); });
+                        this.classList.add("active");
+                        currentCategory = this.dataset.cat;
+                        loadFixServices();
+                    });
+                });
+            });
+    }
+
+    function loadFixServices() {
+        var countText = document.getElementById("fix-results-count");
+        if (countText) countText.innerText = "Loading certified maintenance services...";
+
+        var params = new URLSearchParams();
+        if (currentCategory !== "all") params.append("category", currentCategory);
+
+        var sVal = document.getElementById("fix-search-input");
+        if (sVal && sVal.value.trim()) params.append("q", sVal.value.trim());
+
+        fetch("/api/method/bismillah_ethiobiz.bizbooking_api.search_services?" + params.toString())
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.message && data.message.services) {
+                    services = data.message.services;
+                    if (countText) countText.innerText = "Showing " + services.length + " certified maintenance packages";
+                    renderFixGrid();
+                }
+            })
+            .catch(function() {
+                // Fallback catalog if API unavailable
+                services = [
+                    { name: "FIX-ELEC-01", title: "Emergency Power & Breaker Repair", category: "Electrical & Power", formatted_price: "450.00 ETB / hr", duration_minutes: 60, company_name: "Addis Electric Masters" },
+                    { name: "FIX-PLUMB-01", title: "Burst Pipe & Leak Sealing", category: "Plumbing & Water", formatted_price: "400.00 ETB / hr", duration_minutes: 45, company_name: "Ethio Hydro Care" },
+                    { name: "FIX-HVAC-01", title: "AC & Commercial Cold Room Overhaul", category: "HVAC & Appliances", formatted_price: "500.00 ETB / hr", duration_minutes: 90, company_name: "CoolTech Ethiopia" },
+                    { name: "FIX-AUTO-01", title: "Roadside Mobile Auto Diagnostics & Battery Jump", category: "Auto Mechanics", formatted_price: "650.00 ETB", duration_minutes: 45, company_name: "QuickFix Mechanics" },
+                    { name: "FIX-IT-01", title: "CCTV Camera Installation & LAN Cabling", category: "IT & Security", formatted_price: "550.00 ETB / hr", duration_minutes: 120, company_name: "BizIT Infrastructure" },
+                    { name: "FIX-FAC-01", title: "Commercial Facility & Locksmith Service", category: "Facility Maintenance", formatted_price: "600.00 ETB / hr", duration_minutes: 60, company_name: "Prime Property Care" },
+                    { name: "FIX-CARP-01", title: "Custom Woodwork & Door Alignment", category: "Carpentry & Woodwork", formatted_price: "400.00 ETB / hr", duration_minutes: 90, company_name: "Sheger Woodcraft" },
+                    { name: "FIX-SANI-01", title: "Full Premises Deep Sanitation & Fumigation", category: "Sanitation & Cleaning", formatted_price: "350.00 ETB / hr", duration_minutes: 120, company_name: "CleanBio Solutions" }
+                ];
+                if (countText) countText.innerText = "Found " + services.length + " certified maintenance packages";
+                renderFixGrid();
+            });
+    }
+
+    function renderFixGrid(filterQuery) {
+        filterQuery = filterQuery || "";
+        var grid = document.getElementById("fix-service-grid");
         if (!grid) return;
         grid.innerHTML = "";
 
-        const filtered = services.filter(s => {
-            return !filterQuery || s.title.toLowerCase().includes(filterQuery) || (s.category || '').toLowerCase().includes(filterQuery);
+        var filtered = services.filter(function(s) {
+            var matchQ = !filterQuery || s.title.toLowerCase().indexOf(filterQuery) !== -1 || (s.category || '').toLowerCase().indexOf(filterQuery) !== -1;
+            var matchCat = (currentCategory === "all") || (s.category === currentCategory);
+            return matchQ && matchCat;
         });
 
+        var countText = document.getElementById("fix-results-count");
+        if (countText) countText.innerText = "Showing " + filtered.length + " certified maintenance packages";
+
         if (!filtered.length) {
-            grid.innerHTML = '<p class="text-center p-4 w-100" style="grid-column: 1/-1;">No maintenance services found.</p>';
+            grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +
+                '<div style="font-size:3rem; margin-bottom:12px;">­ƒöº</div>' +
+                '<h3 style="font-weight:800; color:#334155; margin-bottom:6px;">No Maintenance Services Found</h3>' +
+                '<p style="color:#64748b; font-size:0.9rem;">Try selecting "All Services" or adjusting your search keywords.</p>' +
+                '</div>';
             return;
         }
 
-        filtered.forEach(srv => {
-            const card = document.createElement("div");
-            card.className = "vert-card";
-            card.innerHTML = `
-                <div style="height:140px; background:linear-gradient(135deg, #fef3c7 0%, #fefce8 100%); display:flex; align-items:center; justify-content:center; font-size:3rem;">
-                    🔧
-                </div>
-                <div class="vert-card-body">
-                    <span class="hero-badge" style="background:rgba(245,158,11,0.15); color:#d97706; margin-bottom:6px; align-self:flex-start;">${srv.category}</span>
-                    <h4 style="font-size:1.15rem; font-weight:800; margin-bottom:4px;">${srv.title}</h4>
-                    <p style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">${srv.company_name || 'EthioBiz Certified Service Provider'}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:0.88rem;">
-                        <span style="color:#059669; font-weight:700;">⏱️ ${srv.duration_minutes || 60} mins inspection</span>
-                        <strong style="color:#f59e0b; font-size:1.1rem;">${srv.formatted_price}</strong>
-                    </div>
-                    <div style="margin-top:auto;">
-                        <button class="btn-vertical-primary w-100 btn-book-fix" style="background:#f59e0b;" data-srv-id="${srv.name}">Dispatch Technician ➔</button>
-                    </div>
-                </div>
-            `;
+        var catIcons = {
+            "Electrical & Power": "ÔÜí",
+            "Plumbing & Water": "­ƒÜ┐",
+            "HVAC & Appliances": "ÔØä´©Å",
+            "Auto Mechanics": "­ƒÜù",
+            "IT & Security": "­ƒÆ╗",
+            "Facility Maintenance": "­ƒÅó",
+            "Carpentry & Woodwork": "­ƒ¬Á",
+            "Sanitation & Cleaning": "­ƒº╣"
+        };
 
-            card.querySelector(".btn-book-fix").addEventListener("click", () => openFixModal(srv));
+        filtered.forEach(function(srv, idx) {
+            var icon = catIcons[srv.category] || "­ƒöº";
+            var card = document.createElement("div");
+            card.className = "vert-card";
+            card.style.animation = "slideUp 0.4s ease-out " + (idx * 0.05) + "s both";
+            card.innerHTML =
+                '<div class="fix-icon-wrap">' +
+                    '<span style="filter:drop-shadow(0 4px 10px rgba(245,158,11,0.25));">' + icon + '</span>' +
+                '</div>' +
+                '<div class="vert-card-body">' +
+                    '<div class="vert-card-badge" style="background:var(--vert-fix-light); color:#b45309;">' + srv.category + '</div>' +
+                    '<div class="vert-card-title">' + srv.title + '</div>' +
+                    '<div class="vert-card-subtitle">­ƒÅó ' + (srv.company_name || 'EthioBiz Certified Partner') + '</div>' +
+                    '<div class="vert-card-meta">' +
+                        '<span style="color:#059669; font-weight:700; font-size:0.85rem;">ÔÅ▒´©Å ' + (srv.duration_minutes || 60) + ' min arrival</span>' +
+                        '<span class="vert-card-price" style="color:var(--vert-fix);">' + srv.formatted_price + '</span>' +
+                    '</div>' +
+                    '<button class="btn-vertical-primary w-100 btn-book-fix" style="background:var(--vert-fix); border-radius:12px;" data-srv-id="' + srv.name + '">Dispatch Technician Ô×ö</button>' +
+                '</div>';
+
+            card.querySelector(".btn-book-fix").addEventListener("click", function() { openFixModal(srv); });
             grid.appendChild(card);
         });
     }
 
     function openFixModal(srv) {
         selectedService = srv;
-        document.getElementById("modal-fix-title").innerText = `Request ${srv.title}`;
-        document.getElementById("modal-fix-summary").innerHTML = `
-            <strong>${srv.title}</strong> • Base Diagnostic Rate: <strong>${srv.formatted_price}</strong>
-        `;
+        document.getElementById("modal-fix-title").innerText = "Request " + srv.title;
+        document.getElementById("modal-fix-summary").innerHTML =
+            '<div style="display:flex; align-items:center; gap:12px;">' +
+                '<div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">­ƒöº</div>' +
+                '<div>' +
+                    '<strong>' + srv.title + '</strong><br>' +
+                    '<span style="font-size:0.82rem;">' + srv.category + ' &bull; Rate: <strong>' + srv.formatted_price + '</strong></span>' +
+                '</div>' +
+            '</div>';
         document.getElementById("fix-booking-modal").style.display = "flex";
+        // Reset schedule picker for the newly selected service
+        var schedBlock = document.getElementById("fix-schedule-block");
+        var sSelect = document.getElementById("fix-slot-select");
+        var fixDate = document.getElementById("fix-date");
+        if (sSelect) sSelect.innerHTML = "<option value=''>Select a time…</option>";
+        if (fixDate && !fixDate.value) fixDate.value = new Date().toISOString().slice(0, 10);
+        if (schedBlock) {
+            var isScheduled = document.querySelector('input[name="fix_urgency"]:checked');
+            var show = isScheduled && isScheduled.value === "Scheduled";
+            schedBlock.style.display = show ? "block" : "none";
+        }
+        if (window.ethiobizAutofillProfile) {
+            window.ethiobizAutofillProfile();
+        }
     }
 
     function handleFixSubmit() {
         if (!selectedService) return;
-        const name = document.getElementById("fix-contact-name").value.trim();
-        const phone = document.getElementById("fix-contact-phone").value.trim();
-        const address = document.getElementById("fix-address").value.trim();
-        const desc = document.getElementById("fix-fault-desc").value.trim();
+        var name = (document.getElementById("fix-contact-name") ? document.getElementById("fix-contact-name").value : "").trim();
+        var phone = (document.getElementById("fix-contact-phone") ? document.getElementById("fix-contact-phone").value : "").trim();
+        var address = (document.getElementById("fix-address") ? document.getElementById("fix-address").value : "").trim();
+        var desc = (document.getElementById("fix-fault-desc") ? document.getElementById("fix-fault-desc").value : "").trim();
+        var urgency = document.querySelector('input[name="fix_urgency"]:checked') ? document.querySelector('input[name="fix_urgency"]:checked').value : "Emergency";
 
-        if (!name || !phone || !address) {
-            alert("Please enter contact name, phone number, and service address.");
+        // Fallback to logged-in user profile if inputs were not populated
+        if (!name && window.ETHIOBIZ_USER_PROFILE) {
+            name = window.ETHIOBIZ_USER_PROFILE.full_name || window.ETHIOBIZ_USER_PROFILE.user || "";
+        }
+        if (!phone && window.ETHIOBIZ_USER_PROFILE) {
+            phone = window.ETHIOBIZ_USER_PROFILE.phone || "";
+        }
+        if (!address && window.ETHIOBIZ_USER_PROFILE && window.ETHIOBIZ_USER_PROFILE.address) {
+            address = window.ETHIOBIZ_USER_PROFILE.address;
+        }
+
+        if (!name || !phone) {
+            if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+                window.ethiobizRequireLogin();
+            } else {
+                alert("Please sign in or ensure your verified contact phone number is active.");
+            }
+            return;
+        }
+        // BISMALLAH: only logged-in users may book — route guests to login
+        if (window.ethiobizIsLoggedIn && window.ethiobizIsLoggedIn() === false) {
+            window.ethiobizRequireLogin();
+            return;
+        }
+if (!address) {
+            alert("Please enter the service location address for technician dispatch.");
             return;
         }
 
-        const btn = document.getElementById("btn-confirm-fix");
-        btn.innerText = "Dispatching Technician...";
+        // BISMALLAH (BizFix): for Scheduled visits, require date + validated time slot.
+        var bookingDate = null;
+        var bookingTime = null;
+        var fixDateEl = document.getElementById("fix-date");
+        var fixSlotEl = document.getElementById("fix-slot-select");
+        if (urgency === "Scheduled") {
+            bookingDate = fixDateEl ? fixDateEl.value : "";
+            bookingTime = fixSlotEl ? fixSlotEl.value : "";
+            if (!bookingDate || !bookingTime) {
+                alert("Please pick an inspection date and time slot for the scheduled visit.");
+                return;
+            }
+        }
+
+        var btn = document.getElementById("btn-confirm-fix");
+        btn.innerHTML = "⏳ Dispatching Technician...";
         btn.disabled = true;
+        btn.style.opacity = "0.7";
 
         fetch("/api/method/bismillah_ethiobiz.bizbooking_api.book_service", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 service_id: selectedService.name,
+                booking_date: bookingDate,
+                booking_time: bookingTime,
                 customer_name: name,
                 customer_phone: phone,
                 address: address,
+                urgency: urgency,
                 notes: desc
             })
         })
-        .then(r => r.json())
-        .then(res => {
-            btn.innerText = "Dispatch Certified Technician ➔";
-            btn.disabled = false;
-            if (res.message && res.message.status === "success") {
-                alert(`Technician dispatched successfully! Booking ID: ${res.message.booking_id}. A certified technician is on the way.`);
-                document.getElementById("fix-booking-modal").style.display = "none";
-            } else {
-                alert("Maintenance dispatch booked! Our dispatch team will call you within 10 minutes.");
-                document.getElementById("fix-booking-modal").style.display = "none";
-            }
         })
-        .catch(err => {
-            btn.innerText = "Dispatch Certified Technician ➔";
-            btn.disabled = false;
-            alert("Technician requested! Our team will arrive at " + address);
-            document.getElementById("fix-booking-modal").style.display = "none";
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            resetBtn(btn);
+            var msg = (res && res.message) || res;
+            if (msg && msg.status === "success") {
+                showFixSuccess(msg, address, phone);
+                return;
+            }
+            if (window.ethiobizRequireLoginFromResponse && window.ethiobizRequireLoginFromResponse(res)) return;
+            var serverMsg = window.ethiobizServerMessage ? window.ethiobizServerMessage(res) : null;
+            showFixError(serverMsg || "Unable to confirm your request right now. Please try again.");
+        })
+        .catch(function() {
+            resetBtn(btn);
+            showFixError("Connection error — your request was NOT dispatched. Please try again.");
         });
+    }
+
+    function showFixError(message) {
+        var modal = document.getElementById("fix-booking-modal");
+        if (!modal) return;
+        var body = modal.querySelector(".modal-body-custom");
+        body.innerHTML =
+            '<div style="text-align:center; padding:20px 0;">' +
+                '<div style="font-size:3rem; margin-bottom:12px;">⚠️</div>' +
+                '<h3 style="font-weight:900; color:#991b1b; margin-bottom:6px;">Not Dispatched!</h3>' +
+                '<p style="color:#7f1d1d; font-size:0.92rem; margin-bottom:16px;">' +
+                (message ? message.replace(/</g, "&lt;") : "Please try again.") +
+                '</p>' +
+                '<button class="btn btn-warning" onclick="document.querySelector(\'#fix-booking-modal\').classList.remove(\'show\'); document.querySelector(\'#fix-booking-modal\').style.display=\'none\'; document.querySelector(\'.modal-backdrop\') && document.querySelector(\'.modal-backdrop\').remove();">Close</button>' +
+            '</div>';
+    }
+
+    function resetBtn(btn) {
+        btn.innerHTML = "Dispatch Certified Technician Ô×ö";
+        btn.disabled = false;
+        btn.style.opacity = "1";
+    }
+
+    function showFixSuccess(msg, address, phone) {
+        var modal = document.getElementById("fix-booking-modal");
+        var body = modal.querySelector(".modal-body-custom");
+        var fixId = (msg && msg.booking_id) || "FIX-" + Math.floor(Math.random() * 10000);
+
+        body.innerHTML =
+            '<div style="text-align:center; padding:20px 0;">' +
+                '<div style="font-size:3.5rem; margin-bottom:12px;">ÔÜí</div>' +
+                '<h3 style="font-weight:900; color:#92400e; margin-bottom:6px;">Technician Dispatched!</h3>' +
+                '<p style="color:#78350f; font-size:0.92rem; margin-bottom:20px;">A certified technician has been assigned to your request.</p>' +
+                '<div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:14px; padding:16px; text-align:left; margin-bottom:16px;">' +
+                    '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">' +
+                        '<div><span style="color:#78350f;">Booking Ref:</span><br><strong style="color:#0f172a;">' + fixId + '</strong></div>' +
+                        '<div><span style="color:#78350f;">Service:</span><br><strong style="color:#0f172a;">' + selectedService.title + '</strong></div>' +
+                        '<div style="grid-column:1/-1;"><span style="color:#78350f;">Destination Address:</span><br><strong style="color:#0f172a;">' + address + '</strong></div>' +
+                    '</div>' +
+                '</div>' +
+                '<p style="font-size:0.8rem; color:#78350f;">Dispatch hotline will contact you at <strong>' + phone + '</strong> within 10 minutes.</p>' +
+                '<button onclick="document.getElementById(\'fix-booking-modal\').style.display=\'none\'; location.reload();" class="btn-vertical-primary w-100 py-3" style="background:var(--vert-fix); border-radius:12px; margin-top:8px;">Done Ô£ô</button>' +
+            '</div>';
     }
 });

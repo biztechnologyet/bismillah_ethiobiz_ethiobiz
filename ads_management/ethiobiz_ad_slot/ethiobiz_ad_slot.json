@@ -12,6 +12,11 @@
     {"fieldname": "width_px", "fieldtype": "Int", "label": "Width (px)", "default": 300},
     {"fieldname": "height_px", "fieldtype": "Int", "label": "Height (px)", "default": 250},
     {"fieldname": "responsive", "fieldtype": "Check", "label": "Responsive", "default": 0},
+    {"fieldname": "section_break_placement", "fieldtype": "Section Break", "label": "Vertical & Placement (BizServices Ads)"},
+    {"fieldname": "vertical", "fieldtype": "Select", "label": "Vertical", "options": "\nall\nBeauty-Salon-Spa\nHealth\nHotel\nAuto\nHome\nProfessional\nEvents\nTutoring\nShop\nJobs", "default": "all"},
+    {"fieldname": "column_break_placement", "fieldtype": "Column Break"},
+    {"fieldname": "placement", "fieldtype": "Select", "label": "Placement", "options": "\nhomepage-hero\nhomepage-rail\nvertical-hub\nfeed-injected\nbooking-confirmation\nsidebar", "default": "homepage-rail"},
+    {"fieldname": "slot_region", "fieldtype": "Data", "label": "Slot Region"},
     {"fieldname": "section_break_status", "fieldtype": "Section Break", "label": "Status"},
     {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Available\nReserved\nRented\nMaintenance", "default": "Available", "reqd": 1},
     {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}

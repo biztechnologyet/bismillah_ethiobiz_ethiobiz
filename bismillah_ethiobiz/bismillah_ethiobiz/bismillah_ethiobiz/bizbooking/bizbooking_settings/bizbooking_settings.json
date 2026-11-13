@@ -1,0 +1,14 @@
+{
+  "name": "BizBooking Settings",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "issingle": 1,
+  "fields": [
+    {"fieldname": "timezone", "fieldtype": "Data", "label": "Timezone", "default": "Africa/Addis_Ababa"},
+    {"fieldname": "slot_granularity_min", "fieldtype": "Int", "label": "Slot Granularity (minutes)", "default": 30},
+    {"fieldname": "hold_expiry_min", "fieldtype": "Int", "label": "HOLD Expiry (minutes)", "default": 15},
+    {"fieldname": "cancellation_policy", "fieldtype": "Small Text", "label": "Cancellation Policy"},
+    {"fieldname": "reminder_offsets", "fieldtype": "Data", "label": "Reminder Offsets (JSON)", "default": "[24, 2]"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1}]
+}

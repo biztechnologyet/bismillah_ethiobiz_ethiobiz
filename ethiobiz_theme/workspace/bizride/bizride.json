@@ -1,0 +1,298 @@
+{
+ "charts": [
+  {
+   "chart_name": "Active Deliveries",
+   "label": "Active Deliveries",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Today's Rides",
+   "label": "Today's Rides",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Available Drivers",
+   "label": "Available Drivers",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Monthly Revenue",
+   "label": "Monthly Revenue (ETB)",
+   "type": "Number"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"🚗 Delivery Overview\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Deliveries\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Today's Rides\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Available Drivers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Monthly Revenue\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🚚 Fleet Management\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Driver\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle Log\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open BizRide Website\",\"col\":3,\"type\":\"URL\",\"url\":\"https://ethiobiz.et/bizride\"}},{\"type\":\"header\",\"data\":{\"text\":\"📦 Delivery Operations\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Trip\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Note\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shipment\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Route\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"📍 Dispatch & Tracking\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pickup\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Location\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tracking\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"💰 Billing & Payments\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Charge\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pricing Rule\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"⚙️ Settings & Configuration\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Company\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contact\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Address\",\"col\":3}}]",
+ "creation": "2026-09-03 17:40:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "BizRide",
+ "links": [
+  {
+   "label": "Fleet Management",
+   "type": "Card Break"
+  },
+  {
+   "label": "Vehicle",
+   "link_to": "Vehicle",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Driver",
+   "link_to": "Driver",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Vehicle Log",
+   "link_to": "Vehicle Log",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Delivery Operations",
+   "type": "Card Break"
+  },
+  {
+   "label": "Delivery Trip",
+   "link_to": "Delivery Trip",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Delivery Note",
+   "link_to": "Delivery Note",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Shipment",
+   "link_to": "Shipment",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Route",
+   "link_to": "Route",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Dispatch & Tracking",
+   "type": "Card Break"
+  },
+  {
+   "label": "Pickup",
+   "link_to": "Pickup",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Delivery",
+   "link_to": "Delivery",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Location",
+   "link_to": "Location",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Billing & Payments",
+   "type": "Card Break"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Settings & Configuration",
+   "type": "Card Break"
+  },
+  {
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Contact",
+   "link_to": "Contact",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Address",
+   "link_to": "Address",
+   "link_type": "DocType",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-09-03 17:40:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizRide",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Delivery Trip",
+   "label": "Active Deliveries",
+   "filters": [
+    ["status", "=", "In Transit"]
+   ]
+  },
+  {
+   "document_type": "Delivery Trip",
+   "label": "Today's Rides",
+   "filters": [
+    ["delivery_date", "=", "Today"]
+   ]
+  },
+  {
+   "document_type": "Driver",
+   "label": "Available Drivers",
+   "filters": [
+    ["status", "=", "Active"]
+   ]
+  },
+  {
+   "document_type": "Vehicle",
+   "label": "Active Vehicles",
+   "filters": [
+    ["status", "=", "Active"]
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Dispatcher"
+  },
+  {
+   "role": "Delivery Manager"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Vehicle",
+   "link_to": "Vehicle",
+   "stats_filter": "[[\"Vehicle\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Driver",
+   "link_to": "Driver",
+   "stats_filter": "[[\"Driver\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Vehicle Log",
+   "link_to": "Vehicle Log",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Delivery Trip",
+   "link_to": "Delivery Trip",
+   "stats_filter": "[[\"Delivery Trip\",\"status\",\"=\",\"In Transit\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Delivery Note",
+   "link_to": "Delivery Note",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Shipment",
+   "link_to": "Shipment",
+   "type": "DocType"
+  },
+  {
+   "color": "Teal",
+   "doc_view": "List",
+   "label": "Route",
+   "link_to": "Route",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Pickup",
+   "link_to": "Pickup",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Delivery",
+   "link_to": "Delivery",
+   "type": "DocType"
+  },
+  {
+   "color": "Brown",
+   "doc_view": "List",
+   "label": "Location",
+   "link_to": "Location",
+   "type": "DocType"
+  },
+  {
+   "color": "Magenta",
+   "doc_view": "List",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "stats_filter": "[[\"Sales Invoice\",\"posting_date\",\"=\",TODAY(),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Lime",
+   "doc_view": "List",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "label": "Open BizRide Website",
+   "type": "URL",
+   "url": "https://ethiobiz.et/bizride"
+  }
+ ],
+ "title": "BizRide"
+}

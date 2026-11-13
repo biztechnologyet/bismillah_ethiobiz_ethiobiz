@@ -1,50 +1,519 @@
 /* Bismallah EthioBiz BizHealth Brand Polish — INSHA'ALLAH */
-/* Brand identity: clinical teal+sky, warm clinical cards, mobile-first, ETB-aware */
-:root{
-  --health-950:#022c22;
-  --health-900:#064e3b;
-  --health-700:#0f766e;
-  --health-600:#0d9488;
-  --health-500:#14b8a6;
-  --health-100:#ccfbf1;
-  --health-50:#f0fdfa;
-  --health-shadow:0 10px 30px -10px rgba(13,148,136,.35);
-  --health-card-shadow:0 4px 16px -8px rgba(2,44,34,.18);
-  --health-ring:0 0 0 3px rgba(20,184,166,.25);
-  --radius-xl:18px;
-  --radius-lg:14px;
-  --radius-md:10px;
+/* Brand identity: clinical emerald+teal+sapphire, glassmorphism, responsive, mobile-first, ETB-aware */
+:root {
+  --health-950: #022c22;
+  --health-900: #064e3b;
+  --health-800: #065f46;
+  --health-700: #047857;
+  --health-600: #059669;
+  --health-500: #10b981;
+  --health-400: #34d399;
+  --health-200: #a7f3d0;
+  --health-100: #d1fae5;
+  --health-50: #ecfdf5;
+  --health-accent: #0284c7;
+  --health-accent-light: #e0f2fe;
+  --health-dark: #0f172a;
+  --health-gray: #64748b;
+  --health-light-gray: #f8fafc;
+  --health-shadow: 0 12px 32px -10px rgba(5, 150, 105, 0.35);
+  --health-card-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.08);
+  --health-card-hover: 0 16px 36px -12px rgba(5, 150, 105, 0.28);
+  --radius-xl: 18px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
 }
-body.bizhealth .vert-card{border-radius:var(--radius-xl); box-shadow:var(--health-card-shadow); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; border:1px solid #e2e8f0; background:#fff; overflow:hidden;}
-body.bizhealth .vert-card:hover{transform:translateY(-4px); box-shadow:var(--health-shadow); border-color:#99f6e4;}
-body.bizhealth .vert-card-badge{background:var(--health-100); color:var(--health-900); font-weight:800;}
-body.bizhealth .vert-card-price{color:var(--health-700) !important; font-weight:800;}
-body.bizhealth .btn-vertical-primary{background:linear-gradient(135deg,var(--health-600),var(--health-500)); color:#fff; font-weight:800; border-radius:12px; box-shadow:var(--health-card-shadow); transition:transform .15s ease, box-shadow .2s ease;}
-body.bizhealth .btn-vertical-primary:hover{transform:translateY(-1px) scale(1.01); box-shadow:var(--health-shadow);}
-body.bizhealth .btn-vertical-primary:active{transform:scale(.98);}
-body.bizhealth .doc-avatar{width:56px; height:56px; border-radius:50%; object-fit:cover; border:3px solid var(--health-100);}
-body.bizhealth .health-hero{background:linear-gradient(135deg,var(--health-900) 0%, var(--health-600) 60%, var(--health-500) 100%);}
-/* Dashboard stat cards */
-body.bizhealth .health-stat{border-radius:var(--radius-xl); background:#fff; box-shadow:var(--health-card-shadow); padding:18px; display:flex; flex-direction:column; gap:6px;}
-body.bizhealth .filter-pill{display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; border:1.5px solid #e2e8f0; background:#fff; color:#334155; font-size:.85rem; font-weight:700; cursor:pointer; transition:all .18s ease; white-space:nowrap;}
-body.bizhealth .filter-pill:hover{border-color:var(--health-500); color:var(--health-700);}
-body.bizhealth .filter-pill.active{background:var(--health-600); border-color:var(--health-600); color:#fff; box-shadow:var(--health-card-shadow);}
-/* Mobile-first: 360px no horizontal scroll */
-@media (max-width:420px){
-  body.bizhealth .health-hero{padding:40px 16px !important;}
-  body.bizhealth .vert-grid{grid-template-columns:1fr !important; gap:14px !important;}
-  body.bizhealth .filter-pill{font-size:.78rem; padding:8px 12px;}
-  body.bizhealth .health-stat{grid-column:1 / -1;}
-  body.bizhealth .health-newsletter, body.bizhealth .health-stay-tuned{padding:0 8px;}
+
+body.bizhealth .vert-card {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--health-card-shadow);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  overflow: hidden;
 }
-/* Micro-interactions */
-body.bizhealth .spec-chip{padding:10px 16px; border-radius:999px; background:#f8fafc; border:1px solid #e2e8f0; color:#334155; font-weight:700; font-size:.85rem; cursor:pointer; transition:all .18s ease;}
-body.bizhealth .spec-chip:hover{border-color:var(--health-500); color:var(--health-700); transform:translateY(-1px);}
-body.bizhealth .spec-chip.active{background:var(--health-600); border-color:var(--health-600); color:#fff;}
-/* Skeleton shimmer (while loading) */
-body.bizhealth .skeleton{position:relative; overflow:hidden; background:#e2e8f0; border-radius:var(--radius-lg);}
-body.bizhealth .skeleton::after{content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent); animation:healthShimmer 1.4s infinite;}
-@keyframes healthShimmer{100%{transform:translateX(100%);}}
-/* Toast */
-body.bizhealth .health-toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--health-900); color:#fff; padding:12px 20px; border-radius:12px; font-weight:700; font-size:.9rem; z-index:9999; box-shadow:var(--health-shadow); animation:healthToast .3s ease;}
-@keyframes healthToast{from{opacity:0; transform:translate(-50%,8px);} to{opacity:1; transform:translate(-50%,0);}}
+body.bizhealth .vert-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--health-card-hover);
+  border-color: #a7f3d0;
+}
+body.bizhealth .vert-card-badge {
+  background: var(--health-100);
+  color: var(--health-900);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+body.bizhealth .vert-card-price {
+  color: var(--health-700) !important;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+body.bizhealth .btn-vertical-primary {
+  background: linear-gradient(135deg, var(--health-600), var(--health-500));
+  color: #fff;
+  font-weight: 800;
+  border-radius: 12px;
+  border: none;
+  box-shadow: var(--health-card-shadow);
+  transition: transform .15s ease, box-shadow .2s ease;
+  cursor: pointer;
+}
+body.bizhealth .btn-vertical-primary:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: var(--health-shadow);
+}
+body.bizhealth .btn-vertical-primary:active {
+  transform: scale(.98);
+}
+body.bizhealth .doc-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--health-100);
+}
+body.bizhealth .health-hero {
+  background: linear-gradient(135deg, #022c22 0%, #065f46 55%, #059669 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   NAVIGATION HUBS & TABS (Institutes vs Doctors vs Services)
+   ========================================================================== */
+.health-hub-nav-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: -24px auto 20px auto;
+  position: relative;
+  z-index: 20;
+  padding: 0 16px;
+}
+.health-hub-nav {
+  display: inline-flex;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e2e8f0;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.health-hub-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 40px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #475569;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.health-hub-tab:hover {
+  color: var(--health-700);
+  background: #f1f5f9;
+}
+.health-hub-tab.active {
+  background: linear-gradient(135deg, var(--health-700), var(--health-600));
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+}
+
+/* ==========================================================================
+   INSTITUTE CARDS & GRID
+   ========================================================================== */
+.institutes-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+.institute-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--health-card-shadow);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.institute-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--health-card-hover);
+  border-color: #a7f3d0;
+}
+.institute-card-header {
+  position: relative;
+  height: 160px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+.institute-card-header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.institute-card:hover .institute-card-header img {
+  transform: scale(1.05);
+}
+.institute-card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(2, 44, 34, 0.85);
+  backdrop-filter: blur(8px);
+  color: #a7f3d0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.institute-card-rating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.institute-card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.institute-type-chip {
+  font-size: 0.75rem;
+  color: var(--health-600);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.institute-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.institute-address {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.institute-features-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.feat-chip {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.institute-stats-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--health-50);
+  border: 1px solid var(--health-100);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+}
+.institute-stats-bar strong {
+  color: var(--health-900);
+  font-weight: 800;
+}
+.institute-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   CLINICAL SERVICES CARDS & GRID
+   ========================================================================== */
+.services-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+.service-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid #e2e8f0;
+  padding: 20px;
+  box-shadow: var(--health-card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--health-card-hover);
+  border-color: #10b981;
+}
+.service-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.service-duration-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.service-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.service-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.45;
+  flex: 1;
+}
+.service-meta-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
+}
+.service-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.service-fee {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--health-700);
+}
+
+/* ==========================================================================
+   SMART SLOT ALLOCATION ENGINE CONTROLS & WIDGET
+   ========================================================================== */
+.slot-allocation-container {
+  background: #ffffff;
+  border: 1.5px solid #d1fae5;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.slot-mode-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+.slot-mode-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.slot-mode-btn.active {
+  background: #ffffff;
+  color: var(--health-900);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.auto-allocated-banner {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1.5px solid #10b981;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.auto-allocated-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseSlot 1.8s infinite;
+}
+@keyframes pulseSlot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.slots-grid-interactive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.time-slot-pill {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.time-slot-pill:hover:not(.disabled) {
+  border-color: var(--health-500);
+  background: var(--health-50);
+  color: var(--health-800);
+}
+.time-slot-pill.selected {
+  background: var(--health-600);
+  border-color: var(--health-600);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(5, 150, 105, 0.3);
+}
+.time-slot-pill.disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  text-decoration: line-through;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   PAYMENT METHOD SELECTOR
+   ========================================================================== */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.payment-method-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.payment-method-card:hover {
+  border-color: var(--health-400);
+  background: var(--health-50);
+}
+.payment-method-card.active {
+  border-color: var(--health-600);
+  background: #f0fdf4;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25);
+}
+.payment-icon {
+  font-size: 1.5rem;
+}
+.payment-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.payment-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   DIGITAL APPOINTMENT PASS
+   ========================================================================== */
+.digital-appointment-pass {
+  background: #ffffff;
+  border: 2px dashed #86efac;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 20px;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.1);
+}
+.pass-ref-badge {
+  display: inline-block;
+  background: #064e3b;
+  color: #a7f3d0;
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 8px;
+  letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (360px - 1400px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .institutes-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .services-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .health-hub-tab {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+  .payment-methods-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

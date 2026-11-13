@@ -378,9 +378,9 @@ div[data-path*="dobiz-payment"] .control-label {
     visibility: visible !important;
 }
 
-body:not([data-route*="app"]) .frappe-control .control-label,
-body:not([data-route*="app"]) .form-group label,
-body:not([data-route*="app"]) .form-group .control-label {
+html:not([data-route*="app"]) .frappe-control .control-label,
+html:not([data-route*="app"]) .form-group label,
+html:not([data-route*="app"]) .form-group .control-label {
     color: #0f172a !important;
     font-weight: 800 !important;
     font-size: 14px !important;
@@ -1001,19 +1001,29 @@ body {
 body[data-path] { background-attachment: fixed !important; }
 /* ===== END GLOBAL FOOTER FIX ===== */
 
-/* ===== P4-B: DESK TITLE BAR & ACTION BUTTONS ===== */
+/* ===== P4-B: FULL-WIDTH DOC HEADERS, BUTTONS BELOW RIGHT-ALIGNED ===== */
 [data-route*="app"] .page-head .container {
     max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 [data-route*="app"] .page-head-content {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+[data-route*="app"] .page-title,
+[data-route*="app"] .page-title.col-md-4,
+[data-route*="app"] .page-title.col-sm-6,
+[data-route*="app"] .page-title.col-xs-7 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    -webkit-flex: 0 0 100% !important;
 }
 [data-route*="app"] .page-actions {
-    display: inline-flex !important;
-    align-items: center !important;
     justify-content: flex-end !important;
+    margin-top: 4px !important;
 }
 
 /* ===== P4-C: COLLAPSIBLE FILTERS PANEL ===== */
@@ -1069,7 +1079,7 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] .frappe-control .control-label,
 [data-theme="dark"] .form-group label,
 [data-theme="dark"] .form-group .control-label {
-    color: var(--ethiobiz-dark-label-color, #cdd6f4) !important;
+    color: var(--text-color, #cdd6f4) !important;
     font-weight: 600 !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -1077,14 +1087,14 @@ body[data-path] { background-attachment: fixed !important; }
 [data-theme="dark"] .page-head .title-text,
 [data-theme="dark"] h3.title-text,
 [data-theme="dark"] .page-title {
-    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
+    color: #e2e8f0 !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 [data-theme="dark"] .form-section .section-head,
 [data-theme="dark"] .section-head,
 [data-theme="dark"] .form-tabs-list .nav-link {
-    color: var(--ethiobiz-dark-label-color, #cbd5e1) !important;
+    color: #cbd5e1 !important;
 }
 [data-theme="dark"] .control-label .reqd,
 [data-theme="dark"] label .reqd { color: #f87171 !important; }
@@ -1095,7 +1105,7 @@ body[data-path] { background-attachment: fixed !important; }
 }
 [data-theme="dark"] .frappe-control .control-label.muted,
 [data-theme="dark"] .frappe-control .label-muted,
-[data-theme="dark"] .frappe-control .help-box { color: var(--ethiobiz-dark-label-muted, #94a3b8) !important; }
+[data-theme="dark"] .frappe-control .help-box { color: #94a3b8 !important; }
 
 /* Light-mode desk labels â€” explicit AA guarantee (pairs with T3 inputs) */
 [data-theme="light"] .frappe-control .control-label,
@@ -1546,547 +1556,71 @@ div[data-doctype="Blog Post"] .card {
 }
 
 /* ==========================================================================
-   DESK TITLE BAR: CLEAN RESPONSIVE SINGLE LINE (DOCUMENT FORMS ONLY)
+   DESK FULL-WIDTH TITLE BAR & BUTTONS ROW BELOW
    ========================================================================== */
-body[data-route^="Form"] .page-head,
-[data-page-route^="Form"] .page-head,
-.form-page .page-head,
-.page-head.eb-doc-head {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-    overflow-x: visible !important;
-    height: auto !important;
-    min-height: 82px !important;
-    top: var(--navbar-height) !important;
-    position: sticky !important;
-    z-index: 100 !important;
-}
-
-body[data-route^="Form"] .page-head .page-head-content,
-[data-page-route^="Form"] .page-head .page-head-content,
-.form-page .page-head .page-head-content,
-.page-head.eb-doc-head .page-head-content {
+.page-head {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-    padding: 8px 16px 6px !important;
-    gap: 4px !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    height: auto !important;
-    min-height: auto !important;
-    position: relative !important;
+    padding: 16px 24px 12px 24px !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    gap: 12px !important;
 }
 
-body[data-route^="Form"] .page-head .page-title,
-[data-page-route^="Form"] .page-head .page-title,
-.form-page .page-head .page-title,
-.page-head.eb-doc-head .page-title {
+.page-head .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+}
+
+/* Row 1: Full-Width Title with status badge */
+.page-head .title-area {
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
     flex: 1 1 100% !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    margin: 0 0 2px 0 !important;
-    padding: 0 !important;
-    float: none !important;
+    gap: 12px !important;
 }
 
-body[data-route^="Form"] .page-head .title-area,
-[data-page-route^="Form"] .page-head .title-area,
-.form-page .page-head .title-area,
-.page-head.eb-doc-head .title-area {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-body[data-route^="Form"] .page-head .title-area > div,
-body[data-route^="Form"] .page-head .title-area .flex,
-[data-page-route^="Form"] .page-head .title-area > div,
-[data-page-route^="Form"] .page-head .title-area .flex,
-.form-page .page-head .title-area > div,
-.form-page .page-head .title-area .flex,
-.page-head.eb-doc-head .title-area > div,
-.page-head.eb-doc-head .title-area .flex {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-}
-
-body[data-route^="Form"] .page-head .title-text,
-[data-page-route^="Form"] .page-head .title-text,
-.form-page .page-head .title-text,
-.page-head.eb-doc-head .title-text {
-    font-size: 1.35rem !important;
+.page-head .title-area .title-text {
+    font-size: 1.5rem !important;
     font-weight: 800 !important;
     color: #0f172a !important;
-    letter-spacing: -0.3px !important;
-    line-height: 1.3 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    flex: 0 1 auto !important;
-    max-width: calc(100% - 95px) !important;
-    min-width: 0 !important;
-    display: inline-block !important;
-    cursor: default !important;
-    margin: 0 6px 0 0 !important;
-    padding: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    box-sizing: border-box !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .page-head .title-text,
-[data-theme="dark"] [data-page-route^="Form"] .page-head .title-text,
-[data-theme="dark"] .form-page .page-head .title-text,
-[data-theme="dark"] .page-head.eb-doc-head .title-text {
-    color: var(--ethiobiz-dark-label-color, #F8F6F2) !important;
-}
-
-/* Tier 2: Dedicated Actions Row in Document Forms */
-body[data-route^="Form"] .page-head .page-actions,
-[data-page-route^="Form"] .page-head .page-actions,
-.form-page .page-head .page-actions,
-.page-head.eb-doc-head .page-actions {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    gap: 8px !important;
-    margin-top: 4px !important;
-    padding-top: 6px !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
-    flex-wrap: wrap !important;
-    float: none !important;
-    position: relative !important;
-    overflow: visible !important;
-    z-index: 26 !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .page-head .page-actions,
-[data-theme="dark"] [data-page-route^="Form"] .page-head .page-actions,
-[data-theme="dark"] .form-page .page-head .page-actions,
-[data-theme="dark"] .page-head.eb-doc-head .page-actions {
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Ensure dropdown menus (such as ... Menu) render in front of tabs and all page content */
-.page-head .dropdown-menu,
-.page-actions .dropdown-menu,
-.menu-btn-group .dropdown-menu,
-.custom-btn-group .dropdown-menu {
-    z-index: 1050 !important;
-    position: absolute !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-}
-
-[data-theme="dark"] .page-head .dropdown-menu,
-[data-theme="dark"] .page-actions .dropdown-menu,
-[data-theme="dark"] .menu-btn-group .dropdown-menu,
-[data-theme="dark"] .custom-btn-group .dropdown-menu {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Mobile responsive sizing */
-@media (max-width: 768px) {
-    body[data-route^="Form"] .page-head,
-    [data-page-route^="Form"] .page-head,
-    .form-page .page-head,
-    .page-head.eb-doc-head,
-    .page-head {
-        z-index: 30 !important;
-        overflow: visible !important;
-    }
-    body[data-route^="Form"] .page-head .page-head-content,
-    [data-page-route^="Form"] .page-head .page-head-content,
-    .form-page .page-head .page-head-content,
-    .page-head.eb-doc-head .page-head-content {
-        overflow: visible !important;
-        padding: 6px 10px 4px !important;
-    }
-    body[data-route^="Form"] .page-head .title-text,
-    [data-page-route^="Form"] .page-head .title-text,
-    .form-page .page-head .title-text,
-    .page-head.eb-doc-head .title-text {
-        font-size: 1.1rem !important;
-        max-width: calc(100% - 85px) !important;
-    }
-    body[data-route^="Form"] .page-head .page-actions,
-    [data-page-route^="Form"] .page-head .page-actions,
-    .form-page .page-head .page-actions,
-    .page-head.eb-doc-head .page-actions {
-        justify-content: flex-start !important;
-        gap: 6px !important;
-        position: relative !important;
-        overflow: visible !important;
-        z-index: 31 !important;
-    }
-    body[data-route^="Form"] .page-head .page-actions .btn,
-    [data-page-route^="Form"] .page-head .page-actions .btn,
-    .form-page .page-head .page-actions .btn,
-    .page-head.eb-doc-head .page-actions .btn {
-        padding: 4px 8px !important;
-        font-size: 12px !important;
-    }
-    .page-actions .dropdown-menu,
-    .menu-btn-group .dropdown-menu,
-    .custom-btn-group .dropdown-menu {
-        right: 0 !important;
-        left: auto !important;
-        z-index: 1050 !important;
-        max-width: 90vw !important;
-    }
-}
-
-/* When expanded, show full wrapped title in a clean readable card */
-body[data-route^="Form"] .page-head .title-area.eb-title-expanded,
-body[data-route^="Form"] .page-head .page-title.eb-title-expanded,
-[data-page-route^="Form"] .page-head .title-area.eb-title-expanded,
-[data-page-route^="Form"] .page-head .page-title.eb-title-expanded,
-.form-page .page-head .title-area.eb-title-expanded,
-.form-page .page-head .page-title.eb-title-expanded,
-.page-head.eb-doc-head .title-area.eb-title-expanded,
-.page-head.eb-doc-head .page-title.eb-title-expanded,
-.eb-title-expanded {
-    flex-wrap: wrap !important;
-    overflow: visible !important;
-}
-
-body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
-[data-page-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
-.form-page .page-head .title-area.eb-title-expanded .title-text,
-.page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
-.eb-title-expanded .title-text {
     white-space: normal !important;
     word-break: break-word !important;
-    overflow-y: auto !important;
-    max-height: 240px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 1 100% !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    padding: 8px 12px !important;
-    margin: 6px 0 6px 0 !important;
-    border-radius: 8px !important;
-    border: 1.5px solid #008080 !important;
-    box-shadow: 0 4px 16px rgba(0, 128, 128, 0.15) !important;
-    display: block !important;
-    position: relative !important;
-    z-index: 50 !important;
-    box-sizing: border-box !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
-[data-theme="dark"] [data-page-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
-[data-theme="dark"] .form-page .page-head .title-area.eb-title-expanded .title-text,
-[data-theme="dark"] .page-head.eb-doc-head .title-area.eb-title-expanded .title-text,
-[data-theme="dark"] .eb-title-expanded .title-text {
-    background: #18222d !important;
-    color: var(--ethiobiz-dark-label-color, #F8F6F2) !important;
-    border-color: #1FB6AE !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Arrow-only Expand / Collapse button */
-.eb-title-toggle-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    max-width: 26px !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #008080 !important;
-    background: rgba(0, 128, 128, 0.08) !important;
-    border: 1.5px solid rgba(0, 128, 128, 0.3) !important;
-    border-radius: 6px !important;
-    padding: 0 !important;
-    cursor: pointer !important;
-    margin: 0 4px !important;
-    user-select: none !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-    box-sizing: border-box !important;
-    transition: all 0.2s ease !important;
-}
-
-.eb-title-toggle-btn:hover {
-    background: #008080 !important;
-    color: #ffffff !important;
-    border-color: #008080 !important;
-    transform: scale(1.08) !important;
-}
-
-[data-theme="dark"] .eb-title-toggle-btn {
-    color: #1FB6AE !important;
-    background: rgba(31, 182, 174, 0.12) !important;
-    border-color: rgba(31, 182, 174, 0.35) !important;
-}
-
-[data-theme="dark"] .eb-title-toggle-btn:hover {
-    background: #1FB6AE !important;
-    color: #0E1A1A !important;
-}
-
-/* Non-document headers: Preserve natural row layout, no squishing */
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-title {
-    width: auto !important;
-    max-width: none !important;
-    flex: 0 1 auto !important;
-    display: flex !important;
-    align-items: center !important;
-}
-
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-area {
-    width: auto !important;
-    max-width: none !important;
-    display: flex !important;
-    align-items: center !important;
-}
-
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-text {
-    max-width: none !important;
-    width: auto !important;
-    white-space: nowrap !important;
+    line-height: 1.3 !important;
+    text-overflow: unset !important;
     overflow: visible !important;
-    text-overflow: clip !important;
-    display: inline-block !important;
-    flex: 0 1 auto !important;
-}
-
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .eb-title-toggle-btn {
-    display: none !important;
+    max-width: 100% !important;
 }
 
 .page-head .indicator-pill,
 .page-head .status-pill,
 .page-head .indicator {
-    margin-left: 6px !important;
-    flex-shrink: 0 !important;
-    vertical-align: middle !important;
+    margin-left: 8px !important;
 }
 
-/* Action buttons in non-document Desk headers (List View, Workspace) */
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-actions {
-    display: inline-flex !important;
+/* Row 2: Action buttons placed underneath the title bar */
+.page-head .page-actions {
+    display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
-    flex-wrap: nowrap !important;
-    width: auto !important;
-    border-top: none !important;
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-    gap: 8px !important;
-    z-index: 10 !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding-top: 4px !important;
 }
 
 .page-head .page-actions .btn {
     border-radius: 8px !important;
     font-weight: 600 !important;
-    font-size: 13px !important;
 }
 
-/* Universal Desk Header Z-Index & Overflow (All Views: List, Form, Report, Workspace) */
-.page-head {
-    z-index: 100 !important;
-    overflow: visible !important;
-    position: sticky !important;
-    top: var(--navbar-height) !important;
-}
-
-.page-head .container,
-.page-head .page-head-content {
-    overflow: visible !important;
-}
-
-.page-head .page-actions {
-    overflow: visible !important;
-    position: relative !important;
-    z-index: 101 !important;
-}
-
-/* Page content below buttons - always lower stacking context so dropdowns are on top */
-.page-container .page-body,
-.page-body,
-.layout-main,
-.layout-main-section,
-.page-form,
-.standard-filter-section,
-.frappe-list {
-    position: relative !important;
-    z-index: 1 !important;
-}
-
+/* Page content below buttons */
 .page-body {
     padding-top: 16px !important;
-}
-
-/* ==========================================================================
-   CREATIVE STICKY DOCUMENT TABS (LOCKED BELOW ACTION BUTTONS)
-   ========================================================================== */
-body[data-route^="Form"] .layout-main-section.frappe-card,
-[data-page-route^="Form"] .layout-main-section.frappe-card,
-.form-page .layout-main-section.frappe-card {
-    overflow: visible !important;
-}
-
-body[data-route^="Form"] .layout-main-section-wrapper,
-[data-page-route^="Form"] .layout-main-section-wrapper,
-.form-page .layout-main-section-wrapper {
-    overflow: visible !important;
-}
-
-body[data-route^="Form"] .form-tabs-list,
-[data-page-route^="Form"] .form-tabs-list,
-.form-page .form-tabs-list,
-.form-tabs-list,
-.form-tabs-sticky-up,
-.form-tabs-sticky-down {
-    position: sticky !important;
-    top: var(--eb-tabs-sticky-top, 134px) !important;
-    z-index: 5 !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border-bottom: 1.5px solid #e2e8f0 !important;
-    border-radius: 12px 12px 0 0 !important;
-    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.07) !important;
-    transition: top 0.12s ease, box-shadow 0.2s ease !important;
-    padding: 2px 8px 0 8px !important;
-    margin-bottom: 8px !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .form-tabs,
-[data-page-route^="Form"] .form-tabs-list .form-tabs,
-.form-tabs-list .form-tabs {
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scrollbar-width: none !important;
-    gap: 4px !important;
-    border-bottom: none !important;
-    padding: 0 8px !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .form-tabs::-webkit-scrollbar,
-.form-tabs-list .form-tabs::-webkit-scrollbar {
-    display: none !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .nav-item,
-[data-page-route^="Form"] .form-tabs-list .nav-item,
-.form-tabs-list .nav-item {
-    white-space: nowrap !important;
-    list-style: none !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .nav-item .nav-link,
-[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link,
-.form-tabs-list .nav-item .nav-link {
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    color: #64748b !important;
-    padding: 10px 16px !important;
-    margin: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
-    border: none !important;
-    border-bottom: 2.5px solid transparent !important;
-    background: transparent !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
-[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
-.form-tabs-list .nav-item .nav-link:hover {
-    color: #0f172a !important;
-    background: rgba(13, 148, 136, 0.08) !important;
-}
-
-body[data-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
-[data-page-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
-.form-tabs-list .nav-item .nav-link.active {
-    color: #0d9488 !important;
-    font-weight: 700 !important;
-    background: rgba(13, 148, 136, 0.06) !important;
-    border-bottom: 2.5px solid #0d9488 !important;
-}
-
-/* Ensure document content cleanly passes behind sticky tabs */
-body[data-route^="Form"] .form-tab-content,
-[data-page-route^="Form"] .form-tab-content,
-.form-tab-content {
-    scroll-margin-top: calc(var(--eb-tabs-sticky-top, 134px) + 56px) !important;
-    position: relative !important;
-    z-index: 1 !important;
-}
-
-/* Dark Theme Support */
-[data-theme="dark"] body[data-route^="Form"] .form-tabs-list,
-[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list,
-[data-theme="dark"] .form-tabs-list {
-    background: rgba(22, 27, 38, 0.96) !important;
-    border-bottom: 1.5px solid #334155 !important;
-    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.35) !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link,
-[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link,
-[data-theme="dark"] .form-tabs-list .nav-item .nav-link {
-    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
-[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link:hover,
-[data-theme="dark"] .form-tabs-list .nav-item .nav-link:hover {
-    color: var(--ethiobiz-dark-label-color, #f8fafc) !important;
-    background: rgba(45, 212, 191, 0.12) !important;
-}
-
-[data-theme="dark"] body[data-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
-[data-theme="dark"] [data-page-route^="Form"] .form-tabs-list .nav-item .nav-link.active,
-[data-theme="dark"] .form-tabs-list .nav-item .nav-link.active {
-    color: var(--ethiobiz-dark-label-color, #2dd4bf) !important;
-    border-bottom: 2.5px solid var(--ethiobiz-dark-label-color, #2dd4bf) !important;
-    background: rgba(45, 212, 191, 0.08) !important;
 }
 
 /* ==========================================================================
@@ -2227,20 +1761,62 @@ body[data-route^="Form"] .form-tab-content,
 }
 
 /* ==========================================================================
-   DESK ACTION BUTTONS & FORM SPACING
+   DESK 2-TIER HEADER ARCHITECTURE (FULL-WIDTH TITLE + RIGHT-ALIGNED ACTIONS)
    ========================================================================== */
+.page-head {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    padding-bottom: 8px !important;
+    background: transparent !important;
+}
+
+.page-head .page-head-content,
+.page-head .row.page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 8px 16px !important;
+    gap: 8px !important;
+}
+
+/* Tier 1: Full-Width Title Bar */
+.page-head .page-title {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    padding: 0 !important;
+}
+
+.page-head .page-title .title-text {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
 
 .page-head .page-title .indicator-pill {
     margin-left: 8px !important;
     flex-shrink: 0 !important;
 }
 
-/* Actions Row Aligned to Right */
+/* Tier 2: Dedicated Actions Row Below Title, Aligned to Right */
 .page-head .page-actions {
-    display: inline-flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
     justify-content: flex-end !important;
     align-items: center !important;
     gap: 8px !important;
+    margin-top: 4px !important;
+    padding: 6px 0 0 0 !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .page-head .page-actions .standard-actions {
@@ -2344,130 +1920,4 @@ body[data-route^="Form"] .form-tab-content,
 
 body.sidebar-opened .workspace-sidebar-backdrop {
     display: block;
-}/* ==========================================================================
-   PERMANENT DROPDOWN-LAYER FIX (applied 2026-09-10, additive-only)
-   Goal: any "..." overflow menu paints ABOVE page content below it.
-   Scope: stacking/layer + overflow-visible only. It touches NO existing rule,
-   so the title bar, header layout, spacing and tabs keep rendering exactly
-   as before. Backups: ethiobiz.et --with-files (2026-09-10 16:51) + this
-   file .bak.20260910.
-   ========================================================================== */
-
-:root {
-    --eb-z-content: 1;
-    --eb-z-header: 1000;
-    --eb-z-actions: 1001;
-    --eb-z-dropdown: 1200;
-}
-
-.page-head {
-    position: sticky !important;
-    z-index: var(--eb-z-header) !important;
-    overflow: visible !important;
-}
-
-.page-head .page-actions,
-.page-head .page-secondary-actions {
-    position: relative !important;
-    z-index: var(--eb-z-actions) !important;
-    overflow: visible !important;
-}
-
-.page-container .page-body,
-.page-body,
-.layout-main,
-.layout-main-section,
-.page-form,
-.standard-filter-section,
-.frappe-list {
-    position: relative !important;
-    z-index: var(--eb-z-content) !important;
-}
-
-.frappe-list .list-toolbar,
-.frappe-list .list-header,
-.frappe-list .list-row-actions,
-.frappe-list .list-row .row-actions {
-    position: relative !important;
-    z-index: var(--eb-z-actions) !important;
-    overflow: visible !important;
-}
-
-.dropdown-menu {
-    z-index: var(--eb-z-dropdown) !important;
-}
-
-.page-head,
-.page-head .page-head-content,
-.page-actions,
-.btn-group {
-    overflow: visible !important;
-}
-
-/* ===== P4-C DESK-ONLY LABEL GUARANTEE (2026-09-10) =====
-   Scoped strictly to the Desk app shell (body carries data-route="app/..."),
-   so it can never leak onto public website pages. Every desk form label -
-   textbox, dropdown, link, and all editing tools - follows the active theme
-   variable --text-color instead of the near-black web-form color. */
-body[data-route*="app"] .frappe-control .control-label,
-body[data-route*="app"] .form-group label,
-body[data-route*="app"] .form-group .control-label,
-body[data-route*="app"] .form-section .section-head,
-body[data-route*="app"] .form-tabs-list .nav-link {
-    color: var(--text-color, #1f272e) !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* ===== BISMALLAH 2026-09-10: Legible labels & edit-tool controls in dark mode =====
-   Color source: Theme Settings -> "Dark Mode Label Color", exposed as CSS custom
-   properties --ethiobiz-dark-label-color / --ethiobiz-dark-label-muted on :root
-   by ethiobiz_theme.js (applyThemeDarkLabel). Falls back to defaults when unset.
-   Covers ALL form labels, section heads, tabs, grids, sidebars, titles & editors. */
-[data-theme="dark"] body label,
-[data-theme="dark"] body .control-label,
-[data-theme="dark"] body label.control-label,
-[data-theme="dark"] body .form-group label,
-[data-theme="dark"] body .form-column label,
-[data-theme="dark"] body .checkbox label,
-[data-theme="dark"] body .form-section .section-head,
-[data-theme="dark"] body .section-head,
-[data-theme="dark"] body .field-group .label,
-[data-theme="dark"] body .frappe-control .label-area,
-[data-theme="dark"] body .section-head .section-title,
-[data-theme="dark"] body .section-head .section-head-label,
-[data-theme="dark"] body .form-tabs-list .nav-link,
-[data-theme="dark"] body .form-grid .grid-heading-row .grid-row-label,
-[data-theme="dark"] body .grid-heading-row .grid-row-label,
-[data-theme="dark"] body .form-grid .grid-row-label,
-[data-theme="dark"] body .editable-form label,
-[data-theme="dark"] body .static-area label,
-[data-theme="dark"] body .page-head .title-text,
-[data-theme="dark"] body .head-title,
-[data-theme="dark"] body .widget .widget-head-title,
-[data-theme="dark"] body .frappe-card .card-header,
-[data-theme="dark"] body .desk-sidebar .desk-sidebar-item-label,
-[data-theme="dark"] body .desk-sidebar-item-label,
-[data-theme="dark"] body .sidebar-item-label,
-[data-theme="dark"] body .desk-sidebar-item-underline,
-[data-theme="dark"] body .ql-toolbar button,
-[data-theme="dark"] body .ql-toolbar .ql-picker-label,
-[data-theme="dark"] body .ql-formats,
-[data-theme="dark"] body .ql-snow .ql-stroke,
-[data-theme="dark"] body .ql-snow .ql-fill,
-[data-theme="dark"] body .ce-toolbar__settings-btn,
-[data-theme="dark"] body .ce-block__settings-button,
-[data-theme="dark"] body .ce-toolbar__actions,
-[data-theme="dark"] body .ce-toolbar__plus,
-[data-theme="dark"] body .ce-block__settings-button {
-    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
-}
-[data-theme="dark"] body label .text-muted,
-[data-theme="dark"] body .control-label .text-muted,
-[data-theme="dark"] body .section-head .text-muted,
-[data-theme="dark"] body .label-area .text-muted,
-[data-theme="dark"] body .form-section .section-head .text-muted,
-[data-theme="dark"] body .form-grid .grid-heading-row .grid-row-label .text-muted {
-    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
 }

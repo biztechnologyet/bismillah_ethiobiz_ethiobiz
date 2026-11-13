@@ -1,0 +1,24 @@
+[
+ {
+  "dt": "Employee",
+  "fieldname": "id_type",
+  "fieldtype": "Select",
+  "insert_after": "passport_detail",
+  "label": "ID Type",
+  "options": "Passport\nNational ID\nKebele ID",
+  "reqd": 0,
+  "default": "Passport",
+  "doctype": "Custom Field",
+  "name": "Employee-id_type"
+ },
+ {
+  "dt": "User",
+  "fieldname": "custom_company",
+  "fieldtype": "Link",
+  "options": "Company",
+  "label": "Company",
+  "insert_after": "bio",
+  "doctype": "Custom Field",
+  "name": "User-custom_company"
+ }
+]

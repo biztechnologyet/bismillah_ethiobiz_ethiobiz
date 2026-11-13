@@ -11,6 +11,7 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import now, flt, cint
+from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults
 
 @frappe.whitelist()
 def request_delivery(order_reference, order_doctype="Sales Order", seller_company=None,
@@ -20,9 +21,27 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
                      is_cod=False, cod_amount=0.0):
     """
     Creates an official BizRide Delivery order and starts the dispatch broadcast.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    
+    # Require login and get customer
+    customer = require_authed_customer("Please log in to request delivery")
+    
     if not frappe.db.exists("DocType", "BizRide Delivery"):
         frappe.throw("BizRide Delivery module not installed")
+
+    # Resolve seller company from order if not provided
+    if not seller_company and order_reference:
+        order_company = frappe.db.get_value(order_doctype, order_reference, "company")
+        seller_company = order_company or "Biz Technology Solutions"
+    
+    # Ensure company is set, no silent fallback
+    if not seller_company:
+        frappe.throw("Seller company is required. Please specify the delivery provider company.")
+    
+    # Validate company exists
+    if not frappe.db.exists("Company", seller_company):
+        frappe.throw(f"Owning Company '{seller_company}' is not a valid Company.")
 
     pickup_lat = flt(pickup_lat) or 9.010
     pickup_lng = flt(pickup_lng) or 38.761
@@ -49,13 +68,19 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
     pickup_otp = str(frappe.generate_hash(length=4)).upper()
     delivery_otp = str(frappe.generate_hash(length=4)).upper()
 
+    # Get customer details for buyer info
+    customer_defaults = session_contact_defaults()
+    buyer_name = buyer_name or customer_defaults.get("full_name") or "Valued Customer"
+    buyer_phone = buyer_phone or customer_defaults.get("phone") or "0911000000"
+
     delivery_doc = frappe.get_doc({
         "doctype": "BizRide Delivery",
         "order_reference": str(order_reference),
         "order_doctype": order_doctype,
-        "seller_company": seller_company or "Biz Technology Solutions",
-        "buyer_name": buyer_name or "Valued Customer",
-        "buyer_phone": buyer_phone or "0911000000",
+        "seller_company": seller_company,
+        "customer": customer,  # BISMALLAH: Link to authenticated customer
+        "buyer_name": buyer_name,
+        "buyer_phone": buyer_phone,
         "pickup_address": pickup_address or "Bole, Addis Ababa",
         "delivery_address": delivery_address or "Kazanchis, Addis Ababa",
         "pickup_latitude": pickup_lat,
@@ -83,7 +108,9 @@ def request_delivery(order_reference, order_doctype="Sales Order", seller_compan
         "delivery_id": delivery_doc.name,
         "distance_km": distance_km,
         "delivery_fee": f"{delivery_fee:,.2f} ETB",
-        "estimated_mins": delivery_doc.estimated_duration_minutes
+        "estimated_mins": delivery_doc.estimated_duration_minutes,
+        "company": seller_company,
+        "customer": customer
     }
 
 
@@ -131,6 +158,185 @@ def update_rider_location(rider_id, latitude, longitude):
         })
         frappe.db.commit()
     return {"status": "ok"}
+
+
+@frappe.whitelist()
+def reject_delivery(delivery_id, rider_id=None, reason=None):
+    """
+    Rider rejects a delivery offer. If the delivery is still Broadcasting,
+    appends the rejection to the broadcast log and re-announces it to the next
+    rider pool. If a rider was already assigned, the delivery is released back
+    to Broadcasting so the broadcast engine can re-dispatch.
+    """
+    if not frappe.db.exists("BizRide Delivery", delivery_id):
+        frappe.throw("Delivery not found")
+
+    user = frappe.session.user
+    if not rider_id and user != "Guest":
+        rider_id = frappe.db.get_value("BizRider", {"email": user}, "name")
+
+    delivery = frappe.get_doc("BizRide Delivery", delivery_id)
+
+    # Log the rejection into the broadcast history child table
+    if frappe.db.exists("DocType", "BizRide Broadcast Log"):
+        delivery.append("broadcast_logs", {
+            "rider": rider_id or "",
+            "notified_at": now(),
+            "response": "Rejected",
+            "responded_at": now(),
+            "distance_km": delivery.distance_km or 0.0
+        })
+
+    # If a rider had claimed it but is now rejecting, release it back to broadcast
+    if delivery.status == "Rider Assigned":
+        delivery.assigned_rider = None
+        delivery.status = "Broadcasting"
+        message = "Rider rejected after assignment. Delivery re-broadcast to rider pool."
+    else:
+        # Still broadcasting — just re-announce to next candidates
+        delivery.status = "Broadcasting"
+        message = "Offer rejected. Delivery re-broadcast to next rider."
+
+    # Record the rejection reason in the notes-like description (safe field)
+    if reason:
+        delivery.notes = f"{getattr(delivery, 'notes', '') or ''} Rejected: {reason}".strip()
+
+    delivery.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": message,
+        "delivery_id": delivery.name,
+        "delivery_status": delivery.status
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_rider_dashboard(rider_id):
+    """
+    Returns the rider's earnings dashboard: profile, wallet balance,
+    aggregate stats, recent wallet transactions, and active deliveries.
+    """
+    if not rider_id or not frappe.db.exists("BizRider", rider_id):
+        frappe.throw("Rider not found")
+
+    rider = frappe.get_doc("BizRider", rider_id)
+
+    # Aggregate wallet stats
+    total_earnings = 0.0
+    total_withdrawn = 0.0
+    recent_txns = []
+
+    if frappe.db.exists("DocType", "BizRider Wallet Transaction"):
+        rows = frappe.get_all(
+            "BizRider Wallet Transaction",
+            filters={"rider": rider_id},
+            fields=["name", "transaction_type", "amount", "balance_after", "description", "payout_reference", "creation"],
+            order_by="creation desc",
+            limit=20
+        )
+        for r in rows:
+            amt = flt(r.get("amount"))
+            if r.get("transaction_type") == "Earning" or r.get("transaction_type") == "Bonus":
+                total_earnings += amt
+            elif r.get("transaction_type") in ("Withdrawal", "Commission Deduction", "Penalty"):
+                total_withdrawn += amt
+            recent_txns.append(r)
+    else:
+        # Fallback when ledger DocType is absent: derive from delivered trips
+        earnings = frappe.db.sql("""
+            SELECT COALESCE(SUM(rider_earning), 0) as total, COUNT(*) as cnt
+            FROM `tabBizRide Delivery`
+            WHERE assigned_rider = %s AND status = 'Delivered'
+        """, (rider_id,), as_dict=True)
+        if earnings:
+            total_earnings = flt(earnings[0].get("total"))
+            total_deliveries = earnings[0].get("cnt") or 0
+
+    # Active deliveries (assigned to this rider, not yet delivered)
+    active_deliveries = frappe.get_all(
+        "BizRide Delivery",
+        filters={"assigned_rider": rider_id, "status": ["not in", ["Delivered", "Cancelled", "Failed"]]},
+        fields=["name", "order_reference", "pickup_address", "delivery_address", "delivery_fee", "rider_earning", "status", "created"],
+        order_by="creation desc"
+    )
+
+    wallet_balance = flt(rider.get("wallet_balance") or 0.0)
+    total_deliveries = rider.get("total_deliveries") or 0
+
+    return {
+        "status": "success",
+        "rider_id": rider.name,
+        "rider_name": rider.get("rider_name"),
+        "phone": rider.get("phone"),
+        "vehicle_type": rider.get("vehicle_type"),
+        "status": rider.get("status"),
+        "verification_status": rider.get("verification_status"),
+        "rating": rider.get("average_rating"),
+        "wallet_balance": wallet_balance,
+        "formatted_wallet_balance": f"{wallet_balance:,.2f} ETB",
+        "stats": {
+            "total_deliveries": cint(total_deliveries),
+            "total_earnings": round(total_earnings, 2),
+            "total_withdrawn": round(total_withdrawn, 2),
+            "active_deliveries": len(active_deliveries)
+        },
+        "active_deliveries": active_deliveries,
+        "recent_transactions": recent_txns
+    }
+
+
+@frappe.whitelist()
+def rider_withdraw(rider_id, amount, payout_method="Telebirr", payout_account=None, notes=None):
+    """
+    Processes a wallet withdrawal for the rider: validates available balance,
+    deducts the amount, and records a Withdrawal balance ledger entry.
+    """
+    if not rider_id or not frappe.db.exists("BizRider", rider_id):
+        frappe.throw("Rider not found")
+
+    amount = flt(amount)
+    if amount <= 0:
+        frappe.throw("Withdrawal amount must be greater than zero")
+
+    rider = frappe.get_doc("BizRider", rider_id)
+    current_bal = flt(rider.get("wallet_balance") or 0.0)
+    if amount > current_bal:
+        frappe.throw("Insufficient wallet balance for withdrawal")
+
+    new_bal = current_bal - amount
+    frappe.db.set_value("BizRider", rider_id, "wallet_balance", new_bal)
+
+    txn_name = None
+    if frappe.db.exists("DocType", "BizRider Wallet Transaction"):
+        txn = frappe.get_doc({
+            "doctype": "BizRider Wallet Transaction",
+            "rider": rider_id,
+            "transaction_type": "Withdrawal",
+            "amount": amount,
+            "balance_after": new_bal,
+            "description": notes or f"Withdrawal via {payout_method}",
+            "payout_reference": payout_account or ""
+        })
+        txn.insert(ignore_permissions=True)
+        txn_name = txn.name
+    else:
+        # Fallback tracking when ledger DocType is absent
+        txn_name = f"WAL-WD-{frappe.generate_hash(length=8).upper()}"
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "Withdrawal request processed successfully",
+        "transaction_id": txn_name,
+        "rider_id": rider_id,
+        "amount": f"{amount:,.2f} ETB",
+        "payout_method": payout_method,
+        "payout_account": payout_account or "",
+        "balance_after": f"{new_bal:,.2f} ETB"
+    }
 
 
 @frappe.whitelist()

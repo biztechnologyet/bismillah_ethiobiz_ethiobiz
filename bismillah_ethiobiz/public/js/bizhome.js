@@ -71,7 +71,6 @@ function loadProperties() {
       const resp = data.message || data;
       propertiesList = resp.properties || [];
       renderProperties(propertiesList);
-      maybeOpenDeepLinkedProperty();
     })
     .catch((err) => {
       console.error("Error loading properties:", err);
@@ -83,20 +82,6 @@ function loadProperties() {
     });
 }
 
-// Deep link from the feed CTA: /bizhome?property=<name>. Runs once after the
-// first (broadest) load - the modal reads its fields from propertiesList, so
-// the property must be present; a missing/deleted one is silently ignored.
-let deepLinkPropertyHandled = false;
-function maybeOpenDeepLinkedProperty() {
-  if (deepLinkPropertyHandled) return;
-  deepLinkPropertyHandled = true;
-  try {
-    const want = new URLSearchParams(window.location.search).get("property");
-    if (!want) return;
-    if (propertiesList.some((p) => p.name === want)) openPropertyModal(want);
-  } catch (e) { /* deep link must never break browsing */ }
-}
-
 function renderProperties(list) {
   const container = document.getElementById("propertiesContainer");
   if (!container) return;
@@ -104,7 +89,7 @@ function renderProperties(list) {
   if (list.length === 0) {
     container.innerHTML = `
       <div class="col-12 text-center py-5">
-        <div class="h1">🏡</div>
+        <div class="h1">­ƒÅí</div>
         <h4 class="text-muted">No properties match your current filters</h4>
         <p class="text-muted small">Try broadening your search or switching property category.</p>
       </div>
@@ -117,7 +102,7 @@ function renderProperties(list) {
     const isDaily = p.tenure && p.tenure.includes("Day");
     const isSale = p.tenure && p.tenure.includes("Sale");
     const badgeColor = isDaily ? "#0284c7" : isSale ? "#e11d48" : "#0d9488";
-    const ctaLabel = isDaily ? "Book Stay 🏨" : isSale ? "Inquire / Schedule 🏷️" : "Apply / Rent 📑";
+    const ctaLabel = isDaily ? "Book Stay ­ƒÅ¿" : isSale ? "Inquire / Schedule ­ƒÅÀ´©Å" : "Apply / Rent ­ƒôæ";
 
     const amenitiesHtml = (p.amenities || [])
       .slice(0, 4)
@@ -134,16 +119,16 @@ function renderProperties(list) {
           <div class="property-info">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="badge bg-light text-dark border">${p.property_type || 'Property'}</span>
-              <span class="small text-warning font-weight-bold">⭐ ${p.rating || 4.9} (${p.reviews_count || 12})</span>
+              <span class="small text-warning font-weight-bold">Ô¡É ${p.rating || 4.9} (${p.reviews_count || 12})</span>
             </div>
             <h5 class="font-weight-bold text-dark mb-1">${p.title}</h5>
-            <p class="text-muted small mb-2">📍 ${p.subcity ? p.subcity + ', ' : ''}${p.city || 'Addis Ababa'}</p>
+            <p class="text-muted small mb-2">­ƒôì ${p.subcity ? p.subcity + ', ' : ''}${p.city || 'Addis Ababa'}</p>
 
             <div class="property-features">
-              <span>🛏️ ${p.bedrooms} Beds</span>
-              <span>🚿 ${p.bathrooms} Baths</span>
-              <span>📐 ${p.area_sqm || 100} m²</span>
-              ${p.furnished ? '<span>🛋️ Furnished</span>' : ''}
+              <span>­ƒøÅ´©Å ${p.bedrooms} Beds</span>
+              <span>­ƒÜ┐ ${p.bathrooms} Baths</span>
+              <span>­ƒôÉ ${p.area_sqm || 100} m┬▓</span>
+              ${p.furnished ? '<span>­ƒøï´©Å Furnished</span>' : ''}
             </div>
 
             <div class="mb-3">
@@ -262,7 +247,7 @@ function openPropertyModal(propId) {
   if (propIdEl) propIdEl.value = selectedProperty.name;
   if (propTenureEl) propTenureEl.value = selectedProperty.tenure || "Monthly Rental";
   if (propTitleEl) propTitleEl.innerText = selectedProperty.title || "Property";
-  if (propSubEl) propSubEl.innerText = `📍 ${selectedProperty.subcity ? selectedProperty.subcity + ', ' : ''}${selectedProperty.city || 'Addis Ababa'} • ${selectedProperty.property_type || 'Residential'}`;
+  if (propSubEl) propSubEl.innerText = `­ƒôì ${selectedProperty.subcity ? selectedProperty.subcity + ', ' : ''}${selectedProperty.city || 'Addis Ababa'} ÔÇó ${selectedProperty.property_type || 'Residential'}`;
 
   const isDaily = selectedProperty.tenure && selectedProperty.tenure.includes("Day");
   const isSale = selectedProperty.tenure && selectedProperty.tenure.includes("Sale");
@@ -276,7 +261,7 @@ function openPropertyModal(propId) {
     stayFields.forEach((f) => (f.style.display = "block"));
     leaseFields.forEach((f) => (f.style.display = "none"));
     viewingFields.forEach((f) => (f.style.display = "none"));
-    if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation 🏨";
+    if (btnSubmit) btnSubmit.innerText = "Confirm Room Reservation ­ƒÅ¿";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / night`;
@@ -285,7 +270,7 @@ function openPropertyModal(propId) {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "none"));
     viewingFields.forEach((f) => (f.style.display = "block"));
-    if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour 🏠";
+    if (btnSubmit) btnSubmit.innerText = "Schedule Free Property Tour ­ƒÅá";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `Total Price: ${Number(selectedProperty.price).toLocaleString()} ETB`;
@@ -294,7 +279,7 @@ function openPropertyModal(propId) {
     stayFields.forEach((f) => (f.style.display = "none"));
     leaseFields.forEach((f) => (f.style.display = "block"));
     viewingFields.forEach((f) => (f.style.display = "none"));
-    if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application 📑";
+    if (btnSubmit) btnSubmit.innerText = "Submit Lease Contract Application ­ƒôæ";
     const rateEl = document.getElementById("modalRateDisplay");
     const totalEl = document.getElementById("modalTotalDisplay");
     if (rateEl) rateEl.innerText = `${Number(selectedProperty.price).toLocaleString()} ETB / month`;
@@ -573,11 +558,11 @@ function submitPropertyRegistration() {
       }
       const resp = data.message || data;
       if (resp.status === "success") {
-        alert(`✅ SUCCESS!\n${resp.message || "Property submitted successfully."}`);
+        alert(`Ô£à SUCCESS!\n${resp.message || "Property submitted successfully."}`);
         hideRegisterPropertyModal();
         loadProperties();
       } else {
-        alert(`❌ Error: ${resp.message || "Failed to submit property listing."}`);
+        alert(`ÔØî Error: ${resp.message || "Failed to submit property listing."}`);
       }
     })
     .catch((err) => {
@@ -586,7 +571,7 @@ function submitPropertyRegistration() {
         btn.disabled = false;
         btn.innerText = origText;
       }
-      alert("✅ Alhamdulillah! Your property listing has been received. Our team will verify and list it.");
+      alert("Ô£à Alhamdulillah! Your property listing has been received. Our team will verify and list it.");
       hideRegisterPropertyModal();
     });
 }

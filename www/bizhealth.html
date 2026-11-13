@@ -1,35 +1,58 @@
 {% extends "templates/web.html" %}
 
-{% block title %}EthioBiz Health — Find Verified Doctors, Clinics & Book Teleconsultations{% endblock %}
+{% block title %}EthioBiz Health — Find Healthcare Institutes, Verified Doctors & Book Clinical Services{% endblock %}
 
 {% block page_content %}
-<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=3.0.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"></noscript>
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.2.0" />
 
 <div class="vertical-portal-wrapper">
     <!-- HERO SECTION -->
     <header class="vertical-hero health-hero">
         <div class="hero-content">
-            <span class="hero-badge">🩺 Practo-Grade Healthcare Hub</span>
-            <h1 class="hero-title">Your Health, Verified & Accessible</h1>
-            <p class="hero-subtitle">Book in-clinic appointments, schedule video teleconsultations, or request doctor home visits across Ethiopia.</p>
+            <span class="hero-badge" style="background:var(--health-100); color:var(--health-900);">🩺 EthioBiz Healthcare Ecosystem</span>
+            <h1 class="hero-title">Your Health, Verified &amp; Connected</h1>
+            <p class="hero-subtitle">Search healthcare institutes, book clinical services with smart automatic slot allocation, and schedule verified specialist doctors across Ethiopia.</p>
             
             <!-- SEARCH BAR -->
             <div class="vertical-search-card">
                 <div class="search-input-group">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="health-search-input" placeholder="Search doctor name, specialty (e.g. Cardiology, Dental)..." autocomplete="off" />
+                    <input type="text" id="health-search-input" placeholder="Search hospital, clinic, doctor, or service (e.g. Tikur Anbessa, Cardiology, Ultrasound, Dental)..." autocomplete="off" />
                 </div>
-                <button id="btn-search-doctors" class="btn-vertical-primary">Find Doctors</button>
+                <button id="btn-search-health" class="btn-vertical-primary" style="background:var(--health-600);">Search Catalog</button>
             </div>
         </div>
     </header>
 
+    <!-- HUB NAVIGATION TABS (INSTITUTES vs DOCTORS vs SERVICES) -->
+    <div class="health-hub-nav-wrapper">
+        <nav class="health-hub-nav" role="tablist">
+            <button class="health-hub-tab active" data-tab="institutes">
+                <span>🏥</span> Healthcare Institutes &amp; Hospitals
+            </button>
+            <button class="health-hub-tab" data-tab="doctors">
+                <span>🩺</span> Specialist Medical Doctors
+            </button>
+            <button class="health-hub-tab" data-tab="services">
+                <span>🔬</span> Clinical &amp; Diagnostic Services
+            </button>
+        </nav>
+    </div>
+
     <!-- SPECIALTY CHIPS CAROUSEL -->
     <section class="specialty-chips-section">
         <div class="container-fluid px-lg-4">
-            <h3 class="section-title">Top Medical Specialties</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 class="section-title" style="margin-bottom:0;">Top Medical Specialties</h3>
+                <span style="font-size:0.78rem; color:#64748b; font-weight:600;">Scroll for more →</span>
+            </div>
             <div class="specialty-chips-scroll">
-                <button class="spec-chip active" data-dept="all">🌟 All Doctors</button>
+                <button class="spec-chip active" data-dept="all">🌟 All Specialties</button>
                 <button class="spec-chip" data-dept="Cardiology">❤️ Cardiology</button>
                 <button class="spec-chip" data-dept="Dermatology">🧴 Dermatology</button>
                 <button class="spec-chip" data-dept="Pediatrics">👶 Pediatrics</button>
@@ -37,84 +60,255 @@
                 <button class="spec-chip" data-dept="Dental">🦷 Dental Care</button>
                 <button class="spec-chip" data-dept="General Medicine">🩺 General Medicine</button>
                 <button class="spec-chip" data-dept="Gynecology">🌸 Gynecology</button>
-                <button class="spec-chip" data-dept="Ophthalmology">👁️ Ophthalmology</button>
+                <button class="spec-chip" data-dept="Radiology">🔬 Diagnostic Imaging</button>
+                <button class="spec-chip" data-dept="Laboratory">🧪 Pathology Lab</button>
+                <button class="spec-chip" data-dept="Neurology">🧠 Neurology</button>
+                <button class="spec-chip" data-dept="ENT">👂 ENT</button>
             </div>
         </div>
     </section>
 
-    <!-- DOCTOR DIRECTORY -->
-    <main class="container-fluid px-lg-4 py-4">
-        <div class="results-header-bar">
-            <span id="health-results-count">Loading verified medical specialists...</span>
-            <div class="consultation-type-pills">
-                <button class="type-pill active" data-type="all">All Types</button>
-                <button class="type-pill" data-type="in_clinic">🏥 In-Clinic</button>
-                <button class="type-pill" data-type="video">📹 Video Consult</button>
-                <button class="type-pill" data-type="home">🏠 Home Visit</button>
-            </div>
+    <!-- TRUST BANNER -->
+    <div style="background:#f0fdf4; border-bottom:1px solid #d1fae5; padding:10px 24px;">
+        <div style="display:flex; justify-content:center; gap:28px; flex-wrap:wrap;">
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">🏥 Verified Healthcare Facilities</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">⏱️ Smart Free Slot Allocation</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">💳 Telebirr &amp; CBEBirr Instant Pay</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">📋 Digital Prescriptions &amp; Records</span>
+            <span style="font-size:0.78rem; color:#047857; font-weight:700;">🚗 Integrated BizRide Dispatch</span>
         </div>
+    </div>
 
-        <div id="health-doctor-grid" class="doctor-cards-grid">
-            <!-- Dynamically populated via bizhealth.js -->
-        </div>
+    <!-- MAIN VIEWS CONTAINER -->
+    <main class="container-fluid px-lg-4 py-4">
+        <!-- 1. HEALTHCARE INSTITUTES VIEW -->
+        <section id="health-institutes-view" class="health-tab-content">
+            <div class="results-header-bar mb-3">
+                <span id="health-institutes-count">Loading verified healthcare institutes...</span>
+                <div class="consultation-type-pills">
+                    <button class="filter-pill active" data-inst-type="all">All Types</button>
+                    <button class="filter-pill" data-inst-type="general">🏥 General Hospitals</button>
+                    <button class="filter-pill" data-inst-type="specialist">⭐ Specialist Centers</button>
+                    <button class="filter-pill" data-inst-type="diagnostic">🔬 Diagnostic Labs</button>
+                    <button class="filter-pill" data-inst-type="dental">🦷 Dental Clinics</button>
+                </div>
+            </div>
+            <div id="health-institutes-grid" class="institutes-cards-grid">
+                <!-- Dynamically populated via bizhealth.js -->
+            </div>
+        </section>
+
+        <!-- 2. SPECIALIST DOCTORS VIEW -->
+        <section id="health-doctors-view" class="health-tab-content" style="display:none;">
+            <div class="results-header-bar mb-3">
+                <span id="health-results-count">Loading verified medical specialists...</span>
+                <div class="consultation-type-pills">
+                    <button class="type-pill active" data-type="all">All Modes</button>
+                    <button class="type-pill" data-type="in_clinic">🏥 In-Clinic</button>
+                    <button class="type-pill" data-type="video">📹 Video Consult</button>
+                    <button class="type-pill" data-type="home">🏠 Home Visit</button>
+                </div>
+            </div>
+            <div id="health-doctor-grid" class="doctor-cards-grid">
+                <!-- Dynamically populated via bizhealth.js -->
+            </div>
+        </section>
+
+        <!-- 3. CLINICAL SERVICES VIEW -->
+        <section id="health-services-view" class="health-tab-content" style="display:none;">
+            <div class="results-header-bar mb-3">
+                <span id="health-services-count">Loading Desk clinical services &amp; diagnostic procedures...</span>
+                <div class="consultation-type-pills">
+                    <button class="filter-pill active" data-svc-type="all">All Procedures</button>
+                    <button class="filter-pill" data-svc-type="Consultation">🩺 Consultations</button>
+                    <button class="filter-pill" data-svc-type="Diagnostic">🔬 Imaging &amp; Scans</button>
+                    <button class="filter-pill" data-svc-type="Dental">🦷 Dental Procedures</button>
+                    <button class="filter-pill" data-svc-type="Lab">🧪 Pathology Panels</button>
+                </div>
+            </div>
+            <div id="health-services-grid" class="services-cards-grid">
+                <!-- Dynamically populated via bizhealth.js -->
+            </div>
+        </section>
     </main>
 </div>
 
-<!-- CLINICAL APPOINTMENT BOOKING MODAL -->
-<div id="health-booking-modal" class="modal-backdrop-custom" style="display:none;">
-    <div class="modal-dialog-glass">
-        <div class="modal-header-custom">
-            <h3 id="modal-doc-name">Book Doctor Appointment</h3>
-            <button id="btn-close-health-modal" class="btn-close-modal">✕</button>
+<!-- ========================================================================
+     INSTITUTE DETAIL MODAL
+     ======================================================================== -->
+<div id="health-institute-modal" class="modal-backdrop-custom" style="display:none;">
+    <div class="modal-dialog-glass" style="max-width:850px; width:95%;">
+        <div class="modal-header-custom" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="inst-modal-title" style="margin:0; font-weight:800; color:#0f172a;">Healthcare Institute Details</h3>
+            <button id="btn-close-inst-modal" class="btn-close-modal">✕</button>
         </div>
-        <div class="modal-body-custom">
-            <div class="doc-summary-badge" id="modal-doc-summary"></div>
-            
-            <div class="form-group mb-3">
-                <label class="form-label font-weight-bold">Consultation Mode:</label>
-                <div class="consult-mode-selector">
-                    <label class="mode-radio"><input type="radio" name="consult_mode" value="In-Clinic" checked /> 🏥 In-Clinic Visit</label>
-                    <label class="mode-radio"><input type="radio" name="consult_mode" value="Video Telehealth" /> 📹 Video Call</label>
-                    <label class="mode-radio"><input type="radio" name="consult_mode" value="Home Visit" /> 🏠 Doctor Home Visit</label>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Appointment Date:</label>
-                    <input type="date" id="book-appointment-date" class="form-control-custom" />
-                </div>
-                <div class="col-md-6 form-group mb-3">
-                    <label class="form-label font-weight-bold">Available Time Slot:</label>
-                    <select id="book-time-slot" class="form-control-custom">
-                        <option value="09:00 AM">09:00 AM</option>
-                        <option value="10:00 AM">10:00 AM</option>
-                        <option value="11:30 AM">11:30 AM</option>
-                        <option value="02:30 PM">02:30 PM</option>
-                        <option value="04:00 PM">04:00 PM</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group mb-3">
-                <label class="form-label font-weight-bold">Patient Full Name:</label>
-                <input type="text" id="book-patient-name" class="form-control-custom" placeholder="e.g. Abebe Bikila" />
-            </div>
-
-            <div class="form-group mb-3">
-                <label class="form-label font-weight-bold">Phone Number:</label>
-                <input type="text" id="book-patient-phone" class="form-control-custom" placeholder="e.g. 0911223344" />
-            </div>
-
-            <div class="form-group mb-4">
-                <label class="form-label font-weight-bold">Symptoms / Reason for Consultation:</label>
-                <textarea id="book-symptoms" class="form-control-custom" rows="2" placeholder="Briefly describe what you are experiencing..."></textarea>
-            </div>
-
-            <button id="btn-confirm-appointment" class="btn-vertical-primary w-100 py-3">Confirm & Book Appointment ➔</button>
+        <div class="modal-body-custom" id="inst-modal-body" style="padding:20px; max-height:80vh; overflow-y:auto;">
+            <!-- Rendered dynamically -->
         </div>
     </div>
 </div>
 
-<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=3.0.0"></script>
+<!-- ========================================================================
+     UNIFIED SERVICE BOOKING & PAYMENT MODAL
+     ======================================================================== -->
+<div id="health-booking-modal" class="modal-backdrop-custom" style="display:none;">
+    <div class="modal-dialog-glass" style="max-width:680px; width:95%;">
+        <div class="modal-header-custom" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h3 id="modal-doc-name" style="margin:0; font-weight:800; font-size:1.25rem;">Book Clinical Service</h3>
+                <span id="modal-service-subtitle" style="font-size:0.8rem; color:#64748b; font-weight:600;">Desk-Defined Duration &amp; Smart Free Slot Allocation</span>
+            </div>
+            <button id="btn-close-health-modal" class="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body-custom" style="padding:20px; max-height:82vh; overflow-y:auto;">
+            <!-- Service & Institute Summary Card -->
+            <div class="doc-summary-badge" id="modal-doc-summary" style="margin-bottom:16px;"></div>
+            
+            <!-- Patient Verified Profile Top Card -->
+            <div class="ethiobiz-profile-top-slot mb-3">
+                <div class="ethiobiz-user-profile-top-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(13, 148, 136, 0.06)); border: 1px solid rgba(16, 185, 129, 0.28); border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="ethiobiz-user-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #059669; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                            👤
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                <span class="ethiobiz-user-name">EthioBiz Patient</span>
+                                <span style="color: #059669; font-size: 13px;" title="Verified Profile">✓</span>
+                            </div>
+                            <div class="ethiobiz-user-meta" style="font-size: 12px; color: #64748b; margin-top: 1px;">
+                                Verified Patient Profile
+                            </div>
+                        </div>
+                    </div>
+                    <span style="background: #059669; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap;">
+                        Verified Patient ✓
+                    </span>
+                </div>
+            </div>
+
+            <!-- PRACTITIONER SELECTION (IF APPLICABLE) -->
+            <div class="form-group mb-3" id="booking-practitioner-selector-group">
+                <label class="form-label font-weight-bold" style="font-size:0.85rem;">Assigned Medical Practitioner:</label>
+                <select id="book-practitioner-select" class="form-control-custom" style="padding:10px 14px; border-radius:12px; border:1.5px solid #cbd5e1; width:100%;">
+                    <option value="">⚡ First Available Specialist at this Facility</option>
+                </select>
+            </div>
+
+            <!-- SMART SLOT ALLOCATION ENGINE SECTION -->
+            <div class="slot-allocation-container">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div>
+                        <strong style="color:#0f172a; font-size:0.92rem;">🗓️ Appointment Schedule &amp; Time Allocation</strong>
+                        <div id="service-duration-indicator" style="font-size:0.75rem; color:#059669; font-weight:700;">Duration: 30 mins</div>
+                    </div>
+                    <div style="font-size:0.78rem; color:#64748b;">
+                        Date: <input type="date" id="book-appointment-date" style="border:1.5px solid #cbd5e1; border-radius:8px; padding:4px 8px; font-weight:700; font-size:0.82rem;" />
+                    </div>
+                </div>
+
+                <!-- ALLOCATION MODE SWITCHER -->
+                <div class="slot-mode-tabs">
+                    <button type="button" class="slot-mode-btn active" id="btn-mode-auto" data-mode="auto">
+                        <span>⚡</span> Auto-Allocate Earliest Free Slot
+                    </button>
+                    <button type="button" class="slot-mode-btn" id="btn-mode-manual" data-mode="manual">
+                        <span>🗓️</span> Pick My Preferred Time
+                    </button>
+                </div>
+
+                <!-- AUTO-ALLOCATED TIME HIGHLIGHT -->
+                <div id="auto-allocated-slot-box" class="auto-allocated-banner">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="auto-allocated-pulse"></div>
+                        <div>
+                            <div style="font-size:0.75rem; color:#047857; font-weight:800; text-transform:uppercase;">Optimal Free Slot Allocated</div>
+                            <div id="auto-slot-label" style="font-size:1.05rem; font-weight:900; color:#064e3b;">Loading earliest slot...</div>
+                            <div id="auto-slot-details" style="font-size:0.75rem; color:#065f46;">Calculated based on current user time &amp; service duration</div>
+                        </div>
+                    </div>
+                    <span style="background:#059669; color:#fff; font-size:0.75rem; font-weight:800; padding:6px 12px; border-radius:10px;">Locked ✓</span>
+                </div>
+
+                <!-- MANUAL SLOT SELECTION GRID -->
+                <div id="manual-slots-picker-box" style="display:none; margin-top:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:0.78rem; color:#475569; font-weight:700;">Available Free Time Slots:</span>
+                        <span id="manual-slots-count" style="font-size:0.75rem; color:#059669; font-weight:700;">Calculating...</span>
+                    </div>
+                    <div id="interactive-slots-grid" class="slots-grid-interactive">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAYMENT METHOD SELECTION -->
+            <div class="form-group mb-3">
+                <label class="form-label font-weight-bold" style="font-size:0.85rem; display:flex; justify-content:space-between;">
+                    <span>💳 Select Payment Method:</span>
+                    <span id="payment-amount-display" style="color:var(--health-700); font-weight:900;">0.00 ETB</span>
+                </label>
+                <div class="payment-methods-grid">
+                    <div class="payment-method-card active" data-payment="AddisPay">
+                        <span class="payment-icon">💳</span>
+                        <span class="payment-title">AddisPay</span>
+                        <span class="payment-sub">Cards, Telebirr &amp; CBE Birr</span>
+                    </div>
+                    <div class="payment-method-card" data-payment="Bank Transfer">
+                        <span class="payment-icon">🏦</span>
+                        <span class="payment-title">Bank Transfer</span>
+                        <span class="payment-sub">Direct Account Deposit</span>
+                    </div>
+                    <div class="payment-method-card" data-payment="Pay at Facility">
+                        <span class="payment-icon">🏥</span>
+                        <span class="payment-title">Pay at Facility</span>
+                        <span class="payment-sub">Check-in Clinic Cashier</span>
+                    </div>
+                </div>
+
+                <!-- BANK TRANSFER DETAILS (SHOWN ONLY WHEN BANK TRANSFER SELECTED) -->
+                <div id="bank-transfer-details-box" style="display:none; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:14px; padding:14px; margin-top:10px;">
+                    <div style="font-size:0.8rem; font-weight:800; color:#0f172a; margin-bottom:8px;">🏦 Deposit to verified hospital accounts:</div>
+                    <div style="font-size:0.78rem; color:#334155; line-height:1.6; margin-bottom:12px;">
+                        &bull; <strong>Commercial Bank of Ethiopia:</strong> 1000236131606 (Hadi Awad)<br>
+                        &bull; <strong>Telebirr SuperApp:</strong> +251 98 676 7576 (Hadi Awad)<br>
+                        &bull; <strong>Bank of Abyssinia:</strong> 94784891 (Hadi Awad)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-2">
+                            <label style="font-size:0.75rem; font-weight:700;">Depositing Bank:</label>
+                            <input type="text" id="book-bank-name" class="form-control-custom" style="padding:6px 10px; font-size:0.8rem; border-radius:8px; border:1px solid #cbd5e1; width:100%;" placeholder="e.g. CBE or Telebirr" />
+                        </div>
+                        <div class="col-md-6 form-group mb-2">
+                            <label style="font-size:0.75rem; font-weight:700;">Tx Reference / Slip #:</label>
+                            <input type="text" id="book-bank-ref" class="form-control-custom" style="padding:6px 10px; font-size:0.8rem; border-radius:8px; border:1px solid #cbd5e1; width:100%;" placeholder="e.g. FT26081..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Patient Inputs (Bound to Logged-in Profile) -->
+            <input type="hidden" id="book-patient-name" />
+            <input type="hidden" id="book-patient-phone" />
+            <input type="hidden" id="book-patient-email" />
+            <input type="hidden" id="book-selected-slot-value" />
+
+            <div class="form-group mb-4">
+                <label class="form-label font-weight-bold" style="font-size:0.85rem;">Symptoms / Reason for Service:</label>
+                <textarea id="book-symptoms" class="form-control-custom" rows="2" style="border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 14px; width:100%;" placeholder="Describe symptoms or clinical notes (optional)..."></textarea>
+            </div>
+
+            <button id="btn-confirm-appointment" class="btn-vertical-primary w-100 py-3" style="background:var(--health-600); font-size:1rem; border-radius:14px;">
+                Confirm Order &amp; Pay Service ➔
+            </button>
+
+            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:12px;">
+                🔒 Health data &amp; transactions are secured under Ethiopian National e-Health standards.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.2.0"></script>
 {% endblock %}

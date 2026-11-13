@@ -1,0 +1,19 @@
+{
+  "name": "BizBooking Industry",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "field:industry_code",
+  "title_field": "industry_name",
+  "fields": [
+    {"fieldname": "industry_code", "fieldtype": "Data", "label": "Code", "unique": 1, "reqd": 1},
+    {"fieldname": "industry_name", "fieldtype": "Data", "label": "Industry Name", "reqd": 1},
+    {"fieldname": "icon", "fieldtype": "Data", "label": "Icon (e.g. fa-cut)"},
+    {"fieldname": "color", "fieldtype": "Color", "label": "Theme Color", "default": "#1FB6AE"},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": 1},
+    {"fieldname": "default_slot_granularity", "fieldtype": "Int", "label": "Default Slot Granularity (min)", "default": 30},
+    {"fieldname": "default_reminder_offsets", "fieldtype": "Data", "label": "Default Reminder Offsets (JSON)", "default": "[24, 2]"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

@@ -98,14 +98,6 @@
         }
     };
 
-    // BISMALLAH (2026-09-10): custom icons from EthioBiz Theme Settings override
-    // the pillar/default logo. The default (fallback) logo is used ONLY when no
-    // custom icon is set, so updateLogo never reverts a configured icon.
-    let ethiobizCustomIcons = { website: '', desk: '' };
-
-    // BISMALLAH (2026-09-10): optional dark-mode label color from Theme Settings.
-    let ethiobizDarkLabelColor = '';
-
     class BrandManager {
         constructor() {
             this.currentPillar = BRAND_CONFIG.default;
@@ -302,17 +294,10 @@
 
         updateLogo(src, alt) {
             const selectors = ['.navbar-brand img', '.app-logo', '#navbar-logo'];
-            const isDesk = !!(document.body &&
-                (document.body.classList.contains('desk-page') ||
-                 document.querySelector('.desk-sidebar') ||
-                 document.querySelector('.layout-side-section')));
-            // BISMALLAH: a configured Theme icon wins over the pillar/default logo.
-            const custom = isDesk ? ethiobizCustomIcons.desk : ethiobizCustomIcons.website;
-            const effectiveSrc = custom || src;
             selectors.forEach(sel => {
                 document.querySelectorAll(sel).forEach(img => {
                     if (img.closest('.pillar-icon, .sub-icon, .detail-logo, .footer-brand, .legacy-image, .hero-logo, .loader-logo, .pillar-card, .sub-system-card, .final-cta, .detail-image, .hero-content, .ethiobiz-landing, #loading-screen')) return;
-                    img.src = effectiveSrc;
+                    img.src = src;
                     img.alt = alt;
                     img.style.maxHeight = '35px';
                 });
@@ -442,99 +427,12 @@
         xhr.send();
     }
 
-    // ─── Apply Website / Desk icons from EthioBiz Theme Settings ───────────
-    // BISMALLAH (2026-09-10): custom icons are optional — empty settings keep
-    // the default EthioBiz branding untouched. Website icon drives the navbar
-    // brand + favicon; desk icon drives the Desk top-left brand.
-    function applyThemeIcons(s) {
-        if (!s) s = window.__ethiobizThemeSettings || {};
-        var websiteIcon = s.website_icon || s.favicon || '';
-        var deskIcon = s.desk_icon || '';
-        // BISMALLAH: remember configured icons so updateLogo keeps them.
-        ethiobizCustomIcons.website = websiteIcon;
-        ethiobizCustomIcons.desk = deskIcon;
-        var isDesk = !!(document.body &&
-            (document.body.classList.contains('desk-page') ||
-             document.querySelector('.desk-sidebar') ||
-             document.querySelector('.layout-side-section')));
-
-        if (websiteIcon && !isDesk) {
-            var fav = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
-            if (fav) {
-                fav.href = websiteIcon;
-            } else {
-                fav = document.createElement('link');
-                fav.rel = 'icon';
-                fav.href = websiteIcon;
-                document.head.appendChild(fav);
-            }
-            document.querySelectorAll('.navbar-brand img, #navbar-logo, .app-logo').forEach(img => {
-                if (img.closest('.pillar-icon, .sub-icon, .detail-logo, .footer-brand, .legacy-image, .hero-logo, .loader-logo, .pillar-card, .sub-system-card, .final-cta, .detail-image, .hero-content, .ethiobiz-landing, #loading-screen')) return;
-                img.src = websiteIcon;
-                img.alt = (BRAND_CONFIG && BRAND_CONFIG.app_name) || 'EthioBiz';
-                img.style.maxHeight = '35px';
-            });
-        }
-
-        if (deskIcon && isDesk) {
-            document.querySelectorAll('.desk-sidebar .navbar-brand img, .desk-navbar .navbar-brand img, .layout-side-section .navbar-brand img, .navbar-brand img').forEach(img => {
-                img.src = deskIcon;
-                img.alt = (BRAND_CONFIG && BRAND_CONFIG.app_name) || 'EthioBiz';
-                img.style.maxHeight = '35px';
-            });
-            document.querySelectorAll('#switch-to-app img, .app-switcher-window img, .navbar .app-icon img').forEach(img => {
-                img.src = deskIcon;
-            });
-        }
-    }
-
     window.EthioBizBrandManager = new BrandManager();
 
-    // ─── Optional dark-mode label color from Theme Settings ───────────────
-    // BISMALLAH (2026-09-10): expose the chosen color as CSS custom properties
-    // on :root. ethiobiz_theme.css reads these variables so EVERY form label
-    // and edit-tool control updates in real time — no <style> injection battle.
-    function _shadeHex(hex, ratio) {
-        hex = String(hex || '').trim().replace(/^#/, '');
-        if (hex.length === 3) hex = hex.split('').map(function (ch) { return ch + ch; }).join('');
-        if (!/^[0-9a-fA-F]{6}$/.test(hex)) return '#94a3b8';
-        var n = parseInt(hex, 16);
-        var r = Math.round(((n >> 16) & 255) * ratio);
-        var g = Math.round(((n >> 8) & 255) * ratio);
-        var b = Math.round((n & 255) * ratio);
-        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
-    function applyThemeDarkLabel(s) {
-        if (!s) s = window.__ethiobizThemeSettings || {};
-        ethiobizDarkLabelColor = s.dark_label_color || '';
-        var root = document.documentElement;
-        if (!root) return;
-        if (ethiobizDarkLabelColor) {
-            root.style.setProperty('--ethiobiz-dark-label-color', ethiobizDarkLabelColor);
-            root.style.setProperty('--ethiobiz-dark-label-muted', _shadeHex(ethiobizDarkLabelColor, 0.62));
-        } else {
-            root.style.removeProperty('--ethiobiz-dark-label-color');
-            root.style.removeProperty('--ethiobiz-dark-label-muted');
-        }
-        // live re-apply after short delay so later-rendered desk sections inherit
-        setTimeout(function () { document.body.setAttribute('data-eb-label-color', ethiobizDarkLabelColor || 'none'); }, 0);
-    }
-
     // Fetch settings first, then init so updateBackground has correct flags
-    fetchAndCacheThemeSettings(function(s) {
+    fetchAndCacheThemeSettings(function() {
         window.EthioBizBrandManager.init();
-        applyThemeIcons(s);
-        applyThemeDarkLabel(s);
     });
-
-    // Desk content mounts asynchronously — retry icon override briefly
-    let _iconRetries = 0;
-    const iconRetryTimer = setInterval(function() {
-        if (++_iconRetries > 6) { clearInterval(iconRetryTimer); return; }
-        if (document.body && document.querySelector('.desk-sidebar, .layout-side-section')) {
-            applyThemeIcons(window.__ethiobizThemeSettings || {});
-        }
-    }, 1000);
 
 })();
 
@@ -973,169 +871,6 @@
             }
         }
     }, true);
-
-    function isDocView() {
-        // 1. Check frappe router standard route
-        if (typeof frappe !== 'undefined' && frappe.get_route) {
-            const r = frappe.get_route();
-            if (r && r[0] === 'Form') return true;
-            if (r && (r[0] === 'List' || r[0] === 'Workspaces' || r[0] === 'Tree' || r[0] === 'query-report' || r[0] === 'dashboard-view')) return false;
-        }
-
-        // 2. Check frappe get_route_str
-        if (typeof frappe !== 'undefined' && frappe.get_route_str) {
-            const rs = frappe.get_route_str();
-            if (rs && rs.indexOf('Form/') === 0) return true;
-            if (rs && (rs.indexOf('List/') === 0 || rs.indexOf('Workspaces/') === 0)) return false;
-        }
-
-        // 3. Check body data-route attribute
-        const bodyRoute = document.body ? document.body.getAttribute('data-route') : '';
-        if (bodyRoute && bodyRoute.indexOf('Form/') === 0) return true;
-        if (bodyRoute && (bodyRoute.indexOf('List/') === 0 || bodyRoute.indexOf('Workspaces/') === 0)) return false;
-
-        // 4. Check window location pathname / hash
-        const path = (window.location.pathname || '') + (window.location.hash || '');
-        const cleanPath = path.replace(/^[#/]+/, '');
-        const segments = cleanPath.split('/').filter(Boolean);
-        // Desk format: /app/:doctype/:name  e.g. ['app', 'todo', 'h44qvre6j']
-        if (segments.length >= 3 && segments[0] === 'app') {
-            const seg2 = segments[2].toLowerCase();
-            if (seg2 !== 'view' && seg2 !== 'list' && seg2 !== 'report' && seg2 !== 'dashboard') {
-                return true;
-            }
-        }
-
-        // 5. Check cur_frm
-        if (typeof cur_frm !== 'undefined' && cur_frm && cur_frm.docname) return true;
-
-        // 6. Check DOM for form actions / layout
-        if (document.querySelector('.page-container[data-page-route^="Form"], .form-page:not(.hide), .form-layout, .page-head [data-label="Save"], .page-head .primary-action, .form-tabs-list')) {
-            if (!document.querySelector('.frappe-list, .workspace-page, .report-view')) return true;
-        }
-
-        return false;
-    }
-
-    // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed full-width, arrow only)
-    function initTitleToggle() {
-        if (!isDocView()) {
-            // Remove any expand/collapse buttons from List views, Workspaces, Reports
-            document.querySelectorAll('.eb-title-toggle-btn').forEach(b => b.remove());
-            document.querySelectorAll('.title-area, .page-title').forEach(el => {
-                el.classList.remove('eb-title-expanded');
-                delete el.dataset.ebExpanded;
-            });
-            document.querySelectorAll('.page-head:not(.eb-doc-head) .title-text').forEach(t => {
-                t.style.removeProperty('max-width');
-                t.style.removeProperty('white-space');
-                t.style.removeProperty('overflow');
-                t.style.removeProperty('text-overflow');
-                t.style.removeProperty('word-break');
-            });
-            return;
-        }
-
-        const titleElements = document.querySelectorAll('.page-head .title-text');
-        titleElements.forEach(titleText => {
-            const head = titleText.closest('.page-head');
-            if (head) head.classList.add('eb-doc-head');
-
-            const area = titleText.closest('.title-area') || titleText.closest('.page-title');
-            if (!area) return;
-
-            // Enforce collapsed single-line default immediately
-            if (!area.dataset.ebExpanded) {
-                area.classList.remove('eb-title-expanded');
-                titleText.style.setProperty('white-space', 'nowrap', 'important');
-                titleText.style.setProperty('overflow', 'hidden', 'important');
-                titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                titleText.style.setProperty('min-width', '0', 'important');
-                titleText.style.setProperty('visibility', 'visible', 'important');
-                titleText.style.setProperty('opacity', '1', 'important');
-                titleText.style.setProperty('cursor', 'default', 'important');
-            }
-
-            if (area.querySelector('.eb-title-toggle-btn')) {
-                const existingBtn = area.querySelector('.eb-title-toggle-btn');
-                if (!area.classList.contains('eb-title-expanded')) {
-                    existingBtn.innerHTML = '<span class="eb-arrow">↔</span>';
-                    existingBtn.title = 'Expand';
-                    titleText.style.setProperty('white-space', 'nowrap', 'important');
-                    titleText.style.setProperty('overflow', 'hidden', 'important');
-                    titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                    titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                } else {
-                    existingBtn.innerHTML = '<span class="eb-arrow">▲</span>';
-                    existingBtn.title = 'Collapse';
-                    titleText.style.setProperty('white-space', 'normal', 'important');
-                    titleText.style.setProperty('word-break', 'break-word', 'important');
-                    titleText.style.setProperty('overflow-y', 'auto', 'important');
-                    titleText.style.setProperty('max-width', '100%', 'important');
-                }
-                return;
-            }
-
-            const textContent = (titleText.textContent || '').trim();
-            // Only add toggle button for long titles in document forms
-            if (textContent.length > 25) {
-                const toggle = document.createElement('span');
-                toggle.className = 'eb-title-toggle-btn';
-                toggle.title = 'Expand';
-                toggle.innerHTML = '<span class="eb-arrow">↔</span>';
-
-                function toggleState(e) {
-                    if (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                    const isExp = area.classList.toggle('eb-title-expanded');
-                    if (isExp) {
-                        area.dataset.ebExpanded = '1';
-                        titleText.style.setProperty('white-space', 'normal', 'important');
-                        titleText.style.setProperty('word-break', 'break-word', 'important');
-                        titleText.style.setProperty('overflow-y', 'auto', 'important');
-                        titleText.style.setProperty('max-width', '100%', 'important');
-                        toggle.innerHTML = '<span class="eb-arrow">▲</span>';
-                        toggle.title = 'Collapse';
-                    } else {
-                        delete area.dataset.ebExpanded;
-                        titleText.style.setProperty('white-space', 'nowrap', 'important');
-                        titleText.style.setProperty('overflow', 'hidden', 'important');
-                        titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                        titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                        toggle.innerHTML = '<span class="eb-arrow">↔</span>';
-                        toggle.title = 'Expand';
-                    }
-                    if (window.updateDocTabsStickyTop) {
-                        setTimeout(window.updateDocTabsStickyTop, 50);
-                    }
-                }
-
-                // ONLY expand or collapse when clicking the toggle button
-                toggle.addEventListener('click', toggleState);
-
-                titleText.parentNode.insertBefore(toggle, titleText.nextSibling);
-            }
-        });
-    }
-
-    window.initTitleToggle = initTitleToggle;
-
-    // Reset expanded state on document/page change so new doc always opens collapsed
-    $(document).on('page-change router:change', function () {
-        document.querySelectorAll('.title-area, .page-title').forEach(function(el) {
-            delete el.dataset.ebExpanded;
-            el.classList.remove('eb-title-expanded');
-        });
-    });
-
-    $(document).on('page-change form-refresh form_refresh router:change', function () {
-        setTimeout(initTitleToggle, 100);
-        setTimeout(initTitleToggle, 300);
-        setTimeout(initTitleToggle, 800);
-    });
 }
 
 if (typeof frappe !== 'undefined' && frappe.ready) {
