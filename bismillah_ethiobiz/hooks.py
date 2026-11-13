@@ -4,7 +4,7 @@ EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
 
 Static theme deployment for EthioBiz ERPNext ecosystem.
-© 2025 EthioBiz | Powered by Biz Technology Solutions
+Â© 2025 EthioBiz | Powered by Biz Technology Solutions
 """
 
 from __future__ import unicode_literals
@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -51,24 +51,25 @@ app_include_css = [
 # JS included in desk (backend)
 app_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
-    "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js?v=2.0.0",
+    "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_analytics.js?v=1.0.0"
 ]
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
-    "/assets/bismillah_ethiobiz/css/magala_shop.css",
+    "/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.6.0",
     "/assets/bismillah_ethiobiz/css/ethiobiz_map.css",
 ]
 
@@ -76,15 +77,16 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.2.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.3.0",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
-    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.1.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_analytics.js?v=1.0.0",
 ]
 
 # ============================================
@@ -135,6 +137,10 @@ on_session_creation = [
 
 # Force Context Update
 update_website_context = "bismillah_ethiobiz.api.update_website_context"
+
+# Guest-safe webshop cart (prevents HTTP 500 on /cart for visitors without a
+# Customer party). See bismillah_ethiobiz/webshop_guest_cart.py.
+before_request = ["bismillah_ethiobiz.webshop_guest_cart.apply"]
 
 # ============================================
 # DOC EVENTS

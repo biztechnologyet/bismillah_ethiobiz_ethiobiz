@@ -1,0 +1,321 @@
+{
+ "charts": [
+  {
+   "chart_name": "Active Properties",
+   "label": "Active Properties",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Available Units",
+   "label": "Available Units",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Pending Applications",
+   "label": "Pending Applications",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Monthly Revenue",
+   "label": "Monthly Revenue (ETB)",
+   "type": "Number"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"🏠 Property Overview\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Properties\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Available Units\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pending Applications\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Monthly Revenue\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🏢 Property Management\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Property\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Property Unit\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lease\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open BizHome Website\",\"col\":3,\"type\":\"URL\",\"url\":\"https://ethiobiz.et/bizhome\"}},{\"type\":\"header\",\"data\":{\"text\":\"👥 Tenant Management\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tenant\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tenant Ledger\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tenant Exit\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rent Agreement\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🏨 Hotel Operations\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Room\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Room Booking\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Folio\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Guest\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"💰 Billing & Revenue\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rent Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Invoice\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🔧 Maintenance & Services\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Visit\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Ticket\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"⚙️ Settings & Configuration\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Company\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contact\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Address\",\"col\":3}}]",
+ "creation": "2026-09-03 17:45:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "BizHome",
+ "links": [
+  {
+   "label": "Property Management",
+   "type": "Card Break"
+  },
+  {
+   "label": "Property",
+   "link_to": "Property",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Property Unit",
+   "link_to": "Property Unit",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Lease",
+   "link_to": "Lease",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Tenant Management",
+   "type": "Card Break"
+  },
+  {
+   "label": "Tenant",
+   "link_to": "Tenant",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Tenant Ledger",
+   "link_to": "Tenant Ledger",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Tenant Exit",
+   "link_to": "Tenant Exit",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Rent Agreement",
+   "link_to": "Rent Agreement",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Hotel Operations",
+   "type": "Card Break"
+  },
+  {
+   "label": "Room",
+   "link_to": "Room",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Room Booking",
+   "link_to": "Room Booking",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Folio",
+   "link_to": "Folio",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Guest",
+   "link_to": "Guest",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Billing & Revenue",
+   "type": "Card Break"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Maintenance & Services",
+   "type": "Card Break"
+  },
+  {
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Maintenance Visit",
+   "link_to": "Maintenance Visit",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Work Order",
+   "link_to": "Work Order",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Settings & Configuration",
+   "type": "Card Break"
+  },
+  {
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Contact",
+   "link_to": "Contact",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Address",
+   "link_to": "Address",
+   "link_type": "DocType",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-09-03 17:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizHome",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Property",
+   "label": "Active Properties",
+   "filters": [
+    ["status", "=", "Active"]
+   ]
+  },
+  {
+   "document_type": "Property Unit",
+   "label": "Available Units",
+   "filters": [
+    ["status", "=", "Available"]
+   ]
+  },
+  {
+   "document_type": "Lease",
+   "label": "Pending Applications",
+   "filters": [
+    ["status", "=", "Pending"]
+   ]
+  },
+  {
+   "document_type": "Room Booking",
+   "label": "Today's Bookings",
+   "filters": [
+    ["arrival_date", "=", "Today"]
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Property Manager"
+  },
+  {
+   "role": "Hotel Manager"
+  },
+  {
+   "role": "Maintenance Manager"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Property",
+   "link_to": "Property",
+   "stats_filter": "[[\"Property\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Property Unit",
+   "link_to": "Property Unit",
+   "stats_filter": "[[\"Property Unit\",\"status\",\"=\",\"Available\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Lease",
+   "link_to": "Lease",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Tenant",
+   "link_to": "Tenant",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Tenant Ledger",
+   "link_to": "Tenant Ledger",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Room",
+   "link_to": "Room",
+   "stats_filter": "[[\"Room\",\"status\",\"=\",\"Available\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Teal",
+   "doc_view": "List",
+   "label": "Room Booking",
+   "link_to": "Room Booking",
+   "stats_filter": "[[\"Room Booking\",\"arrival_date\",\"=\",TODAY(),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Folio",
+   "link_to": "Folio",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "stats_filter": "[[\"Maintenance Request\",\"status\",\"=\",\"Open\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Brown",
+   "doc_view": "List",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "stats_filter": "[[\"Sales Invoice\",\"posting_date\",\"=\",TODAY(),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Magenta",
+   "doc_view": "List",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Lime",
+   "label": "Open BizHome Website",
+   "type": "URL",
+   "url": "https://ethiobiz.et/bizhome"
+  }
+ ],
+ "title": "BizHome"
+}

@@ -1,0 +1,51 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Doctor Profile | EthioBiz Health{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/biz_verticals.css?v=4.0.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.1.0" />
+<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.1"></script>
+<script src="/assets/bismillah_ethiobiz/js/doctor_detail.js?v=1.0.0" defer></script>
+<script>window.DOCTOR_SLUG = {{ (frappe.form_dict.slug or "") | tojson }};</script>
+
+<div class="vertical-portal-wrapper">
+    <section class="dd-header">
+        <div id="dd-doctor-card" style="text-align:center; padding:24px 0;">
+            <div style="color:#94a3b8;">Loading doctor profile…</div>
+        </div>
+    </section>
+
+    <main class="container-fluid px-lg-4 py-4" style="max-width:900px;">
+        <div class="dd-section" id="dd-about">
+            <h4 class="section-title" style="margin-bottom:10px;">About</h4>
+            <div style="color:#475569; font-size:0.92rem; line-height:1.55;" id="dd-about-text">Loading…</div>
+        </div>
+
+        <div class="dd-section" id="dd-modes" style="margin-top:20px;">
+            <h4 class="section-title" style="margin-bottom:10px;">Consultation Modes</h4>
+            <div id="dd-modes-chips"></div>
+        </div>
+
+        <div class="dd-section" style="margin-top:20px;">
+            <h4 class="section-title" style="margin-bottom:10px;">See Real Availability</h4>
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <input type="date" id="dd-date" class="form-control-custom" style="max-width:220px;" />
+                <button id="dd-refresh" class="btn-vertical-primary" style="background:var(--vert-health); border-radius:12px;">Load Slots</button>
+            </div>
+            <div id="dd-slots" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;">
+                <span style="color:#94a3b8; font-size:0.85rem;">Select a date to load real appointment slots.</span>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:28px;">
+            <a id="dd-book-cta" href="/bizhealth" class="btn-vertical-primary" style="background:var(--vert-health); border-radius:14px; padding:14px 32px; font-size:1rem; display:inline-block;">
+                Book Appointment ➔
+            </a>
+            <div style="margin-top:10px;">
+                <a href="/bizhealth" style="color:#0d9488; font-weight:700; font-size:0.85rem;">← Back to doctor directory</a>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends "templates/web.html" %}
+﻿{% extends "templates/web.html" %}
 
 {% block title %}Magala Marketplace & Supermarket | EthioBiz.ET{% endblock %}
 
@@ -6,11 +6,11 @@
 {% endblock %}
 
 {% block page_content %}
-<!-- BISMALLAH DIKKA SHOP & MAGALA MARKETPLACE -->
+<!-- BISMALLAH DIKKO SHOP & MAGALA MARKETPLACE -->
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/leaflet.css?v=1.9.4" />
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/MarkerCluster.css?v=1.5.3" />
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/MarkerCluster.Default.css?v=1.5.3" />
-<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.5.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.6.0" />
 
 <div class="magala-shop-container">
     <!-- HERO / SEARCH BAR -->
@@ -141,12 +141,13 @@
 </div>
 
 <!-- FLOATING CART DRAWER -->
-<div id="magala-cart-drawer" class="cart-drawer">
+<div id="cart-drawer-backdrop" class="cart-drawer-backdrop" aria-hidden="true"></div>
+<div id="magala-cart-drawer" class="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" aria-hidden="true">
     <div class="cart-drawer-header">
         <h3>🛒 Shopping Cart (<span id="cart-drawer-count">0</span>)</h3>
-        <button id="close-cart-drawer" class="btn-close">✕</button>
+        <button type="button" id="close-cart-drawer" class="btn-close" aria-label="Close shopping cart">✕</button>
     </div>
-    <div id="cart-drawer-items" class="cart-drawer-body">
+    <div id="cart-drawer-items" class="cart-drawer-body" aria-live="polite">
         <p class="empty-cart-msg">Your cart is empty. Explore items to add!</p>
     </div>
     <div class="cart-drawer-footer">
@@ -258,11 +259,9 @@
 </div>
 
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
-<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=2.2.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=2.7.0"></script>
 
 <script src="/assets/bismillah_ethiobiz/js/leaflet.js?v=1.9.4"></script>
 <script src="/assets/bismillah_ethiobiz/js/leaflet.markercluster.js?v=1.5.3"></script>
-<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
-<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=2.5.0"></script>
 
 {% endblock %}

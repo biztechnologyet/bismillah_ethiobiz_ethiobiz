@@ -1,0 +1,19 @@
+{
+  "name": "BizBooking Provider Config",
+  "module": "EthioBiz Theme",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "autoname": "format:PROV-{####}",
+  "title_field": "provider_name",
+  "fields": [
+    {"fieldname": "provider_doctype", "fieldtype": "Select", "label": "Provider DocType", "options": "Practitioner\nSalon Stylist\nAgent\nUser", "reqd": 1},
+    {"fieldname": "provider_name", "fieldtype": "Data", "label": "Provider Name", "reqd": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "service", "fieldtype": "Link", "label": "Service", "options": "BizBookable Service"},
+    {"fieldname": "duration_override", "fieldtype": "Int", "label": "Duration Override (min)"},
+    {"fieldname": "price_override", "fieldtype": "Currency", "label": "Price Override (ETB)"},
+    {"fieldname": "max_per_day", "fieldtype": "Int", "label": "Max Bookings per Day", "default": 0},
+    {"fieldname": "auto_confirm", "fieldtype": "Check", "label": "Auto-Confirm Bookings"}
+  ],
+  "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}]
+}

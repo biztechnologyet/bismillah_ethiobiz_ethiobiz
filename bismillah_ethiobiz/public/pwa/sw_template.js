@@ -12,7 +12,7 @@
 
 var VERSION = "__CACHE_VERSION__";
 var CACHE = "dobiz-pwa-v" + VERSION;
-var NAV_TIMEOUT_MS = 8000; // hard cap for network-first so pages never "stuck"
+var NAV_TIMEOUT_MS = 8000; // offline fallback only when the browser is actually offline
 var OFFLINE_URL = "__OFFLINE_URL__";
 var OFFLINE_TITLE = "__OFFLINE_TITLE__";
 var OFFLINE_MESSAGE = "__OFFLINE_MESSAGE__";
@@ -100,17 +100,24 @@ self.addEventListener("activate", function (event) {
     );
 });
 
+function offlineFallback(request) {
+    return caches.match(request).then(function (page) {
+        return page || caches.match(OFFLINE_URL);
+    }).then(function (fallback) {
+        return fallback || offlinePage();
+    });
+}
+
 function raceTimeout(fetchPromise, request, ms) {
     return new Promise(function (resolve) {
         var settled = false;
         var timer = setTimeout(function () {
-            if (!settled) {
+            // A slow response is not the same thing as being offline. Only
+            // use the offline fallback when the browser actually lost its
+            // connection. HTTP 4xx/5xx responses are never replaced here.
+            if (!settled && typeof navigator !== "undefined" && navigator.onLine === false) {
                 settled = true;
-                caches.match(request).then(function (page) {
-                    return page || caches.match(OFFLINE_URL);
-                }).then(function (fallback) {
-                    resolve(fallback || offlinePage());
-                });
+                offlineFallback(request).then(resolve);
             }
         }, ms);
         fetchPromise.then(function (resp) {
@@ -123,11 +130,7 @@ function raceTimeout(fetchPromise, request, ms) {
             if (!settled) {
                 settled = true;
                 clearTimeout(timer);
-                caches.match(request).then(function (page) {
-                    return page || caches.match(OFFLINE_URL);
-                }).then(function (fallback) {
-                    resolve(fallback || offlinePage());
-                });
+                offlineFallback(request).then(resolve);
             }
         });
     });

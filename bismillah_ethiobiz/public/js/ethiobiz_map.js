@@ -49,13 +49,13 @@
                 });
 
                 const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-                    attribution: "Tiles &copy; Esri &mdash; EthioBiz.ET",
+                    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP | EthioBiz.ET",
                     maxZoom: 19
                 });
 
                 // Pristine Clean Light basemap (Esri Light Gray Canvas - 100% free, no API key required)
                 const cleanLightLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-                    attribution: "Tiles &copy; Esri &mdash; EthioBiz.ET",
+                    attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ | EthioBiz.ET",
                     maxZoom: 19
                 });
 
@@ -301,26 +301,29 @@
                         if (userGpsMarker) map.removeLayer(userGpsMarker);
                         if (userGpsCircle) map.removeLayer(userGpsCircle);
 
-                        userGpsMarker = L.circleMarker([lat, lng], {
-                            radius: 8,
-                            fillColor: "#2563eb",
-                            color: "#ffffff",
-                            weight: 3,
-                            opacity: 1,
-                            fillOpacity: 1
-                        }).addTo(map);
-                        userGpsMarker.bindPopup("<strong>You are here</strong>");
+                        const gpsIcon = L.divIcon({
+                            className: "user-gps-pulse-pin",
+                            html: '<div class="pulse-ring"></div><div class="pulse-core"></div>',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        });
+
+                        userGpsMarker = L.marker([lat, lng], { icon: gpsIcon })
+                            .addTo(map)
+                            .bindPopup("<strong>📍 Your Current Location</strong><br><span style='font-size:0.8rem;color:#64748b;'>Accuracy: ~" + Math.round(accuracy || 0) + "m</span>");
 
                         userGpsCircle = L.circle([lat, lng], {
-                            radius: accuracy,
-                            fillColor: "#3b82f6",
-                            fillOpacity: 0.15,
-                            color: "#2563eb",
-                            weight: 1
+                            radius: Math.max(accuracy || 50, 100),
+                            fillColor: "#0d9488",
+                            color: "#0d9488",
+                            weight: 1,
+                            opacity: 0.4,
+                            fillOpacity: 0.15
                         }).addTo(map);
 
                         if (animate) {
-                            map.flyTo([lat, lng], 14, { duration: 1.5 });
+                            map.flyTo([lat, lng], 14, { duration: 1.2 });
+                            userGpsMarker.openPopup();
                         }
                     }
 
@@ -429,18 +432,12 @@
                 card.innerHTML = 
                     '<img src="' + (comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png') + '" alt="' + displayName + '" class="comp-card-thumb" onerror="this.src=\'/assets/bismillah_ethiobiz/img/walta_real_logo.png\'" />' +
                     '<div class="comp-card-info">' +
-                        '<div class="comp-card-name-row">' +
-                            '<h4 class="comp-card-title">' + displayName + '</h4>' +
-                            branchBadgeHtml +
-                        '</div>' +
-                        '<div class="comp-card-meta">' +
-                            '<span class="badge-cat">' + (comp.category || 'Business') + '</span>' +
-                            '<span class="rating">⭐ ' + (comp.rating || '5.0') + '</span>' +
-                        '</div>' +
-                        '<p class="comp-card-address">📍 ' + (comp.address || 'Ethiopia') + '</p>' +
-                        '<div class="comp-card-actions">' +
-                            '<a href="/shop?company=' + encodeURIComponent(comp.company || comp.id) + '" class="btn-card-action primary">Visit Shop</a>' +
-                            '<a href="' + directionsUrl + '" target="_blank" rel="noopener" class="btn-card-action secondary">Directions</a>' +
+                        '<h4 class="comp-card-title">' + displayName + ' ' + branchBadgeHtml + '</h4>' +
+                        '<div class="comp-card-meta">' + (comp.category || 'Business') + ' • ⭐ ' + (comp.rating || '5.0') + '</div>' +
+                        '<p class="comp-card-meta">📍 ' + (comp.address || 'Ethiopia') + '</p>' +
+                        '<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">' +
+                            '<span class="comp-card-badge">🟢 Open</span>' +
+                            (comp.distance_km ? '<span style="font-size:0.75rem; color:#64748b;">• ' + comp.distance_km + ' km away</span>' : '') +
                         '</div>' +
                     '</div>';
 
@@ -458,11 +455,12 @@
                 // Add Leaflet Pin if map & Leaflet are loaded
                 let marker = null;
                 if (typeof L !== "undefined" && markers && map) {
+                    const pinColor = comp.pin_color || (isPrimary ? "#0d9488" : "#0284c7");
                     const customIcon = L.divIcon({
-                        className: "ethiobiz-custom-pin",
+                        className: "ethiobiz-map-pin",
                         html: 
-                            '<div style="position:relative; width:34px; height:34px;">' +
-                                '<div style="position:absolute; width:34px; height:34px; background:#0d9488; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #ffffff; box-shadow:0 3px 8px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;">' +
+                            '<div style="position:relative; width:34px; height:34px; transform:translate(-50%, -100%);">' +
+                                '<div style="width:34px; height:34px; border-radius:50% 50% 50% 0; background: linear-gradient(135deg, ' + pinColor + ' 0%, #0369a1 100%); transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.35); border:2px solid #ffffff;">' +
                                     '<span style="transform:rotate(45deg); font-size:14px;">📍</span>' +
                                 '</div>' +
                             '</div>',
@@ -520,35 +518,34 @@
 
             const directionsUrl = "https://www.google.com/maps/dir/?api=1&destination=" + comp.lat + "," + comp.lng;
 
-            body.innerHTML = 
-                '<div style="position:relative; margin-bottom:16px; border-radius:12px; overflow:hidden;">' +
-                    '<img src="' + (comp.banner || comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png') + '" alt="' + displayName + '" style="width:100%; height:160px; object-fit:cover;" onerror="this.src=\'/assets/bismillah_ethiobiz/img/walta_real_logo.png\'" />' +
-                '</div>' +
-                '<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">' +
-                    '<img src="' + (comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png') + '" alt="' + displayName + '" style="width:56px; height:56px; border-radius:12px; object-fit:cover; border:2px solid #e2e8f0;" onerror="this.src=\'/assets/bismillah_ethiobiz/img/walta_real_logo.png\'" />' +
-                    '<div>' +
-                        '<h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">' + displayName + '</h3>' +
-                        '<div style="font-size:0.82rem; color:#0d9488; font-weight:700; margin-top:3px;">' +
-                            (comp.category || 'Business') + ' ' + branchBadgeHtml +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<p style="font-size:0.88rem; color:#475569; line-height:1.5; margin-bottom:16px;">' +
-                    (comp.description || 'Verified enterprise operating on the EthioBiz Cloud Network in Ethiopia.') +
-                '</p>' +
-                '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:16px;">' +
-                    '<a href="/shop?company=' + encodeURIComponent(comp.company || comp.id) + '" class="btn-card-action primary" style="text-align:center; padding:10px; font-size:0.9rem;">' +
-                        '🏪 Open Shop' +
-                    '</a>' +
-                    '<a href="' + directionsUrl + '" target="_blank" rel="noopener" class="btn-card-action secondary" style="text-align:center; padding:10px; font-size:0.9rem;">' +
-                        '🧭 Directions' +
-                    '</a>' +
-                '</div>' +
-                '<div style="background:#f8fafc; padding:14px; border-radius:12px; font-size:0.88rem; border:1px solid #e2e8f0;">' +
-                    '<div style="margin-bottom:8px;"><strong>📍 Location:</strong> ' + (comp.address || 'Ethiopia') + '</div>' +
-                    '<div style="margin-bottom:8px;"><strong>🕒 Hours:</strong> ' + (comp.working_hours || 'Mon - Sat: 8:30 AM - 6:30 PM') + '</div>' +
-                    '<div><strong>🚚 Express Fulfillment:</strong> Available across regional hub</div>' +
-                '</div>';
+            body.innerHTML = `
+                <img src="${comp.banner || comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png'}" alt="${displayName}" style="width:100%; height:140px; object-fit:cover; border-radius:12px; margin-bottom:12px;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                    <img src="${comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png'}" alt="${displayName}" style="width:50px; height:50px; border-radius:10px; object-fit:cover; border:1px solid #e2e8f0;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
+                    <div>
+                        <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#0f172a;">${displayName}</h3>
+                        <div style="margin-top:2px;">
+                            <span style="font-size:0.85rem; color:#0d9488; font-weight:700;">✓ Verified EthioBiz Merchant</span>
+                            ${branchBadgeHtml}
+                        </div>
+                    </div>
+                </div>
+                <p style="color:#64748b; font-size:0.9rem; line-height:1.5;">${comp.description || 'Welcome to our verified storefront on EthioBiz. Explore our catalog, book appointments, and request express delivery.'}</p>
+                <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0;" />
+                
+                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:16px;">
+                    <a href="${directionsUrl}" target="_blank" rel="noopener" style="text-align:center; background:#0284c7; color:#fff !important; padding:10px; border-radius:10px; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px;">🧭 Directions</a>
+                    <a href="tel:${comp.phone || '+251911000000'}" style="text-align:center; background:#0d9488; color:#fff !important; padding:10px; border-radius:10px; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px;">📞 Call Direct</a>
+                    <a href="/shop?company=${encodeURIComponent(comp.company || comp.id)}" style="text-align:center; background:#f1f5f9; color:#1e293b; padding:10px; border-radius:10px; font-weight:700; text-decoration:none;">🛒 Shop Store</a>
+                    <a href="/bizservice?provider=${encodeURIComponent(comp.company || comp.id)}" style="text-align:center; background:#f1f5f9; color:#1e293b; padding:10px; border-radius:10px; font-weight:700; text-decoration:none;">📅 Book Service</a>
+                </div>
+
+                <div style="background:#f8fafc; padding:14px; border-radius:12px; font-size:0.88rem; border:1px solid #e2e8f0;">
+                    <div style="margin-bottom:8px;"><strong>📍 Location:</strong> ${comp.address || 'Ethiopia'}</div>
+                    <div style="margin-bottom:8px;"><strong>🕒 Hours:</strong> ${comp.working_hours || 'Mon - Sat: 8:30 AM - 6:30 PM'}</div>
+                    <div><strong>🚚 Express Fulfillment:</strong> Available across regional hub</div>
+                </div>
+            `;
 
             dossier.style.display = "flex";
             if (map) map.setView([comp.lat, comp.lng], 16);

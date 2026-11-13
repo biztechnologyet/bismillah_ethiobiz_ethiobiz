@@ -12,10 +12,33 @@ Directly interfaces with:
 
 import frappe
 from frappe import _
-from frappe.utils import today, add_days, getdate, flt, cint
+from frappe.utils import today, add_days, getdate, flt, cint, cstr
+try:
+    from bismillah_ethiobiz.ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
+except ImportError:
+    from ethiobiz_identity import require_authed_customer, resolve_booking_company, session_contact_defaults, resolve_or_create_customer, resolve_or_create_patient, resolve_booking_customer
+
+
+def _norm_time(raw):
+    """Normalize a time string for equality/storage comparisons.
+
+    '09:00 AM' -> '09:00', '02:00 PM' -> '14:00', '02:00:00' -> '02:00'.
+    """
+    import re
+    s = re.sub(r"[^0-9:APMapm ]", "", cstr(raw or ""))
+    s = s.strip().upper()
+    m = re.match(r"^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$", s)
+    if not m:
+        return cstr(raw or "").strip()[:5]
+    h, mm, suf = int(m.group(1)), m.group(2), m.group(3)
+    if suf == "PM" and h != 12:
+        h += 12
+    if suf == "AM" and h == 12:
+        h = 0
+    return f"{h:02d}:{mm}"
 
 # ==============================================================================
-# 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING (PRACTO-GRADE)
+# 1. HEALTHCARE & PRACTITIONER CLINICAL BOOKING
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=True)
@@ -25,6 +48,13 @@ def search_practitioners(specialty=None, region=None, availability=None,
     """Search healthcare practitioners with specialty, location, rating & fee filters."""
     conditions = ["(p.status != 'Disabled' OR p.status IS NULL)"]
     values = {}
+
+    # Publish toggle: only show practitioners that are not unpublished
+    try:
+        if frappe.db.has_column("Healthcare Practitioner", "is_active"):
+            conditions.append("(p.is_active = 1 OR p.is_active IS NULL)")
+    except Exception:
+        pass
 
     if specialty and specialty.strip():
         conditions.append("(p.department = %(specialty)s)")
@@ -94,19 +124,20 @@ def get_available_slots(practitioner, date=None, service_type="In-Clinic"):
         "05:00 PM", "05:30 PM"
     ]
 
-    # Query already booked appointments
-    booked = []
+    # Query already booked appointments (normalized 24h comparison, AM/PM-safe)
+    booked_set = set()
     if frappe.db.exists("DocType", "Patient Appointment"):
         booked = frappe.db.sql_list("""
             SELECT appointment_time FROM `tabPatient Appointment`
             WHERE practitioner = %s AND appointment_date = %s AND status NOT IN ('Cancelled', 'Closed')
         """, (practitioner, date))
+        booked_set = {_norm_time(t) for t in booked}
 
     available = []
     for s in all_slots:
         available.append({
             "slot": s,
-            "is_available": (s not in booked)
+            "is_available": (_norm_time(s) not in booked_set)
         })
 
     return {
@@ -118,54 +149,58 @@ def get_available_slots(practitioner, date=None, service_type="In-Clinic"):
     }
 
 
-@frappe.whitelist()
-def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
+@frappe.whitelist(allow_guest=True)
+def create_appointment(practitioner=None, date=None, time_slot=None, service_type="In-Clinic",
                        patient_name=None, patient_phone=None, symptoms=None,
-                       book_for="Self", attachments=None):
+                       book_for="Self", attachments=None, **kwargs):
     """
-    Creates real Patient and Patient Appointment in Healthcare Desk.
+    Creates real Patient, User, Customer and Patient Appointment in Healthcare Desk.
+    BISMALLAH: Fully registers User, Customer, and Patient per industry requirements.
     """
-    user = frappe.session.user
-    if not patient_name and user != "Guest":
-        patient_name = frappe.db.get_value("User", user, "full_name") or user
-    if not patient_phone and user != "Guest":
-        patient_phone = frappe.db.get_value("User", user, "mobile_no") or "0911000000"
+    try:
+        from bismillah_ethiobiz import ethiobiz_identity
+    except ImportError:
+        import ethiobiz_identity
 
+    practitioner = practitioner or kwargs.get("doctor") or kwargs.get("doctor_id") or "HLC-PRAC-2026-00001"
+    date = date or kwargs.get("appointment_date") or str(today())
+    time_slot = time_slot or kwargs.get("appointment_time") or kwargs.get("time") or "10:00"
+    time_slot = _norm_time(time_slot)  # store uniformly as 24h HH:MM
+    patient_name = patient_name or kwargs.get("customer_name") or kwargs.get("name") or kwargs.get("full_name")
+    patient_phone = patient_phone or kwargs.get("customer_phone") or kwargs.get("phone") or kwargs.get("mobile")
+    email = kwargs.get("customer_email") or kwargs.get("email") or kwargs.get("patient_email")
+    
     if not patient_name or not patient_phone:
         frappe.throw("Patient Name and Phone Number are mandatory")
 
-    # Get or create Patient
-    patient = None
-    if frappe.db.exists("Patient", {"mobile": patient_phone}):
-        patient = frappe.db.get_value("Patient", {"mobile": patient_phone}, "name")
-    elif frappe.db.exists("Patient", {"patient_name": patient_name}):
-        patient = frappe.db.get_value("Patient", {"patient_name": patient_name}, "name")
-    else:
-        p_doc = frappe.get_doc({
-            "doctype": "Patient",
-            "patient_name": patient_name,
-            "mobile": patient_phone,
-            "sex": "Female" if "w/ro" in patient_name.lower() else "Male"
-        })
-        p_doc.insert(ignore_permissions=True)
-        patient = p_doc.name
+    # BISMALLAH: Resolve or register User, Customer and Patient
+    party = ethiobiz_identity.ensure_registered_party(full_name=patient_name, phone=patient_phone, email=email, party_type="Patient")
+    customer = party["customer"]
+    patient = party["patient"]
+    user = party["user"]
 
     # Create Patient Appointment in Desk
-    fee = frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0
-    comp = frappe.db.get_value("Healthcare Practitioner", practitioner, "company") or "Biz Technology Solutions"
-
+    fee = flt(frappe.db.get_value("Healthcare Practitioner", practitioner, "consultation_fee") or 1000.0)
+    comp = frappe.db.get_value("Healthcare Practitioner", practitioner, "company")
+    if not comp or not frappe.db.exists("Company", comp):
+        comp = frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+    dept = frappe.db.get_value("Healthcare Practitioner", practitioner, "department")
     appt = frappe.get_doc({
         "doctype": "Patient Appointment",
         "patient": patient,
+        "appointment_for": "Practitioner",
         "practitioner": practitioner,
+        "department": dept,
         "appointment_date": date,
         "appointment_time": time_slot,
         "appointment_type": service_type,
         "company": comp,
         "paid_amount": fee,
-        "notes": f"Symptoms: {symptoms or 'General Checkup'} | Booked for: {book_for}",
-        "status": "Scheduled" if frappe.db.exists("DocType", "Patient Appointment") else "Open"
+        "notes": f"Symptoms: {symptoms or 'General Checkup'} | Booked for: {book_for} | Customer: {customer}",
+        "status": "Scheduled" if frappe.db.exists("DocType", "Patient Appointment") else "Open",
+        "customer": customer  # BISMALLAH: Link to customer
     })
+    appt.flags.ignore_mandatory = True
     appt.insert(ignore_permissions=True)
 
     return {
@@ -180,7 +215,7 @@ def create_appointment(practitioner, date, time_slot, service_type="In-Clinic",
 
 
 # ==============================================================================
-# 2. HOTEL & PROPERTY HOSPITALITY BOOKING (OYOROOMS-GRADE)
+# 2. HOTEL & PROPERTY HOSPITALITY BOOKING
 # ==============================================================================
 
 @frappe.whitelist(allow_guest=True)
@@ -243,7 +278,13 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
               special_requests=None, payment_method="Pay at Hotel"):
     """
     Creates real Room Booking, Guest Profile, and Folio in PropMS Desk.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding.
     """
+    from bismillah_ethiobiz import ethiobiz_identity
+    
+    # Require login and get customer
+    customer = ethiobiz_identity.require_authed_customer("Please log in to book rooms")
+    
     user = frappe.session.user
     if not guest_name and user != "Guest":
         guest_name = frappe.db.get_value("User", user, "full_name") or user
@@ -253,6 +294,9 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
     nights = max(1, frappe.utils.date_diff(check_out, check_in)) if check_in and check_out else 1
     rate = 2500.0
     total_amount = rate * nights * int(rooms)
+    
+    # BISMALLAH: Validate company exists
+    company = ethiobiz_identity.resolve_booking_company(company, "room booking")
 
     booking_id = None
     if frappe.db.exists("DocType", "Room Booking"):
@@ -294,27 +338,68 @@ def book_room(company, room_type, check_in, check_out, guest_name=None,
 @frappe.whitelist(allow_guest=True)
 def search_services(category=None, region=None, query=None,
                     min_price=None, max_price=None, min_rating=None,
-                    availability=None, page=1, limit=20):
-    """Returns universal service listings (Salons, Technicians, Home Services, Legal)."""
+                    availability=None, page=1, limit=20, sort_by=None):
+    """Returns universal service listings (Salons, Technicians, Home Services, Legal).
+
+    Server-side filters: category, region/city, keyword, fee range and rating floor.
+    sort_by supports price_asc | price_desc | rating. Only listings with
+    is_active=1 are returned (publish toggle).
+    """
     if not frappe.db.exists("DocType", "BizService Listing"):
         return {"status": "success", "total": 0, "services": []}
 
-    filters = {"is_active": 1}
-    if category and category != "all":
-        filters["category"] = category
+    filters = [["is_active", "=", 1]]
+    if category and str(category) != "all":
+        filters.append(["category", "=", category])
+    q = str(query or "").strip()
+    if q:
+        filters.append(["service_name", "like", f"%{q}%"])
+    if region and str(region).strip().lower() not in ("", "all"):
+        filters.append(["serving_city", "like", f"%{str(region).strip()}%"])
+    if min_price is not None and str(min_price) != "":
+        filters.append(["price", ">=", flt(min_price)])
+    if max_price is not None and str(max_price) != "":
+        filters.append(["price", "<=", flt(max_price)])
+    if min_rating and str(min_rating) != "":
+        filters.append(["average_rating", ">=", flt(min_rating)])
+
+    order_by = "service_name asc"
+    if sort_by == "price_asc":
+        order_by = "price asc"
+    elif sort_by == "price_desc":
+        order_by = "price desc"
+    elif sort_by == "rating":
+        order_by = "average_rating desc"
+
+    page = max(1, cint(page))
+    limit = min(200, max(1, cint(limit)))
 
     services = frappe.get_all(
         "BizService Listing",
         filters=filters,
-        fields=["name", "service_name", "company", "category", "price", "duration_minutes", "requires_travel", "average_rating", "total_bookings", "slug"],
-        limit=limit
+        fields=["name", "service_name", "company", "category", "price", "duration_minutes",
+                "requires_travel", "average_rating", "total_bookings", "slug",
+                "currency", "price_type", "serving_city", "serving_region"],
+        order_by=order_by,
+        limit_page_length=limit,
+        start=(page - 1) * limit,
     )
 
     for s in services:
         s["title"] = s.get("service_name") or s.get("name")
-        s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} ETB"
-        s["company_name"] = frappe.db.get_value("Company", s["company"], "company_name") or s["company"]
+        s["formatted_price"] = f"{flt(s.get('price', 0.0)):,.2f} {s.get('currency') or 'ETB'}"
+        s["company_name"] = frappe.db.get_value("Company", s.get("company") or "", "company_name") or s.get("company")
         s["rating"] = flt(s.get("average_rating") or 4.9)
+        # practitioners is a child table, not a column; load rows and attach
+        try:
+            s["practitioners"] = frappe.get_all(
+                "BizService Practitioner",
+                filters={"parent": s["name"]},
+                fields=["name", "practitioner_name", "role_title", "user", "phone", "is_active"],
+                order_by="idx",
+            )
+        except Exception:
+            s["practitioners"] = []
 
     return {
         "status": "success",
@@ -323,25 +408,90 @@ def search_services(category=None, region=None, query=None,
     }
 
 
-@frappe.whitelist()
-def book_service(service_id, booking_date=None, booking_time=None, customer_name=None,
+@frappe.whitelist(allow_guest=True)
+def book_service(service_id=None, booking_date=None, booking_time=None, customer_name=None,
                  customer_phone=None, practitioner=None, notes=None,
-                 address=None, date=None, time_slot=None):
-    """Creates real BizService Booking and dispatches BizRide if requires_travel."""
+                 address=None, date=None, time_slot=None, service_name=None,
+                 appointment_date=None, appointment_time=None, customer_email=None, **kwargs):
+    """Creates real BizService Booking and dispatches BizRide if requires_travel.
+    BISMALLAH: Integrated with ethiobiz_identity for proper customer binding."""
+    service_id = service_id or service_name or kwargs.get("service")
+    if not service_id:
+        frappe.throw(_("Service ID is required"))
+    b_date = booking_date or date or appointment_date or str(frappe.utils.now_datetime().date())
+    b_time = booking_time or time_slot or appointment_time or "14:00"
+
+    # BISMALLAH (2026-09-10): login-gated; identity always from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone, customer_email)
+    customer = party["customer"]
+
     if not frappe.db.exists("DocType", "BizService Booking"):
         frappe.throw("BizService Booking module not installed")
 
     service_doc = frappe.get_doc("BizService Listing", service_id)
-    b_date = booking_date or date or str(frappe.utils.now_datetime().date())
-    b_time = booking_time or time_slot or "14:00"
+    provider_user = None
+
+    # Customer details come from the logged-in user's linked profile (no typing needed)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
+
+    # BISMALLAH (multi-company): resolve the booking company reliably. Prefer the
+    # listing's own company; fall back to BizService Settings > Global Defaults >
+    # a company owned by the provided service provider. This keeps BizService
+    # usable across many companies without a hard 417 on missing company.
+    company = getattr(service_doc, "company", None)
+    if not company or not frappe.db.exists("Company", company or "-"):
+        company = None
+    if not company:
+        try:
+            company = frappe.db.get_single_value("BizService Settings", "company")
+        except Exception:
+            company = None
+    if not company:
+        try:
+            company = frappe.defaults.get_global_default("company")
+        except Exception:
+            company = None
+    if not company:
+        try:
+            company = frappe.db.get_value("Company", {"is_default": 1}, "name")
+        except Exception:
+            company = None
+    if not company:
+        frappe.throw(_("No valid Company resolved for this service booking. Set the listing's Company or a default company."))
+    
+    # Validate company exists
+    company = resolve_booking_company(company, "service booking")
+
+    # BISMALLAH (Phase 6.5): enforce the provider/service-wise custom time slot.
+    # The chosen time must be in the resolved slot set (or rejected) so customers
+    # can only book times the provider actually offers for THIS service+provider.
+    try:
+        from bismillah_ethiobiz import bizservice_api
+        _sl = bizservice_api.validate_time_slot(
+            listing=service_id, date=b_date, time_slot=b_time, practitioner=practitioner
+        )
+        if _sl and _sl.get("status") == "success" and not _sl.get("valid"):
+            frappe.throw(
+                _("Requested time {0} is not available for this service on {1}. "
+                  "Available slots: {2}").format(
+                    b_time, b_date, ", ".join(_sl.get("valid_slots") or [])
+                )
+            )
+    except frappe.ValidationError:
+        raise
+    except Exception as _ve:
+        frappe.log_error(f"Slot validation skipped for {service_id} {b_time}: {_ve}", "BizService")
 
     b_doc = frappe.get_doc({
         "doctype": "BizService Booking",
-        "customer_name": customer_name or frappe.session.user,
-        "customer_phone": customer_phone or "0911000000",
+        "customer": customer,  # BISMALLAH: Link to authenticated customer
+        "customer_name": customer_name or customer,
+        "customer_phone": customer_phone or "",
         "service": service_id,
-        "company": service_doc.company,
+        "company": company,
         "practitioner_name": practitioner or "Standard Specialist",
+        "practitioner_user": practitioner if practitioner and frappe.db.exists("User", practitioner) else provider_user,
         "booking_date": b_date,
         "booking_time": b_time,
         "duration_minutes": service_doc.duration_minutes or 30,
@@ -352,6 +502,30 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
         "customer_notes": notes or ""
     })
     b_doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    # BISMALLAH (Phase 6.1.4): real BizRide dispatch when the listing requires travel.
+    # The docstring previously claimed dispatch but never executed it — now wired to the
+    # real dispatch engine (bizride_api.request_delivery) and the delivery linked back.
+    delivery_id = None
+    if getattr(service_doc, "requires_travel", 0):
+        try:
+            from bismillah_ethiobiz import bizride_api
+            _res = bizride_api.request_delivery(
+                order_reference=b_doc.name,
+                order_doctype="BizService Booking",
+                seller_company=service_doc.company,
+                delivery_address=address or "Addis Ababa",
+                buyer_name=customer_name or "Valued Customer",
+                buyer_phone=customer_phone or "0911000000",
+                vehicle_type="Motorcycle"
+            )
+            delivery_id = (_res or {}).get("delivery_id")
+            if delivery_id:
+                frappe.db.set_value("BizService Booking", b_doc.name, "bizride_delivery", delivery_id, update_modified=False)
+                frappe.db.commit()
+        except Exception as _be:
+            frappe.log_error(f"BizService BizRide dispatch failed for {b_doc.name}: {_be}", "BizService")
 
     return {
         "status": "success",
@@ -361,6 +535,98 @@ def book_service(service_id, booking_date=None, booking_time=None, customer_name
         "status_text": "Confirmed",
         "date": b_date,
         "time": b_time,
-        "amount": f"{flt(service_doc.price):,.2f} ETB"
+        "amount": f"{flt(service_doc.price):,.2f} ETB",
+        "bizride_delivery": delivery_id or ""
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_booking_catalog(category=None):
+    """Returns aggregated catalog of bookable services and items."""
+    cats = []
+    if frappe.db.exists("DocType", "BizService Category"):
+        cats = frappe.get_all("BizService Category", filters={"is_active": 1}, fields=["name", "category_name", "category_icon"])
+
+    srvs = search_services(category=category).get("services", [])
+    return {
+        "status": "success",
+        "categories": cats,
+        "services": srvs
+    }
+
+
+@frappe.whitelist()
+def create_unified_booking(booking_type=None, service_id=None, resource_id=None, practitioner=None, company=None, date=None, time_slot=None, customer_name=None, customer_phone=None, address=None, booking_date=None, **kwargs):
+    """Universal booking dispatcher across all verticals."""
+    s_id = service_id or resource_id
+    b_date = booking_date or date or str(frappe.utils.now_datetime().date())
+
+    # BISMALLAH (2026-09-10): login-gated; identity from the logged-in account
+    party = resolve_booking_customer(customer_name, customer_phone)
+    customer_name = party["full_name"]
+    customer_phone = party["phone"] or ""
+
+    # --- Salon bookings ---
+    if booking_type and booking_type.lower() == "salon":
+        if frappe.db.exists("DocType", "Salon Appointment"):
+            sa = frappe.get_doc({
+                "doctype": "Salon Appointment",
+                "customer_name": customer_name or party["customer"],
+                "customer_phone": customer_phone,
+                "appointment_date": b_date,
+                "appointment_time": time_slot or "10:00",
+                "status": "Confirmed"
+            })
+            sa.flags.ignore_mandatory = True
+            sa.insert(ignore_permissions=True)
+            frappe.db.commit()
+            return {"status": "success", "message": "Salon appointment booked!", "booking_id": sa.name, "date": b_date, "time": time_slot}
+        else:
+            frappe.throw("Salon Appointment module not installed")
+
+    # --- Healthcare bookings ---
+    if booking_type and booking_type.lower() == "healthcare" or (practitioner and not s_id):
+        return create_appointment(practitioner=practitioner, date=b_date, time_slot=time_slot, patient_name=customer_name, patient_phone=customer_phone)
+
+    # --- Hotel bookings ---
+    if booking_type and booking_type.lower() == "hotel":
+        return book_room(company=company, room_type=kwargs.get("room_type", "Standard"), check_in=b_date, check_out=kwargs.get("check_out", add_days(b_date, 1)), guest_name=customer_name, guest_phone=customer_phone)
+
+    # --- Default: BizService / maintenance bookings ---
+    if not s_id:
+        srvs = frappe.get_all("BizService Listing", filters={"is_active": 1}, limit=1)
+        if srvs:
+            s_id = srvs[0].name
+    return book_service(service_id=s_id, booking_date=b_date, booking_time=time_slot, customer_name=customer_name, customer_phone=customer_phone, practitioner=practitioner, address=address)
+
+
+@frappe.whitelist()
+def create_universal_booking(booking_data=None, **kwargs):
+    """
+    Universal booking dispatcher across all verticals.
+    Delegates to `bizbooking_aggregator_api.create_universal_booking`
+    (the canonical implementation) so a single source of truth is preserved,
+    while remaining backward-compatible for existing callers.
+    """
+    from .bizbooking_aggregator_api import create_universal_booking as _agg
+    return _agg(booking_data=booking_data, **kwargs)
+
+
+# ==============================================================================
+# BIZHEALTH CLINICAL & INSTITUTES EXPORTS
+# ==============================================================================
+try:
+    from .bizhealth_api import (
+        get_institutes,
+        get_institute_details,
+        get_clinical_services,
+        get_service_slots,
+        book_and_pay_service
+    )
+except ImportError:
+    pass
+
+
+
+
 

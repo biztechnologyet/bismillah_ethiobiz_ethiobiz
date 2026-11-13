@@ -346,6 +346,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'stream-card';
+                    card.setAttribute('data-track-type', item.type || 'feed');
+                    card.setAttribute('data-track-id', item.id || item.title || item.name || '');
+                    card.setAttribute('data-track-category', (item.category || item.badge || '').replace(/[^A-Za-z0-9 _-]/g, ''));
+                    card.setAttribute('data-track-company', item.company || '');
 
                     let mediaHtml = '';
                     if (item.image && !item.image.includes('default-avatar')) {
@@ -415,4 +419,5 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchFeedBatch(true);
 });
 </script>
+<script src="/assets/bismillah_ethiobiz/js/feed_tracker.js?v=1.0.0" defer></script>
 {% endblock %}

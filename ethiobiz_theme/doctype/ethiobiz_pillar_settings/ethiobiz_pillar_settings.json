@@ -1,43 +1,221 @@
-﻿{
-    "name":  "EthioBiz Pillar Settings",
-    "module":  "EthioBiz Theme",
-    "custom":  1,
-    "docstatus":  0,
-    "doctype":  "DocType",
-    "istable":  1,
-    "fields":  [
-                   {
-                       "fieldname":  "pillar_name",
-                       "fieldtype":  "Data",
-                       "label":  "Pillar Name",
-                       "reqd":  1,
-                       "in_list_view":  1
-                   },
-                   {
-                       "fieldname":  "workspaces",
-                       "fieldtype":  "Small Text",
-                       "label":  "Associated Workspaces",
-                       "description":  "Comma separated list of Workspaces that trigger this pillar (e.g. Selling, CRM, My Custom Workspace)"
-                   },
-                   {
-                       "fieldname":  "primary_color",
-                       "fieldtype":  "Color",
-                       "label":  "Primary Color",
-                       "reqd":  1,
-                       "in_list_view":  1
-                   },
-                   {
-                       "fieldname":  "supporting_color",
-                       "fieldtype":  "Color",
-                       "label":  "Supporting Color"
-                   },
-                   {
-                       "fieldname":  "pillar_logo",
-                       "fieldtype":  "Attach Image",
-                       "label":  "Pillar Logo"
-                   }
-               ],
-    "permissions":  [
-
-                    ]
+{
+  "name": "EthioBiz Pillar Settings",
+  "module": "EthioBiz Theme",
+  "custom": 1,
+  "docstatus": 0,
+  "doctype": "DocType",
+  "istable": 1,
+  "field_order": [
+    "pillar_key",
+    "pillar_name",
+    "system_key",
+    "subsystem_key",
+    "is_enabled",
+    "sort_order",
+    "primary_color",
+    "supporting_color",
+    "pillar_logo",
+    "icon",
+    "collapsed_title_en",
+    "collapsed_title_am",
+    "badge_en",
+    "badge_am",
+    "title_en",
+    "title_am",
+    "subtitle_en",
+    "subtitle_am",
+    "description_en",
+    "description_am",
+    "primary_cta_label_en",
+    "primary_cta_label_am",
+    "primary_cta_url",
+    "secondary_cta_label_en",
+    "secondary_cta_label_am",
+    "secondary_cta_url",
+    "back_title_en",
+    "back_title_am",
+    "back_subtitle_en",
+    "back_subtitle_am",
+    "workspaces"
+  ],
+  "fields": [
+    {
+      "fieldname": "pillar_key",
+      "fieldtype": "Select",
+      "label": "Pillar Key",
+      "options": "Tibeb\nDagu\nMagala\nDOBiz\nWalta\nAfocha",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "pillar_name",
+      "fieldtype": "Data",
+      "label": "Pillar Name",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "system_key",
+      "fieldtype": "Select",
+      "label": "System Key (CSS / JS)",
+      "options": "tibeb\ndagu\nmagala\ndobiz\nwalta\nafocha",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "subsystem_key",
+      "fieldtype": "Select",
+      "label": "Associated Subsystem Toggle",
+      "options": "none\nshop\njobs\nbizservices\nbizhealth\nbizhome\nbizfix\nbizride\ndagu\ntibeb\nafocha\nwalta\nnews",
+      "default": "none",
+      "description": "none = visible whenever Enabled is checked. A subsystem key also hides the card when that master toggle is off.",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "is_enabled",
+      "fieldtype": "Check",
+      "label": "Enabled",
+      "default": "1",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "sort_order",
+      "fieldtype": "Int",
+      "label": "Sort Order",
+      "default": "0",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "primary_color",
+      "fieldtype": "Color",
+      "label": "Primary Color",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "supporting_color",
+      "fieldtype": "Color",
+      "label": "Supporting Color"
+    },
+    {
+      "fieldname": "pillar_logo",
+      "fieldtype": "Attach Image",
+      "label": "Pillar Logo"
+    },
+    {
+      "fieldname": "icon",
+      "fieldtype": "Data",
+      "label": "Icon (Emoji / Text)"
+    },
+    {
+      "fieldname": "collapsed_title_en",
+      "fieldtype": "Data",
+      "label": "Collapsed Tab Title (English)"
+    },
+    {
+      "fieldname": "collapsed_title_am",
+      "fieldtype": "Data",
+      "label": "Collapsed Tab Title (Amharic)"
+    },
+    {
+      "fieldname": "badge_en",
+      "fieldtype": "Data",
+      "label": "Front Badge (English)"
+    },
+    {
+      "fieldname": "badge_am",
+      "fieldtype": "Data",
+      "label": "Front Badge (Amharic)"
+    },
+    {
+      "fieldname": "title_en",
+      "fieldtype": "Data",
+      "label": "Front Title (English)",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "title_am",
+      "fieldtype": "Data",
+      "label": "Front Title (Amharic)",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "subtitle_en",
+      "fieldtype": "Data",
+      "label": "Front Subtitle / Tagline (English)"
+    },
+    {
+      "fieldname": "subtitle_am",
+      "fieldtype": "Data",
+      "label": "Front Subtitle / Tagline (Amharic)"
+    },
+    {
+      "fieldname": "description_en",
+      "fieldtype": "Small Text",
+      "label": "Front Description (English)"
+    },
+    {
+      "fieldname": "description_am",
+      "fieldtype": "Small Text",
+      "label": "Front Description (Amharic)"
+    },
+    {
+      "fieldname": "primary_cta_label_en",
+      "fieldtype": "Data",
+      "label": "Primary CTA Label (English)"
+    },
+    {
+      "fieldname": "primary_cta_label_am",
+      "fieldtype": "Data",
+      "label": "Primary CTA Label (Amharic)"
+    },
+    {
+      "fieldname": "primary_cta_url",
+      "fieldtype": "Data",
+      "label": "Primary CTA URL"
+    },
+    {
+      "fieldname": "secondary_cta_label_en",
+      "fieldtype": "Data",
+      "label": "Secondary CTA Label (English)"
+    },
+    {
+      "fieldname": "secondary_cta_label_am",
+      "fieldtype": "Data",
+      "label": "Secondary CTA Label (Amharic)"
+    },
+    {
+      "fieldname": "secondary_cta_url",
+      "fieldtype": "Data",
+      "label": "Secondary CTA URL"
+    },
+    {
+      "fieldname": "back_title_en",
+      "fieldtype": "Data",
+      "label": "Card Back Heading (English)"
+    },
+    {
+      "fieldname": "back_title_am",
+      "fieldtype": "Data",
+      "label": "Card Back Heading (Amharic)"
+    },
+    {
+      "fieldname": "back_subtitle_en",
+      "fieldtype": "Small Text",
+      "label": "Card Back Subtitle (English)"
+    },
+    {
+      "fieldname": "back_subtitle_am",
+      "fieldtype": "Small Text",
+      "label": "Card Back Subtitle (Amharic)"
+    },
+    {
+      "fieldname": "workspaces",
+      "fieldtype": "Small Text",
+      "label": "Associated Workspaces",
+      "description": "Comma separated list of Workspaces that trigger this pillar."
+    }
+  ],
+  "permissions": []
 }

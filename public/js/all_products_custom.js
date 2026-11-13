@@ -297,6 +297,13 @@ $(() => {
                 .then(r => r.json())
                 .then(res => {
                     const companies = res.message ? res.message.companies : [];
+                    if (companies.length === 0) {
+                        L.popup()
+                            .setLatLng([9.0108, 38.7617])
+                            .setContent('<div style="font-family:inherit;text-align:center;font-size:12px;color:#64748b;padding:6px;">No verified companies mapped here yet — pins appear as providers add their location.</div>')
+                            .openOn(map);
+                        return;
+                    }
                     companies.forEach(c => {
                         const marker = L.marker([c.lat, c.lng]).addTo(map);
                         marker.bindPopup(`

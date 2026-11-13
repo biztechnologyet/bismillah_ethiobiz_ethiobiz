@@ -91,6 +91,20 @@ def _get_user_language(user):
         return "en"
 
 
+@frappe.whitelist(allow_guest=True)
+def set_user_language(lang):
+    """Persists user language preference for logged-in users and sets session cookie."""
+    lang = "am" if lang in ("am", "amharic", "amh") else "en"
+    user = frappe.session.user
+    if user and user != "Guest":
+        try:
+            frappe.db.set_value("User", user, "language", lang, update_modified=False)
+            frappe.db.commit()
+        except Exception as e:
+            frappe.log_error(f"Error updating user language: {e}")
+    if hasattr(frappe.local, "cookie_manager") and frappe.local.cookie_manager:
+        frappe.local.cookie_manager.set_cookie("preferred_language", lang)
+    return {"status": "success", "language": lang, "user": user}
 
 
 def _get_user_industry_religion(user):
@@ -422,49 +436,27 @@ def chat_webhook_proxy():
         return WerkzeugResponse(body, status=200, content_type="application/json")
 
 
-@frappe.whitelist(methods=["POST", "GET"], allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def get_user_credentials(username=None, telegram_username=None):
     """Return a user's API key + DECRYPTED API secret and profile as raw JSON.
 
     Replaces the n8n erpNext 'Get user' node which reads the api_secret Password
     field and gets the encrypted blob. This endpoint decrypts server-side via
-    get_decrypted_password so CIO can authenticate.
-    Supports session authentication OR HADEEDA Settings service token.
+    get_decrypted_password so CIO can authenticate. Authenticated callers only.
     """
     frappe.flags.ignore_csrf = True
     from werkzeug.wrappers import Response as WerkzeugResponse
 
     caller = frappe.session.user
-    settings = _get_hadeeda_settings()
-
-    # Check for service token header authorization
-    req_auth = frappe.get_request_header("Authorization") or ""
-    custom_token = frappe.get_request_header("X-Hadeeda-Token") or ""
-    bearer_token = ""
-    if req_auth.lower().startswith("bearer "):
-        bearer_token = req_auth[7:].strip()
-
-    token_to_verify = custom_token or bearer_token
-    configured_token = ""
-    if getattr(settings, "enable_service_token_auth", 1):
-        try:
-            configured_token = get_decrypted_password("HADEEDA Settings", "HADEEDA Settings", "service_auth_token", raise_exception=False)
-        except Exception:
-            configured_token = getattr(settings, "service_auth_token", "") or ""
-
-    is_token_authenticated = bool(configured_token and token_to_verify and token_to_verify == configured_token)
-
-    if not is_token_authenticated and (not caller or caller == "Guest"):
+    if not caller or caller == "Guest":
         return WerkzeugResponse(
-            json.dumps({"error": "Authentication required. Provide active session or valid service token."}),
+            json.dumps({"error": "Authentication required"}),
             status=401, content_type="application/json"
         )
 
     target = username or ""
     if not target and telegram_username:
         target = frappe.db.get_value("User", {"telegram_username": telegram_username}, "name") or ""
-    if not target and is_token_authenticated:
-        target = getattr(settings, "default_service_user", "") or "Administrator"
     if not target:
         return WerkzeugResponse(
             json.dumps({"error": "User not found"}),
@@ -645,7 +637,7 @@ def update_website_context(context):
         context.web_include_css = []
 
     css_files = [
-        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css",
+        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
         "/assets/bismillah_ethiobiz/css/walta.css",
         "/assets/bismillah_ethiobiz/css/magala_checkout.css",
     ]
@@ -674,6 +666,8 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
         "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.1.0",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_analytics.js?v=1.0.0",
     ]
     for js in js_files:
         base = js.split("?")[0]

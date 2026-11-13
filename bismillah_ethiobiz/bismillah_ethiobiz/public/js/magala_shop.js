@@ -1,4 +1,4 @@
-// BISMALLAH ETHIOBIZ MAGALA SHOP ENGINE JAVASCRIPT
+﻿// BISMALLAH ETHIOBIZ MAGALA SHOP ENGINE JAVASCRIPT
 // Handles 3-way view switcher (Grid, List, Map), interactive map node filtering,
 // collapsible filter sidebar, product detail navigation & shopping cart
 
@@ -643,64 +643,204 @@ document.addEventListener("DOMContentLoaded", function() {
         pag.innerHTML = "";
         if (totalPages <= 1) return;
 
-        const prevBtn = document.createElement("button");
-        prevBtn.className = "btn-prev";
-        prevBtn.innerHTML = "← Prev";
-        prevBtn.disabled = (currentPage === 1);
-        prevBtn.addEventListener("click", function() {
-            if (currentPage > 1) {
-                currentPage--;
+        // Numbered pagination only. The old Prev/Next controls were removed
+        // per the launch UX standard; page numbers keep navigation intact.
+        const windowSize = 5;
+        let start = Math.max(1, currentPage - Math.floor(windowSize / 2));
+        if (start + windowSize - 1 > totalPages) {
+            start = Math.max(1, totalPages - windowSize + 1);
+        }
+        const end = Math.min(totalPages, start + windowSize - 1);
+
+        for (let p = start; p <= end; p++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.className = "btn-page" + (p === currentPage ? " active" : "");
+            pageBtn.innerText = String(p);
+            pageBtn.disabled = (p === currentPage);
+            pageBtn.setAttribute("aria-label", `Page ${p}`);
+            if (p === currentPage) pageBtn.setAttribute("aria-current", "page");
+            pageBtn.addEventListener("click", function() {
+                if (p === currentPage) return;
+                currentPage = p;
                 loadProducts();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
-        pag.appendChild(prevBtn);
+            });
+            pag.appendChild(pageBtn);
+        }
 
         const pageIndicator = document.createElement("span");
         pageIndicator.style.fontWeight = "700";
         pageIndicator.style.color = "#0f172a";
-        pageIndicator.innerText = `Page ${currentPage} of ${totalPages}`;
+        pageIndicator.innerText = `${currentPage} / ${totalPages}`;
         pag.appendChild(pageIndicator);
-
-        const nextBtn = document.createElement("button");
-        nextBtn.className = "btn-next";
-        nextBtn.innerHTML = "Next →";
-        nextBtn.disabled = (currentPage >= totalPages);
-        nextBtn.addEventListener("click", function() {
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadProducts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
-        pag.appendChild(nextBtn);
     }
 
-    // 8. SHOPPING CART HANDLERS
+    // 8. COMPLETE SHOPPING CART & DRAWER SYSTEM
     window.addToCart = function(itemCode) {
-        let cart = JSON.parse(localStorage.getItem("magala_cart") || "[]");
-        cart.push(itemCode);
-        localStorage.setItem("magala_cart", JSON.stringify(cart));
-        updateCartCount();
-        const drawer = document.getElementById("magala-cart-drawer");
-        if (drawer) drawer.classList.add("open");
+        if (window.MagalaCart && window.MagalaCart.add) {
+            return window.MagalaCart.add(itemCode, 1);
+        }
+
+        // Fallback only when the shared cart controller did not load.
+        return fetch("/api/method/bismillah_ethiobiz.magala_checkout.add_to_cart", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "X-Frappe-CSRF-Token": (window.frappe && frappe.csrf_token) || ""
+            },
+            body: new URLSearchParams({ item_code: itemCode, qty: 1 })
+        }).then(function(r) {
+            return r.json();
+        }).then(function(res) {
+            const cart = (res && res.message) || {};
+            window.renderShopCartDrawer(cart);
+            if (window.MagalaCart && window.MagalaCart.open) window.MagalaCart.open();
+            return cart;
+        }).catch(function() {
+            // Keep the failure visible rather than silently doing nothing.
+            if (window.MagalaCart && window.MagalaCart.refresh) window.MagalaCart.refresh();
+        });
     };
 
-    function initCart() {
-        updateCartCount();
-        const closeBtn = document.getElementById("close-cart-drawer");
-        if (closeBtn) {
-            closeBtn.addEventListener("click", function() {
-                const drawer = document.getElementById("magala-cart-drawer");
-                if (drawer) drawer.classList.remove("open");
-            });
+    function closeShopCartDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (drawer) {
+            drawer.classList.remove("open");
+            drawer.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.remove("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.remove("open");
+            backdrop.setAttribute("aria-hidden", "true");
         }
     }
 
-    function updateCartCount() {
-        let cart = JSON.parse(localStorage.getItem("magala_cart") || "[]");
+    function openShopCartDrawer() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        if (!drawer) return false;
+        drawer.classList.add("open");
+        drawer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("magala-cart-open");
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) {
+            backdrop.classList.add("open");
+            backdrop.setAttribute("aria-hidden", "false");
+        }
+        if (window.MagalaCart && window.MagalaCart.refresh) {
+            window.MagalaCart.refresh();
+        }
+        return true;
+    }
+
+    window.renderShopCartDrawer = function(cart) {
+        const drawerItems = document.getElementById("cart-drawer-items");
+        const drawerTotal = document.getElementById("cart-drawer-total");
         const countBadge = document.getElementById("cart-drawer-count");
-        if (countBadge) countBadge.innerText = cart.length;
+        if (!drawerItems) return;
+
+        const items = (cart && cart.items) || [];
+        const count = (cart && cart.count) || items.reduce(function(sum, it) { return sum + Number(it.qty || 0); }, 0);
+        const total = (cart && cart.total) || 0;
+
+        if (countBadge) countBadge.innerText = count;
+        if (drawerTotal) drawerTotal.innerText = Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
+
+        if (!items || items.length === 0) {
+            drawerItems.innerHTML = '<p class="empty-cart-msg" style="padding:30px 16px; text-align:center; color:#94a3b8; font-size:14px;">Your cart is empty. Explore items to add!</p>';
+            return;
+        }
+
+        let html = '<div class="cart-items-list" style="display:flex; flex-direction:column; gap:12px; padding:12px 0;">';
+        items.forEach(function(it) {
+            const itemCode = escapeHtml(it.item_code || "");
+            const itemName = escapeHtml(it.item_name || it.item_code || "Item");
+            const itemImg = escapeHtml(it.image || "/files/ethiobiz_butterfly_logo.png");
+            const itemPrice = Number(it.amount || (Number(it.qty || 1) * Number(it.rate || it.price || 0)) || 0)
+                .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
+            const qty = Number(it.qty || 1);
+            html += `
+                <div class="cart-drawer-card" data-item-code="${itemCode}" style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12);">
+                    <img src="${itemImg}" alt="${itemName}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; background:#fff;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${itemName}</div>
+                        <div style="font-size:12px; color:#5eead4; font-weight:800; margin-top:2px;">${itemPrice}</div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                            <button type="button" data-cart-action="dec" data-code="${itemCode}" aria-label="Decrease quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">-</button>
+                            <span data-cart-qty style="font-size:12px; font-weight:700; color:#fff;">${qty}</span>
+                            <button type="button" data-cart-action="inc" data-code="${itemCode}" aria-label="Increase quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">+</button>
+                            <button type="button" data-cart-action="remove" data-code="${itemCode}" aria-label="Remove item" style="margin-left:auto; background:none; border:none; color:#f87171; cursor:pointer; font-size:13px;" title="Remove">&#10005;</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        drawerItems.innerHTML = html;
+    };
+
+    function initCart() {
+        const drawer = document.getElementById("magala-cart-drawer");
+        const drawerItems = document.getElementById("cart-drawer-items");
+
+        if (drawerItems) {
+            drawerItems.addEventListener("click", function(e) {
+                const btn = e.target.closest("[data-cart-action]");
+                if (!btn || !window.MagalaCart || !window.MagalaCart.updateQty) return;
+                const code = btn.getAttribute("data-code");
+                const row = btn.closest("[data-item-code]");
+                const qtyText = row ? row.querySelector("[data-cart-qty]") : null;
+                const qty = Number(qtyText ? qtyText.textContent : 1) || 1;
+                let next = qty;
+                if (btn.getAttribute("data-cart-action") === "inc") next = qty + 1;
+                if (btn.getAttribute("data-cart-action") === "dec") next = Math.max(0, qty - 1);
+                if (btn.getAttribute("data-cart-action") === "remove") next = 0;
+
+                btn.disabled = true;
+                window.MagalaCart.updateQty(code, next).finally(function() {
+                    btn.disabled = false;
+                });
+            });
+        }
+
+        const closeBtn = document.getElementById("close-cart-drawer");
+        if (closeBtn) closeBtn.addEventListener("click", closeShopCartDrawer);
+
+        const backdrop = document.getElementById("cart-drawer-backdrop");
+        if (backdrop) backdrop.addEventListener("click", closeShopCartDrawer);
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") closeShopCartDrawer();
+        });
+
+        // Attach the middle navbar cart to the drawer. Never bind to the
+        // duplicate legacy badge or a count span.
+        const navCart = document.querySelector("a.shopping-cart, .shopping-cart a, a.cart-icon, .cart-icon a");
+        const navFallback = document.querySelector(".shopping-cart, .cart-icon");
+        const clickable = navCart || navFallback;
+        if (clickable && drawer) {
+            clickable.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (drawer.classList.contains("open")) {
+                    closeShopCartDrawer();
+                } else {
+                    openShopCartDrawer();
+                }
+            });
+        }
+
+        if (window.MagalaCart && window.MagalaCart.refresh) {
+            window.MagalaCart.refresh();
+        } else {
+            // Keep the drawer populated even if the shared controller is not
+            // present on this page build.
+            fetch("/api/method/bismillah_ethiobiz.magala_checkout.get_cart", { credentials: "same-origin" })
+                .then(function(r) { return r.json(); })
+                .then(function(res) { window.renderShopCartDrawer((res && res.message) || {}); })
+                .catch(function() {});
+        }
     }
 
     function escapeHtml(str) {

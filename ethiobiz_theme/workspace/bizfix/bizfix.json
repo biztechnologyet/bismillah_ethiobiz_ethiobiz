@@ -1,0 +1,297 @@
+{
+ "charts": [
+  {
+   "chart_name": "Active Providers",
+   "label": "Active Providers",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Today's Service Requests",
+   "label": "Today's Service Requests",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Pending Assignments",
+   "label": "Pending Assignments",
+   "type": "Number"
+  },
+  {
+   "chart_name": "Monthly Revenue",
+   "label": "Monthly Revenue (ETB)",
+   "type": "Number"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"🔧 Service Overview\",\"level\":3,\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Active Providers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Today's Service Requests\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pending Assignments\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Monthly Revenue\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"👷 Service Providers\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Provider\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Provider Profile\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Provider Rating\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open BizFix Website\",\"col\":3,\"type\":\"URL\",\"url\":\"https://ethiobiz.et/bizfix\"}},{\"type\":\"header\",\"data\":{\"text\":\"📋 Service Requests\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Assignment\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Appointment\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Quote\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"🛠️ Service Categories\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Category\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Package\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Price\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Template\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"💰 Billing & Payments\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Provider Payout\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"⚙️ Settings & Configuration\",\"level\":3,\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Company\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Contact\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Address\",\"col\":3}}]",
+ "creation": "2026-09-03 17:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "label": "BizFix",
+ "links": [
+  {
+   "label": "Service Providers",
+   "type": "Card Break"
+  },
+  {
+   "label": "Service Provider",
+   "link_to": "Service Provider",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Provider Profile",
+   "link_to": "Provider Profile",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Provider Rating",
+   "link_to": "Provider Rating",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Requests",
+   "type": "Card Break"
+  },
+  {
+   "label": "Service Request",
+   "link_to": "Service Request",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Assignment",
+   "link_to": "Service Assignment",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Appointment",
+   "link_to": "Service Appointment",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Quote",
+   "link_to": "Service Quote",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Categories",
+   "type": "Card Break"
+  },
+  {
+   "label": "Service Category",
+   "link_to": "Service Category",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Package",
+   "link_to": "Service Package",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Price",
+   "link_to": "Service Price",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Service Template",
+   "link_to": "Service Template",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Billing & Payments",
+   "type": "Card Break"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Settings & Configuration",
+   "type": "Card Break"
+  },
+  {
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Customer",
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Contact",
+   "link_to": "Contact",
+   "link_type": "DocType",
+   "type": "Link"
+  },
+  {
+   "label": "Address",
+   "link_to": "Address",
+   "link_type": "DocType",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-09-03 17:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ethiobiz Theme",
+ "name": "BizFix",
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Service Provider",
+   "label": "Active Providers",
+   "filters": [
+    ["status", "=", "Active"]
+   ]
+  },
+  {
+   "document_type": "Service Request",
+   "label": "Today's Service Requests",
+   "filters": [
+    ["request_date", "=", "Today"]
+   ]
+  },
+  {
+   "document_type": "Service Assignment",
+   "label": "Pending Assignments",
+   "filters": [
+    ["status", "=", "Pending"]
+   ]
+  },
+  {
+   "document_type": "Service Appointment",
+   "label": "Today's Appointments",
+   "filters": [
+    ["appointment_date", "=", "Today"]
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Service Manager"
+  },
+  {
+   "role": "Provider Manager"
+  },
+  {
+   "role": "Dispatcher"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Service Provider",
+   "link_to": "Service Provider",
+   "stats_filter": "[[\"Service Provider\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Provider Profile",
+   "link_to": "Provider Profile",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Provider Rating",
+   "link_to": "Provider Rating",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Service Request",
+   "link_to": "Service Request",
+   "stats_filter": "[[\"Service Request\",\"request_date\",\"=\",TODAY(),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Service Assignment",
+   "link_to": "Service Assignment",
+   "stats_filter": "[[\"Service Assignment\",\"status\",\"=\",\"Pending\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Service Appointment",
+   "link_to": "Service Appointment",
+   "type": "DocType"
+  },
+  {
+   "color": "Teal",
+   "doc_view": "List",
+   "label": "Service Quote",
+   "link_to": "Service Quote",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Service Category",
+   "link_to": "Service Category",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Service Package",
+   "link_to": "Service Package",
+   "type": "DocType"
+  },
+  {
+   "color": "Brown",
+   "doc_view": "List",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "stats_filter": "[[\"Sales Invoice\",\"posting_date\",\"=\",TODAY(),false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Magenta",
+   "doc_view": "List",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Lime",
+   "label": "Open BizFix Website",
+   "type": "URL",
+   "url": "https://ethiobiz.et/bizfix"
+  }
+ ],
+ "title": "BizFix"
+}

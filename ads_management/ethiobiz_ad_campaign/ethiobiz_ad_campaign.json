@@ -26,6 +26,12 @@
     {"fieldname": "impressions", "fieldtype": "Int", "label": "Impressions", "default": 0, "read_only": 1},
     {"fieldname": "clicks", "fieldtype": "Int", "label": "Clicks", "default": 0, "read_only": 1},
     {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company"},
+    {"fieldname": "section_break_bizservices", "fieldtype": "Section Break", "label": "BizServices Link & Budget"},
+    {"fieldname": "promoted_listing", "fieldtype": "Link", "label": "Promoted BizService Listing", "options": "BizService Listing"},
+    {"fieldname": "target_vertical", "fieldtype": "Select", "label": "Target Vertical", "options": "\nall\nBeauty-Salon-Spa\nHealth\nHotel\nAuto\nHome\nProfessional\nEvents\nTutoring\nShop\nJobs", "default": "all"},
+    {"fieldname": "column_break_bizservices", "fieldtype": "Column Break"},
+    {"fieldname": "budget_etb", "fieldtype": "Currency", "label": "Budget (ETB)", "default": 0},
+    {"fieldname": "campaign_url", "fieldtype": "Data", "label": "Campaign URL", "options": "URL"},
     {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
   ],
   "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1}]
