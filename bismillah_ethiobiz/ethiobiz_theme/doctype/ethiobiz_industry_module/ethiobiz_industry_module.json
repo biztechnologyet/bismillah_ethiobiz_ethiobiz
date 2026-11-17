@@ -1,0 +1,52 @@
+{
+    "name": "EthioBiz Industry Module",
+    "module": "EthioBiz Theme",
+    "custom": 1,
+    "docstatus": 0,
+    "doctype": "DocType",
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "industry_key",
+            "fieldtype": "Data",
+            "label": "Industry Key",
+            "reqd": 1,
+            "in_list_view": 1,
+            "description": "Stable key used by the signup page and API (e.g. healthcare)."
+        },
+        {
+            "fieldname": "label",
+            "fieldtype": "Data",
+            "label": "Public Label",
+            "reqd": 1,
+            "in_list_view": 1,
+            "description": "Canonical industry label submitted by /dobiz-signup."
+        },
+        {
+            "fieldname": "icon",
+            "fieldtype": "Data",
+            "label": "Icon (Emoji or Class)",
+            "default": "✨",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "label": "Description"
+        },
+        {
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "label": "Enabled",
+            "default": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "sort_order",
+            "fieldtype": "Int",
+            "label": "Sort Order",
+            "default": 0
+        }
+    ],
+    "permissions": []
+}

@@ -3,9 +3,9 @@
 {% block title %}AFOCHA Social & Business Pulse | EthioBiz{% endblock %}
 
 {% block head_include %}
-<meta name="csrf-token" content="{{ frappe.session.csrf_token }}">
+<meta name="csrf-token" content="{{ csrf_token }}">
 <script>
-    window.csrf_token = "{{ frappe.session.csrf_token }}";
+    window.csrf_token = "{{ csrf_token }}";
 </script>
 <style>
     :root {
@@ -910,10 +910,9 @@
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/method/bismillah_ethiobiz.afocha_api.upload_post_image', true);
 
-        // Get CSRF token
-        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        const csrfCookie = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1];
-        const csrfToken = csrfMeta ? csrfMeta.content : (csrfCookie || (window.frappe && frappe.csrf_token));
+        // Get CSRF token (prefer the shared helper, which ignores the literal
+        // string "None" and uses frappe.csrf_token when available).
+        const csrfToken = (window.ebCsrfToken && window.ebCsrfToken()) || '';
         if (csrfToken) {
             xhr.setRequestHeader('X-Frappe-CSRF-Token', csrfToken);
         }

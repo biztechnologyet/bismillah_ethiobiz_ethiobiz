@@ -378,9 +378,9 @@ div[data-path*="dobiz-payment"] .control-label {
     visibility: visible !important;
 }
 
-body:not([data-route*="app"]) .frappe-control .control-label,
-body:not([data-route*="app"]) .form-group label,
-body:not([data-route*="app"]) .form-group .control-label {
+body:not([data-route]) .frappe-control .control-label,
+body:not([data-route]) .form-group label,
+body:not([data-route]) .form-group .control-label {
     color: #0f172a !important;
     font-weight: 800 !important;
     font-size: 14px !important;
@@ -1658,6 +1658,125 @@ body[data-route^="Form"] .page-head .title-text,
     box-sizing: border-box !important;
 }
 
+/* Early single-line title before Frappe sets body[data-route] and before
+   ethiobiz_theme.js adds .eb-doc-head. The class is applied to <html> from the
+   URL as soon as the theme script loads, so the form title never paints
+   expanded/multiline first. Expanded state (higher specificity) still wins. */
+html.eb-doc-route .page-head {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    height: auto !important;
+    min-height: 82px !important;
+    top: var(--navbar-height) !important;
+    position: sticky !important;
+    z-index: 100 !important;
+}
+
+html.eb-doc-route .page-head .page-head-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    padding: 8px 16px 6px !important;
+    gap: 4px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    position: relative !important;
+}
+
+html.eb-doc-route .page-head .page-title {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+html.eb-doc-route .page-head .title-area {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+html.eb-doc-route .page-head .title-area > div,
+html.eb-doc-route .page-head .title-area .flex {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+html.eb-doc-route .page-head .title-text {
+    font-size: 1.35rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex: 0 1 auto !important;
+    max-width: calc(100% - 95px) !important;
+    min-width: 0 !important;
+    display: inline-block !important;
+    cursor: default !important;
+    margin: 0 6px 0 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+}
+
+html.eb-doc-route[data-theme="dark"] .page-head .title-text {
+    color: var(--ethiobiz-dark-label-color, #F8F6F2) !important;
+}
+
+html.eb-doc-route .page-head .page-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+    padding-top: 6px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+    flex-wrap: wrap !important;
+    float: none !important;
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 26 !important;
+}
+
+html.eb-doc-route[data-theme="dark"] .page-head .page-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
 [data-theme="dark"] body[data-route^="Form"] .page-head .title-text,
 [data-theme="dark"] [data-page-route^="Form"] .page-head .title-text,
 [data-theme="dark"] .form-page .page-head .title-text,
@@ -1843,6 +1962,22 @@ body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
     transition: all 0.2s ease !important;
 }
 
+.eb-title-toggle-btn .eb-arrow {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    line-height: 0 !important;
+    pointer-events: none !important;
+}
+
+.eb-title-toggle-btn .eb-arrow svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
 .eb-title-toggle-btn:hover {
     background: #008080 !important;
     color: #ffffff !important;
@@ -1862,7 +1997,7 @@ body[data-route^="Form"] .page-head .title-area.eb-title-expanded .title-text,
 }
 
 /* Non-document headers: Preserve natural row layout, no squishing */
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-title {
+html:not(.eb-doc-route) body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-title {
     width: auto !important;
     max-width: none !important;
     flex: 0 1 auto !important;
@@ -1870,14 +2005,14 @@ body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-title {
     align-items: center !important;
 }
 
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-area {
+html:not(.eb-doc-route) body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-area {
     width: auto !important;
     max-width: none !important;
     display: flex !important;
     align-items: center !important;
 }
 
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-text {
+html:not(.eb-doc-route) body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-text {
     max-width: none !important;
     width: auto !important;
     white-space: nowrap !important;
@@ -1887,7 +2022,7 @@ body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .title-text {
     flex: 0 1 auto !important;
 }
 
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .eb-title-toggle-btn {
+html:not(.eb-doc-route) body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .eb-title-toggle-btn {
     display: none !important;
 }
 
@@ -1900,7 +2035,7 @@ body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .eb-title-toggle-btn
 }
 
 /* Action buttons in non-document Desk headers (List View, Workspace) */
-body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-actions {
+html:not(.eb-doc-route) body:not([data-route^="Form"]) .page-head:not(.eb-doc-head) .page-actions {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -2431,6 +2566,46 @@ body[data-route*="app"] .form-tabs-list .nav-link {
     visibility: visible !important;
 }
 
+/* ===== P4-C DARK-MODE OVERRIDE (2026-11-14) =====
+   The P4-C desk-only rule above is more specific than the generic dark-mode
+   label rule, so it was forcing textbox/dropdown/link labels back to
+   --text-color. Re-assert the configured dark label color with equal-or-higher
+   specificity for every Desk label and editing tool. */
+[data-theme="dark"] body[data-route*="app"] .frappe-control .control-label,
+[data-theme="dark"] body[data-route*="app"] .form-group label,
+[data-theme="dark"] body[data-route*="app"] .form-group .control-label,
+[data-theme="dark"] body[data-route*="app"] .form-column label,
+[data-theme="dark"] body[data-route*="app"] .frappe-control .label-area,
+[data-theme="dark"] body[data-route*="app"] .field-group .label,
+[data-theme="dark"] body[data-route*="app"] .form-section .section-head,
+[data-theme="dark"] body[data-route*="app"] .form-section .section-head .section-title,
+[data-theme="dark"] body[data-route*="app"] .form-section .section-head .section-head-label,
+[data-theme="dark"] body[data-route*="app"] .form-tabs-list .nav-link,
+[data-theme="dark"] body[data-route*="app"] .checkbox label,
+[data-theme="dark"] body[data-route*="app"] .editable-form label,
+[data-theme="dark"] body[data-route*="app"] .static-area label,
+[data-theme="dark"] body[data-route*="app"] .grid-heading-row .grid-row-label,
+[data-theme="dark"] body[data-route*="app"] .form-grid .grid-row-label,
+[data-theme="dark"] body[data-route*="app"] .ql-toolbar button,
+[data-theme="dark"] body[data-route*="app"] .ql-toolbar .ql-picker-label,
+[data-theme="dark"] body[data-route*="app"] .ql-formats,
+[data-theme="dark"] body[data-route*="app"] .ce-toolbar__settings-btn,
+[data-theme="dark"] body[data-route*="app"] .ce-block__settings-button,
+[data-theme="dark"] body[data-route*="app"] .ce-toolbar__actions,
+[data-theme="dark"] body[data-route*="app"] .ce-toolbar__plus,
+[data-theme="dark"] body[data-route*="app"] .color-picker,
+[data-theme="dark"] body[data-route*="app"] .color-picker .swatch-section,
+[data-theme="dark"] body[data-route*="app"] .color-picker-popover {
+    color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
+}
+
+[data-theme="dark"] body[data-route*="app"] .control-label .text-muted,
+[data-theme="dark"] body[data-route*="app"] .label-area .text-muted,
+[data-theme="dark"] body[data-route*="app"] .control-label .help-box,
+[data-theme="dark"] body[data-route*="app"] .label-area .help-box {
+    color: var(--ethiobiz-dark-label-muted, #94a3b8) !important;
+}
+
 /* ===== BISMALLAH 2026-09-10: Legible labels & edit-tool controls in dark mode =====
    Color source: Theme Settings -> "Dark Mode Label Color", exposed as CSS custom
    properties --ethiobiz-dark-label-color / --ethiobiz-dark-label-muted on :root
@@ -2439,6 +2614,9 @@ body[data-route*="app"] .form-tabs-list .nav-link {
 [data-theme="dark"] body label,
 [data-theme="dark"] body .control-label,
 [data-theme="dark"] body label.control-label,
+[data-theme="dark"] body .frappe-control .control-label,
+[data-theme="dark"] body .frappe-control .label-area,
+[data-theme="dark"] body .form-group .control-label,
 [data-theme="dark"] body .form-group label,
 [data-theme="dark"] body .form-column label,
 [data-theme="dark"] body .checkbox label,
@@ -2464,6 +2642,9 @@ body[data-route*="app"] .form-tabs-list .nav-link {
 [data-theme="dark"] body .desk-sidebar-item-underline,
 [data-theme="dark"] body .ql-toolbar button,
 [data-theme="dark"] body .ql-toolbar .ql-picker-label,
+[data-theme="dark"] body .ql-toolbar .ql-picker-item,
+[data-theme="dark"] body .ql-toolbar .ql-picker-options,
+[data-theme="dark"] body .ql-toolbar .ql-picker,
 [data-theme="dark"] body .ql-formats,
 [data-theme="dark"] body .ql-snow .ql-stroke,
 [data-theme="dark"] body .ql-snow .ql-fill,
@@ -2471,6 +2652,15 @@ body[data-route*="app"] .form-tabs-list .nav-link {
 [data-theme="dark"] body .ce-block__settings-button,
 [data-theme="dark"] body .ce-toolbar__actions,
 [data-theme="dark"] body .ce-toolbar__plus,
+[data-theme="dark"] body .ce-popover__item-label,
+[data-theme="dark"] body .ce-inline-toolbar,
+[data-theme="dark"] body .ce-inline-toolbar__dropdown,
+[data-theme="dark"] body .color-picker,
+[data-theme="dark"] body .color-picker .swatch-section,
+[data-theme="dark"] body .color-picker .color-map,
+[data-theme="dark"] body .color-picker .hue-map,
+[data-theme="dark"] body .color-picker .swatches,
+[data-theme="dark"] body .color-picker-popover,
 [data-theme="dark"] body .ce-block__settings-button {
     color: var(--ethiobiz-dark-label-color, #e2e8f0) !important;
 }

@@ -16,6 +16,8 @@
     let popup = null;
     let targetState = null;
     let generatedResponse = '';
+    let lastGeneratedResponse = '';
+    let contextMenu = null;
 
     function getFormContext(el) {
         if (!cur_frm) return '';
@@ -235,11 +237,11 @@
         }
     }
 
-    function showPopup(el, x, y) {
+    function showPopup(el, x, y, presetPrompt, skipTriggerRemoval) {
         if (popup) closePopup();
 
         targetState = captureTargetState(el);
-        removeTriggerChar(targetState);
+        if (!skipTriggerRemoval) removeTriggerChar(targetState);
         generatedResponse = '';
 
         popup = document.createElement('div');
@@ -623,6 +625,7 @@
             .then(data => {
                 const reply = (data.message && data.message.reply) || '';
                 generatedResponse = reply;
+                if (reply) lastGeneratedResponse = reply;
 
                 if (reply) {
                     resultPreview.textContent = reply;
@@ -844,7 +847,12 @@
             window.addEventListener('resize', syncInnerSizes);
         })();
 
-        setTimeout(function () { input.focus(); }, 80);
+        if (presetPrompt) {
+            input.value = presetPrompt;
+            setTimeout(function () { doSubmit(); }, 60);
+        } else {
+            setTimeout(function () { input.focus(); }, 80);
+        }
     }
 
     function closePopup() {
@@ -856,8 +864,345 @@
         generatedResponse = '';
     }
 
+    // ─── E1: Hadeeda custom right-click context menu ───────────────────────
+    function ensureContextMenuStyles() {
+        if (document.getElementById('hadeeda-ctx-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'hadeeda-ctx-styles';
+        style.textContent = `
+            @keyframes hadeeda-ctx-in {
+                0% { opacity: 0; transform: scale(0.97); }
+                100% { opacity: 1; transform: scale(1); }
+            }
+            .hadeeda-ctx-menu {
+                position: fixed;
+                z-index: 1000000;
+                min-width: 240px;
+                max-width: 320px;
+                background: #0D1117;
+                color: #E6EDF3;
+                border: 1px solid rgba(31, 182, 174, 0.45);
+                border-radius: 10px;
+                box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(31, 182, 174, 0.2);
+                padding: 6px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+                font-size: 13px;
+                animation: hadeeda-ctx-in 0.12s ease-out;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+            .hadeeda-ctx-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                background: transparent;
+                border: none;
+                color: inherit;
+                padding: 8px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                text-align: left;
+                font: inherit;
+                line-height: 1.25;
+            }
+            .hadeeda-ctx-item:hover:not(:disabled) { background: rgba(31, 182, 174, 0.18); }
+            .hadeeda-ctx-item:disabled, .hadeeda-ctx-item.is-disabled { opacity: 0.38; cursor: not-allowed; }
+            .hadeeda-ctx-icon { width: 18px; text-align: center; flex: 0 0 18px; }
+            .hadeeda-ctx-label { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .hadeeda-ctx-sep { height: 1px; background: rgba(255, 255, 255, 0.12); margin: 5px 6px; }
+            [data-theme='light'] .hadeeda-ctx-menu,
+            html[data-theme='light'] .hadeeda-ctx-menu {
+                background: #ffffff;
+                color: #0f172a;
+                border-color: rgba(2, 106, 110, 0.3);
+                box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 0 14px rgba(31, 182, 174, 0.1);
+            }
+            [data-theme='light'] .hadeeda-ctx-item:hover:not(:disabled),
+            html[data-theme='light'] .hadeeda-ctx-item:hover:not(:disabled) { background: rgba(31, 182, 174, 0.12); }
+            [data-theme='light'] .hadeeda-ctx-sep,
+            html[data-theme='light'] .hadeeda-ctx-sep { background: rgba(15, 23, 42, 0.12); }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function showHadeedaToast(message) {
+        const existing = document.getElementById('hadeeda-inline-toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'hadeeda-inline-toast';
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;z-index:1000001;bottom:24px;left:50%;transform:translateX(-50%);' +
+            'background:#0D1117;color:#fff;border:1px solid rgba(31,182,174,.5);border-radius:8px;' +
+            'padding:10px 16px;font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
+            'box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw;text-align:center;';
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2600);
+    }
+
+    function getStateSelectionText(state) {
+        if (!state) return '';
+        if (state.isInput && state.el) {
+            const value = state.el.value || '';
+            return value.substring(state.start || 0, state.end || 0);
+        }
+        if (state.quill) {
+            try {
+                const range = state.quillRange;
+                if (range && range.length) return state.quill.getText(range.index, range.length);
+            } catch (e) {}
+        }
+        if (state.domRange) {
+            try { return state.domRange.toString(); } catch (e) {}
+        }
+        return '';
+    }
+
+    function copyTextToClipboard(text) {
+        if (!text) return false;
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(function () {});
+                return true;
+            }
+        } catch (e) {}
+        try {
+            const helper = document.createElement('textarea');
+            helper.value = text;
+            helper.style.cssText = 'position:fixed;opacity:0;left:-9999px;top:-9999px;';
+            document.body.appendChild(helper);
+            helper.focus();
+            helper.select();
+            const ok = document.execCommand('copy');
+            helper.remove();
+            return ok;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function cutStateSelection(state) {
+        if (!state) return false;
+        const text = getStateSelectionText(state);
+        if (!text) return false;
+        copyTextToClipboard(text);
+
+        if (state.isInput && state.el) {
+            const el = state.el;
+            const value = el.value || '';
+            el.value = value.substring(0, state.start || 0) + value.substring(state.end || 0);
+            el.selectionStart = el.selectionEnd = state.start || 0;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+        }
+        if (state.quill) {
+            try {
+                const range = state.quillRange;
+                if (range && range.length) {
+                    state.quill.deleteText(range.index, range.length);
+                    state.quill.setSelection(range.index);
+                    return true;
+                }
+            } catch (e) {}
+        }
+        if (state.domRange) {
+            try {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(state.domRange);
+                if (document.queryCommandSupported && document.queryCommandSupported('cut')) {
+                    return document.execCommand('cut', false, null);
+                }
+                state.domRange.deleteContents();
+                return true;
+            } catch (e) {}
+        }
+        return false;
+    }
+
+    function pasteIntoState(state) {
+        if (!state) return;
+        function apply(text) {
+            if (!text) return;
+            targetState = state;
+            doInsert(text);
+        }
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(apply).catch(function () {
+                showHadeedaToast('Paste is blocked by the browser. Use Ctrl+V.');
+            });
+        } else {
+            showHadeedaToast('Paste is not available in this browser. Use Ctrl+V.');
+        }
+    }
+
+    function closeContextMenu() {
+        if (contextMenu) {
+            contextMenu.remove();
+            contextMenu = null;
+        }
+        document.removeEventListener('mousedown', onContextDocMouseDown, true);
+        document.removeEventListener('touchstart', onContextDocMouseDown, true);
+        document.removeEventListener('keydown', onContextKeyDown, true);
+        window.removeEventListener('scroll', closeContextMenu, true);
+        window.removeEventListener('resize', closeContextMenu, true);
+        window.removeEventListener('hashchange', closeContextMenu);
+        window.removeEventListener('popstate', closeContextMenu);
+    }
+
+    function onContextDocMouseDown(e) {
+        if (contextMenu && !contextMenu.contains(e.target)) closeContextMenu();
+    }
+
+    function onContextKeyDown(e) {
+        if (e.key === 'Escape') {
+            closeContextMenu();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+
+    function showContextMenu(el, x, y) {
+        closeContextMenu();
+        ensureContextMenuStyles();
+
+        const state = captureTargetState(el);
+        const editable = isEditable(el) ||
+            !!(el.closest && el.closest('[contenteditable="true"], .ql-editor, .note-editable'));
+        const selectedText = getStateSelectionText(state) ||
+            (window.getSelection ? window.getSelection().toString() : '');
+        const hasSelection = !!selectedText;
+        const hasResponse = !!lastGeneratedResponse;
+
+        const menu = document.createElement('div');
+        menu.className = 'hadeeda-ctx-menu';
+        menu.setAttribute('role', 'menu');
+        menu.setAttribute('aria-label', 'HADEEDA context menu');
+
+        function addItem(action, label, opts) {
+            opts = opts || {};
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'hadeeda-ctx-item';
+            btn.setAttribute('data-action', action);
+            btn.setAttribute('role', 'menuitem');
+            btn.innerHTML = '<span class="hadeeda-ctx-icon">' + (opts.icon || '') +
+                '</span><span class="hadeeda-ctx-label">' + label + '</span>';
+            if (opts.disabled) {
+                btn.disabled = true;
+                btn.classList.add('is-disabled');
+            }
+            btn.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (opts.disabled) return;
+                closeContextMenu();
+                if (opts.onClick) opts.onClick();
+            });
+            menu.appendChild(btn);
+        }
+
+        function addSeparator() {
+            const sep = document.createElement('div');
+            sep.className = 'hadeeda-ctx-sep';
+            menu.appendChild(sep);
+        }
+
+        addItem('hadeeda-draft', 'Draft with HADEEDA', {
+            icon: '✍️', disabled: !editable,
+            onClick: function () { showPopup(el, x, y, 'Draft a professional response', true); }
+        });
+        addItem('hadeeda-tone', 'Tone Fix', {
+            icon: '⚡', disabled: !editable,
+            onClick: function () { showPopup(el, x, y, 'Improve clarity and professional tone', true); }
+        });
+        addItem('hadeeda-summary', 'Summary', {
+            icon: '📝', disabled: !editable,
+            onClick: function () { showPopup(el, x, y, 'Summarize into key bullet points', true); }
+        });
+        addItem('hadeeda-amharic', 'Amharic', {
+            icon: '🌐', disabled: !editable,
+            onClick: function () { showPopup(el, x, y, 'Translate text into Amharic', true); }
+        });
+        addItem('hadeeda-generate', 'Generate with HADEEDA', {
+            icon: '✨', disabled: !editable,
+            onClick: function () { showPopup(el, x, y, null, true); }
+        });
+        addItem('hadeeda-insert', 'Insert Last AI Response', {
+            icon: '📥', disabled: !editable || !hasResponse,
+            onClick: function () {
+                targetState = state;
+                doInsert(lastGeneratedResponse);
+            }
+        });
+        addItem('hadeeda-copy-ai', 'Copy Last AI Response', {
+            icon: '🤖', disabled: !hasResponse,
+            onClick: function () {
+                if (copyTextToClipboard(lastGeneratedResponse)) {
+                    showHadeedaToast('Copied HADEEDA response.');
+                } else {
+                    showHadeedaToast('Could not copy the HADEEDA response.');
+                }
+            }
+        });
+
+        addSeparator();
+
+        addItem('cut', 'Cut', {
+            icon: '✂️', disabled: !editable || !hasSelection,
+            onClick: function () {
+                if (!cutStateSelection(state)) showHadeedaToast('Nothing to cut.');
+            }
+        });
+        addItem('copy', 'Copy', {
+            icon: '⧉', disabled: !hasSelection,
+            onClick: function () {
+                if (!copyTextToClipboard(selectedText)) showHadeedaToast('Nothing to copy.');
+            }
+        });
+        addItem('paste', 'Paste', {
+            icon: '📎', disabled: !editable,
+            onClick: function () { pasteIntoState(state); }
+        });
+
+        menu.addEventListener('contextmenu', function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+        menu.addEventListener('mousedown', function (ev) { ev.stopPropagation(); });
+        menu.addEventListener('click', function (ev) { ev.stopPropagation(); });
+
+        document.body.appendChild(menu);
+
+        const menuWidth = menu.offsetWidth;
+        const menuHeight = menu.offsetHeight;
+        let left = x;
+        let top = y;
+        if (left + menuWidth > window.innerWidth - 8) left = window.innerWidth - menuWidth - 8;
+        if (top + menuHeight > window.innerHeight - 8) top = window.innerHeight - menuHeight - 8;
+        if (left < 8) left = 8;
+        if (top < 8) top = 8;
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+
+        contextMenu = menu;
+
+        document.addEventListener('mousedown', onContextDocMouseDown, true);
+        document.addEventListener('touchstart', onContextDocMouseDown, true);
+        document.addEventListener('keydown', onContextKeyDown, true);
+        window.addEventListener('scroll', closeContextMenu, true);
+        window.addEventListener('resize', closeContextMenu, true);
+        window.addEventListener('hashchange', closeContextMenu);
+        window.addEventListener('popstate', closeContextMenu);
+    }
+
     // 1. Desktop Keyboard Trigger Listener (keyup)
     document.addEventListener('keyup', function (e) {
+        if (contextMenu && e.key === 'Escape') {
+            closeContextMenu();
+            return;
+        }
         if (popup && e.key === 'Escape') {
             closePopup();
             return;
@@ -896,20 +1241,24 @@
         }
     });
 
-    // 3. Desktop Right-Click Trigger (contextmenu) - (TASK-2026-00858)
+    // 3. Desktop Right-Click Trigger: custom Hadeeda context menu
     document.addEventListener("contextmenu", function (e) {
-        if (popup) return;
         const el = e.target;
         if (isExcluded(el)) return;
 
-        const isEdit = isEditable(el) || el.closest("input, textarea, [contenteditable=\"true\"], .ql-editor, .frappe-control, .form-control");
+        // Keep the browser's native menu inside the Hadeeda popup itself so
+        // copy/paste in the prompt box keeps working normally.
+        if (popup && popup.contains(el)) return;
+        if (popup) closePopup();
+
+        const isEdit = isEditable(el) || el.closest("input, textarea, [contenteditable=\"true\"], .ql-editor, .note-editable, .frappe-control, .form-control");
         const sel = window.getSelection ? window.getSelection().toString().trim() : "";
 
         // Allow right click inside editable fields, on selected text, or with Alt key
         if (!isEdit && !sel && !e.altKey) return;
 
         e.preventDefault();
-        showPopup(el, e.clientX, e.clientY);
+        showContextMenu(el, e.clientX, e.clientY);
     });
 
     // 4. Mobile Tap-and-Hold / Long-Press Trigger (550ms)
@@ -961,6 +1310,14 @@
         clearTimeout(touchTimer);
         touchTimer = null;
     }, { passive: true });
+
+    // Close the custom menu when Frappe navigates to another page/route.
+    if (window.frappe && frappe.router && frappe.router.on) {
+        frappe.router.on('change', function () {
+            closeContextMenu();
+            closePopup();
+        });
+    }
 
     document.addEventListener('click', function (e) {
         if (popup && !popup.contains(e.target) && targetState && e.target !== targetState.el) {

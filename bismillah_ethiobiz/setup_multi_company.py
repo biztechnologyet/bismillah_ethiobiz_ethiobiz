@@ -37,6 +37,16 @@ def after_migrate():
         ensure_booking_doctypes()
         ensure_bizride_doctypes()
 
+        # TASK-2026-00972: master-identity memberships + Theme-driven industries.
+        from bismillah_ethiobiz.company_access import (
+            backfill_memberships,
+            ensure_company_membership_schema,
+            seed_dobiz_industry_modules,
+        )
+        ensure_company_membership_schema()
+        seed_dobiz_industry_modules()
+        backfill_memberships()
+
         print("EthioBiz: Multi-company, Magala, BizBooking & BizRide setup complete.")
     except Exception as e:
         print(f"EthioBiz: Error in multi-company setup: {e}")

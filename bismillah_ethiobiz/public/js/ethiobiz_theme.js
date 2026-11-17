@@ -5,7 +5,7 @@
  * Manages strict separation of Dagu, Magala, Walta, and Tibeb branding.
  * Handles logos, backgrounds, and colors dynamically.
  * 
- * © 2025 EthioBiz | Powered by Biz Technology Solutions
+ * ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 2025 EthioBiz | Powered by Biz Technology Solutions
  */
 
 (function () {
@@ -117,7 +117,7 @@
         init() {
             if (this.initialized) return;
             window.__ethiobizBrandInitialized = true;
-            console.log('%c✨ EthioBiz Brand Manager Initializing...', 'color: #1FB6AE; font-weight: bold;');
+            console.log('%cÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“Ãƒâ€šÃ‚Â¨ EthioBiz Brand Manager Initializing...', 'color: #1FB6AE; font-weight: bold;');
 
             this.detectAndApply();
 
@@ -145,9 +145,11 @@
             // F. Global Sidebar Toggle (One-time registration via native delegation)
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.sidebar-toggle-btn, .toggle-sidebar')) {
-                    document.body.classList.toggle('sidebar-collapsed');
-                    const isNowCollapsed = document.body.classList.contains('sidebar-collapsed');
-                    console.log('[EthioBiz] Sidebar Toggled. Collapsed:', isNowCollapsed);
+                    if (typeof window.ethiobizToggleSidebar === 'function') {
+                        window.ethiobizToggleSidebar();
+                    } else {
+                        document.body.classList.toggle('sidebar-collapsed');
+                    }
                 }
             });
         }
@@ -182,7 +184,7 @@
 
         applyPillar() {
             const p = this.currentPillar;
-            console.log(`%c🎨 Applying Brand: ${p.name}`, `color: ${p.primary}; font-weight: bold;`);
+            console.log(`%cÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½Ãƒâ€šÃ‚Â¨ Applying Brand: ${p.name}`, `color: ${p.primary}; font-weight: bold;`);
 
             this.updateLogo(p.logo, p.name);
             this.updateColors(p.primary, p.rgb);
@@ -197,7 +199,12 @@
         }
 
         setDocumentBranding(p) {
-            document.title = `${p.name} | ${BRAND_CONFIG.app_name}`;
+            const appName = BRAND_CONFIG.app_name || 'EthioBiz';
+            const currentTitle = (document.title || '').trim();
+            const genericTitles = ['', appName, `${appName} | ${appName}`, 'Home', 'Shop', 'Login', 'Cart'];
+            if (!window.ETHIOBIZ_PRESERVE_TITLE && genericTitles.includes(currentTitle)) {
+                document.title = `${p.name} | ${appName}`;
+            }
             let themeColorMeta = document.querySelector('meta[name="theme-color"]');
             if (!themeColorMeta) {
                 themeColorMeta = document.createElement('meta');
@@ -414,7 +421,7 @@
         }
     }
 
-    // ─── Fetch & cache Theme Settings from API ───────────────────────────────
+    // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Fetch & cache Theme Settings from API ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
     function fetchAndCacheThemeSettings(callback) {
         if (window.__ethiobizThemeSettings) {
             if (callback) callback(window.__ethiobizThemeSettings);
@@ -442,8 +449,8 @@
         xhr.send();
     }
 
-    // ─── Apply Website / Desk icons from EthioBiz Theme Settings ───────────
-    // BISMALLAH (2026-09-10): custom icons are optional — empty settings keep
+    // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Apply Website / Desk icons from EthioBiz Theme Settings ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
+    // BISMALLAH (2026-09-10): custom icons are optional ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â empty settings keep
     // the default EthioBiz branding untouched. Website icon drives the navbar
     // brand + favicon; desk icon drives the Desk top-left brand.
     function applyThemeIcons(s) {
@@ -490,10 +497,10 @@
 
     window.EthioBizBrandManager = new BrandManager();
 
-    // ─── Optional dark-mode label color from Theme Settings ───────────────
+    // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Optional dark-mode label color from Theme Settings ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
     // BISMALLAH (2026-09-10): expose the chosen color as CSS custom properties
     // on :root. ethiobiz_theme.css reads these variables so EVERY form label
-    // and edit-tool control updates in real time — no <style> injection battle.
+    // and edit-tool control updates in real time ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â no <style> injection battle.
     function _shadeHex(hex, ratio) {
         hex = String(hex || '').trim().replace(/^#/, '');
         if (hex.length === 3) hex = hex.split('').map(function (ch) { return ch + ch; }).join('');
@@ -527,7 +534,7 @@
         applyThemeDarkLabel(s);
     });
 
-    // Desk content mounts asynchronously — retry icon override briefly
+    // Desk content mounts asynchronously ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â retry icon override briefly
     let _iconRetries = 0;
     const iconRetryTimer = setInterval(function() {
         if (++_iconRetries > 6) { clearInterval(iconRetryTimer); return; }
@@ -544,18 +551,104 @@
         if (typeof frappe === 'undefined') return;
         if (document.querySelector('.web-form')) return;
 
-    // Block "Try the new Print Designer" at source BEFORE it reaches DOM
-    // Override frappe Page prototype add_inner_message
-    if (frappe.ui && frappe.ui.Page) {
-        var _origAddInner = frappe.ui.Page.prototype.add_inner_message;
-        frappe.ui.Page.prototype.add_inner_message = function (msg) {
-            if (msg && typeof msg === 'string' && msg.indexOf('Print Designer') !== -1) {
-                return $(document.createElement('span')).addClass('inner-page-message text-muted small').hide();
-            }
-            return _origAddInner.call(this, msg);
-        };
+    // ---------------------------------------------------------------------
+    // Sidebar state (BISMALLAH 2026-11-17)
+    // Default: COLLAPSED on every full Desk load. The navbar button to the
+    // left of the EthioBiz logo toggles expand/collapse for the SPA session.
+    // Theme settings must never force the sidebar open or re-collapse it
+    // after the user toggles.
+    // ---------------------------------------------------------------------
+    function updateSidebarToggleUi(collapsed) {
+        const btn = document.getElementById('ethio-toggle-btn');
+        if (btn) {
+            const label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            btn.setAttribute('aria-pressed', collapsed ? 'true' : 'false');
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+            btn.classList.toggle('is-collapsed', !!collapsed);
+        }
+        const closeBtn = document.getElementById('ethio-sidebar-close');
+        if (closeBtn) {
+            closeBtn.setAttribute('title', 'Collapse sidebar');
+            closeBtn.setAttribute('aria-label', 'Collapse sidebar');
+        }
     }
 
+    // Tracks whether the user explicitly used the toggle/close/outside-click.
+    // Until they do, SPA route changes keep the sidebar collapsed by default.
+    let _sidebarUserToggled = false;
+
+    function setSidebarCollapsed(collapsed) {
+        if (!document.body) return;
+        const isCollapsed = !!collapsed;
+        document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+        // Explicit positive state. Older cached builds only knew
+        // `sidebar-collapsed` and removed it on load, which made the sidebar
+        // look permanently expanded. `sidebar-expanded` is only present when
+        // the user actually expanded the sidebar.
+        document.body.classList.toggle('sidebar-expanded', !isCollapsed);
+        if (!isCollapsed) {
+            document.body.classList.remove('sidebar-mobile-open');
+        }
+        updateSidebarToggleUi(isCollapsed);
+    }
+
+    function toggleSidebar() {
+        if (!document.body) return;
+        _sidebarUserToggled = true;
+        const next = !document.body.classList.contains('sidebar-collapsed');
+        setSidebarCollapsed(next);
+        console.log('[EthioBiz] Sidebar toggled. Collapsed:', next);
+    }
+
+    window.ethiobizToggleSidebar = toggleSidebar;
+    window.ethiobizSetSidebarCollapsed = setSidebarCollapsed;
+
+    // Apply before the async theme-settings request so Desk never paints
+    // with an expanded sidebar on first load.
+    setSidebarCollapsed(true);
+    if (!document.body) {
+        document.addEventListener('DOMContentLoaded', function () {
+            setSidebarCollapsed(true);
+        }, { once: true });
+    }
+
+    // Block "Try the new Print Designer" at source BEFORE it reaches DOM.
+    // `frappe.ready` is NOT guaranteed to exist when app_include_js runs
+    // (desk.bundle loads later). Calling it unconditionally used to throw
+    // "frappe.ready is not a function" here and abort the whole sidebar IIFE
+    // before the CSS/button injection ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â leaving the sidebar permanently open.
+    function whenFrappeReady(fn) {
+        if (typeof frappe !== 'undefined' && typeof frappe.ready === 'function') {
+            frappe.ready(fn);
+            return;
+        }
+        let tries = 0;
+        const timer = setInterval(function () {
+            if (typeof frappe !== 'undefined' && typeof frappe.ready === 'function') {
+                clearInterval(timer);
+                frappe.ready(fn);
+            } else if (++tries > 200) {
+                clearInterval(timer);
+                try { fn(); } catch (e) { /* non-fatal */ }
+            }
+        }, 50);
+    }
+
+    whenFrappeReady(function () {
+        if (frappe.ui && frappe.ui.Page) {
+            var _origAddInner = frappe.ui.Page.prototype.add_inner_message;
+            frappe.ui.Page.prototype.add_inner_message = function (msg) {
+                if (msg && typeof msg === 'string' && msg.indexOf('Print Designer') !== -1) {
+                    return $(document.createElement('span')).addClass('inner-page-message text-muted small').hide();
+                }
+                return _origAddInner.call(this, msg);
+            };
+        }
+    });
+
+    console.log('[EthioBiz] Sidebar init start (build 2026-11-18-v2.5.5-title-preserve)');
     console.log('[EthioBiz] V6 Sidebar Init via Theme - ' + new Date().toISOString());
 
     const css = `
@@ -576,6 +669,10 @@
             width: var(--sidebar-width) !important;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            touch-action: pan-y !important;
             padding-top: 50px !important;
         }
         
@@ -658,7 +755,14 @@
             .layout-side-section {
                 width: 85% !important;
                 max-width: 300px !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
                 transform: translateX(-100%) !important; /* Hidden by default on mobile */
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+                touch-action: pan-y !important;
             }
             
             /* Show sidebar when active */
@@ -767,7 +871,787 @@
                 display: none !important;
             }
         }
-        
+
+        /* ------------------------------------------------------------------
+         * 5. Mobile Workspace drawer polish (2026-11-17)
+         * Scope is intentionally limited to body.ethio-mobile-workspace
+         * inside the phone breakpoint. Desktop and the internal doctype
+         * mobile drawer keep their existing look.
+         * ------------------------------------------------------------------ */
+        .ethio-mobile-ws-header { display: none; }
+
+        @media (max-width: 991px) {
+            /* The drawer starts below the sticky navbar (50px) so the
+             * hamburger and close affordance never sit underneath it. */
+            body.ethio-mobile-workspace .layout-side-section {
+                top: 50px !important;
+                height: calc(100dvh - 50px) !important;
+                max-height: calc(100dvh - 50px) !important;
+                width: min(86vw, 320px) !important;
+                max-width: 320px !important;
+                padding-top: 8px !important;
+                padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+                border-radius: 0 22px 22px 0 !important;
+                border-right: 1px solid rgba(255,255,255,0.12) !important;
+                box-shadow: 18px 0 48px rgba(0,0,0,0.45) !important;
+                background: linear-gradient(180deg, rgba(14,26,26,0.98) 0%, rgba(9,17,17,0.99) 100%) !important;
+                backdrop-filter: blur(24px) !important;
+                -webkit-backdrop-filter: blur(24px) !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+                touch-action: pan-y !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .layout-side-section {
+                background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+                border-right-color: rgba(15,23,42,0.08) !important;
+                box-shadow: 18px 0 48px rgba(15,23,42,0.18) !important;
+            }
+
+            /* Header card: workspace identity + close-safe padding */
+            body.ethio-mobile-workspace .ethio-mobile-ws-header {
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
+                padding: 8px 52px 14px 16px !important;
+                margin: 0 0 8px 0 !important;
+                border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .ethio-mobile-ws-header {
+                border-bottom-color: rgba(15,23,42,0.08) !important;
+            }
+
+            body.ethio-mobile-workspace .ethio-mobile-ws-icon {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 38px !important;
+                height: 38px !important;
+                flex: 0 0 auto !important;
+                border-radius: 12px !important;
+                color: #ffffff !important;
+                background: linear-gradient(135deg, #1FB6AE 0%, #0f766e 100%) !important;
+                box-shadow: 0 6px 16px rgba(31,182,174,0.35) !important;
+            }
+
+            body.ethio-mobile-workspace .ethio-mobile-ws-text {
+                display: flex !important;
+                flex-direction: column !important;
+                min-width: 0 !important;
+            }
+
+            body.ethio-mobile-workspace .ethio-mobile-ws-kicker {
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+                letter-spacing: 0.16em !important;
+                text-transform: uppercase !important;
+                font-weight: 700 !important;
+                color: rgba(248,246,242,0.62) !important;
+            }
+
+            body.ethio-mobile-workspace .ethio-mobile-ws-title {
+                font-size: 18px !important;
+                line-height: 1.25 !important;
+                font-weight: 700 !important;
+                color: #ffffff !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .ethio-mobile-ws-kicker {
+                color: rgba(15,23,42,0.55) !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .ethio-mobile-ws-title {
+                color: #0f172a !important;
+            }
+
+            /* Rounded, touch-friendly workspace links */
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item {
+                margin: 4px 10px !important;
+                padding: 0 !important;
+                border-radius: 12px !important;
+                background: transparent !important;
+                transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item .item-anchor {
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                padding: 11px 12px !important;
+                border-radius: 12px !important;
+                font-size: 14.5px !important;
+                font-weight: 500 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected {
+                background: linear-gradient(90deg, rgba(31,182,174,0.24) 0%, rgba(31,182,174,0.06) 100%) !important;
+                box-shadow: inset 3px 0 0 #1FB6AE, 0 6px 18px rgba(31,182,174,0.10) !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-label {
+                color: #ffffff !important;
+                font-weight: 650 !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item .sidebar-item-icon {
+                color: rgba(248,246,242,0.68) !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-icon {
+                color: #5eead4 !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-label {
+                color: #0f172a !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-icon {
+                color: #0f766e !important;
+            }
+
+            /* Section captions: small, quiet, uppercase */
+            body.ethio-mobile-workspace .layout-side-section .standard-sidebar-label {
+                padding: 14px 18px 6px !important;
+                opacity: 0.85 !important;
+            }
+
+            body.ethio-mobile-workspace .layout-side-section .standard-sidebar-label .section-title {
+                font-size: 10.5px !important;
+                letter-spacing: 0.14em !important;
+                text-transform: uppercase !important;
+                font-weight: 700 !important;
+                color: rgba(248,246,242,0.58) !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace .layout-side-section .standard-sidebar-label .section-title {
+                color: rgba(15,23,42,0.52) !important;
+            }
+
+            /* Keep the mobile drawer clean: no edit/duplicate controls */
+            body.ethio-mobile-workspace .layout-side-section .sidebar-item-control {
+                display: none !important;
+            }
+
+            /* Circular glass close button, positioned inside the drawer */
+            body.ethio-mobile-workspace #ethio-sidebar-close {
+                top: 10px !important;
+                right: 14px !important;
+                width: 34px !important;
+                height: 34px !important;
+                border-radius: 50% !important;
+                background: rgba(255,255,255,0.12) !important;
+                color: #ffffff !important;
+                border: 1px solid rgba(255,255,255,0.18) !important;
+                backdrop-filter: blur(8px) !important;
+                -webkit-backdrop-filter: blur(8px) !important;
+                box-shadow: 0 4px 14px rgba(0,0,0,0.20) !important;
+            }
+
+            [data-theme="light"] body.ethio-mobile-workspace #ethio-sidebar-close {
+                background: rgba(15,23,42,0.06) !important;
+                color: #0f172a !important;
+                border-color: rgba(15,23,42,0.08) !important;
+            }
+
+            body.ethio-mobile-workspace #ethio-mobile-hamburger {
+                background: linear-gradient(135deg, rgba(31,182,174,0.18) 0%, rgba(31,182,174,0.06) 100%) !important;
+                border-color: rgba(31,182,174,0.35) !important;
+                color: #1FB6AE !important;
+                border-radius: 10px !important;
+            }
+
+            body.ethio-mobile-workspace.sidebar-mobile-open .ethio-mobile-overlay {
+                background: rgba(2,6,23,0.55) !important;
+                backdrop-filter: blur(2px) !important;
+                -webkit-backdrop-filter: blur(2px) !important;
+            }
+
+            /* Slim, themed scrollbar inside the drawer */
+            body.ethio-mobile-workspace .layout-side-section::-webkit-scrollbar {
+                width: 4px !important;
+            }
+            body.ethio-mobile-workspace .layout-side-section::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.22) !important;
+                border-radius: 999px !important;
+            }
+            [data-theme="light"] body.ethio-mobile-workspace .layout-side-section::-webkit-scrollbar-thumb {
+                background: rgba(15,23,42,0.18) !important;
+            }
+        }
+
+        /* ------------------------------------------------------------------
+         * 6. Unified polished sidebar (desktop + doctype + mobile)
+         *    Same visual language as the mobile Workspace drawer:
+         *    glass panel, rounded cards, teal selected state, header card.
+         *    Desktop keeps its 230px width and collapse/offset behavior.
+         *    Internal doctype list/form sidebars get the same treatment.
+         * ------------------------------------------------------------------ */
+        body .layout-side-section {
+            background: linear-gradient(180deg, rgba(14,26,26,0.98) 0%, rgba(9,17,17,0.99) 100%) !important;
+            border-right: 1px solid rgba(255,255,255,0.12) !important;
+            border-radius: 0 22px 22px 0 !important;
+            box-shadow: 18px 0 48px rgba(0,0,0,0.32) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            /* Bootstrap's col-lg-2 adds 15px side padding. Remove it so the
+             * header, cards and close button use the full 230px rail. */
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        [data-theme="light"] body .layout-side-section {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+            border-right-color: rgba(15,23,42,0.08) !important;
+            box-shadow: 18px 0 48px rgba(15,23,42,0.12) !important;
+        }
+
+        /* Header card shared by workspace, doctype list and doctype form */
+        body .ethio-mobile-ws-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 10px 52px 14px 16px !important;
+            margin: 0 0 8px 0 !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            background: linear-gradient(180deg, rgba(31,182,174,0.06) 0%, rgba(31,182,174,0) 100%) !important;
+        }
+
+        [data-theme="light"] body .ethio-mobile-ws-header {
+            border-bottom-color: rgba(15,23,42,0.08) !important;
+            background: linear-gradient(180deg, rgba(31,182,174,0.06) 0%, rgba(31,182,174,0) 100%) !important;
+        }
+
+        body .ethio-mobile-ws-icon {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 34px !important;
+            height: 34px !important;
+            flex: 0 0 auto !important;
+            border-radius: 11px !important;
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #1FB6AE 0%, #0f766e 100%) !important;
+            box-shadow: 0 6px 16px rgba(31,182,174,0.35) !important;
+        }
+
+        body .ethio-mobile-ws-icon .ethio-ws-icon-list { display: none !important; }
+        body .ethio-mobile-ws-header[data-kind="doctype"] .ethio-ws-icon-grid { display: none !important; }
+        body .ethio-mobile-ws-header[data-kind="doctype"] .ethio-ws-icon-list { display: block !important; }
+
+        body .ethio-mobile-ws-text {
+            display: flex !important;
+            flex-direction: column !important;
+            min-width: 0 !important;
+        }
+
+        body .ethio-mobile-ws-kicker {
+            font-size: 10px !important;
+            line-height: 1.2 !important;
+            letter-spacing: 0.16em !important;
+            text-transform: uppercase !important;
+            font-weight: 700 !important;
+            color: rgba(248,246,242,0.62) !important;
+        }
+
+        body .ethio-mobile-ws-title {
+            font-size: 16px !important;
+            line-height: 1.25 !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        [data-theme="light"] body .ethio-mobile-ws-kicker { color: rgba(15,23,42,0.55) !important; }
+        [data-theme="light"] body .ethio-mobile-ws-title { color: #0f172a !important; }
+
+        /* Circular glass close button. On desktop it sits just below the
+         * navbar (top 60) beside the header; mobile overrides it to top 10
+         * inside the drawer. */
+        body #ethio-sidebar-close {
+            top: 60px !important;
+            right: 12px !important;
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 50% !important;
+            background: rgba(255,255,255,0.10) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255,255,255,0.16) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.16) !important;
+        }
+
+        [data-theme="light"] body #ethio-sidebar-close {
+            background: rgba(15,23,42,0.06) !important;
+            color: #0f172a !important;
+            border-color: rgba(15,23,42,0.08) !important;
+        }
+
+        body #ethio-sidebar-close:hover {
+            background: rgba(239,68,68,0.16) !important;
+            color: #ef4444 !important;
+            border-color: rgba(239,68,68,0.30) !important;
+        }
+
+        /* Slim, themed scrollbar */
+        body .layout-side-section::-webkit-scrollbar { width: 4px !important; }
+        body .layout-side-section::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.22) !important;
+            border-radius: 999px !important;
+        }
+        [data-theme="light"] body .layout-side-section::-webkit-scrollbar-thumb {
+            background: rgba(15,23,42,0.18) !important;
+        }
+
+        /* Workspace standard items */
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item {
+            margin: 4px 10px !important;
+            padding: 0 !important;
+            border-radius: 10px !important;
+            background: transparent !important;
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item .item-anchor {
+            display: flex !important;
+            align-items: center !important;
+            gap: 9px !important;
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            color: rgba(248,246,242,0.92) !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .desk-sidebar-item.standard-sidebar-item .item-anchor {
+            color: #0f172a !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item:hover {
+            background: rgba(31,182,174,0.10) !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected {
+            background: linear-gradient(90deg, rgba(31,182,174,0.22) 0%, rgba(31,182,174,0.05) 100%) !important;
+            box-shadow: inset 3px 0 0 #1FB6AE, 0 6px 18px rgba(31,182,174,0.08) !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-label {
+            color: #ffffff !important;
+            font-weight: 650 !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-label {
+            color: #0f172a !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item .sidebar-item-icon {
+            color: rgba(248,246,242,0.66) !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-icon {
+            color: #5eead4 !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .desk-sidebar-item.standard-sidebar-item.selected .sidebar-item-icon {
+            color: #0f766e !important;
+        }
+
+        body .layout-side-section .standard-sidebar-label {
+            padding: 12px 16px 4px !important;
+            opacity: 0.85 !important;
+        }
+
+        body .layout-side-section .standard-sidebar-label .section-title {
+            font-size: 10px !important;
+            letter-spacing: 0.14em !important;
+            text-transform: uppercase !important;
+            font-weight: 700 !important;
+            color: rgba(248,246,242,0.58) !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .standard-sidebar-label .section-title {
+            color: rgba(15,23,42,0.52) !important;
+        }
+
+        body .layout-side-section .sidebar-item-control {
+            opacity: 0 !important;
+            transition: opacity 0.15s ease !important;
+        }
+
+        body .layout-side-section .desk-sidebar-item.standard-sidebar-item:hover .sidebar-item-control {
+            opacity: 1 !important;
+        }
+
+        /* Doctype list sidebar cards */
+        body .layout-side-section .list-sidebar .sidebar-menu {
+            padding: 4px 10px !important;
+        }
+
+        body .layout-side-section .list-sidebar .sidebar-menu li {
+            margin: 4px 0 !important;
+        }
+
+        body .layout-side-section .list-sidebar .dropdown-menu li {
+            margin: 0 !important;
+        }
+
+        body .layout-side-section .list-sidebar .sidebar-label {
+            padding: 12px 8px 4px !important;
+            font-size: 10px !important;
+            letter-spacing: 0.14em !important;
+            text-transform: uppercase !important;
+            font-weight: 700 !important;
+            color: rgba(248,246,242,0.58) !important;
+            opacity: 0.9 !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .list-sidebar .sidebar-label {
+            color: rgba(15,23,42,0.52) !important;
+        }
+
+        body .layout-side-section .list-sidebar .list-sidebar-button,
+        body .layout-side-section .list-sidebar .btn-default,
+        body .layout-side-section .list-sidebar .btn-primary,
+        body .layout-side-section .list-sidebar .list-link > a:not(.dropdown-item) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            width: 100% !important;
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            color: rgba(248,246,242,0.92) !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            box-shadow: none !important;
+            text-align: left !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .list-sidebar .list-sidebar-button,
+        [data-theme="light"] body .layout-side-section .list-sidebar .btn-default,
+        [data-theme="light"] body .layout-side-section .list-sidebar .btn-primary,
+        [data-theme="light"] body .layout-side-section .list-sidebar .list-link > a:not(.dropdown-item) {
+            background: rgba(15,23,42,0.035) !important;
+            border-color: rgba(15,23,42,0.08) !important;
+            color: #0f172a !important;
+        }
+
+        body .layout-side-section .list-sidebar .list-sidebar-button:hover,
+        body .layout-side-section .list-sidebar .btn-default:hover,
+        body .layout-side-section .list-sidebar .btn-primary:hover,
+        body .layout-side-section .list-sidebar .list-link > a:not(.dropdown-item):hover {
+            background: rgba(31,182,174,0.10) !important;
+            border-color: rgba(31,182,174,0.25) !important;
+        }
+
+        body .layout-side-section .list-sidebar .current-view {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+        }
+
+        body .layout-side-section .list-sidebar .current-view .list-link {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+        }
+
+        body .layout-side-section .list-sidebar .sidebar-action > a {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 30px !important;
+            height: 30px !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            color: rgba(248,246,242,0.72) !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .list-sidebar .sidebar-action > a {
+            color: rgba(15,23,42,0.62) !important;
+        }
+
+        body .layout-side-section .list-sidebar .sidebar-action > a:hover {
+            background: rgba(31,182,174,0.12) !important;
+            color: #1FB6AE !important;
+        }
+
+        body .layout-side-section .list-sidebar .divider {
+            border-top: 1px solid rgba(255,255,255,0.08) !important;
+            margin: 8px 0 !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .list-sidebar .divider {
+            border-top-color: rgba(15,23,42,0.08) !important;
+        }
+
+        body .layout-side-section .list-sidebar .sidebar-section {
+            margin-bottom: 8px !important;
+        }
+
+        /* Doctype form sidebar cards */
+        body .layout-side-section .form-sidebar .sidebar-menu {
+            padding: 4px 10px !important;
+        }
+
+        body .layout-side-section .form-sidebar .sidebar-menu > li {
+            margin: 6px 0 !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
+            background: rgba(255,255,255,0.055) !important;
+            border: 1px solid rgba(255,255,255,0.09) !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .form-sidebar .sidebar-menu > li {
+            background: rgba(15,23,42,0.035) !important;
+            border-color: rgba(15,23,42,0.08) !important;
+        }
+
+        body .layout-side-section .form-sidebar .form-sidebar-items {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+        }
+
+        body .layout-side-section .form-sidebar .add-assignment-label,
+        body .layout-side-section .form-sidebar .attachments-actions span,
+        body .layout-side-section .form-sidebar .pill-label {
+            color: rgba(248,246,242,0.92) !important;
+            font-size: 13px !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .form-sidebar .add-assignment-label,
+        [data-theme="light"] body .layout-side-section .form-sidebar .attachments-actions span,
+        [data-theme="light"] body .layout-side-section .form-sidebar .pill-label {
+            color: #0f172a !important;
+        }
+
+        body .layout-side-section .form-sidebar .add-assignment-btn {
+            color: #5eead4 !important;
+            background: rgba(31,182,174,0.10) !important;
+            border-radius: 8px !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .form-sidebar .add-assignment-btn {
+            color: #0f766e !important;
+        }
+
+        body .layout-side-section .form-sidebar .sidebar-image-wrapper {
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        body .layout-side-section .form-sidebar .sidebar-image {
+            border-radius: 10px !important;
+        }
+
+        /* Respect Frappe's own hide/hidden classes inside the form sidebar.
+         * The mobile base rules unhide the sidebar wrapper itself, but they
+         * must not resurrect intentionally hidden sections or empty
+         * placeholder rows (Follow, page views, auto-repeat, etc.). */
+        body .layout-side-section .form-sidebar .hide,
+        body .layout-side-section .form-sidebar .hidden,
+        body .layout-side-section .form-sidebar .hidden-xs,
+        body .layout-side-section .form-sidebar .hidden-sm,
+        body .layout-side-section .form-sidebar .ethio-empty-sidebar-item,
+        body .layout-side-section .form-sidebar .ethio-empty-sidebar-section {
+            display: none !important;
+        }
+
+        body .layout-side-section .form-sidebar hr {
+            border: 0 !important;
+            border-top: 1px solid rgba(255,255,255,0.08) !important;
+            margin: 10px 10px !important;
+        }
+
+        [data-theme="light"] body .layout-side-section .form-sidebar hr {
+            border-top-color: rgba(15,23,42,0.08) !important;
+        }
+
+        /* Frappe/Bootstrap can leave an invisible backdrop behind after a
+         * modal closes. It must never swallow taps on the page or drawer. */
+        .modal-backdrop.fade:not(.show) {
+            display: none !important;
+            pointer-events: none !important;
+        }
+
+        /* Mobile: every sidebar becomes the same polished drawer */
+        @media (max-width: 991px) {
+            /* The drawer and overlay live inside .layout-main. Frappe's
+             * .page-head uses z-index:10, which otherwise paints over the
+             * top strip of the drawer and swallows taps on the close
+             * button. Raise the drawer's stacking context above page chrome
+             * but keep it below the 1020 navbar so the hamburger remains
+             * tappable while the drawer is open. */
+            body .layout-main {
+                z-index: 1010 !important;
+            }
+
+            /* Some Desk layouts wrap the drawer and sticky page actions in
+             * .container.page-body, which creates its own stacking context.
+             * Raise that wrapper only while the drawer is open so the close
+             * button and drawer links sit above .page-head/.page-actions,
+             * but keep it below the 1020 navbar so the hamburger still works. */
+            body.sidebar-mobile-open .container.page-body {
+                z-index: 1001 !important;
+            }
+
+            body .layout-side-section {
+                top: 50px !important;
+                height: calc(100dvh - 50px) !important;
+                max-height: calc(100dvh - 50px) !important;
+                width: min(86vw, 320px) !important;
+                max-width: 320px !important;
+                padding-top: 8px !important;
+                padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+                border-radius: 0 22px 22px 0 !important;
+                border-right: 1px solid rgba(255,255,255,0.12) !important;
+                box-shadow: 18px 0 48px rgba(0,0,0,0.45) !important;
+                background: linear-gradient(180deg, rgba(14,26,26,0.98) 0%, rgba(9,17,17,0.99) 100%) !important;
+                backdrop-filter: blur(24px) !important;
+                -webkit-backdrop-filter: blur(24px) !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+                touch-action: pan-y !important;
+            }
+
+            [data-theme="light"] body .layout-side-section {
+                background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+                border-right-color: rgba(15,23,42,0.08) !important;
+                box-shadow: 18px 0 48px rgba(15,23,42,0.18) !important;
+            }
+
+            body .layout-side-section.hide-sidebar,
+            body.ethio-no-sidebar .layout-side-section {
+                display: none !important;
+            }
+
+            body.ethio-no-sidebar #ethio-mobile-hamburger,
+            body.ethio-no-sidebar .ethio-mobile-overlay {
+                display: none !important;
+            }
+
+            body #ethio-sidebar-close {
+                top: 10px !important;
+                right: 14px !important;
+                width: 34px !important;
+                height: 34px !important;
+            }
+
+            body #ethio-mobile-hamburger {
+                background: linear-gradient(135deg, rgba(31,182,174,0.18) 0%, rgba(31,182,174,0.06) 100%) !important;
+                border-color: rgba(31,182,174,0.35) !important;
+                color: #1FB6AE !important;
+                border-radius: 10px !important;
+            }
+
+            body.sidebar-mobile-open .ethio-mobile-overlay {
+                background: rgba(2,6,23,0.55) !important;
+                backdrop-filter: blur(2px) !important;
+                -webkit-backdrop-filter: blur(2px) !important;
+            }
+
+            body .ethio-mobile-ws-icon {
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 12px !important;
+            }
+
+            body .ethio-mobile-ws-title {
+                font-size: 18px !important;
+            }
+
+            body .layout-side-section .sidebar-item-control {
+                display: none !important;
+            }
+
+            body .layout-side-section .desk-sidebar-item.standard-sidebar-item {
+                margin: 4px 10px !important;
+                padding: 0 !important;
+                border-radius: 12px !important;
+            }
+
+            body .layout-side-section .desk-sidebar-item.standard-sidebar-item .item-anchor {
+                gap: 10px !important;
+                padding: 11px 12px !important;
+                border-radius: 12px !important;
+                font-size: 14.5px !important;
+            }
+
+            body .layout-side-section .standard-sidebar-label {
+                padding: 14px 18px 6px !important;
+            }
+
+            body .layout-side-section .standard-sidebar-label .section-title {
+                font-size: 10.5px !important;
+            }
+
+            body .layout-side-section .list-sidebar .sidebar-menu {
+                padding: 4px 10px !important;
+            }
+
+            body .layout-side-section .list-sidebar .sidebar-label {
+                padding: 12px 8px 4px !important;
+                font-size: 10.5px !important;
+            }
+
+            body .layout-side-section .list-sidebar .list-sidebar-button,
+            body .layout-side-section .list-sidebar .btn-default,
+            body .layout-side-section .list-sidebar .btn-primary,
+            body .layout-side-section .list-sidebar .list-link > a:not(.dropdown-item) {
+                padding: 11px 12px !important;
+                border-radius: 12px !important;
+                font-size: 14px !important;
+            }
+
+            body .layout-side-section .list-sidebar .sidebar-action > a {
+                width: 34px !important;
+                height: 34px !important;
+                border-radius: 9px !important;
+            }
+
+            body .layout-side-section .form-sidebar .sidebar-menu {
+                padding: 4px 10px !important;
+            }
+
+            body .layout-side-section .form-sidebar .sidebar-menu > li {
+                padding: 11px 12px !important;
+                border-radius: 12px !important;
+            }
+
+            body .layout-side-section .form-sidebar .add-assignment-label,
+            body .layout-side-section .form-sidebar .attachments-actions span,
+            body .layout-side-section .form-sidebar .pill-label {
+                font-size: 14px !important;
+            }
+        }
+
         /* Desktop: hide mobile hamburger */
         @media (min-width: 992px) {
             #ethio-mobile-hamburger {
@@ -802,31 +1686,72 @@
         }
 
         // B. Desktop Toggle Button (for desktop)
-        if (brand && brand.parentElement && !document.getElementById('ethio-toggle-btn')) {
-            const btn = document.createElement('div');
-            btn.id = 'ethio-toggle-btn';
-            btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
-            btn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                document.body.classList.toggle('sidebar-collapsed');
-            };
-            brand.parentElement.insertBefore(btn, brand);
+        // Reuse an old button if a cached build already injected one, but
+        // always (re)attach the current handler and a11y attributes. An old
+        // `#ethio-toggle-btn` can survive an SPA render without a handler.
+        let toggleBtn = document.getElementById('ethio-toggle-btn');
+        if (!toggleBtn && brand && brand.parentElement) {
+            toggleBtn = document.createElement('div');
+            toggleBtn.id = 'ethio-toggle-btn';
+            toggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+            brand.parentElement.insertBefore(toggleBtn, brand);
             console.log('[EthioBiz] Desktop toggle button injected');
         }
-        
-        // C. Mobile Overlay (for closing sidebar when clicking outside)
-        if (!document.getElementById('ethio-mobile-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'ethio-mobile-overlay';
-            overlay.onclick = (e) => {
+        if (toggleBtn) {
+            toggleBtn.setAttribute('role', 'button');
+            toggleBtn.setAttribute('tabindex', '0');
+            if (!toggleBtn.querySelector('svg')) {
+                toggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+            }
+            toggleBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                document.body.classList.remove('sidebar-mobile-open');
-                console.log('[EthioBiz] Mobile sidebar closed via overlay');
+                toggleSidebar();
             };
-            document.body.appendChild(overlay);
+            toggleBtn.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleSidebar();
+                }
+            };
+            // Keep it immediately left of the main EthioBiz logo.
+            if (brand && brand.parentElement && toggleBtn.parentElement !== brand.parentElement) {
+                brand.parentElement.insertBefore(toggleBtn, brand);
+            }
+        }
+        updateSidebarToggleUi(document.body.classList.contains('sidebar-collapsed'));
+        
+        // C. Mobile Overlay (for closing sidebar when clicking outside)
+        //
+        // IMPORTANT STACKING NOTE (2026-11-17):
+        // `.layout-main` is `position: relative; z-index: 1`, so it creates a
+        // stacking context. The sidebar lives inside that context at z-index
+        // 1001. If the overlay is appended to <body> at z-index 1000 it is
+        // above the *whole* `.layout-main` context, including the open
+        // sidebar ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â every tap and scroll then hits the overlay and the drawer
+        // feels "inactive" on mobile. Appending the overlay to the sidebar's
+        // parent keeps it in the same context: 1000 < 1001 (sidebar) and
+        // 1000 > main content, while the sticky navbar (1020) stays above the
+        // overlay so the hamburger remains tappable to close the drawer.
+        let overlay = document.getElementById('ethio-mobile-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'ethio-mobile-overlay';
+            overlay.className = 'ethio-mobile-overlay';
             console.log('[EthioBiz] Mobile overlay injected');
+        }
+        overlay.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.body.classList.remove('sidebar-mobile-open');
+            console.log('[EthioBiz] Mobile sidebar closed via overlay');
+        };
+        const overlaySidebar = document.querySelector('.layout-side-section');
+        const overlayHost = (overlaySidebar && overlaySidebar.parentElement)
+            ? overlaySidebar.parentElement
+            : document.body;
+        if (overlay.parentElement !== overlayHost) {
+            overlayHost.appendChild(overlay);
         }
 
         // D. Close Button (works for both desktop and mobile)
@@ -838,7 +1763,7 @@
             closeBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                document.body.classList.add('sidebar-collapsed');
+                setSidebarCollapsed(true);
                 document.body.classList.remove('sidebar-mobile-open');
                 console.log('[EthioBiz] Sidebar closed (both modes)');
             };
@@ -886,6 +1811,228 @@
 
     }
 
+    // ---------------------------------------------------------------------
+    // Unified sidebar chrome (2026-11-17)
+    // The same header card, rounded items and glass panel are used by the
+    // desktop sidebar, the internal doctype list/form sidebars and the
+    // mobile drawer. The body class ethio-mobile-workspace is still used
+    // for the Workspace-specific mobile title and item accents.
+    // ---------------------------------------------------------------------
+    function isWorkspaceRoute() {
+        try {
+            if (typeof frappe !== 'undefined' && typeof frappe.get_route === 'function') {
+                const r = frappe.get_route();
+                if (r && r[0] === 'Workspaces') return true;
+            }
+        } catch (e) { /* route may not be ready yet */ }
+        const bodyRoute = document.body ? (document.body.getAttribute('data-route') || '') : '';
+        if (bodyRoute.indexOf('Workspaces/') === 0) return true;
+        return /^\/app\/private\/home/.test(window.location.pathname || '');
+    }
+
+    function isMobileViewport() {
+        return !!(window.matchMedia && window.matchMedia('(max-width: 991px)').matches);
+    }
+
+    function getSidebarHeaderInfo(side) {
+        let route = [];
+        try {
+            if (typeof frappe !== 'undefined' && typeof frappe.get_route === 'function') {
+                route = frappe.get_route() || [];
+            }
+        } catch (e) { route = []; }
+        const first = route[0] || '';
+        if (first === 'Workspaces') {
+            const sel = side.querySelector('.standard-sidebar-item.selected .sidebar-item-label, .desk-sidebar-item.selected .sidebar-item-label');
+            const title = sel ? (sel.textContent || '').trim() : 'Workspace';
+            return { kind: 'workspace', kicker: 'Workspace', title: title || 'Workspace' };
+        }
+        if (first === 'List' || first === 'Form' || first === 'Tree' ||
+            first === 'Report' || first === 'query-report' ||
+            first === 'Dashboard' || first === 'dashboard') {
+            return { kind: 'doctype', kicker: 'Menu', title: route[1] || first || 'Menu' };
+        }
+        return { kind: 'doctype', kicker: 'Menu', title: route[1] || first || 'Menu' };
+    }
+
+    function sidebarHasContent(side) {
+        if (!side || side.classList.contains('hide-sidebar')) return false;
+        const content = side.querySelector('.list-sidebar, .form-sidebar, .desk-sidebar, .sidebar-menu');
+        if (!content) return false;
+        // Do not rely on getBoundingClientRect here: while the mobile drawer is
+        // closed, or while the desktop form sidebar is display:none, every
+        // child rect is 0x0. That previously made us add `ethio-no-sidebar`,
+        // which set display:none and then kept the check permanently false.
+        try {
+            const cs = getComputedStyle(content);
+            if (cs.display === 'none' && !isMobileViewport()) return false;
+        } catch (e) { /* ignore */ }
+        const items = content.querySelectorAll('.standard-sidebar-item, .sidebar-item-container, .list-sidebar-button, .list-link, .sidebar-action, .sidebar-menu > li:not(.ethio-empty-sidebar-item), .form-sidebar .sidebar-menu > li:not(.ethio-empty-sidebar-item)');
+        if (items.length > 0) return true;
+        return !!(content.innerText && content.innerText.trim().length);
+    }
+
+    function hasVisibleText(li) {
+        if (li.classList.contains('hidden') || li.classList.contains('hide') ||
+            li.classList.contains('hidden-xs') || li.classList.contains('hidden-sm')) {
+            return false;
+        }
+        const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+            if (!node.nodeValue || !node.nodeValue.trim()) continue;
+            let parent = node.parentElement;
+            let hidden = false;
+            while (parent && parent !== li) {
+                if (parent.classList.contains('hidden') || parent.classList.contains('hide') ||
+                    parent.classList.contains('hidden-xs') || parent.classList.contains('hidden-sm') ||
+                    parent.getAttribute('aria-hidden') === 'true' ||
+                    (parent.style && (parent.style.display === 'none' || parent.style.visibility === 'hidden'))) {
+                    hidden = true;
+                    break;
+                }
+                parent = parent.parentElement;
+            }
+            if (!hidden) return true;
+        }
+        return false;
+    }
+
+    function decorateFormSidebar() {
+        const form = document.querySelector('.layout-side-section .form-sidebar');
+        if (!form) return;
+        form.querySelectorAll('.sidebar-menu').forEach(function(ul) {
+            if (ul.classList.contains('hide') || ul.classList.contains('hidden') ||
+                ul.classList.contains('hidden-xs') || ul.classList.contains('hidden-sm')) {
+                return;
+            }
+            let visible = false;
+            Array.from(ul.children).filter(function(el) { return el.tagName === 'LI'; }).forEach(function(li) {
+                let interactive = false;
+                li.querySelectorAll('img, input, textarea, select, button, a[href], .rating-icons, .sidebar-image, .form-sidebar-items').forEach(function(el) {
+                    if (interactive) return;
+                    const r = el.getBoundingClientRect();
+                    const cs = getComputedStyle(el);
+                    if (r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden') interactive = true;
+                });
+                const meaningful = hasVisibleText(li) || interactive;
+                li.classList.toggle('ethio-empty-sidebar-item', !meaningful);
+                if (meaningful && getComputedStyle(li).display !== 'none') visible = true;
+            });
+            let directContent = false;
+            Array.from(ul.children).forEach(function(child) {
+                if (child.tagName === 'LI') return;
+                const r = child.getBoundingClientRect();
+                const cs = getComputedStyle(child);
+                if (r.width <= 0 || r.height <= 0 || cs.display === 'none' || cs.visibility === 'hidden') return;
+                const text = (child.innerText || '').replace(/\s+/g, ' ').trim();
+                let media = false;
+                child.querySelectorAll('img, input, textarea, select, button, a[href], svg').forEach(function(el) {
+                    if (media) return;
+                    const er = el.getBoundingClientRect();
+                    const ecs = getComputedStyle(el);
+                    if (er.width > 0 && er.height > 0 && ecs.display !== 'none' && ecs.visibility !== 'hidden') media = true;
+                });
+                if (text.length > 0 || media) directContent = true;
+            });
+            ul.classList.toggle('ethio-empty-sidebar-section', !visible && !directContent);
+        });
+    }
+
+    // Frappe reveals/hides form-sidebar rows by toggling classes (for example
+    // the Follow/Unfollow links start visible and become `.hidden` after the
+    // document loads). Observe only the form sidebar and only class/style
+    // changes, then re-evaluate which rows are meaningful. Do not reuse the
+    // global sidebar observer here: forceUI writes ARIA attributes on every
+    // pass and an attributes:true global observer would feed itself.
+    let _formSidebarObserver = null;
+    let _formSidebarObserverTarget = null;
+
+    function ensureFormSidebarObserver() {
+        const form = document.querySelector('.layout-side-section .form-sidebar');
+        if (!form) {
+            if (_formSidebarObserver) {
+                _formSidebarObserver.disconnect();
+                _formSidebarObserver = null;
+                _formSidebarObserverTarget = null;
+            }
+            return;
+        }
+        if (_formSidebarObserver && _formSidebarObserverTarget === form) return;
+        if (_formSidebarObserver) _formSidebarObserver.disconnect();
+        _formSidebarObserverTarget = form;
+        _formSidebarObserver = new MutationObserver(function() {
+            decorateFormSidebar();
+        });
+        _formSidebarObserver.observe(form, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+    }
+
+    function ensureSidebarHeader() {
+        const side = document.querySelector('.layout-side-section');
+        if (!side) return;
+        const hasContent = sidebarHasContent(side);
+        document.body.classList.toggle('ethio-no-sidebar', !hasContent);
+        let header = side.querySelector('.ethio-mobile-ws-header');
+        if (!hasContent) {
+            if (header) header.remove();
+            return;
+        }
+        if (!header) {
+            header = document.createElement('div');
+            header.className = 'ethio-mobile-ws-header';
+            header.innerHTML =
+                '<div class="ethio-mobile-ws-icon" aria-hidden="true">' +
+                    '<svg class="ethio-ws-icon-grid" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<rect x="3" y="3" width="7" height="7" rx="1.5"></rect>' +
+                        '<rect x="14" y="3" width="7" height="7" rx="1.5"></rect>' +
+                        '<rect x="3" y="14" width="7" height="7" rx="1.5"></rect>' +
+                        '<rect x="14" y="14" width="7" height="7" rx="1.5"></rect>' +
+                    '</svg>' +
+                    '<svg class="ethio-ws-icon-list" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<line x1="8" y1="6" x2="21" y2="6"></line>' +
+                        '<line x1="8" y1="12" x2="21" y2="12"></line>' +
+                        '<line x1="8" y1="18" x2="21" y2="18"></line>' +
+                        '<line x1="3" y1="6" x2="3.01" y2="6"></line>' +
+                        '<line x1="3" y1="12" x2="3.01" y2="12"></line>' +
+                        '<line x1="3" y1="18" x2="3.01" y2="18"></line>' +
+                    '</svg>' +
+                '</div>' +
+                '<div class="ethio-mobile-ws-text">' +
+                    '<span class="ethio-mobile-ws-kicker">Menu</span>' +
+                    '<span class="ethio-mobile-ws-title">Menu</span>' +
+                '</div>';
+            // Insert before the scrollable sidebar content but after the
+            // absolute close button, so the header scrolls with the menu.
+            const content = side.querySelector('.list-sidebar, .form-sidebar, .desk-sidebar, .sidebar-menu');
+            if (content) side.insertBefore(header, content);
+            else side.appendChild(header);
+        }
+        const info = getSidebarHeaderInfo(side);
+        header.setAttribute('data-kind', info.kind);
+        const kickerEl = header.querySelector('.ethio-mobile-ws-kicker');
+        const titleEl = header.querySelector('.ethio-mobile-ws-title');
+        if (kickerEl && kickerEl.textContent !== info.kicker) kickerEl.textContent = info.kicker;
+        if (titleEl && titleEl.textContent !== info.title) titleEl.textContent = info.title;
+    }
+
+    function updateSidebarChrome() {
+        if (!document.body) return;
+        const activeWs = isWorkspaceRoute() && isMobileViewport();
+        document.body.classList.toggle('ethio-mobile-workspace', activeWs);
+        decorateFormSidebar();
+        ensureFormSidebarObserver();
+        ensureSidebarHeader();
+        // Never leave the mobile drawer state on when returning to desktop.
+        if (!isMobileViewport()) {
+            document.body.classList.remove('sidebar-mobile-open');
+        }
+    }
+
     let sidebarObserver = null;
     let _forceUIPending = false;
 
@@ -912,20 +2059,11 @@
 
     function applySidebarPolicy(conf) {
         forceUI();
+        updateSidebarChrome();
+        // Default collapsed is applied at script load. Do not re-apply here:
+        // the async settings response must not override the user's toggle.
         if (conf && conf.hide_sidebar === false) {
-            document.body.classList.remove('sidebar-collapsed');
-            console.log('[EthioBiz] Sidebar ENABLED via EthioBiz Theme settings');
-            return;
-        }
-        if (document.querySelector('.desk-container')) {
-            let collapseCount = 0;
-            let collapseInterval = setInterval(() => {
-                if (!document.body.classList.contains('sidebar-collapsed')) {
-                    document.body.classList.add('sidebar-collapsed');
-                    console.log('[EthioBiz] Forced collapse');
-                }
-                if (++collapseCount > 15) clearInterval(collapseInterval);
-            }, 200);
+            console.log('[EthioBiz] Sidebar enabled; default remains collapsed until the toggle is used.');
         }
     }
 
@@ -948,6 +2086,7 @@
             _forceUIPending = true;
             requestAnimationFrame(() => {
                 forceUI();
+                updateSidebarChrome();
                 _forceUIPending = false;
             });
         }
@@ -958,20 +2097,59 @@
         sidebarObserver.observe(document.body, { childList: true, subtree: true });
     }
 
-    // BISMALLAH: Auto-collapse workspace sidebar when clicked outside
+    // BISMALLAH: Clicking outside the sidebar collapses it. The navbar toggle,
+    // the sidebar close button and the mobile hamburger are excluded so the
+    // capture listener never fights the explicit toggle action.
     document.addEventListener('click', function (e) {
         const sidebar = document.querySelector('.layout-side-section, .desk-sidebar, .workspace-sidebar');
-        const toggleBtn = document.querySelector('.sidebar-toggle-btn, .navbar-sidebar-toggle, .toggle-sidebar, .page-head .page-title [data-action="toggle-sidebar"]');
-        
-        if (sidebar && !document.body.classList.contains('sidebar-collapsed')) {
-            if (!sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
-                const mainSection = document.querySelector('.layout-main-section, .page-container, .main-section, .page-head');
-                if (mainSection && mainSection.contains(e.target)) {
-                    document.body.classList.add('sidebar-collapsed');
-                    sidebar.classList.remove('opened');
-                }
+        if (!sidebar) return;
+        if (!(e.target instanceof Element)) return;
+        // Native Frappe may add `sidebar-collapsed` first; if our explicit
+        // `sidebar-expanded` is still present, normalize the state instead of
+        // returning early (otherwise the button UI stays stale).
+        if (document.body.classList.contains('sidebar-collapsed') &&
+            !document.body.classList.contains('sidebar-expanded')) return;
+        if (sidebar.contains(e.target)) return;
+        if (e.target.closest('#ethio-toggle-btn, #ethio-sidebar-close, #ethio-mobile-hamburger, .sidebar-toggle-btn, .navbar-sidebar-toggle, .toggle-sidebar, .page-head .page-title [data-action="toggle-sidebar"]')) return;
+        setSidebarCollapsed(true);
+        sidebar.classList.remove('opened');
+        document.body.classList.remove('sidebar-mobile-open');
+        console.log('[EthioBiz] Sidebar collapsed via outside click');
+    }, true);
+
+    // SPA route safety net: if the user has never toggled, keep the sidebar
+    // collapsed across Workspace/Form/List transitions. Once the user makes an
+    // explicit choice, respect it for the rest of the session.
+    if (typeof frappe !== 'undefined' && frappe.router && typeof frappe.router.on === 'function') {
+        frappe.router.on('change', function () {
+            if (!_sidebarUserToggled) {
+                setSidebarCollapsed(true);
             }
-        }
+            // On phones the drawer is an overlay; it must never survive a
+            // route change and hide the page the user just navigated to.
+            if (isMobileViewport()) {
+                document.body.classList.remove('sidebar-mobile-open');
+            }
+            updateSidebarChrome();
+        });
+    }
+
+    // Keep the workspace-only mobile class in sync when rotating/resizing.
+    let _mobileUiResizeTimer = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(_mobileUiResizeTimer);
+        _mobileUiResizeTimer = setTimeout(updateSidebarChrome, 120);
+    });
+
+    // Tapping a sidebar link on mobile should reveal the destination page
+    // immediately (close the drawer) instead of leaving the drawer open.
+    document.addEventListener('click', function (e) {
+        if (!isMobileViewport()) return;
+        if (!document.body.classList.contains('sidebar-mobile-open')) return;
+        if (!(e.target instanceof Element)) return;
+        const link = e.target.closest('.layout-side-section a.item-anchor, .layout-side-section a');
+        if (!link) return;
+        document.body.classList.remove('sidebar-mobile-open');
     }, true);
 
     function isDocView() {
@@ -984,7 +2162,8 @@
 
         // 2. Check frappe get_route_str
         if (typeof frappe !== 'undefined' && frappe.get_route_str) {
-            const rs = frappe.get_route_str();
+            let rs = '';
+            try { rs = frappe.get_route_str(); } catch (e) { rs = ''; }
             if (rs && rs.indexOf('Form/') === 0) return true;
             if (rs && (rs.indexOf('List/') === 0 || rs.indexOf('Workspaces/') === 0)) return false;
         }
@@ -1018,7 +2197,92 @@
     }
 
     // BISMALLAH: Form Title Auto-Size Collapsible Toggle (Default strictly collapsed full-width, arrow only)
+    // Mark document-form routes on <html> as early as possible. Frappe sets
+    // body[data-route] only on page-change, which is too late for the first
+    // paint; this class lets the single-line title CSS apply immediately and
+    // prevents the expanded/multiline flicker.
+    function setDocRouteClass() {
+        const seg = (window.location.pathname || '').replace(/^\/+|\/+$/g, '').split('/');
+        let isDoc = false;
+        if (seg[0] === 'app' && seg.length >= 2) {
+            const second = (seg[1] || '').toLowerCase();
+            const third = (seg[2] || '').toLowerCase();
+            const nonForm = ['list', 'view', 'report', 'query-report', 'dashboard', 'dashboard-view',
+                'workspace', 'workspaces', 'tree', 'modules', 'module', 'setup', 'print', 'background_jobs'];
+            if (nonForm.indexOf(second) === -1) {
+                if (seg.length === 2) {
+                    isDoc = false; // /app/<doctype> is the list view
+                } else if (third === 'new') {
+                    isDoc = true; // /app/<doctype>/new is a new document form
+                } else if (nonForm.indexOf(third) === -1) {
+                    isDoc = true; // /app/<doctype>/<name> is a document form
+                }
+            }
+        }
+        if (document.documentElement) {
+            document.documentElement.classList.toggle('eb-doc-route', isDoc);
+        }
+        return isDoc;
+    }
+    window.ebSetDocRouteClass = setDocRouteClass;
+    setDocRouteClass();
+
+    function _collapseTitle(titleText, area) {
+        if (!titleText) return;
+        if (area) {
+            area.classList.remove('eb-title-expanded');
+            delete area.dataset.ebExpanded;
+        }
+        titleText.style.setProperty('white-space', 'nowrap', 'important');
+        titleText.style.setProperty('overflow', 'hidden', 'important');
+        titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
+        titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
+        titleText.style.setProperty('min-width', '0', 'important');
+        titleText.style.setProperty('visibility', 'visible', 'important');
+        titleText.style.setProperty('opacity', '1', 'important');
+        titleText.style.setProperty('cursor', 'default', 'important');
+        titleText.style.removeProperty('word-break');
+        titleText.style.removeProperty('overflow-y');
+        titleText.style.removeProperty('overflow-x');
+        titleText.style.removeProperty('max-height');
+        titleText.style.removeProperty('width');
+        titleText.style.removeProperty('flex');
+    }
+
+    function _expandTitle(titleText, area) {
+        if (!titleText) return;
+        if (area) {
+            area.classList.add('eb-title-expanded');
+            area.dataset.ebExpanded = '1';
+        }
+        titleText.style.setProperty('white-space', 'normal', 'important');
+        titleText.style.setProperty('word-break', 'break-word', 'important');
+        titleText.style.setProperty('overflow-y', 'auto', 'important');
+        titleText.style.setProperty('overflow-x', 'hidden', 'important');
+        titleText.style.setProperty('max-width', '100%', 'important');
+    }
+
+    function _clearTitleInlineStyles(titleText) {
+        if (!titleText) return;
+        ['max-width', 'white-space', 'overflow', 'overflow-y', 'overflow-x',
+            'text-overflow', 'word-break', 'min-width', 'max-height', 'width',
+            'flex', 'visibility', 'opacity', 'cursor'].forEach(function (prop) {
+            titleText.style.removeProperty(prop);
+        });
+    }
+
+    let _titleTogglePending = false;
+    function _scheduleTitleToggle() {
+        if (_titleTogglePending) return;
+        _titleTogglePending = true;
+        requestAnimationFrame(function () {
+            _titleTogglePending = false;
+            initTitleToggle();
+        });
+    }
+
     function initTitleToggle() {
+        setDocRouteClass();
         if (!isDocView()) {
             // Remove any expand/collapse buttons from List views, Workspaces, Reports
             document.querySelectorAll('.eb-title-toggle-btn').forEach(b => b.remove());
@@ -1026,12 +2290,8 @@
                 el.classList.remove('eb-title-expanded');
                 delete el.dataset.ebExpanded;
             });
-            document.querySelectorAll('.page-head:not(.eb-doc-head) .title-text').forEach(t => {
-                t.style.removeProperty('max-width');
-                t.style.removeProperty('white-space');
-                t.style.removeProperty('overflow');
-                t.style.removeProperty('text-overflow');
-                t.style.removeProperty('word-break');
+            document.querySelectorAll('.page-head .title-text').forEach(t => {
+                _clearTitleInlineStyles(t);
             });
             return;
         }
@@ -1044,98 +2304,135 @@
             const area = titleText.closest('.title-area') || titleText.closest('.page-title');
             if (!area) return;
 
-            // Enforce collapsed single-line default immediately
-            if (!area.dataset.ebExpanded) {
-                area.classList.remove('eb-title-expanded');
-                titleText.style.setProperty('white-space', 'nowrap', 'important');
-                titleText.style.setProperty('overflow', 'hidden', 'important');
-                titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                titleText.style.setProperty('min-width', '0', 'important');
-                titleText.style.setProperty('visibility', 'visible', 'important');
-                titleText.style.setProperty('opacity', '1', 'important');
-                titleText.style.setProperty('cursor', 'default', 'important');
+            // The class is the single source of truth. Never leave stale
+            // expanded inline styles behind after a page/route reset.
+            const isExpanded = area.classList.contains('eb-title-expanded');
+            if (isExpanded) {
+                _expandTitle(titleText, area);
+            } else {
+                _collapseTitle(titleText, area);
             }
 
-            if (area.querySelector('.eb-title-toggle-btn')) {
-                const existingBtn = area.querySelector('.eb-title-toggle-btn');
-                if (!area.classList.contains('eb-title-expanded')) {
-                    existingBtn.innerHTML = '<span class="eb-arrow">↔</span>';
-                    existingBtn.title = 'Expand';
-                    titleText.style.setProperty('white-space', 'nowrap', 'important');
-                    titleText.style.setProperty('overflow', 'hidden', 'important');
-                    titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                    titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                } else {
-                    existingBtn.innerHTML = '<span class="eb-arrow">▲</span>';
-                    existingBtn.title = 'Collapse';
-                    titleText.style.setProperty('white-space', 'normal', 'important');
-                    titleText.style.setProperty('word-break', 'break-word', 'important');
-                    titleText.style.setProperty('overflow-y', 'auto', 'important');
-                    titleText.style.setProperty('max-width', '100%', 'important');
-                }
-                return;
-            }
+            let toggle = area.querySelector('.eb-title-toggle-btn');
+            if (!toggle) {
+                const textContent = (titleText.textContent || '').trim();
+                // Only add toggle button for long titles in document forms
+                if (textContent.length <= 25) return;
 
-            const textContent = (titleText.textContent || '').trim();
-            // Only add toggle button for long titles in document forms
-            if (textContent.length > 25) {
-                const toggle = document.createElement('span');
+                toggle = document.createElement('span');
                 toggle.className = 'eb-title-toggle-btn';
-                toggle.title = 'Expand';
-                toggle.innerHTML = '<span class="eb-arrow">↔</span>';
-
-                function toggleState(e) {
+                toggle.setAttribute('role', 'button');
+                toggle.setAttribute('tabindex', '0');
+                toggle.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggle.click();
+                    }
+                });
+                toggle.addEventListener('click', function (e) {
                     if (e) {
                         e.preventDefault();
                         e.stopPropagation();
                     }
-                    const isExp = area.classList.toggle('eb-title-expanded');
-                    if (isExp) {
-                        area.dataset.ebExpanded = '1';
-                        titleText.style.setProperty('white-space', 'normal', 'important');
-                        titleText.style.setProperty('word-break', 'break-word', 'important');
-                        titleText.style.setProperty('overflow-y', 'auto', 'important');
-                        titleText.style.setProperty('max-width', '100%', 'important');
-                        toggle.innerHTML = '<span class="eb-arrow">▲</span>';
+                    const nowExpanded = !area.classList.contains('eb-title-expanded');
+                    if (nowExpanded) {
+                        _expandTitle(titleText, area);
+                        toggle.innerHTML = '<span class="eb-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></span>';
                         toggle.title = 'Collapse';
+                        toggle.setAttribute('aria-label', 'Collapse title');
+                        toggle.setAttribute('aria-expanded', 'true');
                     } else {
-                        delete area.dataset.ebExpanded;
-                        titleText.style.setProperty('white-space', 'nowrap', 'important');
-                        titleText.style.setProperty('overflow', 'hidden', 'important');
-                        titleText.style.setProperty('text-overflow', 'ellipsis', 'important');
-                        titleText.style.setProperty('max-width', 'calc(100% - 95px)', 'important');
-                        toggle.innerHTML = '<span class="eb-arrow">↔</span>';
+                        _collapseTitle(titleText, area);
+                        toggle.innerHTML = '<span class="eb-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>';
                         toggle.title = 'Expand';
+                        toggle.setAttribute('aria-label', 'Expand title');
+                        toggle.setAttribute('aria-expanded', 'false');
                     }
                     if (window.updateDocTabsStickyTop) {
                         setTimeout(window.updateDocTabsStickyTop, 50);
                     }
-                }
-
-                // ONLY expand or collapse when clicking the toggle button
-                toggle.addEventListener('click', toggleState);
-
+                });
                 titleText.parentNode.insertBefore(toggle, titleText.nextSibling);
+            }
+
+            if (isExpanded) {
+                toggle.innerHTML = '<span class="eb-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></span>';
+                toggle.title = 'Collapse';
+                toggle.setAttribute('aria-label', 'Collapse title');
+                toggle.setAttribute('aria-expanded', 'true');
+            } else {
+                toggle.innerHTML = '<span class="eb-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>';
+                toggle.title = 'Expand';
+                toggle.setAttribute('aria-label', 'Expand title');
+                toggle.setAttribute('aria-expanded', 'false');
             }
         });
     }
 
     window.initTitleToggle = initTitleToggle;
 
+    // Watch for the page head/title being inserted. This is what removes the
+    // initial flicker on slow page loads where the fixed timers below fire
+    // before Frappe has rendered the form title.
+    let _titleObserver = null;
+    function _startTitleObserver() {
+        if (_titleObserver) return;
+        const root = document.documentElement;
+        if (!root) return;
+        _titleObserver = new MutationObserver(function (mutations) {
+            for (const m of mutations) {
+                if (m.type !== 'childList') continue;
+                for (const node of m.addedNodes) {
+                    if (node.nodeType !== 1) continue;
+                    const matches = (node.matches && (node.matches('.page-head, .title-text, .page-container, .form-page') ||
+                        (node.querySelector && node.querySelector('.page-head, .title-text'))));
+                    if (matches) {
+                        _scheduleTitleToggle();
+                        return;
+                    }
+                }
+            }
+        });
+        _titleObserver.observe(root, { childList: true, subtree: true });
+        _scheduleTitleToggle();
+    }
+    if (document.documentElement) {
+        _startTitleObserver();
+    } else {
+        document.addEventListener('DOMContentLoaded', _startTitleObserver);
+    }
+
     // Reset expanded state on document/page change so new doc always opens collapsed
     $(document).on('page-change router:change', function () {
-        document.querySelectorAll('.title-area, .page-title').forEach(function(el) {
-            delete el.dataset.ebExpanded;
-            el.classList.remove('eb-title-expanded');
+        setDocRouteClass();
+        document.querySelectorAll('.page-head .title-text').forEach(function (t) {
+            const area = t.closest('.title-area') || t.closest('.page-title');
+            _collapseTitle(t, area);
         });
+        document.querySelectorAll('.title-area, .page-title').forEach(function (el) {
+            el.classList.remove('eb-title-expanded');
+            delete el.dataset.ebExpanded;
+        });
+        _scheduleTitleToggle();
     });
 
     $(document).on('page-change form-refresh form_refresh router:change', function () {
-        setTimeout(initTitleToggle, 100);
-        setTimeout(initTitleToggle, 300);
-        setTimeout(initTitleToggle, 800);
+        _scheduleTitleToggle();
+        setTimeout(initTitleToggle, 50);
+        setTimeout(initTitleToggle, 200);
+        setTimeout(initTitleToggle, 600);
+        setTimeout(initTitleToggle, 1500);
     });
+
+    // Initial load: apply collapsed state as soon as possible.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTitleToggle);
+    } else {
+        initTitleToggle();
+    }
+    setTimeout(initTitleToggle, 100);
+    setTimeout(initTitleToggle, 500);
+    setTimeout(initTitleToggle, 1500);
 }
 
 if (typeof frappe !== 'undefined' && frappe.ready) {

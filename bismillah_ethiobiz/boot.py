@@ -15,11 +15,32 @@ def boot_session(bootinfo):
 
     sanitize_boot_workspaces(bootinfo)
 
-    # Inject Hadeeda Settings into boot payload for chat widget & inline AI
+    # Inject a sanitized Hadeeda settings snapshot into the boot payload.
+    # Webhook URLs, auth headers/secrets, API credentials, and custom CSS are
+    # intentionally excluded so they never reach the browser.
     try:
         settings = _get_hadeeda_settings()
         if settings and getattr(settings, "enabled", 0):
-            bootinfo["hadeeda_settings"] = settings.as_dict()
+            bootinfo["hadeeda_settings"] = {
+                "enabled": bool(settings.enabled),
+                "bot_name": settings.bot_name or "HADEEDA",
+                "default_language": settings.default_language or "en",
+                "chat_enabled": bool(settings.chat_enabled),
+                "enable_streaming": bool(getattr(settings, "enable_streaming", 1)),
+                "widget_title": settings.widget_title or "",
+                "widget_subtitle": settings.widget_subtitle or "",
+                "widget_position": settings.widget_position or "Right",
+                "widget_primary_color": settings.widget_primary_color or "#1FB6AE",
+                "widget_mode": settings.widget_mode or "window",
+                "allow_file_uploads": bool(settings.allow_file_uploads),
+                "allowed_mime_types": settings.allowed_mime_types or "",
+                "inline_ai_enabled": bool(settings.inline_ai_enabled),
+                "trigger_character": settings.trigger_character or "/",
+                "show_trigger_hint": bool(settings.show_trigger_hint),
+                "excluded_doctypes": settings.excluded_doctypes or "",
+                "excluded_fields": settings.excluded_fields or "",
+                "bot_avatar": settings.bot_avatar or "",
+            }
     except Exception as e:
         frappe.logger("ethiobiz").error(f"Hadeeda boot injection error: {e}")
 

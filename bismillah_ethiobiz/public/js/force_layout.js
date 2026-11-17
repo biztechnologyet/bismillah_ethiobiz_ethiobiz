@@ -120,7 +120,7 @@ frappe.ui.force_vertical_layout = function () {
             const titleText = title.querySelector('.title-text');
             if (titleText) {
                 const area = titleText.closest('.title-area') || title.querySelector('.title-area') || title;
-                const isExpanded = area.classList.contains('eb-title-expanded') || !!area.dataset.ebExpanded;
+                const isExpanded = area.classList.contains('eb-title-expanded');
 
                 if (isExpanded) {
                     titleText.style.setProperty('white-space', 'normal', 'important');

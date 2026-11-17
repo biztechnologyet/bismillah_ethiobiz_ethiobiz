@@ -332,7 +332,7 @@ def get_product_detail(item_code):
     # Reviews
     reviews = []
     if frappe.db.exists("DocType", "Item Review"):
-        reviews = frappe.get_all("Item Review", filters={"item_code": item_code}, fields=["name", "user", "review_title", "comment", "rating", "creation", "verified_purchase", "seller_response"], limit=10)
+        reviews = frappe.get_all("Item Review", filters={"item": item_code}, fields=["name", "user", "review_title", "comment", "rating", "creation", "verified_purchase", "seller_response"], limit=10)
 
     return {
         "item_code": item.name,
@@ -404,7 +404,7 @@ def submit_review(item_code, rating, review_text, review_title="Customer Review"
 
     doc = frappe.get_doc({
         "doctype": "Item Review",
-        "item_code": item_code,
+        "item": item_code,
         "user": user,
         "customer": customer,  # BISMALLAH: Link to customer
         "rating": flt(rating),
@@ -418,7 +418,7 @@ def submit_review(item_code, rating, review_text, review_title="Customer Review"
     avg_data = frappe.db.sql("""
         SELECT AVG(rating) as avg_r, COUNT(*) as cnt
         FROM `tabItem Review`
-        WHERE item_code = %s
+        WHERE item = %s
     """, (item_code,), as_dict=True)
 
     if avg_data and avg_data[0]["cnt"] > 0:
@@ -615,16 +615,20 @@ def get_company_storefront(company_slug=None, company_name=None):
     reviews = []
     if frappe.db.exists("DocType", "Item Review"):
         reviews = frappe.db.sql("""
-            SELECT ir.name, ir.item_code, it.item_name, ir.user, ir.rating,
+            SELECT ir.name, ir.item, ir.website_item, it.item_name, ir.user, ir.rating,
                    ir.review_title, ir.comment, ir.verified_purchase, ir.seller_response, ir.creation
             FROM `tabItem Review` ir
-            LEFT JOIN `tabItem` it ON it.name = ir.item_code
+            LEFT JOIN `tabItem` it ON it.name = ir.item
             WHERE it.company = %s
             ORDER BY ir.creation DESC
             LIMIT 20
         """, (lookup,), as_dict=True)
         for r in reviews:
-            r["rating_stars"] = cint(r.get("rating") or 0)
+            rating = flt(r.get("rating") or 0)
+            if 0 < rating <= 1:
+                rating = rating * 5
+            r["rating"] = round(rating, 2)
+            r["rating_stars"] = int(round(rating))
 
     return {
         "status": "success",
@@ -949,4 +953,92 @@ def place_quick_order(item_code, quantity=1, customer_name=None, customer_phone=
         "delivery_address": delivery_address,
         "message": f"Alhamdulillah! {'B2B Enterprise ' if is_b2b else ''}Order #{so_id} has been registered successfully{f' with Purchase Order #{po_id}' if po_id else ''}. Verified confirmation sent."
     }
+
+
+# ===========================================================================
+# DIKKA SHOP â€” PUBLISHED WEBSITE ITEM ENGINE
+# ---------------------------------------------------------------------------
+# The legacy Item-only implementations above remain for backwards reference,
+# but these definitions intentionally take precedence at import time. Website
+# Item is the storefront record; Item remains the commerce record. This keeps
+# the Shop aligned with /all-products and gives canonical Website Item routes
+# (/<route>) and /product/<route> the same rich product experience.
+# ===========================================================================
+
+try:
+    from bismillah_ethiobiz import dikka_catalog as _dikka_catalog
+except ImportError:  # pragma: no cover
+    import dikka_catalog as _dikka_catalog
+
+
+@frappe.whitelist(allow_guest=True)
+def search_products(query="", category=None, company=None, region=None,
+                    min_price=None, max_price=None, min_rating=None,
+                    sort_by="relevance", page=1, limit=24, view_mode="grid", **kwargs):
+    return _dikka_catalog.search_products(
+        query=query,
+        category=category,
+        company=company,
+        region=region,
+        min_price=min_price,
+        max_price=max_price,
+        min_rating=min_rating,
+        sort_by=sort_by,
+        page=page,
+        limit=limit,
+        view_mode=view_mode,
+    )
+
+
+@frappe.whitelist(allow_guest=True)
+def get_categories(parent=None):
+    return _dikka_catalog.get_categories(parent=parent)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_product_detail(item_code):
+    product = _dikka_catalog.get_website_item_detail(item_code)
+    if not product:
+        frappe.throw("Product not found", frappe.DoesNotExistError)
+    return product
+
+
+@frappe.whitelist(allow_guest=True)
+def get_website_item_detail(identifier):
+    product = _dikka_catalog.get_website_item_detail(identifier)
+    if not product:
+        frappe.throw("Product not found", frappe.DoesNotExistError)
+    return product
+
+
+@frappe.whitelist()
+def submit_review(item_code=None, rating=0, review_text="", review_title="Customer Review",
+                  website_item=None):
+    return _dikka_catalog.submit_review(
+        item_code=item_code,
+        rating=rating,
+        review_text=review_text,
+        review_title=review_title,
+        website_item=website_item,
+    )
+
+
+@frappe.whitelist(allow_guest=True)
+def get_product_reviews(item_code=None, page=1, limit=12, sort_by="newest", website_item=None):
+    return _dikka_catalog.get_product_reviews(
+        item_code=item_code,
+        website_item=website_item,
+        page=page,
+        limit=limit,
+        sort_by=sort_by,
+    )
+
+
+@frappe.whitelist()
+def mark_review_helpful(review_name):
+    return _dikka_catalog.mark_review_helpful(review_name=review_name)
+
+
+def build_product_context(context, identifier):
+    return _dikka_catalog.build_product_context(context, identifier)
 

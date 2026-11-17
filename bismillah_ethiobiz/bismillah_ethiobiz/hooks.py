@@ -4,7 +4,7 @@ EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
 
 Static theme deployment for EthioBiz ERPNext ecosystem.
-© 2025 EthioBiz | Powered by Biz Technology Solutions
+Â© 2025 EthioBiz | Powered by Biz Technology Solutions
 """
 
 from __future__ import unicode_literals
@@ -43,7 +43,7 @@ app_license = "MIT"
 
 # CSS included in desk (backend)
 app_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css"
 ]
@@ -64,7 +64,7 @@ app_include_js = [
 
 # CSS for website (frontend/portal)
 web_include_css = [
-    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.2.0",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",

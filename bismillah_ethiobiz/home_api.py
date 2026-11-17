@@ -1,4 +1,5 @@
 import json
+import re
 from urllib.parse import quote
 import frappe
 from frappe import _
@@ -771,3 +772,475 @@ def get_card_portals_and_subsystems():
         "systems": systems,
         "portals": portals_by_pillar,
     }
+
+
+# ---------------------------------------------------------------------------
+# Home page live ticker, feed filters, floating actions, and rail ads
+# ---------------------------------------------------------------------------
+
+TICKER_TYPE_META = {
+    "product": {"icon": "🛍️", "badge": "Shop"},
+    "job": {"icon": "💼", "badge": "Jobs"},
+    "service": {"icon": "⚡", "badge": "BizServices"},
+    "doctor": {"icon": "🩺", "badge": "BizHealth"},
+    "property": {"icon": "🏠", "badge": "BizHome"},
+    "fix_service": {"icon": "🔧", "badge": "BizFix"},
+    "course": {"icon": "🎓", "badge": "Dagu"},
+    "tibeb": {"icon": "📝", "badge": "Tibeb"},
+    "afocha": {"icon": "🌟", "badge": "Afocha"},
+    "forum": {"icon": "💬", "badge": "Walta"},
+    "news": {"icon": "📰", "badge": "Live News"},
+    "ad": {"icon": "📣", "badge": "Promoted"},
+}
+
+_TEST_MARKERS = ("test", "roundtrip", "dummy", "sample", "demo", "tuition")
+_TEST_PREFIXES = ("fg-", "ctn-", "wi-", "wic-", "rt-", "ev003", "web-itm-")
+_TEST_LONG_NUMBER = re.compile(r"\d{9,}")
+
+
+def _is_test_like(value):
+    """Keep test/demo records out of the public ticker."""
+    text = str(value or "").strip().lower()
+    if not text:
+        return False
+    if any(text.startswith(prefix) for prefix in _TEST_PREFIXES):
+        return True
+    if _TEST_LONG_NUMBER.search(text):
+        return True
+    padded = f" {text} "
+    return any(f" {marker} " in padded for marker in _TEST_MARKERS)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_live_ticker_activities(limit=8):
+    """Return a short, diverse list of live ecosystem activities for the ticker.
+
+    This endpoint is called on every home page load, so it deliberately uses a
+    handful of small, indexed queries instead of the much heavier personalized
+    feed (which already powers the main stream). Results are cached briefly to
+    keep page loads fast and to avoid competing with the feed request.
+    """
+    try:
+        limit = max(1, min(int(limit or 8), 20))
+    except Exception:
+        limit = 8
+
+    cache_key = "ethiobiz_live_ticker_activities_v4"
+    cached = frappe.cache().get_value(cache_key)
+    if cached:
+        return cached[:limit]
+
+    # (doctype, filters, fields, title_field, type, icon, badge)
+    sources = (
+        (
+            "Website Item",
+            {"published": 1},
+            ("web_item_name", "item_name", "route", "creation"),
+            "web_item_name",
+            "product",
+            "🛍️",
+            "Shop",
+        ),
+        (
+            "Job Opening",
+            {"status": "Open"},
+            ("job_title", "company", "creation"),
+            "job_title",
+            "job",
+            "💼",
+            "Jobs",
+        ),
+        (
+            "Blog Post",
+            {"published": 1},
+            ("title", "route", "creation"),
+            "title",
+            "tibeb",
+            "📝",
+            "Tibeb",
+        ),
+        (
+            "Afocha Post",
+            {},
+            ("author_name", "content", "creation"),
+            "author_name",
+            "afocha",
+            "🌟",
+            "Afocha",
+        ),
+        (
+            "LMS Course",
+            {"published": 1},
+            ("title", "creation"),
+            "title",
+            "course",
+            "🎓",
+            "Dagu",
+        ),
+        (
+            "Walta Forum Topic",
+            {},
+            ("title", "creation"),
+            "title",
+            "forum",
+            "💬",
+            "Walta",
+        ),
+        (
+            "BizBooking Resource",
+            {"is_active": 1},
+            ("resource_name", "category", "creation"),
+            "resource_name",
+            "service",
+            "⚡",
+            "BizServices",
+        ),
+    )
+
+    activities = []
+    seen_titles = set()
+    type_counts = {}
+
+    for doctype, filters, wanted_fields, title_field, item_type, icon, badge in sources:
+        if not frappe.db.exists("DocType", doctype):
+            continue
+
+        fields = [field for field in wanted_fields if frappe.db.has_column(doctype, field)]
+        if title_field not in fields:
+            continue
+
+        filters = dict(filters or {})
+        if doctype == "Afocha Post" and frappe.db.has_column(doctype, "published"):
+            filters["published"] = 1
+
+        order_by = "creation desc" if "creation" in fields else "modified desc"
+        try:
+            rows = frappe.get_all(
+                doctype,
+                filters=filters,
+                fields=["name"] + fields,
+                order_by=order_by,
+                limit=2,
+            )
+        except Exception:
+            continue
+
+        for row in rows:
+            title = str(row.get(title_field) or "").strip()
+            if not title and doctype == "Website Item":
+                title = str(row.get("item_name") or "").strip()
+            if not title and doctype == "Afocha Post":
+                content = frappe.utils.strip_html(row.get("content") or "")
+                title = content[:90].strip()
+            if not title or title in seen_titles:
+                continue
+            if _is_test_like(title) or _is_test_like(row.get("name")):
+                continue
+            if type_counts.get(item_type, 0) >= 2:
+                continue
+
+            docname = quote(str(row.get("name") or ""))
+            if doctype == "Website Item":
+                url = f"/post?doctype=Item&name={docname}"
+            elif doctype == "Job Opening":
+                url = f"/post?doctype=Job%20Opening&name={docname}"
+            elif doctype == "Blog Post":
+                url = row.get("route") or f"/post?doctype=Blog%20Post&name={docname}"
+            elif doctype == "Afocha Post":
+                url = f"/post?doctype=Afocha%20Post&name={docname}"
+            elif doctype == "LMS Course":
+                url = f"/post?doctype=LMS%20Course&name={docname}"
+            elif doctype == "Walta Forum Topic":
+                url = f"/forum?topic={docname}"
+            elif doctype == "BizBooking Resource":
+                url = f"/post?doctype=BizBooking%20Resource&name={docname}"
+            else:
+                url = "#"
+
+            activities.append(
+                {
+                    "text_en": title,
+                    "text_am": title,
+                    "url": url,
+                    "icon": icon,
+                    "badge": badge,
+                    "_created": str(row.get("creation") or ""),
+                }
+            )
+            seen_titles.add(title)
+            type_counts[item_type] = type_counts.get(item_type, 0) + 1
+            if len(activities) >= max(limit * 2, 12):
+                break
+        if len(activities) >= max(limit * 2, 12):
+            break
+
+    activities.sort(key=lambda row: row.get("_created", ""), reverse=True)
+    for row in activities:
+        row.pop("_created", None)
+
+    activities = activities[:limit]
+    if activities:
+        frappe.cache().set_value(cache_key, activities, expires_in_sec=120)
+    return activities
+
+
+def _filter_option(label, label_am, key):
+    return {"label": label, "label_am": label_am, "key": key}
+
+
+FEED_FILTER_STRUCTURE = {
+    "news": [
+        _filter_option("All News", "ሁሉም ዜናዎች", "all"),
+        _filter_option("💼 Business & Economy", "💼 ንግድ እና ኢኮኖሚ", "business"),
+        _filter_option("💻 Tech & Innovation", "💻 ቴክኖሎጂ እና ፈጠራ", "tech"),
+        _filter_option("🇪🇹 Ethiopia & Horn", "🇪🇹 ኢትዮጵያ እና ቀንድ አፍሪካ", "ethiopia"),
+        _filter_option("🌍 World News", "🌍 ዓለም አቀፍ ዜና", "world"),
+        _filter_option("⚽ Sports", "⚽ ስፖርት", "sport"),
+        _filter_option("🏛️ Politics", "🏛️ ፖለቲካ እና አስተዳደር", "politics"),
+        _filter_option("🏥 Health & Life", "🏥 ጤና እና አኗኗር", "health"),
+        _filter_option("🔬 Science", "🔬 ሳይንስ", "science"),
+        _filter_option("🎭 Culture", "🎭 ባህል እና ቅርስ", "culture"),
+    ],
+    "shop": [
+        _filter_option("All Items", "ሁሉም እቃዎች", "all"),
+        _filter_option("Electronics & Tech", "ኤሌክትሮኒክስ እና ቴክ", "Electronics"),
+        _filter_option("Habesha Fashion", "የሀበሻ ፋሽን እና አልባሳት", "Fashion"),
+        _filter_option("Ethiopian Coffee & Spices", "የኢትዮጵያ ቡና እና ቅመማቅመም", "Coffee"),
+        _filter_option("Home & Furniture", "የቤት እቃዎች እና ፈርኒቸር", "Home"),
+        _filter_option("Vehicles & Parts", "ተሽከርካሪዎች እና መለዋወጫዎች", "Vehicles"),
+    ],
+    "jobs": [
+        _filter_option("All Positions", "ሁሉም ስራዎች", "all"),
+        _filter_option("Software & IT", "ሶፍትዌር እና አይቲ", "Tech"),
+        _filter_option("Accounting & Finance", "ሂሳብ እና ፋይናንስ", "Finance"),
+        _filter_option("Healthcare & Clinical", "ጤና እና ህክምና", "Health"),
+        _filter_option("Engineering & Construction", "ምህንድስና እና ግንባታ", "Engineering"),
+        _filter_option("Hospitality & Tourism", "ሆቴል እና ቱሪዝም", "Hotel"),
+    ],
+    "bizservices": [
+        _filter_option("All BizServices", "ሁሉም ቢዝሰርቪሶች", "all"),
+        _filter_option("Hotel & Lodging", "ሆቴል እና ማረፊያ", "Hotel"),
+        _filter_option("Salon & Spa Care", "ሳሎን እና ስፓ", "Salon"),
+        _filter_option("Conference Venues", "የስብሰባ አዳራሾች", "Event"),
+        _filter_option("Car Rental", "የመኪና ኪራይ", "Car"),
+        _filter_option("Business Consult", "የንግድ ማማከር", "Consult"),
+    ],
+    "bizhealth": [
+        _filter_option("All Specialties", "ሁሉም የህክምና ዘርፎች", "all"),
+        _filter_option("General Practitioners", "ጠቅላላ ሀኪሞች", "General"),
+        _filter_option("Pediatrics", "የህጻናት ህክምና", "Pediatric"),
+        _filter_option("Dental Care", "የጥርስ ህክምና", "Dental"),
+        _filter_option("Diagnostics & Labs", "ዲያግኖስቲክስ እና ላብራቶሪ", "Diagnostics"),
+        _filter_option("Pharmacies", "ፋርማሲዎች", "Pharmacy"),
+    ],
+    "bizhome": [
+        _filter_option("All Properties", "ሁሉም ቤቶች", "all"),
+        _filter_option("Apartments for Rent", "የሚከራዩ አፓርታማዎች", "Rent"),
+        _filter_option("Villas for Sale", "የሚሸጡ ቪላዎች", "Sale"),
+        _filter_option("Commercial & Office", "የንግድ እና ቢሮ ቦታዎች", "Commercial"),
+        _filter_option("Bole Luxury Condos", "የቦሌ ኮንዶሚኒየሞች", "Bole"),
+    ],
+    "bizfix": [
+        _filter_option("All Maintenance", "ሁሉም ጥገናዎች", "all"),
+        _filter_option("Electricians", "ኤሌክትሪሻን እና መብራት", "Electrical"),
+        _filter_option("Plumbing", "ቧንቧ እና የውሃ መስመር", "Plumbing"),
+        _filter_option("Appliance Repair", "የቤት እቃዎች ጥገና", "Appliance"),
+        _filter_option("Carpentry", "የእንጨት እና አናጢነት ስራ", "Carpentry"),
+        _filter_option("Auto & Generator", "መካኒክ እና ጀነሬተር", "Auto"),
+    ],
+    "dagu": [
+        _filter_option("All Academy Courses", "ሁሉም ኮርሶች", "all"),
+        _filter_option("DOBiz ERP Training", "የDOBiz ERP ስልጠና", "ERP"),
+        _filter_option("Coding & Software", "ኮዲንግ እና ሶፍትዌር", "Programming"),
+        _filter_option("Accounting & Tax", "ሂሳብ እና ታክስ", "Accounting"),
+        _filter_option("Business Leadership", "የንግድ አመራር", "Leadership"),
+    ],
+    "tibeb": [
+        _filter_option("All Tibebs", "ሁሉም ጥበቦች", "all"),
+        _filter_option("Spiritual Insights", "መንፈሳዊ እይታዎች", "Spiritual"),
+        _filter_option("Business Wisdom", "የንግድ ጥበብ", "Wisdom"),
+        _filter_option("Culture & History", "ባህል እና ታሪክ", "Heritage"),
+        _filter_option("Entrepreneurial Mindset", "የስራ ፈጠራ አስተሳሰብ", "Mindset"),
+    ],
+    "social": [
+        _filter_option("All Stories", "ሁሉም የአፎቻ ዜናዎች", "all"),
+        _filter_option("Merchant Unions", "የነጋዴ ማህበራት", "Merchant"),
+        _filter_option("Community Updates", "የአካባቢ ማህበረሰብ", "Community"),
+    ],
+    "forum": [
+        _filter_option("All Discussions", "ሁሉም ውይይቶች", "all"),
+        _filter_option("Finance & Tax Q&A", "የፋይናንስ እና ታክስ ጥያቄዎች", "Tax"),
+        _filter_option("Startup Ideas", "የስራ ፈጠራ ሀሳቦች", "Startup"),
+    ],
+}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_feed_filter_structure():
+    """Return the bilingual sub-filter matrix for the home live feed.
+
+    The matrix is intentionally server-driven so future verticals can add
+    filters without editing the large home template. It mirrors the inline
+    fallback in ``www/ethiobiz_home_v1.html`` exactly.
+    """
+    return FEED_FILTER_STRUCTURE
+
+
+@frappe.whitelist(allow_guest=True)
+def get_dobiz_industries():
+    """Return the enabled DOBiz signup industries from EthioBiz Theme.
+
+    The Theme single is the admin-controlled source of truth.  If the table is
+    empty (fresh install) a safe canonical fallback is returned so the public
+    signup page never breaks.
+    """
+    try:
+        from bismillah_ethiobiz.company_access import get_enabled_industry_modules
+        industries = get_enabled_industry_modules()
+    except Exception as exc:
+        frappe.logger("home_api").warning("DOBiz industries lookup failed: %s", exc)
+        industries = []
+    return {
+        "industries": industries,
+        "count": len(industries),
+        "source": "EthioBiz Theme > DOBiz Industry Modules",
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_floating_action_items():
+    """Return active FAB actions configured in EthioBiz Theme."""
+    try:
+        theme = frappe.get_cached_doc("EthioBiz Theme", "EthioBiz Theme")
+    except Exception:
+        return []
+
+    items = []
+    for row in getattr(theme, "floating_action_items", []) or []:
+        if not _as_bool(getattr(row, "is_active", 1), True):
+            continue
+        link = str(getattr(row, "link", "") or "").strip()
+        title = str(getattr(row, "title", "") or "").strip()
+        if not link or not title:
+            continue
+        items.append(
+            {
+                "icon": getattr(row, "icon", "") or "⚡",
+                "title": title,
+                "title_am": getattr(row, "title_am", "") or title,
+                "link": link,
+                "target": getattr(row, "target", "") or "Same Tab (_self)",
+                "sort_order": int(getattr(row, "sort_order", 0) or 0),
+            }
+        )
+
+    items.sort(key=lambda row: row.get("sort_order", 0))
+    return items
+
+
+@frappe.whitelist(allow_guest=True)
+def get_active_home_ads(placement="homepage-rail"):
+    """Return active desk-managed campaigns for a home placement.
+
+    Only campaigns whose linked ad slot matches ``placement`` and whose
+    schedule covers today are returned. Missing doctypes/columns are treated
+    as an empty rail so the template keeps its built-in fallback cards.
+    """
+    placement = str(placement or "homepage-rail").strip()
+    if not frappe.db.exists("DocType", "EthioBiz Ad Campaign"):
+        return []
+
+    slot_names = []
+    if frappe.db.exists("DocType", "EthioBiz Ad Slot"):
+        slot_names = frappe.get_all(
+            "EthioBiz Ad Slot", filters={"slot_code": placement}, pluck="name"
+        )
+        if not slot_names:
+            slot_names = frappe.get_all(
+                "EthioBiz Ad Slot",
+                filters={"slot_name": ["like", f"%{placement}%"]},
+                pluck="name",
+            )
+    if not slot_names:
+        return []
+
+    filters = {"status": "Active", "slot": ["in", slot_names]}
+    today = frappe.utils.nowdate()
+    if frappe.db.has_column("EthioBiz Ad Campaign", "start_date"):
+        filters["start_date"] = ["<=", today]
+    if frappe.db.has_column("EthioBiz Ad Campaign", "end_date"):
+        filters["end_date"] = [">=", today]
+
+    fields = ["name", "campaign_name", "click_url", "creative_image", "alt_text", "company"]
+    for optional in ("campaign_url", "slot", "impressions", "clicks"):
+        if frappe.db.has_column("EthioBiz Ad Campaign", optional):
+            fields.append(optional)
+
+    try:
+        ads = frappe.get_all(
+            "EthioBiz Ad Campaign",
+            filters=filters,
+            fields=fields,
+            order_by="modified desc",
+            limit=5,
+        )
+    except Exception as exc:
+        frappe.log_error(f"Error fetching home rail ads: {exc}")
+        return []
+
+    result = []
+    for ad in ads:
+        click_url = (ad.get("campaign_url") or ad.get("click_url") or "").strip()
+        if not click_url:
+            continue
+        result.append(
+            {
+                "id": ad.get("name"),
+                "title": ad.get("campaign_name") or ad.get("name"),
+                "alt_text": ad.get("alt_text") or "",
+                "click_url": click_url,
+                "image": ad.get("creative_image") or "",
+                "company": ad.get("company") or "",
+            }
+        )
+        if frappe.db.has_column("EthioBiz Ad Campaign", "impressions"):
+            try:
+                current = frappe.utils.cint(ad.get("impressions")) + 1
+                frappe.db.set_value(
+                    "EthioBiz Ad Campaign",
+                    ad.get("name"),
+                    "impressions",
+                    current,
+                    update_modified=False,
+                )
+            except Exception:
+                pass
+
+    if result:
+        frappe.db.commit()
+    return result
+
+
+@frappe.whitelist(allow_guest=True)
+def track_ad_click(campaign_name=None):
+    """Increment the click counter for a home rail campaign."""
+    campaign_name = str(campaign_name or "").strip()
+    if not campaign_name or not frappe.db.exists("EthioBiz Ad Campaign", campaign_name):
+        return {"ok": False}
+
+    try:
+        current = frappe.utils.cint(
+            frappe.db.get_value("EthioBiz Ad Campaign", campaign_name, "clicks")
+        )
+        frappe.db.set_value(
+            "EthioBiz Ad Campaign",
+            campaign_name,
+            "clicks",
+            current + 1,
+            update_modified=False,
+        )
+        frappe.db.commit()
+        return {"ok": True}
+    except Exception as exc:
+        frappe.log_error(f"Error tracking ad click for {campaign_name}: {exc}")
+        return {"ok": False}

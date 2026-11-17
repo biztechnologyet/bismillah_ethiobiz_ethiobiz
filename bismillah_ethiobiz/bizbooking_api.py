@@ -612,5 +612,21 @@ def create_universal_booking(booking_data=None, **kwargs):
     return _agg(booking_data=booking_data, **kwargs)
 
 
+# ==============================================================================
+# BIZHEALTH CLINICAL & INSTITUTES EXPORTS
+# ==============================================================================
+try:
+    from .bizhealth_api import (
+        get_institutes,
+        get_institute_details,
+        get_clinical_services,
+        get_service_slots,
+        book_and_pay_service
+    )
+except ImportError:
+    pass
+
+
+
 
 

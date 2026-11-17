@@ -8,6 +8,7 @@ Modeled after Facebook, TikTok, LinkedIn, and Amazon recommendation systems.
 import math
 import json
 import random
+import re
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, now_datetime, getdate, get_datetime, add_to_date, get_url, strip_html_tags
@@ -287,7 +288,7 @@ def _feed_engagement_lookup(items):
         # wants plain text - the card body may still carry entity-laden markup.
         action_url = it.get("action_url") or "/"
         it["share_url"] = action_url if "://" in action_url else get_url(action_url)
-        it["share_title"] = (it.get("title") or "EthioBiz")[:160]
+        it["share_title"] = (it.get("title") or it.get("author_name") or "EthioBiz")[:160]
         try:
             share_body = strip_html_tags(it.get("content") or "")
         except Exception:
@@ -316,6 +317,128 @@ def _feed_article(value, fallback=""):
             pass
     text = " ".join(str(text).split())
     return text or fallback
+
+
+# ---------------------------------------------------------------------------
+# Afocha / social-post normalisation
+# ---------------------------------------------------------------------------
+_MD_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]+\)")
+_MD_LINK_RE = re.compile(r"\[([^\]]+)\]\((https?://[^)]+)\)")
+_MD_HR_RE = re.compile(r"^\s{0,3}(?:[-*_]\s*){3,}$", re.M)
+_MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s*", re.M)
+_MD_QUOTE_RE = re.compile(r"^\s{0,3}>\s?", re.M)
+_MD_LIST_RE = re.compile(r"^\s{0,3}(?:[-*+]|\d+[.)])\s+", re.M)
+_MD_BOLD_RE = re.compile(r"(\*\*|__)(.*?)\1")
+_MD_ITALIC_RE = re.compile(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)")
+_MD_CODE_RE = re.compile(r"`([^`]+)`")
+
+
+_NORM_TEXT_RE = re.compile(r"[^0-9a-z\u1200-\u137f]+", re.I)
+_TEST_PRODUCT_RE = re.compile(
+    r"(?:^|[\s_\-])(?:test|testing|probe|sample|demo|dummy|e2e|csrf|shop-a|shop-b)(?:[\s_\-]|$)",
+    re.I,
+)
+_TEST_GROUP_PREFIXES = ("Packing ", "FG ", "RM ", "Test ", "Demo ", "Sample ")
+_TEST_CONTENT_RE = re.compile(
+    r"(?:^|[\s_\-])(?:csrf|e2e|probe|dummy|smoke)(?:[\s_\-]|$)|^(?:E2E|P15)[\-_]",
+    re.I,
+)
+
+
+def _is_test_content(*values):
+    """True for suite/probe posts that should not reach the public feed."""
+    for value in values:
+        text = str(value or "").strip()
+        if text and _TEST_CONTENT_RE.search(text):
+            return True
+    return False
+
+
+def _norm_text(value):
+    """Case/punctuation-insensitive comparison key for short labels."""
+    return _NORM_TEXT_RE.sub("", str(value or "")).lower()
+
+
+def _is_test_product(*values):
+    """
+    True for suite/demo records that must never reach the public feed.
+
+    Mirrors the Dikka Shop catalog filter: ERP test batches land in ERPNext as
+    real Items (e.g. "Carton Test 714091", group "Packing 714091"), and showing
+    them on the homepage makes the marketplace look unfinished.
+    """
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        if text.startswith(_TEST_GROUP_PREFIXES):
+            return True
+        if _TEST_PRODUCT_RE.search(text):
+            return True
+    return False
+
+
+def _product_body(item_name, company, short_description=None, description=None):
+    """Merchant-written product copy, never a repeat of the card title."""
+    raw = _feed_article(short_description or description)
+    if raw and _norm_text(raw) == _norm_text(item_name):
+        raw = ""
+    return raw or "Available from %s on Dikka Shop." % (company or "a verified merchant")
+
+
+def _strip_author_signature(text, author):
+    """Remove a duplicated author name used as a leading/trailing signature."""
+    if not text or not author:
+        return text
+    author = str(author).strip()
+    if not author:
+        return text
+    escaped = re.escape(author)
+    # Leading "Hadi Awad:" / "Hadi Awad —" style byline.
+    text = re.sub(r"^\s*" + escaped + r"\s*[:\-\u2013\u2014|·•.,]*\s*", "", text, flags=re.I)
+    # Trailing "— Hadi Awad ." style signature.
+    text = re.sub(
+        r"\s*[:\-\u2013\u2014|·•.,]*\s*" + escaped + r"\s*[.:\-\u2013\u2014|·•,]*\s*$",
+        "",
+        text,
+        flags=re.I,
+    )
+    return text.strip()
+
+
+def _social_feed_article(value, author=""):
+    """
+    Clean an Afocha post for a feed card.
+
+    Afocha content is often authored in Markdown and may end with a manual
+    byline. Feed cards render plain text, so headings, bold/italic markers,
+    blockquotes, list bullets and image syntax are removed while paragraph
+    breaks are preserved. The author's leading/trailing signature is removed
+    so the card does not repeat the header name.
+    """
+    text = value or ""
+    if text and "<" in text:
+        try:
+            text = frappe.utils.strip_html(text)
+        except Exception:
+            pass
+    text = str(text).replace("\r\n", "\n").replace("\r", "\n")
+    text = _MD_IMAGE_RE.sub("", text)
+    text = _MD_LINK_RE.sub(
+        lambda m: m.group(1) if m.group(2) in m.group(1) else "%s (%s)" % (m.group(1), m.group(2)),
+        text,
+    )
+    text = _MD_HR_RE.sub("", text)
+    text = _MD_HEADING_RE.sub("", text)
+    text = _MD_QUOTE_RE.sub("", text)
+    text = _MD_LIST_RE.sub("", text)
+    text = _MD_BOLD_RE.sub(lambda m: m.group(2), text)
+    text = _MD_ITALIC_RE.sub(lambda m: m.group(1), text)
+    text = _MD_CODE_RE.sub(lambda m: m.group(1), text)
+    text = _strip_author_signature(text, author)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
 def _item_text_fields():
@@ -553,6 +676,8 @@ def _hydrate_original(doctype, name):
             if not rows:
                 return None
             p = rows[0]
+            if _is_test_product(p.name, p.item_name, p.item_group):
+                return None
             prices = frappe.get_all(
                 "Item Price",
                 filters={"item_code": p.name, "selling": 1},
@@ -567,9 +692,11 @@ def _hydrate_original(doctype, name):
                 "badge_class": "badge-product",
                 "title": p.item_name,
                 "subtitle": f"{p.company or 'Verified Merchant'} • In Stock",
-                "content": _feed_article(
-                    p.get("short_description") or p.get("description"),
-                    fallback=f"{p.item_name} from {p.company or 'an EthioBiz merchant'}.",
+                "content": _product_body(
+                    p.item_name,
+                    p.company,
+                    p.get("short_description"),
+                    p.get("description"),
                 ),
                 "category": p.item_group or "General",
                 "image": _feed_image(p.image),
@@ -652,7 +779,7 @@ def _hydrate_original(doctype, name):
                 "type": "doctor",
                 "badge": d.department or "Healthcare",
                 "badge_class": "badge-booking",
-                "title": f"Dr. {dname}" if not dname.startswith("Dr.") else dname,
+                "title": f"{d.department or 'General'} Consultation",
                 "subtitle": f"{d.hospital or 'St. Paul Hospital'} • Verified Specialist",
                 "content": _feed_article(
                     d.get("bio") or d.get("about") or d.get("specialization"),
@@ -826,14 +953,16 @@ def _hydrate_original(doctype, name):
             if not rows:
                 return None
             post = rows[0]
+            if _is_test_content(post.name, post.content, post.author_name):
+                return None
             return {
                 "id": post.name,
                 "type": "social",
                 "badge": post.category_tag or "Afocha Story",
                 "badge_class": "badge-social",
-                "title": post.author_name,
+                "title": "",
                 "subtitle": f"{post.company or 'EthioBiz Network'} • {post.author_handle or '@member'}",
-                "content": _feed_article(post.content),
+                "content": _social_feed_article(post.content, post.author_name),
                 "category": post.category_tag or "Social",
                 "image": _feed_image(post.post_image),
                 "avatar": _feed_image(post.author_image),
@@ -1087,6 +1216,8 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             order_by="creation desc"
         )
         for p in products:
+            if _is_test_product(p.name, p.item_name, p.item_group):
+                continue
             prices = frappe.get_all("Item Price", filters={"item_code": p.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
             items.append({
@@ -1097,9 +1228,11 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "title": p.item_name,
                 "subtitle": f"🏢 {p.company or 'Verified Merchant'} • In Stock",
                 # The merchant's own words, not a marketing sentence about them.
-                "content": _feed_article(
-                    p.get("short_description") or p.get("description"),
-                    fallback=f"{p.item_name} from {p.company or 'an EthioBiz merchant'}.",
+                "content": _product_body(
+                    p.item_name,
+                    p.company,
+                    p.get("short_description"),
+                    p.get("description"),
                 ),
                 "category": p.item_group or "General",
                 "image": _feed_image(p.image),
@@ -1194,7 +1327,7 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     "type": "doctor",
                     "badge": f"🩺 {d.department or 'Healthcare'}",
                     "badge_class": "badge-booking",
-                    "title": f"Dr. {dname}" if not dname.startswith("Dr.") else dname,
+                    "title": f"{d.department or 'General'} Consultation",
                     "subtitle": f"🏥 {d.hospital or 'St. Paul Hospital'} • Verified Specialist",
                     "content": _feed_article(
                         d.get("bio") or d.get("about") or d.get("specialization"),
@@ -1370,14 +1503,16 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 order_by="creation desc"
             )
             for post in posts:
+                if _is_test_content(post.name, post.content, post.author_name):
+                    continue
                 items.append({
                     "id": post.name,
                     "type": "social",
                     "badge": f"🌟 {post.category_tag or 'Afocha Story'}",
                     "badge_class": "badge-social",
-                    "title": post.author_name,
+                    "title": "",
                     "subtitle": f"🏢 {post.company or 'EthioBiz Network'} • {post.author_handle or '@member'}",
-                    "content": _feed_article(post.content),
+                    "content": _social_feed_article(post.content, post.author_name),
                     "category": post.category_tag or "Social",
                     "image": _feed_image(post.post_image),
                     "avatar": _feed_image(post.author_image),
@@ -1511,6 +1646,8 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                     LIMIT %s
                 """, tuple(forum_vals), as_dict=True)
                 for ft in topics:
+                    if _is_test_content(ft.name, ft.title):
+                        continue
                     clean_c = frappe.utils.strip_html(ft.content or "")
                     items.append({
                         "id": ft.name,

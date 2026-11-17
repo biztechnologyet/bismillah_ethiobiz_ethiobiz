@@ -1,265 +1,274 @@
 ﻿{% extends "templates/web.html" %}
 
-{% block title %}Magala Marketplace & Supermarket | EthioBiz.ET{% endblock %}
+{% block title %}Dikka Shop — Ethiopia's Connected Marketplace | EthioBiz.ET{% endblock %}
 
 {% block header_actions %}
 {% endblock %}
 
 {% block page_content %}
-<!-- BISMALLAH DIKKO SHOP & MAGALA MARKETPLACE -->
+<!-- BISMALLAH ETHIOBIZ MAGALA MARKETPLACE V3 -->
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/leaflet.css?v=1.9.4" />
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/MarkerCluster.css?v=1.5.3" />
 <link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/MarkerCluster.Default.css?v=1.5.3" />
-<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_shop.css?v=2.6.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_shop.css?v=3.2.0" />
 
-<div class="magala-shop-container">
-    <!-- HERO / SEARCH BAR -->
-    <div class="magala-search-hero">
-        <div class="magala-search-box">
-            <div class="search-input-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="magala-search-input" placeholder="Search products, services, companies (e.g. Samsung, Dentist, Hotel)..." autocomplete="off" />
-                <button id="magala-clear-search" class="clear-btn" style="display:none;">✕</button>
+<div class="magala-shop-container mgs-shell" id="mgs-shop">
+    <div class="mgs-aurora" aria-hidden="true">
+        <span></span><span></span><span></span>
+    </div>
+
+    <!-- HERO / SEARCH -->
+    <section class="magala-search-hero mgs-hero" aria-labelledby="mgs-hero-title">
+        <div class="mgs-hero-inner">
+            <div class="mgs-hero-copy">
+                <span class="mgs-eyebrow"><i aria-hidden="true"></i> Dikka Shop · Ethiopia's connected marketplace</span>
+                <h1 id="mgs-hero-title" class="mgs-dikka-title"><span data-i18n="Dikka">Dikka</span> <span class="mgs-dikka-word" data-i18n="DikkaShopWord">Shop</span></h1>
+                <p class="mgs-hero-tagline">Everything you need, beautifully local.</p>
+                <p class="mgs-hero-lede">
+                    Discover verified shops, restaurants, clinics, hotels, schools and services across Ethiopia.
+                    Search once, compare with confidence, and check out securely.
+                </p>
+                <div class="mgs-hero-stats" aria-label="Marketplace benefits">
+                    <div class="mgs-stat">
+                        <span class="mgs-stat-icon" aria-hidden="true">✓</span>
+                        <span><strong>Verified sellers</strong><small>Real Ethiopian businesses</small></span>
+                    </div>
+                    <div class="mgs-stat">
+                        <span class="mgs-stat-icon" aria-hidden="true">🔒</span>
+                        <span><strong>Secure checkout</strong><small>Telebirr, CBE Birr &amp; COD</small></span>
+                    </div>
+                    <div class="mgs-stat">
+                        <span class="mgs-stat-icon" aria-hidden="true">🚚</span>
+                        <span><strong>Local delivery</strong><small>Tracked across the city</small></span>
+                    </div>
+                </div>
             </div>
-            <button id="btn-near-me" class="btn-geo">📍 Near Me</button>
-            
-            <!-- VIEW SWITCHER (GRID | LIST | MAP) -->
-            <div class="magala-view-toggle">
-                <button class="view-btn active" data-view="grid" title="Grid View">🔲 <span class="d-none d-md-inline">Grid</span></button>
-                <button class="view-btn" data-view="list" title="List View">📋 <span class="d-none d-md-inline">List</span></button>
-                <button class="view-btn" data-view="map" title="Map View">🗺️ <span class="d-none d-md-inline">Map</span></button>
+
+            <div class="mgs-hero-panel">
+                <div class="mgs-search-wrap">
+                    <form id="mgs-search-form" class="mgs-search" role="search" autocomplete="off">
+                        <span class="mgs-search-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                        </span>
+                        <input type="search" id="magala-search-input" placeholder="Search products, restaurants, clinics, hotels…" aria-label="Search the marketplace" autocomplete="off" enterkeyhint="search" />
+                        <button type="button" id="magala-clear-search" class="mgs-clear-btn" aria-label="Clear search" hidden>✕</button>
+                        <button type="submit" class="mgs-search-btn">Search</button>
+                    </form>
+                </div>
+
+                <div class="mgs-hero-actions">
+                    <button type="button" id="btn-near-me" class="mgs-ghost-btn">
+                        <span aria-hidden="true">📍</span> Near me
+                    </button>
+                    <a href="/map" class="mgs-ghost-btn">
+                        <span aria-hidden="true">🗺️</span> Open map
+                    </a>
+                    <a href="/cart" class="mgs-ghost-btn mgs-ghost-btn--strong">
+                        <span aria-hidden="true">🛒</span> My cart
+                    </a>
+                </div>
+
+                <p class="mgs-hero-note">Free to browse · Secure login for checkout · Prices in ETB</p>
             </div>
         </div>
-        <div id="magala-typeahead-dropdown" class="typeahead-dropdown" style="display:none;"></div>
+    </section>
+
+    <div id="magala-typeahead-dropdown" class="mgs-typeahead" role="listbox" aria-label="Search suggestions" hidden></div>
+
+    <!-- CATEGORY RAIL -->
+    <section class="mgs-category-section" aria-labelledby="mgs-category-title">
+        <div class="mgs-section-head">
+            <div>
+                <span class="mgs-kicker">Discover</span>
+                <h2 id="mgs-category-title">Browse the marketplace</h2>
+            </div>
+            <span id="mgs-category-status" class="mgs-muted" aria-live="polite">Loading categories…</span>
+        </div>
+        <div class="magala-category-bar" id="mgs-category-bar" role="list" aria-label="Product categories">
+            <!-- Categories are loaded dynamically from magala_shop_api.get_categories -->
+            <button type="button" class="cat-pill active" data-category="all" role="listitem" aria-pressed="true">
+                <span class="mgs-chip-icon" aria-hidden="true">✨</span>
+                <span class="mgs-chip-label">All products</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- STOREFRONT BANNER -->
+    <div id="mgs-store-banner" class="mgs-store-banner" hidden>
+        <div class="mgs-store-banner-icon" aria-hidden="true">🏬</div>
+        <div>
+            <span class="mgs-kicker">Storefront</span>
+            <strong id="mgs-store-name">Verified store</strong>
+            <span class="mgs-muted">Browse everything this seller offers on Magala.</span>
+        </div>
+        <button type="button" id="mgs-clear-store" class="mgs-btn mgs-btn-ghost">Browse all products</button>
     </div>
 
-    <!-- CATEGORY PILLS BAR -->
-    <div class="magala-category-bar">
-        <button class="cat-pill active" data-category="all">🌟 All Categories</button>
-        <button class="cat-pill" data-category="Mobile Phones">📱 Mobile Phones</button>
-        <button class="cat-pill" data-category="Computers & Laptops">💻 Computers & Laptops</button>
-        <button class="cat-pill" data-category="Electronics">⚡ Electronics</button>
-        <button class="cat-pill" data-category="Fashion & Apparel">👗 Fashion</button>
-        <button class="cat-pill" data-category="Food & Groceries">🛒 Groceries</button>
-        <button class="cat-pill" data-category="Health & Beauty">🩺 Health & Beauty</button>
-    </div>
+    <!-- MAIN CONTENT -->
+    <div class="magala-layout mgs-layout" id="mgs-layout">
+        <!-- FILTER SIDEBAR -->
+        <aside class="magala-sidebar mgs-sidebar" id="mgs-filter-panel" aria-label="Product filters">
+            <div class="mgs-filter-top">
+                <div>
+                    <span class="mgs-kicker">Refine</span>
+                    <h2>Filters</h2>
+                </div>
+                <button type="button" id="mgs-close-filters" class="mgs-icon-btn" aria-label="Close filters">✕</button>
+            </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <div class="magala-layout">
-        <!-- SIDEBAR FILTERS (DESKTOP) -->
-        <aside class="magala-sidebar">
-            <div class="filter-card">
-                <div class="filter-header">
-                    <h4>⚙️ Refine Search</h4>
-                    <button id="btn-reset-filters" class="btn-link">Reset</button>
+            <div class="filter-card mgs-filter-card">
+                <div class="mgs-filter-group">
+                    <div class="mgs-filter-title">Categories</div>
+                    <div id="mgs-category-filters" class="mgs-category-filter-list">
+                        <!-- Dynamically populated category filters -->
+                    </div>
                 </div>
 
-                <!-- Price Filter -->
                 <div class="filter-group">
-                    <label class="filter-title">💰 Price Range (ETB)</label>
+                    <label class="filter-title" for="filter-min-price">Price range (ETB)</label>
                     <div class="price-inputs">
-                        <input type="number" id="filter-min-price" placeholder="Min" />
-                        <span>—</span>
-                        <input type="number" id="filter-max-price" placeholder="Max" />
+                        <input type="number" id="filter-min-price" placeholder="Min" min="0" inputmode="numeric" aria-label="Minimum price in ETB" />
+                        <span aria-hidden="true">—</span>
+                        <input type="number" id="filter-max-price" placeholder="Max" min="0" inputmode="numeric" aria-label="Maximum price in ETB" />
                     </div>
                 </div>
 
-                <!-- Star Rating -->
                 <div class="filter-group">
-                    <label class="filter-title">⭐ Customer Rating</label>
+                    <span class="filter-title">Customer rating</span>
                     <div class="rating-options">
-                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.5" /> 4.5★ & Above</label>
-                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.0" /> 4.0★ & Above</label>
-                        <label class="radio-label"><input type="radio" name="rating_filter" value="3.0" /> 3.0★ & Above</label>
-                        <label class="radio-label"><input type="radio" name="rating_filter" value="" checked /> Any Rating</label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.5" /> <span>4.5★ &amp; above</span></label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="4.0" /> <span>4.0★ &amp; above</span></label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="3.0" /> <span>3.0★ &amp; above</span></label>
+                        <label class="radio-label"><input type="radio" name="rating_filter" value="" checked /> <span>Any rating</span></label>
                     </div>
                 </div>
 
-                <!-- Sorting -->
-                <div class="filter-group">
-                    <label class="filter-title">🔃 Sort By</label>
-                    <select id="filter-sort-by" class="form-control">
-                        <option value="relevance">Top Relevant</option>
-                        <option value="price_low_high">Price: Low to High</option>
-                        <option value="price_high_low">Price: High to Low</option>
-                        <option value="rating">Highest Rated</option>
-                        <option value="newest">Newest Arrivals</option>
-                    </select>
+                <div class="mgs-filter-actions">
+                    <button type="button" id="btn-reset-filters" class="mgs-btn mgs-btn-ghost">Reset</button>
+                    <button type="button" id="mgs-apply-filters" class="mgs-btn mgs-btn-primary">Show results</button>
                 </div>
+            </div>
 
-                <!-- BizRide Express Toggle -->
-                <div class="filter-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="filter-bizride-express" checked />
-                        <span>🚚 BizRide Express Eligible</span>
-                    </label>
+            <div class="mgs-side-card">
+                <span class="mgs-side-card-icon" aria-hidden="true">🛍️</span>
+                <div>
+                    <strong>Can't find it?</strong>
+                    <p>Tell Hadeeda what you need and we will help you find a trusted local seller.</p>
+                    <button type="button" class="mgs-text-btn" id="mgs-open-hadeeda">Ask Hadeeda →</button>
                 </div>
             </div>
         </aside>
 
         <!-- PRODUCTS / VIEW DISPLAY -->
-        <main class="magala-main-display">
-            <!-- Results Header with Collapsible Filter Toggle -->
-            <div class="results-meta-bar">
-                <div class="d-flex align-items-center gap-2">
-                    <button id="btn-toggle-filters" class="btn-toggle-filters">
-                        <span class="filter-icon">⚙️</span>
-                        <span id="toggle-filter-text">Hide Filters</span>
+        <main class="magala-main-display mgs-main">
+            <div class="mgs-toolbar" id="mgs-toolbar">
+                <div class="mgs-toolbar-left">
+                    <button type="button" id="btn-toggle-filters" class="btn-toggle-filters" aria-controls="mgs-filter-panel" aria-expanded="false">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+                        <span id="toggle-filter-text">Filters</span>
                     </button>
-                    <span id="results-count-text">Loading items...</span>
+                    <div class="mgs-results">
+                        <span id="results-count-text" aria-live="polite">Loading products…</span>
+                        <span id="mgs-results-sub" class="mgs-muted"></span>
+                    </div>
                 </div>
-                <a href="/map" class="btn-open-map-portal">🗺️ Open Fullscreen Map Portal →</a>
+
+                <div class="mgs-toolbar-right">
+                    <div class="magala-view-toggle" role="group" aria-label="View mode">
+                        <button type="button" class="view-btn active" data-view="grid" title="Grid view" aria-label="Grid view" aria-pressed="true">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+                            <span class="mgs-view-label">Grid</span>
+                        </button>
+                        <button type="button" class="view-btn" data-view="list" title="List view" aria-label="List view" aria-pressed="false">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"></path><circle cx="4" cy="6" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="18" r="1"></circle></svg>
+                            <span class="mgs-view-label">List</span>
+                        </button>
+                        <button type="button" class="view-btn" data-view="map" title="Map view" aria-label="Map view" aria-pressed="false">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 18 3 21V6l6-3 6 3 6-3v15l-6 3-6-3Z"></path><path d="M9 3v15M15 6v15"></path></svg>
+                            <span class="mgs-view-label">Map</span>
+                        </button>
+                    </div>
+
+                    <label class="mgs-sort" for="filter-sort-by">
+                        <span>Sort</span>
+                        <select id="filter-sort-by" class="mgs-select" aria-label="Sort products">
+                            <option value="relevance">Top relevant</option>
+                            <option value="price_low_high">Price: Low to high</option>
+                            <option value="price_high_low">Price: High to low</option>
+                            <option value="rating">Highest rated</option>
+                            <option value="newest">Newest arrivals</option>
+                        </select>
+                    </label>
+
+                    <a href="/map" class="btn-open-map-portal">
+                        <span aria-hidden="true">🗺️</span> Map portal
+                    </a>
+
+                    <button type="button" id="mgs-cart-button" class="mgs-cart-btn" aria-label="Open shopping cart">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5H4.5L6 7Z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>
+                        <span class="mgs-cart-btn-label">Cart</span>
+                        <span id="mgs-cart-count" class="mgs-cart-count">0</span>
+                    </button>
+                </div>
             </div>
 
+            <div id="mgs-active-filters" class="mgs-active-filters" aria-label="Active filters" hidden></div>
+
             <!-- GRID & LIST CONTAINER -->
-            <div id="magala-items-container" class="magala-grid-view">
+            <div id="magala-items-container" class="magala-grid-view mgs-grid" aria-live="polite" aria-busy="true">
                 <!-- Dynamically injected items -->
             </div>
 
-            <!-- EMBEDDED MAP VIEW CONTAINER (Hidden by default) -->
-            <div id="magala-embedded-map-container" style="display:none;">
-                <div class="embedded-map-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-                    <span id="magala-map-status" style="font-weight:700; color:#0f172a; font-size:0.92rem;">
-                        🗺️ Loading business locations...
-                    </span>
-                    <div style="display:flex; gap:8px;">
-                        <button id="btn-magala-map-fit" type="button" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:6px 12px; font-size:0.82rem; font-weight:600; cursor:pointer;">
-                            🎯 Fit All Locations
-                        </button>
-                        <a href="/map" style="background:#0d9488; color:#ffffff !important; border-radius:8px; padding:6px 12px; font-size:0.82rem; font-weight:600; text-decoration:none;">
-                            🗺️ Fullscreen Portal ➔
-                        </a>
+            <!-- EMBEDDED MAP VIEW CONTAINER -->
+            <div id="magala-embedded-map-container" class="mgs-map-wrap" hidden>
+                <div class="mgs-map-toolbar">
+                    <span id="magala-map-status" class="mgs-map-status">🗺️ Loading business locations…</span>
+                    <div class="mgs-map-actions">
+                        <button type="button" id="btn-magala-map-fit" class="mgs-btn mgs-btn-ghost">🎯 Fit all locations</button>
+                        <a href="/map" class="mgs-btn mgs-btn-primary">Fullscreen portal →</a>
                     </div>
                 </div>
                 <div id="magala-split-map" class="embedded-leaflet-map"></div>
             </div>
 
             <!-- PAGINATION -->
-            <div id="magala-pagination" class="magala-pagination"></div>
+            <div id="magala-pagination" class="magala-pagination" role="navigation" aria-label="Product pages"></div>
         </main>
     </div>
 </div>
 
+<!-- MOBILE FILTER BACKDROP -->
+<div id="mgs-filter-backdrop" class="mgs-filter-backdrop" hidden></div>
+
 <!-- FLOATING CART DRAWER -->
 <div id="cart-drawer-backdrop" class="cart-drawer-backdrop" aria-hidden="true"></div>
-<div id="magala-cart-drawer" class="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" aria-hidden="true">
+<aside id="magala-cart-drawer" class="cart-drawer mgs-cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" aria-hidden="true">
     <div class="cart-drawer-header">
-        <h3>🛒 Shopping Cart (<span id="cart-drawer-count">0</span>)</h3>
-        <button type="button" id="close-cart-drawer" class="btn-close" aria-label="Close shopping cart">✕</button>
+        <div>
+            <span class="mgs-kicker">Your basket</span>
+            <h3><span data-i18n="Shopping cart">Shopping cart</span> <span class="mgs-cart-head-count">(<span id="cart-drawer-count">0</span>)</span></h3>
+        </div>
+        <button type="button" id="close-cart-drawer" class="mgs-icon-btn mgs-icon-btn--light" aria-label="Close shopping cart">✕</button>
     </div>
     <div id="cart-drawer-items" class="cart-drawer-body" aria-live="polite">
         <p class="empty-cart-msg">Your cart is empty. Explore items to add!</p>
     </div>
     <div class="cart-drawer-footer">
         <div class="cart-subtotal">
-            <span>Estimated Total:</span>
+            <span>Estimated total</span>
             <strong id="cart-drawer-total">0.00 ETB</strong>
         </div>
-        <a href="/cart" class="btn-checkout-primary">Proceed to Checkout →</a>
+        <a href="/cart" class="btn-checkout-primary">Proceed to checkout →</a>
+        <a href="/cart" class="mgs-drawer-link">View full cart</a>
+        <p class="mgs-drawer-note">🔒 Secure checkout · Login required to place orders</p>
     </div>
-</div>
+</aside>
 
-<!-- PRODUCT QUICK VIEW MODAL -->
-<div id="magala-quickview-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content-glass">
-        <button id="close-quickview-modal" class="btn-modal-close">✕</button>
-        <div id="quickview-modal-body" class="quickview-body"></div>
-    </div>
-</div>
+<div id="mgs-toast" class="mgs-toast" role="status" aria-live="polite"></div>
 
-
-<!-- INSTANT PURCHASE / ORDER MODAL -->
-<div id="shop-order-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); backdrop-filter:blur(6px); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:#ffffff; border-radius:20px; width:94%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); border:1px solid #e2e8f0; position:relative; margin:auto;">
-        <div style="background:linear-gradient(135deg, #0f766e 0%, #0d9488 100%); color:#ffffff; padding:20px 24px; border-radius:20px 20px 0 0; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h4 style="margin:0; font-weight:700; color:#ffffff; font-size:1.2rem;">🛒 Instant Order & Purchase</h4>
-                <p style="margin:2px 0 0; font-size:0.8rem; opacity:0.9;">Direct marketplace checkout with verified profile delivery</p>
-            </div>
-            <button onclick="closeShopOrderModal()" style="border:none; background:transparent; color:#ffffff; font-size:24px; cursor:pointer; line-height:1;">✕</button>
-        </div>
-        <div style="padding:24px;" id="shop-order-modal-body">
-            <!-- Injected Product Info Banner -->
-            <div id="order-product-card" style="display:flex; gap:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:18px; align-items:center;">
-                <img id="order-item-img" src="/assets/bismillah_ethiobiz/img/walta_real_logo.png" style="width:64px; height:64px; object-fit:cover; border-radius:8px;" />
-                <div style="flex:1;">
-                    <strong id="order-item-name" style="font-size:1rem; color:#0f172a; display:block;">Product Name</strong>
-                    <span id="order-item-price" style="font-size:1.1rem; font-weight:700; color:#0d9488;">0.00 ETB</span>
-                </div>
-            </div>
-
-            <input type="hidden" id="order-item-code" />
-
-            <!-- Verified User Profile Card -->
-            <div id="shop-profile-card" style="background:linear-gradient(135deg,#f0fdfa 0%,#ecfdf5 100%); border:1.5px solid #99f6e4; border-radius:14px; padding:14px 16px; margin-bottom:16px; display:flex; align-items:center; gap:14px;">
-                <div style="width:44px; height:44px; border-radius:50%; background:#0d9488; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#fff; font-weight:800;" id="shop-profile-initials">👤</div>
-                <div style="flex:1; min-width:0;">
-                    <div style="font-weight:700; color:#0f172a; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="shop-profile-name">Loading profile...</div>
-                    <div style="font-size:0.8rem; color:#475569;" id="shop-profile-phone">—</div>
-                    <div style="font-size:0.75rem; color:#64748b;" id="shop-profile-email">—</div>
-                </div>
-                <span style="background:#d1fae5; color:#065f46; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px;">✓ Verified</span>
-            </div>
-            <input type="hidden" id="orderCustName" />
-            <input type="hidden" id="orderCustEmail" />
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-                <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Quantity</label>
-                    <input type="number" id="orderCustQty" min="1" value="1" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" onchange="updateOrderTotal()" />
-                </div>
-                <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Payment Method</label>
-                    <select id="orderCustPayment" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem; background:#fff;">
-                        <option value="Telebirr">📱 Telebirr SuperApp</option>
-                        <option value="CBE Birr">🏦 CBE Birr</option>
-                        <option value="Cash on Delivery">💵 Cash on Delivery</option>
-                    </select>
-                </div>
-            </div>
-
-            <div style="margin-bottom:14px;">
-                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Contact / Delivery Phone *</label>
-                <input type="tel" id="orderCustPhone" placeholder="09xxxxxxxx" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem;" />
-            </div>
-
-            <!-- B2B Company Purchase Toggle -->
-            <div id="b2b-purchase-section" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:14px;">
-                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:0;">
-                    <input type="checkbox" id="b2bToggle" onchange="toggleB2BSection()" style="width:18px; height:18px; accent-color:#0d9488;" />
-                    <span style="font-size:0.88rem; font-weight:700; color:#334155;">🏢 Purchase on Behalf of a Company (B2B)</span>
-                </label>
-                <div id="b2b-company-selector" style="display:none; margin-top:12px;">
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Select Buyer Company</label>
-                    <select id="b2bBuyerCompany" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem; background:#fff;">
-                        <option value="">-- Loading companies... --</option>
-                    </select>
-                    <p style="font-size:0.72rem; color:#64748b; margin:6px 0 0;">Purchase Order will be auto-created in selected buyer company, linked to the seller's Sales Order.</p>
-                </div>
-            </div>
-
-            <div style="margin-bottom:18px;">
-                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px;">Delivery Address / Subcity *</label>
-                <textarea id="orderCustAddress" rows="2" placeholder="e.g. Bole Medhanialem, Subcity, House No..." style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem; resize:none;" required></textarea>
-            </div>
-
-            <div style="background:#f1f5f9; border-radius:12px; padding:14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-                <span style="font-size:0.9rem; color:#475569; font-weight:600;">Order Total:</span>
-                <strong id="orderCustTotal" style="font-size:1.3rem; color:#0f766e;">0.00 ETB</strong>
-            </div>
-
-            <button id="btnSubmitOrder" onclick="submitQuickOrder()" style="width:100%; background:#0d9488; color:#ffffff; border:none; padding:14px; border-radius:12px; font-size:1.05rem; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(13,148,136,0.35); transition:all 0.2s;">
-                Confirm & Place Order ➔
-            </button>
-            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin:10px 0 0;">
-                🔒 Secure checkout. Logged-in profile automatically verified.
-            </p>
-        </div>
-    </div>
-</div>
-
+<script>window.ETHIOBIZ_PRESERVE_TITLE = true;</script>
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
-<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=2.7.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/magala_shop.js?v=3.2.0"></script>
 
 <script src="/assets/bismillah_ethiobiz/js/leaflet.js?v=1.9.4"></script>
 <script src="/assets/bismillah_ethiobiz/js/leaflet.markercluster.js?v=1.5.3"></script>

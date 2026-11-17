@@ -127,6 +127,44 @@ def apply():
         _PATCHED = True
         return
 
+    # A stale Contact/Portal User can point at a Customer or Supplier that no
+    # longer exists.  Upstream get_party() then raises DoesNotExistError before
+    # the cart guard below ever runs, which Frappe renders as HTTP 403
+    # ("Not Permitted") for guests.  More importantly, upstream get_party()
+    # *creates* a Customer/Contact/Portal User for the literal "Guest" user if
+    # no Portal User exists, which then triggers the "Please add Customer role
+    # to user Guest" popup on every public page.  Never let that happen.
+    original_get_party = getattr(webshop_cart, "get_party", None)
+    if original_get_party and not getattr(original_get_party, "_ethiobiz_guest_safe", False):
+
+        def guest_safe_get_party(user=None):
+            if (user or frappe.session.user) == "Guest":
+                return None
+            try:
+                return original_get_party(user)
+            except frappe.DoesNotExistError:
+                if (user or frappe.session.user) == "Guest":
+                    return None
+                raise
+
+        guest_safe_get_party._ethiobiz_guest_safe = True
+        webshop_cart.get_party = guest_safe_get_party
+
+        # Some webshop modules imported get_party by value before this hook
+        # ran.  Patch those aliases too, otherwise product filters and item
+        # pages still reach the upstream guest-creating branch.
+        for module_name in (
+            "webshop.webshop.shopping_cart.product_info",
+            "webshop.webshop.doctype.website_item.website_item",
+            "webshop.templates.pages.wishlist",
+        ):
+            try:
+                module = __import__(module_name, fromlist=["get_party"])
+                if getattr(module, "get_party", None) is original_get_party:
+                    module.get_party = guest_safe_get_party
+            except Exception:
+                pass
+
     original = getattr(webshop_cart, "_get_cart_quotation", None)
     if original and not getattr(original, "_ethiobiz_guest_safe", False):
 
@@ -139,6 +177,42 @@ def apply():
 
         guest_safe_get_cart_quotation._ethiobiz_guest_safe = True
         webshop_cart._get_cart_quotation = guest_safe_get_cart_quotation
+
+        # product_info imported _get_cart_quotation by value before this hook.
+        try:
+            from webshop.webshop.shopping_cart import product_info
+
+            if getattr(product_info, "_get_cart_quotation", None) is original:
+                product_info._get_cart_quotation = guest_safe_get_cart_quotation
+        except Exception:
+            pass
+
+    # _set_price_list dereferences get_party().get("name") for guests, which
+    # crashes the product-filter AJAX call once get_party() correctly returns
+    # None.  Use the shop's default price list when there is no party.
+    original_set_price_list = getattr(webshop_cart, "_set_price_list", None)
+    if original_set_price_list and not getattr(original_set_price_list, "_ethiobiz_guest_safe", False):
+
+        def guest_safe_set_price_list(cart_settings, quotation=None):
+            if not quotation and not webshop_cart.get_party():
+                return cart_settings.price_list
+            return original_set_price_list(cart_settings, quotation)
+
+        guest_safe_set_price_list._ethiobiz_guest_safe = True
+        webshop_cart._set_price_list = guest_safe_set_price_list
+
+        for module_name in (
+            "webshop.webshop.shopping_cart.product_info",
+            "webshop.webshop.doctype.website_item.website_item",
+            "webshop.templates.pages.wishlist",
+            "webshop.webshop.variant_selector.utils",
+        ):
+            try:
+                module = __import__(module_name, fromlist=["_set_price_list"])
+                if getattr(module, "_set_price_list", None) is original_set_price_list:
+                    module._set_price_list = guest_safe_set_price_list
+            except Exception:
+                pass
 
     original_decorate = getattr(webshop_cart, "decorate_quotation_doc", None)
     if original_decorate and not getattr(original_decorate, "_ethiobiz_safe_decorate", False):

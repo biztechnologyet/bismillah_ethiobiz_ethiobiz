@@ -616,7 +616,314 @@
             "Healthcare": "ጤና",
             "Education": "ትምህርት",
             "Manufacturing": "ምርት",
-            "Government & Public Sector": "መንግሥትና የሕዝብ ዘርፍ"
+            "Government & Public Sector": "መንግሥትና የሕዝብ ዘርፍ",
+
+            // ============================================================
+            // DIKKA SHOP — MARKETPLACE LISTING (/shop)
+            // Static markup in www/shop.html + dynamic copy rendered by
+            // public/js/magala_shop.js.
+            // ============================================================
+            "Dikka": "ዲካ",
+            "DikkaShopWord": "ሾፕ",
+            "Dikka Shop": "ዲካ ሾፕ",
+            "Dikka Shop · Ethiopia's connected marketplace": "ዲካ ሾፕ · የኢትዮጵያ የተገናኘ ገበያ",
+            "Everything you need, beautifully local.": "የሚፈልጉት ሁሉ፣ በሚያምር ሁኔታ ከአገር ውስጥ።",
+            "Discover verified shops, restaurants, clinics, hotels, schools and services across Ethiopia. Search once, compare with confidence, and check out securely.": "በመላው ኢትዮጵያ የተረጋገጡ መሸጫዎችን፣ ምግብ ቤቶችን፣ ክሊኒኮችን፣ ሆቴሎችን፣ ትምህርት ቤቶችንና አገልግሎቶችን ያግኙ። አንድ ጊዜ ይፈልጉ፣ በእምነት ያነጻጽሩ፣ እና በደህንነት ይክፈሉ።",
+            "Verified sellers": "የተረጋገጡ ሻጮች",
+            "Real Ethiopian businesses": "እውነተኛ የኢትዮጵያ ንግዶች",
+            "Secure checkout": "ደህንነቱ የተጠበቀ ክፍያ",
+            "Telebirr, CBE Birr & COD": "ቴሌብር፣ CBE ብር እና በደረሰኝ ክፍያ",
+            "Local delivery": "የአካባቢ ማድረስ",
+            "Tracked across the city": "በከተማው ውስጥ ክትትል የሚደረግለት",
+            "Search products, restaurants, clinics, hotels…": "ምርቶችን፣ ምግብ ቤቶችን፣ ክሊኒኮችን፣ ሆቴሎችን ይፈልጉ…",
+            "Search the marketplace": "ገበያውን ይፈልጉ",
+            "Clear search": "ፍለጋን አጽዳ",
+            "Search suggestions": "የፍለጋ ምክሮች",
+            "Near me": "በአቅራቢያዬ",
+            "Open map": "ካርታ ክፈት",
+            "My cart": "የእኔ ጋሪ",
+            "Free to browse · Secure login for checkout · Prices in ETB": "በነፃ ማሰስ · ለክፍያ ደህንነቱ የተጠበቀ መግቢያ · ዋጋዎች በብር",
+            "Discover": "ያግኙ",
+            "Browse the marketplace": "ገበያውን ያስሱ",
+            "Loading categories…": "ምድቦች በመጫን ላይ…",
+            "Browse all categories": "ሁሉንም ምድቦች ያስሱ",
+            "All products": "ሁሉም ምርቶች",
+            "Storefront": "የመሸጫ ገጽ",
+            "Verified store": "የተረጋገጠ መሸጫ",
+            "Browse everything this seller offers on Magala.": "ይህ ሻጭ በመጋላ ላይ የሚያቀርበውን ሁሉ ያስሱ።",
+            "Browse all products": "ሁሉንም ምርቶች ያስሱ",
+            "Refine": "ያጣሩ",
+            "Filters": "ማጣሪያዎች",
+            "Show filters": "ማጣሪያዎችን አሳይ",
+            "Close filters": "ማጣሪያዎችን ዝጋ",
+            "Product filters": "የምርት ማጣሪያዎች",
+            "Categories": "ምድቦች",
+            "Price range (ETB)": "የዋጋ ክልል (ብር)",
+            "Min": "ዝቅተኛ",
+            "Max": "ከፍተኛ",
+            "Customer rating": "የደንበኛ ደረጃ",
+            "Any rating": "ማንኛውም ደረጃ",
+            "Reset": "እንደነበር",
+            "Show results": "ውጤቶችን አሳይ",
+            "Can't find it?": "አላገኙትም?",
+            "Tell Hadeeda what you need and we will help you find a trusted local seller.": "ሐዲዳን የሚፈልጉትን ይንገሩ፤ የታመነ የአካባቢ ሻጭ እንድታገኙ እንረዳዎታለን።",
+            "Ask Hadeeda →": "ሐዲዳን ይጠይቁ →",
+            "Loading products…": "ምርቶች በመጫን ላይ…",
+            "View mode": "የእይታ ሁነታ",
+            "Grid view": "የፍርግርግ እይታ",
+            "List view": "የዝርዝር እይታ",
+            "Map view": "የካርታ እይታ",
+            "Grid": "ፍርግርግ",
+            "List": "ዝርዝር",
+            "Sort": "ደርድር",
+            "Sort products": "ምርቶችን ደርድር",
+            "Top relevant": "በጣም ተገቢ",
+            "Price: Low to high": "ዋጋ፦ ከዝቅተኛ ወደ ከፍተኛ",
+            "Price: High to low": "ዋጋ፦ ከከፍተኛ ወደ ዝቅተኛ",
+            "Highest rated": "ከፍተኛ ደረጃ ያላቸው",
+            "Newest arrivals": "አዲስ የገቡ",
+            "Map portal": "የካርታ ፖርታል",
+            "Open shopping cart": "የግዢ ጋሪውን ክፈት",
+            "Active filters": "ንቁ ማጣሪያዎች",
+            "Loading business locations…": "የንግድ አካባቢዎች በመጫን ላይ…",
+            "Fit all locations": "ሁሉንም አካባቢዎች አሳይ",
+            "Fullscreen portal →": "ሙሉ ማያ ፖርታል →",
+            "Product pages": "የምርት ገጾች",
+            "Your basket": "የእርስዎ ቅርጫት",
+            "Shopping cart": "የግዢ ጋሪ",
+            "Close shopping cart": "የግዢ ጋሪውን ዝጋ",
+            "Your cart is empty. Explore items to add!": "ጋሪዎ ባዶ ነው። ለመጨመር ዕቃዎችን ያስሱ!",
+            "Estimated total": "የሚገመት ጠቅላላ",
+            "Proceed to checkout →": "ወደ ክፍያ ይቀጥሉ →",
+            "View full cart": "ሙሉ ጋሪውን ይመልከቱ",
+            "🔒 Secure checkout · Login required to place orders": "🔒 ደህንነቱ የተጠበቀ ክፍያ · ትዕዛዝ ለመስጠት መግባት ያስፈልጋል",
+            "Ask Hadeeda from the home page chat bubble. 🛍️": "ከዋናው ገጽ የውይይት አረፋ ሐዲዳን ይጠይቁ። 🛍️",
+            "Price on request": "ዋጋ በጥያቄ",
+            "Contact seller": "ሻጩን ያግኙ",
+            "incl. VAT": "ተ.እ.ታን ጨምሮ",
+            "New arrival": "አዲስ ገቢ",
+            "Products": "ምርቶች",
+            "Stores": "መሸጫዎች",
+            "Browse category": "ምድብ ያስሱ",
+            "View storefront": "የመሸጫ ገጽ ይመልከቱ",
+            "Verified seller": "የተረጋገጠ ሻጭ",
+            "Product": "ምርት",
+            "Product image": "የምርት ምስል",
+            "Could not load products": "ምርቶችን መጫን አልተቻለም",
+            "Check your connection and try again.": "ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+            "No products found": "ምርቶች አልተገኙም",
+            "Try adjusting your filters": "ማጣሪያዎችዎን በማስተካከል ይሞክሩ",
+            "No products match your filters": "ከማጣሪያዎችዎ ጋር የሚስማማ ምርት የለም",
+            "Try a different category, widen your price range, or clear the search to explore the whole marketplace.": "ሌላ ምድብ ይሞክሩ፣ የዋጋ ክልልዎን ያስፋፉ፣ ወይም ፍለጋውን አጽድተው መላውን ገበያ ያስሱ።",
+            "Clear filters": "ማጣሪያዎችን አጽዳ",
+            "Clear all": "ሁሉንም አጽዳ",
+            "Explore on the map": "በካርታው ላይ ያስሱ",
+            "We could not load the marketplace": "ገበያውን መጫን አልተቻለም",
+            "Try again": "እንደገና ይሞክሩ",
+            "Reload shop": "ሾፑን እንደገና ጫን",
+            "Add": "ጨምር",
+            "Add to cart": "ወደ ጋሪ ጨምር",
+            "View details": "ዝርዝሩን ይመልከቱ",
+            "Verified marketplace listing.": "የተረጋገጠ የገበያ ማስታወቂያ።",
+            "Previous page": "ቀዳሚ ገጽ",
+            "Next page": "ቀጣይ ገጽ",
+            "Geolocation is not supported by this browser.": "ይህ አሳሽ የአካባቢ መለያ አይደግፍም።",
+            "Locating…": "ቦታ በመለየት ላይ…",
+            "Map centered on your location. 📍": "ካርታው በእርስዎ ቦታ ላይ ተማክሏል። 📍",
+            "Location permission denied. You can still browse all products.": "የቦታ ፈቃድ ተከልክሏል። አሁንም ሁሉንም ምርቶች ማሰስ ይችላሉ።",
+            "Map library could not load. Please refresh the page.": "የካርታ ቤተ-መጽሐፍት መጫን አልተቻለም። እባክዎ ገጹን ያድሱ።",
+            "No map locations are published for this store yet.": "ለዚህ መሸጫ እስካሁን የካርታ አካባቢ አልታተመም።",
+            "No verified business locations yet. New stores are added every week.": "እስካሁን የተረጋገጠ የንግድ አካባቢ የለም። አዲስ መሸጫዎች በየሳምንቱ ይጨመራሉ።",
+            "Could not load business locations. ": "የንግድ አካባቢዎችን መጫን አልተቻለም። ",
+            "km away": "ኪሜ ርቀት",
+            "View storefront →": "የመሸጫ ገጽ ይመልከቱ →",
+            "Item removed from cart.": "ዕቃው ከጋሪ ተወግዷል።",
+            "Could not update cart quantity": "የጋሪ ብዛትን ማዘመን አልተቻለም",
+            "Adding…": "በመጨመር ላይ…",
+            "Added": "ተጨምሯል",
+            'Added to cart. <a href="/cart">Checkout →</a>': 'ወደ ጋሪ ተጨምሯል። <a href="/cart">ወደ ክፍያ →</a>',
+            "Could not add to cart": "ወደ ጋሪ መጨመር አልተቻለም",
+            "Remove": "አስወግድ",
+            "Decrease quantity": "ብዛት ቀንስ",
+            "Increase quantity": "ብዛት ጨምር",
+            "Quantity": "ብዛት",
+            "In Stock": "በክምችት አለ",
+            "Out of Stock": "ከክምችት ውጪ",
+            "Available on backorder": "በቅድሚያ ትዕዛዝ ይገኛል",
+            "Per item": "በየዕቃው",
+
+            // ============================================================
+            // DIKKA SHOP — SINGLE PRODUCT PAGE
+            // Shared partial templates/includes/dikka_product_page.html and
+            // public/js/magala_product.js.
+            // ============================================================
+            "Breadcrumb": "የመንገድ አቅጣጫ",
+            "Dikka verified": "በዲካ የተረጋገጠ",
+            "✦ Dikka verified": "✦ በዲካ የተረጋገጠ",
+            "View larger image": "ትልቁን ምስል ይመልከቱ",
+            "Product images": "የምርት ምስሎች",
+            "Watch product video": "የምርት ቪዲዮ ይመልከቱ",
+            "Verified seller · Ethiopia": "የተረጋገጠ ሻጭ · ኢትዮጵያ",
+            "Published on Dikka Shop": "በዲካ ሾፕ ላይ ታትሟል",
+            "Be the first to review": "የመጀመሪያው ግምገማ ይስጡ",
+            "VAT & delivery calculated at checkout": "ተ.እ.ታና ማድረሻ በክፍያ ጊዜ ይሰላል",
+            "Contact the seller for a quote": "ለዋጋ ማቅረቢያ ሻጩን ያግኙ",
+            "View offer": "ቅናሹን ይመልከቱ",
+            "Product highlights": "የምርት ዋና ዋና ጉዳዮች",
+            "Buy now": "አሁን ይግዙ",
+            "Share": "አጋራ",
+            "Share this product": "ይህን ምርት አጋራ",
+            "Copy link": "አገናኝ ቅዳ",
+            "Visit seller": "ሻጩን ይጎብኙ",
+            "Product quick facts": "የምርት አጭር መረጃ",
+            "Item code": "የዕቃ ኮድ",
+            "Category": "ምድብ",
+            "Unit": "መለኪያ",
+            "Availability": "መገኘት",
+            "Seller": "ሻጭ",
+            "Brand": "ብራንድ",
+            "Product information": "የምርት መረጃ",
+            "Product details": "የምርት ዝርዝሮች",
+            "Description": "መግለጫ",
+            "Specifications": "ዝርዝር መረጃ",
+            "Offers": "ቅናሾች",
+            "Reviews": "ግምገማዎች",
+            "Shipping & Returns": "ማድረስና ተመላሽ",
+            "Shipping & returns": "ማድረስና ተመላሽ",
+            "The details": "ዝርዝሮቹ",
+            "About this product": "ስለዚህ ምርት",
+            "Full specification": "ሙሉ ዝርዝር መረጃ",
+            "Product specifications": "የምርት ዝርዝር መረጃ",
+            "Seller offers": "የሻጭ ቅናሾች",
+            "Offers & bundles": "ቅናሾችና ጥቅሎች",
+            "Buyer voices": "የገዢዎች ድምጽ",
+            "Customer reviews": "የደንበኞች ግምገማዎች",
+            "This seller has not added a long description yet. Use the highlights above or contact the seller for more details.": "ይህ ሻጭ እስካሁን ረጅም መግለጫ አልጨመረም። ከላይ ያሉትን ዋና ዋና ነጥቦች ይመልከቱ ወይም ለተጨማሪ ዝርዝር ሻጩን ያግኙ።",
+            "This seller has not added a long description yet. Use the highlights above or contact the seller for more details.": "ይህ ሻጭ እስካሁን ረጅም መግለጫ አልጨመረም። ከላይ ያሉትን ዋና ጉዳዮች ይጠቀሙ ወይም ለተጨማሪ ዝርዝር ሻጩን ያግኙ።",
+            "At a glance": "በአንድ እይታ",
+            "Full specification": "ሙሉ ዝርዝር መረጃ",
+            "Product specifications": "የምርት ዝርዝር መረጃ",
+            "Seller offers": "የሻጭ ቅናሾች",
+            "Offers & bundles": "ቅናሾችና ጥቅሎች",
+            "Offer": "ቅናሽ",
+            "Buyer voices": "የገዢዎች ድምጽ",
+            "Customer reviews": "የደንበኞች ግምገማዎች",
+            "Write a review": "ግምገማ ይጻፉ",
+            "Log in to review": "ለግምገማ ይግቡ",
+            "Rating distribution": "የደረጃ ስርጭት",
+            "Your experience helps other buyers choose with confidence. Reviews are published after purchase.": "የእርስዎ ተሞክሮ ሌሎች ገዢዎች በእምነት እንዲመርጡ ይረዳል። ግምገማዎች ከግዢ በኋላ ይታተማሉ።",
+            "Filter reviews": "ግምገማዎችን አጣራ",
+            "Newest": "አዲስ",
+            "Lowest rated": "ዝቅተኛ ደረጃ ያላቸው",
+            "Most helpful": "በጣም ጠቃሚ",
+            "Share your experience": "ተሞክሮዎን ያጋሩ",
+            "Your rating": "የእርስዎ ደረጃ",
+            "Headline (optional)": "አርዕስት (አማራጭ)",
+            "What stood out?": "ምን ጎልቶ ታየ?",
+            "Your review": "የእርስዎ ግምገማ",
+            "Tell other buyers what you liked, how it arrived, and how you use it.": "ሌሎች ገዢዎች ምን እንደወደዱ፣ እንዴት እንደደረሰ እና እንዴት እንደሚጠቀሙበት ይንገሩ።",
+            "Publish review": "ግምገማ አትም",
+            "Your review will be published on this product page. Please keep it honest and helpful.": "ግምገማዎ በዚህ የምርት ገጽ ላይ ይታተማል። እባክዎ ታማኝና ጠቃሚ ያድርጉት።",
+            "Bought this product?": "ይህን ምርት ገዝተዋል?",
+            "Log in to share your experience with other buyers.": "ተሞክሮዎን ከሌሎች ገዢዎች ጋር ለማጋራት ይግቡ።",
+            "Log in": "ይግቡ",
+            "Verified purchase": "የተረጋገጠ ግዢ",
+            "Seller response": "የሻጭ ምላሽ",
+            "Helpful": "ጠቃሚ",
+            "Log in to mark helpful": "ጠቃሚ ብለው ለመምረጥ ይግቡ",
+            "No reviews yet": "እስካሁን ግምገማ የለም",
+            "Be the first to review this product after your purchase.": "ከግዢ በኋላ የመጀመሪያው ግምገማ ይስጡ።",
+            "Write the first review": "የመጀመሪያውን ግምገማ ይጻፉ",
+            "No reviews match this filter.": "ከዚህ ማጣሪያ ጋር የሚስማማ ግምገማ የለም።",
+            "Load more reviews": "ተጨማሪ ግምገማዎችን ጫን",
+            "Meet the seller": "ሻጩን ያውቁ",
+            "Verified EthioBiz seller serving customers across Ethiopia.": "በመላው ኢትዮጵያ ደንበኞችን የሚያገለግል የተረጋገጠ የኢትዮቢዝ ሻጭ።",
+            "Website": "ድረ-ገጽ",
+            "Browse this seller": "ይህን ሻጭ ያስሱ",
+            "Ask a question": "ጥያቄ ይጠይቁ",
+            "More from the seller": "ተጨማሪ ከሻጩ",
+            "Good to know": "ማወቅ ጥሩ ነው",
+            "Returns": "ተመላሾች",
+            "Delivery options and fees are confirmed with the seller at checkout. Many sellers deliver across Addis Ababa and major regional cities.": "የማድረስ አማራጮችና ክፍያዎች በክፍያ ጊዜ ከሻጩ ጋር ይረጋገጣሉ። ብዙ ሻጮች በአዲስ አበባና በዋና ዋና የክልል ከተሞች ያደርሳሉ።",
+            "Return eligibility depends on the product and seller. Contact the seller through their storefront before placing a return request.": "የመመለስ ብቁነት በምርቱና በሻጩ ላይ ይመሰረታል። የመመለስ ጥያቄ ከማቅረብዎ በፊት በመሸጫ ገጻቸው በኩል ሻጩን ያግኙ።",
+            "Your order is handled inside EthioBiz with verified seller records. Login is required to place an order and track its status.": "ትዕዛዝዎ በኢትዮቢዝ ውስጥ በተረጋገጡ የሻጭ መዝገቦች ይስተናገዳል። ትዕዛዝ ለመስጠትና ሁኔታውን ለመከታተል መግባት ያስፈልጋል።",
+            "Keep exploring": "ማሰስዎን ይቀጥሉ",
+            "Discover more on Dikka Shop": "ተጨማሪ በዲካ ሾፕ ያግኙ",
+            "See all →": "ሁሉንም ይመልከቱ →",
+            "New": "አዲስ",
+            "More products are waiting for you": "ተጨማሪ ምርቶች ይጠብቁዎታል",
+            "Explore the full Dikka Shop catalogue, discover verified sellers, and find something you love.": "ሙሉውን የዲካ ሾፕ ካታሎግ ያስሱ፣ የተረጋገጡ ሻጮችን ያግኙ፣ እና የሚወዱትን ያግኙ።",
+            "Browse Dikka Shop": "ዲካ ሾፕን ያስሱ",
+            "Product image unavailable": "የምርት ምስል አይገኝም",
+            "Link copied to clipboard.": "አገናኙ ወደ ቅንጥብ ሰሌዳ ተቀድቷል።",
+            "Please choose a rating from 1 to 5 stars.": "እባክዎ ከ1 እስከ 5 ኮከብ ደረጃ ይምረጡ።",
+            "Please write a short review before publishing.": "እባክዎ ከማተምዎ በፊት አጭር ግምገማ ይጻፉ።",
+            "Publishing…": "በማተም ላይ…",
+            "Thank you! Your review has been published.": "አመሰግናለሁ! ግምገማዎ ታትሟል።",
+            "Could not publish your review.": "ግምገማዎን ማተም አልተቻለም።",
+            "Marked as helpful. Thank you!": "ጠቃሚ ተብሎ ምልክት ተደርጓል። አመሰግናለሁ!",
+            "Could not mark this review.": "ይህን ግምገማ ምልክት ማድረግ አልተቻለም።",
+            "Loading…": "በመጫን ላይ…",
+            "Could not load more reviews.": "ተጨማሪ ግምገማዎችን መጫን አልተቻለም።",
+            "Verified customer": "የተረጋገጠ ደንበኛ",
+            "Ethiopia": "ኢትዮጵያ",
+            "Item": "ዕቃ",
+            "Something went wrong.": "የተሳሳተ ነገር ተፈጥሯል።",
+            "Dikka Shop listing": "የዲካ ሾፕ ማስታወቂያ",
+            "Ships from Ethiopia": "ከኢትዮጵያ ይላካል",
+            "Watch product video": "የምርት ቪዲዮ ይመልከቱ",
+            "Published on Dikka Shop": "በዲካ ሾፕ ላይ ታትሟል",
+            "Be the first to review": "የመጀመሪያው ግምገማ ይስጡ",
+            "VAT & delivery calculated at checkout": "ተ.እ.ታና ማድረስ በክፍያ ጊዜ ይሰላሉ",
+            "Contact the seller for a quote": "ለዋጋ ማቅረቢያ ሻጩን ያግኙ",
+            "View offer": "ቅናሹን ይመልከቱ",
+            "More products are waiting for you": "ተጨማሪ ምርቶች ይጠብቁዎታል",
+            "Explore the full Dikka Shop catalogue, discover verified sellers, and find something you love.": "ሙሉ የዲካ ሾፕ ካታሎግን ያስሱ፣ የተረጋገጡ ሻጮችን ያግኙ እና የሚወዱትን ያግኙ።",
+            "Browse Dikka Shop": "ዲካ ሾፕን ያስሱ",
+            "Discover more on Dikka Shop": "ተጨማሪ በዲካ ሾፕ ያግኙ",
+            "See all →": "ሁሉንም ይመልከቱ →",
+            "New": "አዲስ",
+            "🔒 Secure checkout · Login required to place orders": "🔒 ደህንነቱ የተጠበቀ ክፍያ · ትዕዛዝ ለማስገባት መግባት ያስፈልጋል",
+            "Meet the seller": "ሻጩን ያውቁ",
+            "More from the seller": "ተጨማሪ ከሻጩ",
+            "Good to know": "ማወቅ ያለብዎት",
+            "Delivery options and fees are confirmed with the seller at checkout. Many sellers deliver across Addis Ababa and major regional cities.": "የማድረስ አማራጮችና ክፍያዎች በክፍያ ጊዜ ከሻጩ ጋር ይረጋገጣሉ። ብዙ ሻጮች በአዲስ አበባና በዋና ዋና የክልል ከተሞች ያደርሳሉ።",
+            "Return eligibility depends on the product and seller. Contact the seller through their storefront before placing a return request.": "የመመለስ ብቁነት በምርቱና በሻጩ ላይ ይመሰረታል። የመመለስ ጥያቄ ከማስገባትዎ በፊት በመሸጫ ገጻቸው በኩል ሻጩን ያግኙ።",
+            "Your order is handled inside EthioBiz with verified seller records. Login is required to place an order and track its status.": "ትዕዛዝዎ በኢትዮቢዝ ውስጥ ከተረጋገጡ የሻጭ መዝገቦች ጋር ይስተናገዳል። ትዕዛዝ ለማስገባትና ሁኔታውን ለመከታተል መግባት ያስፈልጋል።",
+            "Browse this seller": "ይህን ሻጭ ያስሱ",
+            "Ask a question": "ጥያቄ ይጠይቁ",
+            "Website": "ድረ-ገጽ",
+            "Verified EthioBiz seller serving customers across Ethiopia.": "በመላው ኢትዮጵያ ደንበኞችን የሚያገለግል የተረጋገጠ የኢትዮቢዝ ሻጭ።",
+            "✓ Verified seller": "✓ የተረጋገጠ ሻጭ",
+            "✦ Dikka verified": "✦ በዲካ የተረጋገጠ",
+            "Headline": "አርዕስት",
+            "(optional)": "(አማራጭ)",
+            "What stood out?": "ምን ጎልቶ ታየ?",
+            "More from": "ተጨማሪ ከ",
+            "Your review will be published on this product page. Please keep it honest and helpful.": "ግምገማዎ በዚህ የምርት ገጽ ላይ ይታተማል። እባክዎ በታማኝነትና በጠቃሚነት ይጻፉት።",
+            "Log in to share your experience with other buyers.": "ተሞክሮዎን ከሌሎች ገዢዎች ጋር ለማጋራት ይግቡ።",
+            "Tell other buyers what you liked, how it arrived, and how you use it.": "ምን እንደወደዱት፣ እንዴት እንደደረሰ እና እንዴት እንደሚጠቀሙበት ለሌሎች ገዢዎች ይንገሩ።",
+
+            // Interpolated keys used by page scripts through EthioBizI18n.t().
+            "{n} reviews": "{n} ግምገማ",
+            "{n} categories · updated live": "{n} ምድቦች · በቀጥታ ተዘምኗል",
+            "Showing {shown} of {total} products": "ከ{total} ምርቶች {shown} በማሳየት ላይ",
+            "Page {page} of {pages}": "ገጽ {page} ከ{pages}",
+            "{n} verified business locations on the map": "{n} የተረጋገጡ የንግድ አካባቢዎች በካርታው ላይ",
+            "Store: {name}": "መሸጫ፦ {name}",
+            "Search: “{query}”": "ፍለጋ፦ “{query}”",
+            "{rating}★ & above": "{rating}★ እና ከዚያ በላይ",
+            "Reviews ({n})": "ግምገማዎች ({n})",
+            "{n} offers": "{n} ቅናሾች",
+            "for “{query}” · try a broader search": "ለ“{query}” · ሰፋ ያለ ፍለጋ ይሞክሩ",
+            "Add {name} to cart": "{name}ን ወደ ጋሪ ጨምር",
+            "Remove {name}": "{name}ን አስወግድ",
+            "Show image {n}": "ምስል {n} አሳይ",
+            "{n} stars": "{n} ኮከቦች",
+            "{n} out of 5": "ከ5 {n}",
+            "More from {group}": "ተጨማሪ ከ{group}",
+            "Real feedback from buyers who shopped with {seller}.": "ከ{seller} ጋር የገዙ ገዢዎች የሰጡ እውነተኛ አስተያየት።",
+            "Dikka Shop — Ethiopia's Connected Marketplace | EthioBiz.ET": "ዲካ ሾፕ — የኢትዮጵያ የተገናኘ ገበያ | ኢትዮቢዝ.ኢት"
         },
         en: {
             "Home": "Home",
@@ -643,6 +950,41 @@
             "Verified Merchant": "Verified Merchant"
         }
     };
+
+    // Number-bearing labels (counts, pagination, product page titles) cannot be
+    // stored in a flat dictionary, so they are matched with a small pattern
+    // table after exact lookup fails. Only the visible label is localised; the
+    // dynamic value itself (count, name, date) is preserved verbatim.
+    const PATTERNS = {
+        am: [
+            [/^(\d[\d,]*)\s+categories?\s+·\s+updated live$/i, function (m) { return m[1] + ' ምድቦች · በቀጥታ ተዘምኗል'; }],
+            [/^(\d[\d,]*)\s+reviews?$/i, function (m) { return m[1] + ' ግምገማ'; }],
+            [/^(\d[\d,]*)\s+verified business locations?\s+on the map$/i, function (m) { return m[1] + ' የተረጋገጡ የንግድ አካባቢዎች በካርታው ላይ'; }],
+            [/^Page\s+(\d+)\s+of\s+(\d+)$/i, function (m) { return 'ገጽ ' + m[1] + ' ከ' + m[2]; }],
+            [/^Reviews\s*\((\d+)\)$/i, function (m) { return 'ግምገማዎች (' + m[1] + ')'; }],
+            [/^(\d+)\s+offers?$/i, function (m) { return m[1] + ' ቅናሾች'; }],
+            [/^Store:\s*(.+)$/i, function (m) { return 'መሸጫ፦ ' + m[1]; }],
+            [/^Search:\s*“(.+)”$/i, function (m) { return 'ፍለጋ፦ “' + m[1] + '”'; }],
+            [/^(\d+(?:\.\d+)?)★\s*&\s*above$/i, function (m) { return m[1] + '★ እና ከዚያ በላይ'; }],
+            [/^(\d+)\s+stars?$/i, function (m) { return m[1] + ' ኮከቦች'; }],
+            [/^(\d+(?:\.\d+)?)\s+out of 5$/i, function (m) { return 'ከ5 ' + m[1]; }],
+            [/^(.+)\s+—\s+Dikka Shop\s*\|\s*EthioBiz\.ET$/i, function (m) { return m[1] + ' — ዲካ ሾፕ | ኢትዮቢዝ.ኢት'; }],
+            [/^Item\s+([A-Za-z0-9][\w./-]*)$/, function (m) { return 'ዕቃ ' + m[1]; }],
+            [/^Real feedback from buyers who shopped with (.+)\.$/i, function (m) { return 'ከ' + m[1] + ' ጋር የገዙ ገዢዎች የሰጡ እውነተኛ አስተያየት።'; }],
+            [/^Verified seller\s*·\s*(.+)$/i, function (m) { return 'የተረጋገጠ ሻጭ · ' + m[1]; }],
+            [/^More from\s+(.+)$/i, function (m) { return 'ተጨማሪ ከ' + m[1]; }],
+            [/^(.+)\s+—\s+EthioBiz\.ET$/i, function (m) { return m[1] + ' — ኢትዮቢዝ.ኢት'; }]
+        ]
+    };
+
+    function applyPatterns(text) {
+        const rules = PATTERNS[currentLang] || [];
+        for (let i = 0; i < rules.length; i += 1) {
+            const match = text.match(rules[i][0]);
+            if (match) return rules[i][1](match);
+        }
+        return '';
+    }
 
     let currentLang = 'en';
     let welcomeModalShown = false;
@@ -860,6 +1202,10 @@
         const noDots = clean.replace(/[.…]+$/, '').trim();
         if (dict[noDots]) return dict[noDots];
         if (lower[noDots.toLowerCase()]) return lower[noDots.toLowerCase()];
+
+        // Number-bearing / branded labels (counts, pagination, page titles).
+        const patterned = applyPatterns(raw);
+        if (patterned) return patterned;
         return '';
     }
 
@@ -867,8 +1213,14 @@
     // only the human-readable label next to them.
     function isDecorativeNode(node) {
         if (!node || node.nodeType !== 1) return false;
-        if (node.tagName === 'BR' || node.tagName === 'SVG') return true;
-        return node.tagName === 'SPAN' && /icon/i.test(node.className || '');
+        const tag = node.tagName;
+        if (tag === 'BR' || tag === 'SVG' || tag === 'I') return true;
+        if (node.getAttribute && node.getAttribute('aria-hidden') === 'true') {
+            // Glyph-only nodes (icons, emoji, stars) are decoration; anything
+            // longer than a couple of characters is real content.
+            return (node.textContent || '').replace(/\s+/g, '').length <= 2;
+        }
+        return tag === 'SPAN' && /icon/i.test(node.className || '');
     }
 
     function setTextPreservingDecor(el, text) {
@@ -889,7 +1241,7 @@
     function getTranslatableText(el) {
         const clone = el.cloneNode(true);
         Array.prototype.forEach.call(
-            clone.querySelectorAll('svg, br, .dob-ind-icon'),
+            clone.querySelectorAll('svg, br, i, [aria-hidden="true"], .dob-ind-icon'),
             function (node) { node.remove(); }
         );
         return (clone.textContent || '').replace(/\s+/g, ' ').trim();
@@ -943,7 +1295,27 @@
                 '.card-title', '.section-title', '.eyebrow', '.badge', '.btn',
                 '.dob-ind-btn', '.dob-pkg-module', '.dob-pkg-users', '.dob-pkg-name',
                 '.dob-pkg-price', '.dob-pkg-price span', '.dob-step-title',
-                '.dob-summary-label', '.dob-summary-value'
+                '.dob-summary-label', '.dob-summary-value',
+                // Dikka Shop listing labels (dynamic + static)
+                '.mgs-eyebrow', '.mgs-kicker', '.mgs-chip-label', '.mgs-view-label',
+                '.mgs-cart-btn-label', '.mgs-filter-title', '.mgs-muted',
+                '.mgs-map-status', '.mgs-results', '.mgs-typeahead-group-label',
+                '.mgs-new-pill', '.mgs-fallback-label', '.mgs-add-label',
+                '.mgs-page-indicator', '.mgs-sort span', '.mgs-badge',
+                '.mgs-empty h3', '.mgs-empty p', '.mgs-error h3',
+                // Dikka single product page labels
+                '.mp-kicker', '.mp-badge', '.mp-info-chip', '.mp-price',
+                '.mp-price-note', '.mp-review-count', '.mp-rating-meta',
+                '.mp-seller-sub', '.mp-trust span', '.mp-share > span',
+                '.mp-quickfact dt', '.mp-meta-grid span',
+                '.mp-offer-ribbon-sub', '.mp-review-meta', '.mp-review-meta em',
+                '.mp-review-stars', '.mp-seller-badge', '.mp-rel-seller',
+                '.mp-rel-rating', '.mp-sticky-copy strong',
+                '.mp-form-note', '.mp-review-filter-empty', '.mp-panel-lede',
+                '.mp-breadcrumb-current', '.mp-drawer-note', '.mp-offer-badge',
+                '.cart-subtotal span', '.mp-fallback-text', '.mp-video-link',
+                '.filter-title', '.mgs-drawer-note', '.mgs-side-card strong',
+                '.mgs-hero-note', '.mgs-stat strong', '.mgs-stat small'
             ].join(',');
 
             document.querySelectorAll(selector).forEach(el => {

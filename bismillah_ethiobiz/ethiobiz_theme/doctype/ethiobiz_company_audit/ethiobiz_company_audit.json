@@ -1,0 +1,69 @@
+{
+    "name": "EthioBiz Company Audit",
+    "module": "EthioBiz Theme",
+    "custom": 1,
+    "docstatus": 0,
+    "doctype": "DocType",
+    "autoname": "hash",
+    "fields": [
+        {
+            "fieldname": "user",
+            "fieldtype": "Link",
+            "label": "User",
+            "options": "User",
+            "in_list_view": 1,
+            "search_index": 1
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "in_list_view": 1,
+            "search_index": 1
+        },
+        {
+            "fieldname": "action",
+            "fieldtype": "Data",
+            "label": "Action",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "label": "Status",
+            "options": "Success\nFailed",
+            "default": "Success",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "details",
+            "fieldtype": "Small Text",
+            "label": "Details"
+        },
+        {
+            "fieldname": "ip_address",
+            "fieldtype": "Data",
+            "label": "IP Address"
+        },
+        {
+            "fieldname": "timestamp",
+            "fieldtype": "Datetime",
+            "label": "Timestamp",
+            "default": "now",
+            "in_list_view": 1
+        }
+    ],
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "report": 1,
+            "export": 1
+        }
+    ],
+    "sort_field": "timestamp",
+    "sort_order": "DESC",
+    "track_changes": 0
+}

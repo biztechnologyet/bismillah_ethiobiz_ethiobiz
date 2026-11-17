@@ -12,13 +12,23 @@
 
   if (window.ebFetch) return;
 
+  function validToken(token) {
+    return !!token && token !== "None" && token !== "null" && token !== "undefined";
+  }
+
   window.ebCsrfToken = function () {
     if (typeof window !== "undefined") {
-      if (window.csrf_token) return window.csrf_token;
-      if (window.frappe && window.frappe.csrf_token) return window.frappe.csrf_token;
+      // frappe.csrf_token is injected by Frappe's base template and is the
+      // authoritative value. The legacy window.csrf_token can be the literal
+      // string "None" when the page template used the wrong session path.
+      if (window.frappe && validToken(window.frappe.csrf_token)) return window.frappe.csrf_token;
+      if (validToken(window.csrf_token)) return window.csrf_token;
+      if (window.frappe && window.frappe.boot && validToken(window.frappe.boot.csrf_token)) {
+        return window.frappe.boot.csrf_token;
+      }
     }
     var meta = document.querySelector('meta[name="csrf-token"]');
-    if (meta && meta.content) return meta.content;
+    if (meta && validToken(meta.content)) return meta.content;
     var match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : null;
   };

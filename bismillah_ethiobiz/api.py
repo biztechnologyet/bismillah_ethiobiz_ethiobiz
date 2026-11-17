@@ -1,4 +1,4 @@
-﻿import frappe
+import frappe
 import requests
 import json
 import re
@@ -639,7 +639,7 @@ def update_website_context(context):
         context.web_include_css = []
 
     css_files = [
-        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.0",
+        "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
         "/assets/bismillah_ethiobiz/css/walta.css",
         "/assets/bismillah_ethiobiz/css/magala_checkout.css",
     ]
@@ -660,7 +660,7 @@ def update_website_context(context):
     js_files = [
         "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.5",
         "/assets/bismillah_ethiobiz/js/walta.js",
         "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
         "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
@@ -668,7 +668,7 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
         "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.0.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.1.0",
     ]
     for js in js_files:
         base = js.split("?")[0]

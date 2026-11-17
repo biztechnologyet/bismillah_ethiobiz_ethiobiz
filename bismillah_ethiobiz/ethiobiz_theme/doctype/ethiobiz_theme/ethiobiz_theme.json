@@ -433,11 +433,23 @@
       "fieldtype": "Table",
       "label": "Floating Action Items",
       "options": "EthioBiz Floating Action Item"
+    },
+    {
+      "fieldname": "section_dobiz_industries",
+      "fieldtype": "Section Break",
+      "label": "DOBiz Signup Industries"
+    },
+    {
+      "fieldname": "dobiz_industry_modules",
+      "fieldtype": "Table",
+      "label": "DOBiz Industry Modules",
+      "options": "EthioBiz Industry Module",
+      "description": "Enabled rows appear on /dobiz-signup. Disabled rows disappear from the page and are rejected by the server."
     }
   ],
   "index_loggable": 0,
   "links": [],
-  "modified": "2026-10-30 22:50:00.000000",
+  "modified": "2026-11-17 21:20:00.000000",
   "modified_by": "Administrator",
   "owner": "Administrator",
   "permissions": [
@@ -540,6 +552,8 @@
     "enable_light_label_fix",
     "custom_css",
     "section_floating_widget",
-    "floating_action_items"
+    "floating_action_items",
+    "section_dobiz_industries",
+    "dobiz_industry_modules"
   ]
 }

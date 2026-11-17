@@ -1,0 +1,573 @@
+{% macro star_rating(value, extra_class='') -%}
+<span class="mp-stars {{ extra_class }}" aria-hidden="true">
+    <span class="mp-stars-base">★★★★★</span>
+    <span class="mp-stars-fill" style="width: {{ ((value or 0) / 5 * 100) | round(1) }}%">★★★★★</span>
+</span>
+{%- endmacro %}
+
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/magala_product.css?v=2.0.0" />
+
+<div id="page-product"
+     class="dikka-product"
+     data-item-code="{{ product.item_code | e }}"
+     data-website-item="{{ product.website_item | e }}"
+     data-price="{{ product.price_value }}"
+     data-currency="{{ product.currency | e }}">
+    <div class="mp-aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+    <div class="mp-shell">
+        <nav class="mp-breadcrumbs" aria-label="Breadcrumb">
+            {% for crumb in product.breadcrumbs %}
+                {% if not loop.last %}
+                    <a href="{{ crumb.route | e }}">{{ crumb.name | e }}</a>
+                    <span aria-hidden="true">/</span>
+                {% else %}
+                    <span class="mp-breadcrumb-current" aria-current="page">{{ crumb.name | e }}</span>
+                {% endif %}
+            {% endfor %}
+        </nav>
+
+        <section class="mp-hero" aria-labelledby="mp-title">
+            <div class="mp-gallery">
+                <div class="mp-main-image" id="mp-main-image-wrap">
+                    {% if product.primary_image %}
+                    <img id="mp-main-image" src="{{ product.primary_image | e }}" alt="{{ product.item_name | e }}" />
+                    {% else %}
+                    <div class="mp-image-fallback" role="img" aria-label="{{ product.item_name | e }}">
+                        <span class="mp-fallback-glyph" aria-hidden="true">◈</span>
+                        <span class="mp-fallback-text" data-i18n="Dikka Shop">Dikka Shop</span>
+                        <span class="mp-fallback-sub">{{ product.item_group | e }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="mp-image-badges">
+                        <span class="mp-badge mp-badge-stock"><i aria-hidden="true"></i> {{ product.stock_status | e }}</span>
+                        {% if product.item_group %}<span class="mp-badge mp-badge-cat">{{ product.item_group | e }}</span>{% endif %}
+                        {% if product.is_published %}<span class="mp-badge mp-badge-published">✦ Dikka verified</span>{% endif %}
+                    </div>
+                    <button type="button" class="mp-zoom-btn" id="mp-zoom-btn" aria-label="View larger image" {% if not product.primary_image %}hidden{% endif %}>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5M11 8v6M8 11h6"></path></svg>
+                    </button>
+                </div>
+
+                {% if product.has_gallery %}
+                <div class="mp-thumbs" role="list" aria-label="Product images">
+                    {% for img in product.gallery %}
+                    <button type="button" class="mp-thumb{% if loop.first %} is-active{% endif %}" role="listitem"
+                            data-image="{{ img.image | e }}" aria-label="Show image {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+                        <img src="{{ img.image | e }}" alt="{{ img.caption | e }}" loading="lazy" />
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if product.video_url %}
+                <a class="mp-video-link" href="{{ product.video_url | e }}" target="_blank" rel="noopener">
+                    <span aria-hidden="true">▶</span> Watch product video
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="mp-info">
+                <div class="mp-seller-line">
+                    {% if product.company_logo %}
+                    <img class="mp-seller-logo" src="{{ product.company_logo | e }}" alt="{{ product.company_name | e }}" loading="lazy" />
+                    {% else %}
+                    <span class="mp-seller-avatar" aria-hidden="true">{{ (product.company_name or 'S')[0] | upper }}</span>
+                    {% endif %}
+                    <div>
+                        <a class="mp-seller-name" href="{{ product.storefront_url | e }}">{{ product.company_name or 'Verified seller' }}</a>
+                        <span class="mp-seller-sub">Verified seller · {{ (product.company_address or "Ethiopia") | e }}</span>
+                    </div>
+                    <span class="mp-seller-check" title="Verified seller" aria-label="Verified seller">✓</span>
+                </div>
+
+                <div class="mp-info-chips">
+                    {% if product.item_group %}<a class="mp-info-chip" href="/shop?category={{ product.item_group | urlencode | e }}">{{ product.item_group | e }}</a>{% endif %}
+                    {% if product.brand %}<span class="mp-info-chip mp-info-chip--brand">{{ product.brand | e }}</span>{% endif %}
+                    {% if product.is_published %}<span class="mp-info-chip mp-info-chip--published">Published on Dikka Shop</span>{% endif %}
+                </div>
+
+                <h1 id="mp-title" class="mp-title">{{ product.item_name | e }}</h1>
+
+                {% if product.short_description %}
+                <p class="mp-short-desc">{{ product.short_description | e }}</p>
+                {% endif %}
+
+                <div class="mp-rating-row">
+                    <a class="mp-rating-link" href="#mp-reviews" data-mp-reviews-link>
+                        {{ star_rating(product.rating) }}
+                        {% if product.total_reviews %}
+                        <strong>{{ "%.1f" | format(product.rating) }}</strong>
+                        <span class="mp-review-count">{{ product.review_count_label }}</span>
+                        {% else %}
+                        <strong class="mp-rating-empty">New arrival</strong>
+                        <span class="mp-review-count">Be the first to review</span>
+                        {% endif %}
+                    </a>
+                    <span class="mp-rating-divider" aria-hidden="true"></span>
+                    <span class="mp-rating-meta">Item {{ product.item_code | e }}</span>
+                </div>
+
+                <div class="mp-price-row">
+                    <span class="mp-price">{{ product.price_label | e }}</span>
+                    <span class="mp-price-note">{% if product.price_value > 0 %}VAT &amp; delivery calculated at checkout{% else %}Contact the seller for a quote{% endif %}</span>
+                </div>
+
+                {% if product.offers %}
+                <div class="mp-offer-ribbon" role="note">
+                    <span class="mp-offer-ribbon-badge" aria-hidden="true">✦</span>
+                    <div>
+                        <strong class="mp-offer-ribbon-title">{{ product.offers[0].offer_title | e }}</strong>
+                        {% if product.offers[0].offer_subtitle %}<span class="mp-offer-ribbon-sub">{{ product.offers[0].offer_subtitle | e }}</span>{% endif %}
+                    </div>
+                    {% if product.offers | length > 1 %}
+                    <button type="button" class="mp-offer-count" data-mp-tab-link="offers">{{ product.offers | length }} offers</button>
+                    {% else %}
+                    <button type="button" class="mp-offer-count" data-mp-tab-link="offers">View offer</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if product.highlights %}
+                <ul class="mp-highlights" aria-label="Product highlights">
+                    {% for h in product.highlights %}
+                    <li><span class="mp-highlight-icon" aria-hidden="true">{{ h.icon | e }}</span><span>{{ h.text | e }}</span></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                <div class="mp-buy-box">
+                    <div class="mp-qty" role="group" aria-label="Quantity">
+                        <button type="button" id="mp-qty-dec" class="mp-qty-btn" aria-label="Decrease quantity">−</button>
+                        <input id="mp-qty" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity" />
+                        <button type="button" id="mp-qty-inc" class="mp-qty-btn" aria-label="Increase quantity">+</button>
+                    </div>
+                    <button type="button" id="mp-add-to-cart" class="mp-btn mp-btn-primary" data-item-code="{{ product.item_code | e }}">
+                        <span aria-hidden="true">🛒</span> Add to cart
+                    </button>
+                    <button type="button" id="mp-buy-now" class="mp-btn mp-btn-accent" data-item-code="{{ product.item_code | e }}">
+                        Buy now
+                    </button>
+                </div>
+
+                <div class="mp-trust">
+                    <span><i aria-hidden="true">✓</i> Verified seller</span>
+                    <span><i aria-hidden="true">🔒</i> Secure checkout</span>
+                    <span><i aria-hidden="true">🚚</i> Local delivery</span>
+                </div>
+
+                <div class="mp-share">
+                    <span>Share</span>
+                    <button type="button" class="mp-share-btn" id="mp-share-btn" aria-label="Share this product">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.6 6.8-4.2M8.6 13.4l6.8 4.2"></path></svg>
+                        Copy link
+                    </button>
+                    <a class="mp-share-btn" href="{{ product.storefront_url | e }}">Visit seller</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mp-quickfacts" aria-label="Product quick facts">
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">▣</span>
+                <div><dt>Item code</dt><dd>{{ product.item_code | e }}</dd></div>
+            </div>
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">◈</span>
+                <div><dt>Category</dt><dd>{{ product.item_group | e }}</dd></div>
+            </div>
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">◌</span>
+                <div><dt>Unit</dt><dd>{{ (product.uom or "Per item") | e }}</dd></div>
+            </div>
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">●</span>
+                <div><dt>Availability</dt><dd>{{ product.stock_status | e }}</dd></div>
+            </div>
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">◆</span>
+                <div><dt>Seller</dt><dd>{{ (product.company_name or "Verified seller") | e }}</dd></div>
+            </div>
+            <div class="mp-quickfact">
+                <span class="mp-quickfact-icon" aria-hidden="true">✦</span>
+                <div><dt>Brand</dt><dd>{{ (product.brand or "EthioBiz") | e }}</dd></div>
+            </div>
+        </section>
+
+        <section class="mp-panels" aria-label="Product information">
+            <div class="mp-tabs" role="tablist" aria-label="Product details">
+                <button type="button" class="mp-tab is-active" role="tab" aria-selected="true" aria-controls="mp-panel-description" data-tab="description">Description</button>
+                {% if product.specs %}
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-specifications" data-tab="specifications">Specifications</button>
+                {% endif %}
+                {% if product.offers %}
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-offers" data-tab="offers">Offers</button>
+                {% endif %}
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-reviews" data-tab="reviews">Reviews ({{ product.total_reviews }})</button>
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-seller" data-tab="seller">Seller</button>
+                {% for tab in product.tabs %}
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-extra-{{ loop.index }}" data-tab="extra-{{ loop.index }}">{{ tab.label | e }}</button>
+                {% endfor %}
+                <button type="button" class="mp-tab" role="tab" aria-selected="false" aria-controls="mp-panel-shipping" data-tab="shipping">Shipping &amp; Returns</button>
+            </div>
+
+            <div class="mp-panel is-active" id="mp-panel-description" role="tabpanel">
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">The details</span>
+                    <h2 class="mp-panel-title">About this product</h2>
+                </div>
+                {% if product.description %}
+                <div class="mp-rich-content">{{ product.description | safe }}</div>
+                {% else %}
+                <p class="mp-description mp-muted">This seller has not added a long description yet. Use the highlights above or contact the seller for more details.</p>
+                {% endif %}
+
+                {% if product.specs %}
+                <div class="mp-spec-preview">
+                    <h3>At a glance</h3>
+                    <dl class="mp-specs">
+                        {% for spec in product.specs[:4] %}
+                        <div><dt>{{ spec.label | e }}</dt><dd>{{ spec.description | safe }}</dd></div>
+                        {% endfor %}
+                    </dl>
+                </div>
+                {% endif %}
+
+                <div class="mp-meta-grid">
+                    <div><span>Item code</span><strong>{{ product.item_code | e }}</strong></div>
+                    <div><span>Category</span><strong>{{ product.item_group | e }}</strong></div>
+                    <div><span>Brand</span><strong>{{ (product.brand or "—") | e }}</strong></div>
+                    <div><span>Unit</span><strong>{{ (product.uom or "—") | e }}</strong></div>
+                    <div><span>Seller</span><strong>{{ (product.company_name or "—") | e }}</strong></div>
+                    <div><span>Availability</span><strong>{{ product.stock_status | e }}</strong></div>
+                </div>
+            </div>
+
+            {% if product.specs %}
+            <div class="mp-panel" id="mp-panel-specifications" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">Full specification</span>
+                    <h2 class="mp-panel-title">Product specifications</h2>
+                </div>
+                <dl class="mp-spec-table">
+                    {% for spec in product.specs %}
+                    <div class="mp-spec-row"><dt>{{ spec.label | e }}</dt><dd>{{ spec.description | safe }}</dd></div>
+                    {% endfor %}
+                </dl>
+            </div>
+            {% endif %}
+
+            {% if product.offers %}
+            <div class="mp-panel" id="mp-panel-offers" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">Seller offers</span>
+                    <h2 class="mp-panel-title">Offers &amp; bundles</h2>
+                </div>
+                <div class="mp-offers-grid">
+                    {% for offer in product.offers %}
+                    <article class="mp-offer-card">
+                        <span class="mp-offer-badge">Offer</span>
+                        <h3>{{ offer.offer_title | e }}</h3>
+                        {% if offer.offer_subtitle %}<p class="mp-offer-subtitle">{{ offer.offer_subtitle | e }}</p>{% endif %}
+                        {% if offer.offer_details %}<div class="mp-offer-details">{{ offer.offer_details | safe }}</div>{% endif %}
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mp-panel" id="mp-panel-reviews" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">Buyer voices</span>
+                    <h2 class="mp-panel-title">Customer reviews</h2>
+                    <p class="mp-panel-lede">Real feedback from buyers who shopped with {{ product.company_name or "this seller" }}.</p>
+                </div>
+
+                <div class="mp-review-summary">
+                    <div class="mp-review-score">
+                        <strong>{{ "%.1f" | format(review_summary.average or 0) }}</strong>
+                        {{ star_rating(review_summary.average or 0) }}
+                        <span class="mp-review-count">{{ product.review_count_label }}</span>
+                        {% if can_review %}
+                        <button type="button" class="mp-btn mp-btn-primary mp-write-review" id="mp-write-review">Write a review</button>
+                        {% else %}
+                        <a class="mp-btn mp-btn-primary mp-write-review" href="{{ login_url | e }}">Log in to review</a>
+                        {% endif %}
+                    </div>
+                    <div class="mp-review-bars" aria-label="Rating distribution">
+                        {% for row in review_summary.rows %}
+                        <div class="mp-review-bar">
+                            <span class="mp-review-bar-label">{{ row.star }} ★</span>
+                            <div class="mp-bar"><span style="width: {{ row.percent }}%"></span></div>
+                            <span class="mp-review-bar-count">{{ row.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mp-review-prompt">
+                        <span class="mp-review-prompt-icon" aria-hidden="true">✦</span>
+                        <p>Your experience helps other buyers choose with confidence. Reviews are published after purchase.</p>
+                    </div>
+                </div>
+
+                <div class="mp-review-toolbar">
+                    <div class="mp-review-filters" role="group" aria-label="Filter reviews">
+                        <button type="button" class="mp-filter-btn is-active" data-review-filter="all">All</button>
+                        <button type="button" class="mp-filter-btn" data-review-filter="5">5 ★</button>
+                        <button type="button" class="mp-filter-btn" data-review-filter="4">4 ★</button>
+                        <button type="button" class="mp-filter-btn" data-review-filter="3">3 ★</button>
+                        <button type="button" class="mp-filter-btn" data-review-filter="2">2 ★</button>
+                        <button type="button" class="mp-filter-btn" data-review-filter="1">1 ★</button>
+                    </div>
+                    <label class="mp-review-sort-wrap" for="mp-review-sort">
+                        <span data-i18n="Sort">Sort</span>
+                        <select id="mp-review-sort" class="mp-review-sort">
+                            <option value="newest">Newest</option>
+                            <option value="highest">Highest rated</option>
+                            <option value="lowest">Lowest rated</option>
+                            <option value="helpful">Most helpful</option>
+                        </select>
+                    </label>
+                </div>
+
+                {% if can_review %}
+                <form class="mp-review-form" id="mp-review-form" hidden>
+                    <div class="mp-form-head">
+                        <span class="mp-kicker">Share your experience</span>
+                        <h3>Write a review</h3>
+                    </div>
+                    <input type="hidden" id="mp-review-rating" value="0" />
+                    <div class="mp-star-input" role="radiogroup" aria-label="Your rating">
+                        {% for star in [5, 4, 3, 2, 1] %}
+                        <button type="button" class="mp-star-btn" data-star="{{ star }}" role="radio" aria-checked="false" aria-label="{{ star }} stars">★</button>
+                        {% endfor %}
+                    </div>
+                    <label class="mp-form-row">
+                        <span><span data-i18n="Headline">Headline</span> <small data-i18n="(optional)">(optional)</small></span>
+                        <input type="text" id="mp-review-title" class="mp-input" maxlength="140" placeholder="What stood out?" />
+                    </label>
+                    <label class="mp-form-row">
+                        <span data-i18n="Your review">Your review</span>
+                        <textarea id="mp-review-text" class="mp-textarea" rows="5" maxlength="3000" placeholder="Tell other buyers what you liked, how it arrived, and how you use it."></textarea>
+                    </label>
+                    <div class="mp-form-actions">
+                        <button type="submit" class="mp-btn mp-btn-primary" id="mp-review-submit">Publish review</button>
+                        <button type="button" class="mp-btn mp-btn-ghost" id="mp-review-cancel">Cancel</button>
+                    </div>
+                    <p class="mp-form-note">Your review will be published on this product page. Please keep it honest and helpful.</p>
+                </form>
+                {% else %}
+                <div class="mp-review-login">
+                    <span aria-hidden="true">☆</span>
+                    <div>
+                        <strong>Bought this product?</strong>
+                        <p>Log in to share your experience with other buyers.</p>
+                    </div>
+                    <a class="mp-btn mp-btn-primary" href="{{ login_url | e }}">Log in</a>
+                </div>
+                {% endif %}
+
+                <div class="mp-review-list" id="mp-review-list" data-total="{{ product.total_reviews }}">
+                    {% if product.reviews %}
+                        {% for rev in product.reviews %}
+                        <article class="mp-review" data-rating="{{ rev.rating }}" data-helpful="{{ rev.helpful_count }}" data-creation="{{ rev.creation_iso | e }}">
+                            <div class="mp-review-head">
+                                {% if rev.user_image %}
+                                <img class="mp-review-avatar-img" src="{{ rev.user_image | e }}" alt="" loading="lazy" />
+                                {% else %}
+                                <span class="mp-review-avatar" aria-hidden="true">{{ (rev.user_name or 'C')[0] | upper }}</span>
+                                {% endif %}
+                                <div class="mp-review-person">
+                                    <strong>{{ rev.user_name | e }}</strong>
+                                    <span class="mp-review-meta">{{ rev.date_label | e }}{% if rev.verified_purchase %} · <em>Verified purchase</em>{% endif %}{% if rev.reviewer_region %} · {{ rev.reviewer_region | e }}{% endif %}</span>
+                                </div>
+                                <span class="mp-review-stars" aria-label="{{ rev.rating }} out of 5">★ {{ "%.1f" | format(rev.rating) }}</span>
+                            </div>
+                            {% if rev.review_title %}<h4>{{ rev.review_title | e }}</h4>{% endif %}
+                            <p class="mp-review-comment">{{ rev.comment | e }}</p>
+                            {% if rev.seller_response %}
+                            <div class="mp-seller-response"><strong>Seller response</strong><p>{{ rev.seller_response | e }}</p></div>
+                            {% endif %}
+                            <div class="mp-review-foot">
+                                <button type="button" class="mp-helpful-btn" data-helpful-review="{{ rev.name | e }}" {% if not can_review %}disabled title="Log in to mark helpful"{% endif %}>
+                                    <span aria-hidden="true">♡</span> <span data-i18n="Helpful">Helpful</span> <span class="mp-helpful-count">{{ rev.helpful_count }}</span>
+                                </button>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% else %}
+                    <div class="mp-empty-reviews">
+                        <span aria-hidden="true">☆</span>
+                        <h3>No reviews yet</h3>
+                        <p>Be the first to review this product after your purchase.</p>
+                        {% if can_review %}
+                        <button type="button" class="mp-btn mp-btn-primary" id="mp-empty-write-review">Write the first review</button>
+                        {% else %}
+                        <a class="mp-btn mp-btn-primary" href="{{ login_url | e }}">Log in to review</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <p class="mp-muted mp-review-filter-empty" id="mp-review-filter-empty" hidden>No reviews match this filter.</p>
+                {% if product.total_reviews > (product.reviews | length) %}
+                <button type="button" class="mp-btn mp-btn-ghost mp-review-more" id="mp-review-more" data-page="1">Load more reviews</button>
+                {% endif %}
+            </div>
+
+            <div class="mp-panel" id="mp-panel-seller" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">Meet the seller</span>
+                    <h2 class="mp-panel-title">{{ product.company_name or "Verified seller" }}</h2>
+                </div>
+                <div class="mp-seller-panel">
+                    {% if product.company_logo %}
+                    <img src="{{ product.company_logo | e }}" alt="{{ product.company_name | e }}" class="mp-seller-panel-logo" loading="lazy" />
+                    {% else %}
+                    <span class="mp-seller-avatar mp-seller-avatar-lg" aria-hidden="true">{{ (product.company_name or 'S')[0] | upper }}</span>
+                    {% endif %}
+                    <div class="mp-seller-panel-main">
+                        <div class="mp-seller-badges">
+                            <span class="mp-seller-badge">✓ Verified seller</span>
+                            <span class="mp-seller-badge mp-seller-badge--soft">Dikka Shop</span>
+                        </div>
+                        <p>{{ (product.company_address or "Verified EthioBiz seller serving customers across Ethiopia.") | e }}</p>
+                        <div class="mp-seller-contact">
+                            {% if product.company_phone %}<span><i aria-hidden="true">☎</i> {{ product.company_phone | e }}</span>{% endif %}
+                            {% if product.company_email %}<a href="mailto:{{ product.company_email | e }}"><i aria-hidden="true">✉</i> {{ product.company_email | e }}</a>{% endif %}
+                            {% if product.company_website %}<a href="{{ product.company_website | e }}" target="_blank" rel="noopener"><i aria-hidden="true">↗</i> Website</a>{% endif %}
+                        </div>
+                        <div class="mp-seller-actions">
+                            <a class="mp-btn mp-btn-primary" href="{{ product.storefront_url | e }}">Browse this seller</a>
+                            {% if product.company_email %}<a class="mp-btn mp-btn-ghost" href="mailto:{{ product.company_email | e }}">Ask a question</a>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% for tab in product.tabs %}
+            <div class="mp-panel" id="mp-panel-extra-{{ loop.index }}" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">More from the seller</span>
+                    <h2 class="mp-panel-title">{{ tab.label | e }}</h2>
+                </div>
+                <div class="mp-rich-content">{{ tab.content | safe }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="mp-panel" id="mp-panel-shipping" role="tabpanel" hidden>
+                <div class="mp-panel-head">
+                    <span class="mp-kicker">Good to know</span>
+                    <h2 class="mp-panel-title">Shipping &amp; returns</h2>
+                </div>
+                <div class="mp-shipping-grid">
+                    <article class="mp-shipping-card">
+                        <span class="mp-shipping-icon" aria-hidden="true">🚚</span>
+                        <h3>Local delivery</h3>
+                        <p>Delivery options and fees are confirmed with the seller at checkout. Many sellers deliver across Addis Ababa and major regional cities.</p>
+                    </article>
+                    <article class="mp-shipping-card">
+                        <span class="mp-shipping-icon" aria-hidden="true">↩</span>
+                        <h3>Returns</h3>
+                        <p>Return eligibility depends on the product and seller. Contact the seller through their storefront before placing a return request.</p>
+                    </article>
+                    <article class="mp-shipping-card">
+                        <span class="mp-shipping-icon" aria-hidden="true">🔒</span>
+                        <h3>Secure checkout</h3>
+                        <p>Your order is handled inside EthioBiz with verified seller records. Login is required to place an order and track its status.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="mp-related" aria-labelledby="mp-related-title">
+            <div class="mp-section-head">
+                <div>
+                    <span class="mp-kicker">Keep exploring</span>
+                    <h2 id="mp-related-title">{% if related %}More from {{ product.item_group | e }}{% else %}Discover more on Dikka Shop{% endif %}</h2>
+                </div>
+                <a class="mp-see-all" href="/shop?category={{ product.item_group | urlencode | e }}">See all →</a>
+            </div>
+            {% if related %}
+            <div class="mp-related-grid">
+                {% for row in related %}
+                <a class="mp-rel-card" href="{{ row.detail_url | e }}">
+                    <div class="mp-rel-media">
+                        {% if row.image %}
+                        <img src="{{ row.image | e }}" alt="{{ row.item_name | e }}" loading="lazy" />
+                        {% else %}
+                        <span class="mp-rel-fallback" aria-hidden="true">◈</span>
+                        {% endif %}
+                    </div>
+                    <div class="mp-rel-body">
+                        <span class="mp-rel-seller">{{ (row.company_name or "Verified seller") | e }}</span>
+                        <h3>{{ row.item_name | e }}</h3>
+                        <div class="mp-rel-foot">
+                            <strong>{{ row.formatted_price | e }}</strong>
+                            <span class="mp-rel-rating">{% if row.total_reviews %}★ {{ "%.1f" | format(row.rating) }}{% else %}New{% endif %}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="mp-related-empty">
+                <span aria-hidden="true">✦</span>
+                <h3>More products are waiting for you</h3>
+                <p>Explore the full Dikka Shop catalogue, discover verified sellers, and find something you love.</p>
+                <a class="mp-btn mp-btn-primary" href="/shop">Browse Dikka Shop</a>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="mp-sticky-buy" id="mp-sticky-buy" aria-hidden="true">
+        <div class="mp-sticky-copy">
+            <span>{{ product.item_name | e }}</span>
+            <strong>{{ product.price_label | e }}</strong>
+        </div>
+        <button type="button" class="mp-btn mp-btn-primary" id="mp-sticky-add" data-item-code="{{ product.item_code | e }}">Add to cart</button>
+    </div>
+
+    <div id="cart-drawer-backdrop" class="cart-drawer-backdrop" aria-hidden="true"></div>
+    <aside id="magala-cart-drawer" class="cart-drawer mp-cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" aria-hidden="true">
+        <div class="cart-drawer-header">
+            <div>
+                <span class="mp-kicker">Your basket</span>
+                <h3><span data-i18n="Shopping cart">Shopping cart</span> (<span id="cart-drawer-count">0</span>)</h3>
+            </div>
+            <button type="button" id="close-cart-drawer" class="mp-icon-btn" aria-label="Close shopping cart">✕</button>
+        </div>
+        <div id="cart-drawer-items" class="cart-drawer-body" aria-live="polite">
+            <p class="empty-cart-msg">Your cart is empty. Explore items to add!</p>
+        </div>
+        <div class="cart-drawer-footer">
+            <div class="cart-subtotal">
+                <span>Estimated total</span>
+                <strong id="cart-drawer-total">0.00 ETB</strong>
+            </div>
+            <a href="/cart" class="btn-checkout-primary">Proceed to checkout →</a>
+            <a href="/cart" class="mp-drawer-link">View full cart</a>
+            <p class="mp-drawer-note">🔒 Secure checkout · Login required to place orders</p>
+        </div>
+    </aside>
+
+    <div class="mp-lightbox" id="mp-lightbox" role="dialog" aria-modal="true" aria-label="Product image" hidden>
+        <button type="button" class="mp-lightbox-close" id="mp-lightbox-close" aria-label="Close image">✕</button>
+        <img id="mp-lightbox-img" src="" alt="{{ product.item_name | e }}" />
+    </div>
+
+    <div id="mgs-toast" class="mgs-toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>window.ETHIOBIZ_PRESERVE_TITLE = true;</script>
+<script>
+window.MGS_PRODUCT = {{ product | tojson }};
+window.MGS_RELATED = {{ related | tojson }};
+window.MGS_REVIEWS = {{ product.reviews | tojson }};
+window.MGS_REVIEW_SUMMARY = {{ review_summary | tojson }};
+window.MGS_CAN_REVIEW = {{ can_review | tojson }};
+window.MGS_LOGIN_URL = {{ login_url | tojson }};
+window.MGS_CSRF_TOKEN = {{ csrf_token | tojson }};
+window.MGS_WEBSITE_ITEM = {{ product.website_item | tojson }};
+</script>
+<script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
+<script src="/assets/bismillah_ethiobiz/js/magala_product.js?v=2.2.0"></script>

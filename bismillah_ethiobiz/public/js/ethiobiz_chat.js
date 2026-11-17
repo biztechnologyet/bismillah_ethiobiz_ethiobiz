@@ -121,33 +121,73 @@
         if (!chatWin || chatWin.getAttribute('data-hadeeda-resizable')) return;
         chatWin.setAttribute('data-hadeeda-resizable', '1');
 
-        // Restore saved dimensions
-        const savedW = localStorage.getItem('hadeeda_chat_width');
-        const savedH = localStorage.getItem('hadeeda_chat_height');
-        if (savedW) chatWin.style.width = savedW;
-        if (savedH) chatWin.style.height = savedH;
+        const isMobile = () => window.innerWidth <= 600;
 
-        // Top-Left corner handle (NW)
-        const handleNW = document.createElement('div');
-        handleNW.className = 'hadeeda-resize-handle hadeeda-resize-nw';
-        handleNW.title = 'Drag to resize chat window';
-        handleNW.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"><path d="M1 9L9 1M1 5L5 1M1 1L1 1"/></svg>';
+        function px(value, fallback) {
+            const n = parseInt(value, 10);
+            return isNaN(n) ? fallback : n;
+        }
 
-        // Left border handle (W)
-        const handleW = document.createElement('div');
-        handleW.className = 'hadeeda-resize-handle hadeeda-resize-w';
+        // Restore saved dimensions (desktop only for width; height is safe on mobile too)
+        try {
+            if (!isMobile()) {
+                const savedW = px(localStorage.getItem('hadeeda_chat_width'), 0);
+                if (savedW) {
+                    const maxW = Math.max(300, Math.min(850, window.innerWidth - 16));
+                    chatWin.style.setProperty('width', Math.min(maxW, Math.max(300, savedW)) + 'px', 'important');
+                }
+            }
+            const savedH = px(localStorage.getItem('hadeeda_chat_height'), 0);
+            if (savedH) {
+                const maxH = Math.max(320, window.innerHeight - 16);
+                chatWin.style.setProperty('height', Math.min(maxH, Math.max(320, savedH)) + 'px', 'important');
+            }
+            if (!isMobile()) {
+                const savedB = px(localStorage.getItem('hadeeda_chat_bottom'), 0);
+                if (savedB) {
+                    chatWin.style.setProperty('bottom', Math.min(window.innerHeight - 100, Math.max(8, savedB)) + 'px', 'important');
+                }
+            }
+        } catch (e) {}
 
-        // Top border handle (N)
-        const handleN = document.createElement('div');
-        handleN.className = 'hadeeda-resize-handle hadeeda-resize-n';
+        // If the viewport becomes mobile-sized, drop desktop-only inline overrides so
+        // the full-width mobile CSS takes over again.
+        window.addEventListener('resize', () => {
+            if (isMobile()) {
+                chatWin.style.removeProperty('width');
+                chatWin.style.removeProperty('bottom');
+            }
+        });
 
-        chatWin.appendChild(handleNW);
-        chatWin.appendChild(handleW);
-        chatWin.appendChild(handleN);
+        const grip = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"><path d="M1 9L9 1M1 5L5 1M1 1L1 1"/></svg>';
+
+        function makeHandle(cls, title, html) {
+            const handle = document.createElement('div');
+            handle.className = 'hadeeda-resize-handle ' + cls;
+            handle.title = title;
+            if (html) handle.innerHTML = html;
+            chatWin.appendChild(handle);
+            return handle;
+        }
+
+        // Top-left corner: width + height
+        const handleNW = makeHandle('hadeeda-resize-nw', 'Drag to resize (width & height)', grip);
+        // Left edge: width
+        const handleW = makeHandle('hadeeda-resize-w', 'Drag left/right to resize width');
+        // Top edge: height
+        const handleN = makeHandle('hadeeda-resize-n', 'Drag up/down to resize height');
+        // Bottom-left corner: width + height
+        const handleSW = makeHandle('hadeeda-resize-sw', 'Drag to resize (width & height)', grip);
+        // Bottom edge (left half): height
+        const handleS = makeHandle('hadeeda-resize-s', 'Drag up/down to resize height');
 
         let isResizing = false;
         let resizeType = null;
-        let startX, startY, startWidth, startHeight;
+        let startX, startY, startWidth, startHeight, startBottom, startTop;
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
 
         function onResizeStart(e, type) {
             e.preventDefault();
@@ -158,41 +198,70 @@
             const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
             startX = clientX;
             startY = clientY;
-            startWidth = parseInt(document.defaultView.getComputedStyle(chatWin).width, 10);
-            startHeight = parseInt(document.defaultView.getComputedStyle(chatWin).height, 10);
+
+            const rect = chatWin.getBoundingClientRect();
+            const computed = document.defaultView.getComputedStyle(chatWin);
+            startWidth = rect.width || px(computed.width, 420);
+            startHeight = rect.height || px(computed.height, 580);
+            startBottom = px(computed.bottom, Math.max(8, window.innerHeight - rect.bottom));
+            startTop = rect.top;
+
             document.body.style.userSelect = 'none';
+            document.body.style.webkitUserSelect = 'none';
 
             function onMove(ev) {
                 if (!isResizing) return;
                 ev.preventDefault();
                 const cx = ev.type.startsWith('touch') ? ev.touches[0].clientX : ev.clientX;
                 const cy = ev.type.startsWith('touch') ? ev.touches[0].clientY : ev.clientY;
-                const minW = 280, maxW = Math.min(800, window.innerWidth - 10);
-                const minH = 300, maxH = Math.min(900, window.innerHeight - 70);
+                const dx = cx - startX;
+                const dy = cy - startY;
 
-                if (resizeType === 'nw' || resizeType === 'w') {
-                    const newW = Math.min(maxW, Math.max(minW, startWidth - (cx - startX)));
-                    chatWin.style.width = newW + 'px';
+                const minW = 300;
+                const maxW = Math.max(minW, Math.min(850, window.innerWidth - 16));
+                const minH = 320;
+                const maxH = Math.max(minH, window.innerHeight - 16);
+
+                // Width: NW/SW/W grow from the left; keep mobile full-width layout intact.
+                if (!isMobile() && (resizeType === 'nw' || resizeType === 'sw' || resizeType === 'w')) {
+                    const newW = clamp(startWidth - dx, minW, maxW);
+                    chatWin.style.setProperty('width', newW + 'px', 'important');
                 }
-                if (resizeType === 'nw' || resizeType === 'n') {
-                    const newH = Math.min(maxH, Math.max(minH, startHeight - (cy - startY)));
-                    chatWin.style.height = newH + 'px';
+
+                // Height from the top edge: bottom stays anchored.
+                if (resizeType === 'n' || resizeType === 'nw') {
+                    const maxHFromBottom = Math.max(minH, window.innerHeight - startBottom - 8);
+                    const newH = clamp(startHeight - dy, minH, Math.min(maxH, maxHFromBottom));
+                    chatWin.style.setProperty('height', newH + 'px', 'important');
+                }
+
+                // Height from the bottom edge: keep the top edge fixed by moving `bottom`.
+                if (resizeType === 's' || resizeType === 'sw') {
+                    const maxHFromTop = Math.max(minH, window.innerHeight - startTop - 8);
+                    const newH = clamp(startHeight + dy, minH, Math.min(maxH, maxHFromTop));
+                    const newBottom = clamp(startBottom - (newH - startHeight), 8, window.innerHeight - newH - 8);
+                    chatWin.style.setProperty('height', newH + 'px', 'important');
+                    chatWin.style.setProperty('bottom', newBottom + 'px', 'important');
                 }
             }
 
             function onUp() {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.userSelect = '';
-                    try {
-                        localStorage.setItem('hadeeda_chat_width', chatWin.style.width);
-                        localStorage.setItem('hadeeda_chat_height', chatWin.style.height);
-                    } catch(ex) {}
-                    window.removeEventListener('mousemove', onMove);
-                    window.removeEventListener('mouseup', onUp);
-                    window.removeEventListener('touchmove', onMove);
-                    window.removeEventListener('touchend', onUp);
-                }
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.style.userSelect = '';
+                document.body.style.webkitUserSelect = '';
+                try {
+                    const rect = chatWin.getBoundingClientRect();
+                    if (!isMobile()) {
+                        localStorage.setItem('hadeeda_chat_width', Math.round(rect.width) + 'px');
+                        localStorage.setItem('hadeeda_chat_bottom', Math.round(px(document.defaultView.getComputedStyle(chatWin).bottom, 0)) + 'px');
+                    }
+                    localStorage.setItem('hadeeda_chat_height', Math.round(rect.height) + 'px');
+                } catch (ex) {}
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('touchend', onUp);
             }
 
             window.addEventListener('mousemove', onMove, { passive: false });
@@ -201,12 +270,16 @@
             window.addEventListener('touchend', onUp);
         }
 
-        handleNW.addEventListener('mousedown', (e) => onResizeStart(e, 'nw'));
-        handleNW.addEventListener('touchstart', (e) => onResizeStart(e, 'nw'), { passive: false });
-        handleW.addEventListener('mousedown', (e) => onResizeStart(e, 'w'));
-        handleW.addEventListener('touchstart', (e) => onResizeStart(e, 'w'), { passive: false });
-        handleN.addEventListener('mousedown', (e) => onResizeStart(e, 'n'));
-        handleN.addEventListener('touchstart', (e) => onResizeStart(e, 'n'), { passive: false });
+        function bindHandle(handle, type) {
+            handle.addEventListener('mousedown', (e) => onResizeStart(e, type));
+            handle.addEventListener('touchstart', (e) => onResizeStart(e, type), { passive: false });
+        }
+
+        bindHandle(handleNW, 'nw');
+        bindHandle(handleW, 'w');
+        bindHandle(handleN, 'n');
+        bindHandle(handleSW, 'sw');
+        bindHandle(handleS, 's');
     }
 
     async function initChat() {
@@ -441,7 +514,7 @@
                     animation: hadeeda-window-open 0.25s cubic-bezier(0.16, 1, 0.3, 1) both !important;
                 }
 
-                /* ─── RESIZE HANDLES (TOP & CORNER FOR VERTICAL/HORIZONTAL RESIZING) ─── */
+                /* ─── RESIZE HANDLES (TOP, LEFT, BOTTOM & CORNERS) ─── */
                 .hadeeda-resize-handle {
                     position: absolute !important;
                     z-index: 100000 !important;
@@ -465,10 +538,37 @@
                 }
                 .hadeeda-resize-n {
                     top: 0 !important; left: 32px !important; right: 50px !important;
-                    height: 12px !important; cursor: ns-resize !important;
+                    height: 16px !important; cursor: ns-resize !important;
                     background: rgba(31, 182, 174, 0.12) !important;
+                    display: flex !important; align-items: center !important; justify-content: center !important;
+                }
+                .hadeeda-resize-n::after {
+                    content: '' !important;
+                    width: 44px !important; height: 3px !important;
+                    border-radius: 2px !important;
+                    background: rgba(255, 255, 255, 0.45) !important;
                 }
                 .hadeeda-resize-n:hover, .hadeeda-resize-n:active {
+                    background: rgba(31, 182, 174, 0.4) !important;
+                }
+                .hadeeda-resize-sw {
+                    bottom: 0 !important; left: 0 !important;
+                    width: 26px !important; height: 26px !important;
+                    cursor: nesw-resize !important;
+                    display: flex !important; align-items: center !important; justify-content: center !important;
+                    background: rgba(31, 182, 174, 0.35) !important;
+                    border-top-right-radius: 12px !important;
+                    transition: background 0.2s ease !important;
+                }
+                .hadeeda-resize-sw:hover, .hadeeda-resize-sw:active {
+                    background: rgba(31, 182, 174, 0.7) !important;
+                }
+                .hadeeda-resize-s {
+                    bottom: 0 !important; left: 26px !important; width: 42% !important;
+                    height: 10px !important; cursor: ns-resize !important;
+                    background: rgba(31, 182, 174, 0.12) !important;
+                }
+                .hadeeda-resize-s:hover, .hadeeda-resize-s:active {
                     background: rgba(31, 182, 174, 0.4) !important;
                 }
 

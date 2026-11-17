@@ -1,850 +1,1690 @@
-﻿// BISMALLAH ETHIOBIZ MAGALA SHOP ENGINE JAVASCRIPT
-// Handles 3-way view switcher (Grid, List, Map), interactive map node filtering,
-// collapsible filter sidebar, product detail navigation & shopping cart
+﻿/* ============================================================
+   BISMALLAH ETHIOBIZ — MAGALA MARKETPLACE V3 ENGINE
+   Search, dynamic categories, filters, grid/list/map views,
+   cart drawer, mobile filter sheet and accessibility helpers.
+   Scoped to #page-shop; does not touch ERPNext records.
+   ============================================================ */
+(function () {
+    "use strict";
 
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("[Magala Shop] Engine Initializing...");
+    const API = {
+        search: "/api/method/bismillah_ethiobiz.magala_shop_api.search_products",
+        categories: "/api/method/bismillah_ethiobiz.magala_shop_api.get_categories",
+        map: "/api/method/bismillah_ethiobiz.magala_shop_api.get_companies_map",
+        cart: "/api/method/bismillah_ethiobiz.magala_checkout.get_cart",
+        add: "/api/method/bismillah_ethiobiz.magala_checkout.add_to_cart",
+        qty: "/api/method/bismillah_ethiobiz.magala_checkout.update_cart_qty"
+    };
 
-    let currentView = localStorage.getItem("magala_view_mode") || "grid";
-    let currentCategory = "all";
-    let currentPage = 1;
-    let mapInstance = null;
-    let markerCluster = null;
-    let allMapCompanies = [];
-    let isMapLoaded = false;
-    let isSidebarCollapsed = localStorage.getItem("magala_sidebar_collapsed") === "true";
-    let userLocation = null;
+    const FALLBACK_IMG = "/assets/bismillah_ethiobiz/img/walta_real_logo.png";
+    const PLACEHOLDER_RE = /(default-avatar|placeholder|no[-_]?image|walta_real_logo|empty-image)/i;
+    const TEST_CATEGORY_RE = /^(RM|FG|Packing)\s+\d+/i;
+    const PAGE_SIZE = 24;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedCompany = (urlParams.get("company") || "").trim();
+    const FALLBACK_CATEGORIES = [
+        { name: "Products", label: "Products", count: null },
+        { name: "Food & Dining", label: "Food & Dining", count: null },
+        { name: "Healthcare & Medical", label: "Healthcare", count: null },
+        { name: "Courses & Education", label: "Education", count: null },
+        { name: "Salon & Beauty", label: "Salon & Beauty", count: null },
+        { name: "Hotel & Hospitality", label: "Hotels", count: null },
+        { name: "Consumables", label: "Consumables", count: null },
+        { name: "Software & SaaS", label: "Software", count: null }
+    ];
 
-    initCollapsibleSidebar();
-    initViewSwitcher();
-    initSearch();
-    initFilters();
-    initCart();
-    loadProducts();
-
-    // If map view was stored or URL directs to map
-    if (currentView === "map") {
-        applyViewLayout();
-    }
-
-    // 1. COLLAPSIBLE SIDEBAR
-    function initCollapsibleSidebar() {
-        const toggleBtn = document.getElementById("btn-toggle-filters");
-        const sidebar = document.querySelector(".magala-sidebar");
-        const layout = document.querySelector(".magala-layout");
-        const toggleText = document.getElementById("toggle-filter-text");
-
-        if (isSidebarCollapsed && sidebar && layout) {
-            sidebar.classList.add("collapsed");
-            layout.classList.add("sidebar-collapsed");
-            if (toggleText) toggleText.innerText = "Show Filters";
+    const state = {
+        view: "grid",
+        category: "all",
+        page: 1,
+        query: "",
+        sort: "relevance",
+        minPrice: "",
+        maxPrice: "",
+        rating: "",
+        company: "",
+        items: [],
+        total: 0,
+        totalPages: 1,
+        loading: false,
+        requestSeq: 0,
+        categories: [],
+        categoriesReady: false,
+        lastResponse: null,
+        userLat: null,
+        userLng: null,
+        lastFocused: null,
+        map: {
+            instance: null,
+            cluster: null,
+            companies: [],
+            loaded: false,
+            loading: false,
+            retry: 0,
+            status: null
         }
+    };
 
-        if (toggleBtn && sidebar && layout) {
-            toggleBtn.addEventListener("click", function() {
-                const isMobile = window.innerWidth <= 992;
-                if (isMobile) {
-                    sidebar.classList.toggle("mobile-open");
-                } else {
-                    isSidebarCollapsed = !isSidebarCollapsed;
-                    localStorage.setItem("magala_sidebar_collapsed", isSidebarCollapsed);
-                    sidebar.classList.toggle("collapsed", isSidebarCollapsed);
-                    layout.classList.toggle("sidebar-collapsed", isSidebarCollapsed);
-                    if (toggleText) toggleText.innerText = isSidebarCollapsed ? "Show Filters" : "Hide Filters";
-                }
-                setTimeout(function() {
-                    if (mapInstance) mapInstance.invalidateSize();
-                }, 300);
-            });
-        }
-    }
+    const els = {};
+    let searchTimer = null;
+    let toastTimer = null;
 
-    // 2. VIEW SWITCHER (Grid | List | Map)
-    function initViewSwitcher() {
-        const viewBtns = document.querySelectorAll(".view-btn");
-        viewBtns.forEach(function(btn) {
-            if (btn.dataset.view === currentView) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
-            }
-
-            btn.addEventListener("click", function() {
-                viewBtns.forEach(function(b) { b.classList.remove("active"); });
-                this.classList.add("active");
-                currentView = this.dataset.view;
-                localStorage.setItem("magala_view_mode", currentView);
-                applyViewLayout();
-                if (currentView !== "map" && window.__lastFetchedItems) {
-                    renderItems(window.__lastFetchedItems);
-                }
-            });
-        });
-    }
-
-    function applyViewLayout() {
-        const container = document.getElementById("magala-items-container");
-        const mapContainer = document.getElementById("magala-embedded-map-container");
-        const pagination = document.getElementById("magala-pagination");
-
-        if (!container || !mapContainer) return;
-
-        if (currentView === "grid") {
-            container.style.display = "grid";
-            container.className = "magala-grid-view";
-            mapContainer.style.display = "none";
-            if (pagination) pagination.style.display = "flex";
-        } else if (currentView === "list") {
-            container.style.display = "flex";
-            container.className = "magala-list-view";
-            mapContainer.style.display = "none";
-            if (pagination) pagination.style.display = "flex";
-        } else if (currentView === "map") {
-            container.style.display = "none";
-            mapContainer.style.display = "block";
-            if (pagination) pagination.style.display = "none";
-            initEmbeddedMap();
-            setTimeout(function() {
-                if (mapInstance) mapInstance.invalidateSize();
-            }, 250);
-        }
-    }
-
-    // 3. SEARCH & TYPEAHEAD
-    function initSearch() {
-        const searchInput = document.getElementById("magala-search-input");
-        const clearBtn = document.getElementById("magala-clear-search");
-        let debounceTimer;
-
-        if (searchInput) {
-            searchInput.addEventListener("input", function() {
-                clearTimeout(debounceTimer);
-                const q = this.value.trim();
-                if (clearBtn) clearBtn.style.display = q ? "inline-block" : "none";
-
-                debounceTimer = setTimeout(function() {
-                    currentPage = 1;
-                    loadProducts(q);
-                    filterAndRenderMapMarkers();
-                }, 250);
-            });
-        }
-
-        if (clearBtn && searchInput) {
-            clearBtn.addEventListener("click", function() {
-                searchInput.value = "";
-                clearBtn.style.display = "none";
-                currentPage = 1;
-                loadProducts("");
-                filterAndRenderMapMarkers();
-            });
-        }
-
-        // Near Me Button
-        const btnNearMe = document.getElementById("btn-near-me");
-        if (btnNearMe) {
-            btnNearMe.addEventListener("click", function() {
-                if (navigator.geolocation) {
-                    btnNearMe.innerText = "Locating...";
-                    navigator.geolocation.getCurrentPosition(
-                        function(pos) {
-                            btnNearMe.innerText = "📍 Near Me";
-                            userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                            loadProducts(searchInput ? searchInput.value.trim() : "", pos.coords.latitude, pos.coords.longitude);
-                            if (mapInstance) {
-                                mapInstance.flyTo([pos.coords.latitude, pos.coords.longitude], 13);
-                            }
-                            filterAndRenderMapMarkers();
-                        },
-                        function(err) {
-                            btnNearMe.innerText = "📍 Near Me";
-                            console.warn("Geolocation denied or error:", err);
-                        }
-                    );
-                }
-            });
-        }
-    }
-
-    // 4. CATEGORY PILLS & FILTERS
-    function initFilters() {
-        const pills = document.querySelectorAll(".cat-pill");
-        pills.forEach(function(pill) {
-            pill.addEventListener("click", function() {
-                pills.forEach(function(p) { p.classList.remove("active"); });
-                this.classList.add("active");
-                currentCategory = this.dataset.category || "all";
-                currentPage = 1;
-                loadProducts();
-                filterAndRenderMapMarkers();
-            });
-        });
-
-        const sortSelect = document.getElementById("filter-sort-by");
-        if (sortSelect) {
-            sortSelect.addEventListener("change", function() {
-                loadProducts();
-            });
-        }
-
-        const minPriceInput = document.getElementById("filter-min-price");
-        const maxPriceInput = document.getElementById("filter-max-price");
-        [minPriceInput, maxPriceInput].forEach(function(input) {
-            if (input) {
-                input.addEventListener("change", function() {
-                    currentPage = 1;
-                    loadProducts();
-                    filterAndRenderMapMarkers();
-                });
-            }
-        });
-
-        document.querySelectorAll("input[name='rating_filter']").forEach(function(radio) {
-            radio.addEventListener("change", function() {
-                currentPage = 1;
-                loadProducts();
-                filterAndRenderMapMarkers();
-            });
-        });
-
-        const expressCheckbox = document.getElementById("filter-bizride-express");
-        if (expressCheckbox) {
-            expressCheckbox.addEventListener("change", function() {
-                currentPage = 1;
-                loadProducts();
-                filterAndRenderMapMarkers();
-            });
-        }
-
-        // Reset Filters Button
-        const resetBtn = document.getElementById("btn-reset-filters");
-        if (resetBtn) {
-            resetBtn.addEventListener("click", function(e) {
-                e.preventDefault();
-                if (minPriceInput) minPriceInput.value = "";
-                if (maxPriceInput) maxPriceInput.value = "";
-                if (sortSelect) sortSelect.value = "relevance";
-                document.querySelectorAll("input[name='rating_filter']").forEach(function(r) {
-                    r.checked = (r.value === "");
-                });
-                if (expressCheckbox) expressCheckbox.checked = true;
-                const searchInput = document.getElementById("magala-search-input");
-                if (searchInput) searchInput.value = "";
-                pills.forEach(function(p) { p.classList.remove("active"); });
-                const allPill = document.querySelector(".cat-pill[data-category='all']");
-                if (allPill) allPill.classList.add("active");
-                currentCategory = "all";
-                currentPage = 1;
-                loadProducts();
-                filterAndRenderMapMarkers();
-            });
-        }
-
-        // Fit map bounds button
-        const btnFitMap = document.getElementById("btn-magala-map-fit");
-        if (btnFitMap) {
-            btnFitMap.addEventListener("click", function(e) {
-                e.preventDefault();
-                fitMapToMarkers();
-            });
-        }
-    }
-
-    // 5. EMBEDDED MAP VIEW INITIALIZER (Interactive Leaflet Map with Filtered Nodes)
-    function initEmbeddedMap() {
-        if (typeof L === "undefined") {
-            console.warn("[Magala Shop] Leaflet not loaded yet. Waiting...");
-            setTimeout(initEmbeddedMap, 150);
-            return;
-        }
-
-        const mapEl = document.getElementById("magala-split-map");
-        if (!mapEl) return;
-
-        if (!mapInstance) {
-            const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "&copy; OpenStreetMap contributors | EthioBiz.ET",
-                maxZoom: 19
-            });
-
-            const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-                attribution: "Tiles &copy; Esri &mdash; EthioBiz.ET",
-                maxZoom: 19
-            });
-
-            const cleanLightLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-                attribution: "Tiles &copy; Esri &mdash; EthioBiz.ET",
-                maxZoom: 19
-            });
-
-            mapInstance = L.map("magala-split-map", {
-                zoomControl: false,
-                layers: [streetLayer]
-            }).setView([9.010, 38.761], 12);
-
-            L.control.zoom({ position: "bottomright" }).addTo(mapInstance);
-
-            const baseMaps = {
-                "🗺️ Streets": streetLayer,
-                "🛰️ Satellite": satelliteLayer,
-                "⚪ Clean Light": cleanLightLayer
-            };
-            L.control.layers(baseMaps, null, { position: "topright" }).addTo(mapInstance);
-
-            // Safe Marker Clustering
-            if (typeof L.markerClusterGroup === "function") {
-                try {
-                    markerCluster = L.markerClusterGroup({
-                        showCoverageOnHover: false,
-                        spiderfyOnMaxZoom: true,
-                        maxClusterRadius: 40
-                    });
-                } catch(e) {
-                    markerCluster = L.featureGroup();
-                }
-            } else {
-                markerCluster = L.featureGroup();
-            }
-            mapInstance.addLayer(markerCluster);
-        }
-
-        if (allMapCompanies.length === 0) {
-            const statusEl = document.getElementById("magala-map-status");
-            if (statusEl) statusEl.innerText = "🗺️ Discovering verified business locations...";
-
-            fetch("/api/method/bismillah_ethiobiz.magala_shop_api.get_companies_map")
-                .then(function(r) { return r.json(); })
-                .then(function(res) {
-                    if (res.message && res.message.companies) {
-                        allMapCompanies = res.message.companies;
-                    } else if (res.message && Array.isArray(res.message)) {
-                        allMapCompanies = res.message;
-                    } else {
-                        allMapCompanies = [];
-                    }
-                    console.log("[Magala Shop Map] Fetched " + allMapCompanies.length + " company locations.");
-                    filterAndRenderMapMarkers();
-                })
-                .catch(function(err) {
-                    console.error("[Magala Shop Map] Error fetching locations:", err);
-                    if (statusEl) statusEl.innerText = "🗺️ Error loading locations. Retrying...";
-                });
-        } else {
-            filterAndRenderMapMarkers();
-        }
-    }
-
-    // 6. REACTIVE MAP NODES FILTERING ENGINE
-    function filterAndRenderMapMarkers() {
-        if (!mapInstance || !markerCluster) return;
-        markerCluster.clearLayers();
-
-        const searchInput = document.getElementById("magala-search-input");
-        const query = (searchInput ? searchInput.value.trim().toLowerCase() : "");
-
-        const ratingRadio = document.querySelector("input[name='rating_filter']:checked");
-        const minRating = ratingRadio && ratingRadio.value ? parseFloat(ratingRadio.value) : 0;
-
-        const filtered = allMapCompanies.filter(function(comp) {
-            const nameStr = (comp.company_name || comp.name || comp.company || "").toLowerCase();
-            const addrStr = (comp.address || "").toLowerCase();
-            const catStr = (comp.category || "").toLowerCase();
-            const idStr = (comp.id || "").toLowerCase();
-
-            // 1. Company filter from URL
-            if (selectedCompany) {
-                const sCompLower = selectedCompany.toLowerCase();
-                const matchCompany = nameStr.includes(sCompLower) || idStr.includes(sCompLower) || (comp.company && comp.company.toLowerCase().includes(sCompLower));
-                if (!matchCompany) return false;
-            }
-
-            // 2. Category pill filter
-            if (currentCategory && currentCategory !== "all") {
-                const curCatLower = currentCategory.toLowerCase();
-                const matchCategory = catStr.includes(curCatLower) || nameStr.includes(curCatLower);
-                if (!matchCategory && !selectedCompany) return false;
-            }
-
-            // 3. Search query filter
-            if (query) {
-                const matchQuery = nameStr.includes(query) || addrStr.includes(query) || catStr.includes(query);
-                if (!matchQuery) return false;
-            }
-
-            // 4. Rating filter
-            if (minRating > 0) {
-                const r = parseFloat(comp.rating || 5.0);
-                if (r < minRating) return false;
-            }
-
-            return true;
-        });
-
-        const statusEl = document.getElementById("magala-map-status");
-        if (statusEl) {
-            if (selectedCompany) {
-                statusEl.innerHTML = `📍 Showing <strong>${filtered.length}</strong> branch locations for <em>${escapeHtml(selectedCompany)}</em>`;
-            } else {
-                statusEl.innerHTML = `🗺️ Showing <strong>${filtered.length}</strong> verified business locations`;
-            }
-        }
-
-        let primaryMarker = null;
-
-        filtered.forEach(function(comp) {
-            let lat = parseFloat(comp.lat);
-            let lng = parseFloat(comp.lng);
-            if (isNaN(lat) || isNaN(lng) || lat === 0) {
-                lat = 9.010;
-                lng = 38.761;
-            }
-            comp.lat = lat;
-            comp.lng = lng;
-
-            const displayName = comp.company_name || comp.name || comp.company || "Enterprise";
-            const branchName = comp.name && comp.name !== comp.company_name ? comp.name : (comp.branch_type || "");
-            const isPrimary = Boolean(comp.is_primary);
-            const branchBadge = isPrimary 
-                ? '<span style="background:#fef08a; color:#854d0e; font-weight:700; padding:2px 7px; border-radius:10px; font-size:0.72rem;">⭐ Head Office</span>'
-                : (branchName ? '<span style="background:#e0f2fe; color:#0369a1; font-weight:700; padding:2px 7px; border-radius:10px; font-size:0.72rem;">🏢 ' + branchName + '</span>' : '');
-
-            const pinColor = isPrimary ? "#0d9488" : "#0284c7";
-
-            // Rich Custom Pin Icon
-            const customIcon = L.divIcon({
-                className: "magala-custom-pin",
-                html: `
-                    <div style="position:relative; width:34px; height:34px;">
-                        <div style="position:absolute; width:34px; height:34px; background:${pinColor}; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
-                            <span style="transform:rotate(45deg); font-size:14px;">${isPrimary ? '⭐' : '📍'}</span>
-                        </div>
-                    </div>
-                `,
-                iconSize: [34, 34],
-                iconAnchor: [17, 34],
-                popupAnchor: [0, -32]
-            });
-
-            const directionsUrl = "https://www.google.com/maps/dir/?api=1&destination=" + comp.lat + "," + comp.lng;
-            const shopUrl = "/shop?company=" + encodeURIComponent(comp.company || comp.id || comp.name);
-
-            const popupContent = `
-                <div style="min-width:240px; max-width:280px; font-family:'Inter',sans-serif; padding:4px;">
-                    <div style="width:100%; height:100px; overflow:hidden; border-radius:8px; margin-bottom:8px; background:#f1f5f9;">
-                        <img src="${comp.banner || comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png'}" alt="${displayName}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
-                    </div>
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <img src="${comp.logo || '/assets/bismillah_ethiobiz/img/walta_real_logo.png'}" alt="${displayName}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; border:1px solid #e2e8f0;" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
-                        <div>
-                            <strong style="font-size:0.95rem; color:#0f172a; display:block; line-height:1.2;">${displayName}</strong>
-                            <div style="margin-top:2px;">
-                                <span style="font-size:0.75rem; color:#0d9488; font-weight:700;">${(comp.category || 'Business').toUpperCase()} • ⭐ ${comp.rating || '5.0'}</span>
-                                ${branchBadge}
-                            </div>
-                        </div>
-                    </div>
-                    <p style="margin:4px 0 8px 0; font-size:0.8rem; color:#64748b; line-height:1.35;">📍 ${comp.address || 'Ethiopia'}</p>
-                    <div style="display:flex; gap:6px; margin-top:8px;">
-                        <a href="${shopUrl}" style="flex:1; text-align:center; background:#0d9488; color:#ffffff !important; padding:6px 10px; border-radius:6px; font-size:0.78rem; font-weight:700; text-decoration:none;">Store ➔</a>
-                        <a href="${directionsUrl}" target="_blank" rel="noopener" style="flex:1; text-align:center; background:#0284c7; color:#ffffff !important; padding:6px 10px; border-radius:6px; font-size:0.78rem; font-weight:700; text-decoration:none;">🧭 Directions</a>
-                    </div>
-                </div>
-            `;
-
-            const marker = L.marker([comp.lat, comp.lng], { icon: customIcon }).bindPopup(popupContent, { maxWidth: 300 });
-            markerCluster.addLayer(marker);
-
-            if (isPrimary || !primaryMarker) {
-                primaryMarker = marker;
-            }
-        });
-
-        // Smart Zoom & Bounds fitting
-        if (filtered.length > 0) {
-            if (selectedCompany && primaryMarker) {
-                mapInstance.setView(primaryMarker.getLatLng(), 15);
-                setTimeout(function() { primaryMarker.openPopup(); }, 350);
-            } else {
-                fitMapToMarkers();
-            }
-        } else {
-            mapInstance.setView([9.010, 38.761], 12);
-        }
-    }
-
-    function fitMapToMarkers() {
-        if (!mapInstance || !markerCluster) return;
+    /* ---------------------------------------------------------
+       Bilingual helpers
+       Static copy is translated by ethiobiz_i18n.js (exact-match
+       dictionary). Number-bearing labels are rebuilt here through
+       the same dictionary so a language switch re-renders cleanly.
+       --------------------------------------------------------- */
+    function currentLang() {
         try {
-            const layers = markerCluster.getLayers ? markerCluster.getLayers() : [];
-            if (layers.length > 0 && typeof markerCluster.getBounds === "function") {
-                const bounds = markerCluster.getBounds();
-                if (bounds.isValid && bounds.isValid()) {
-                    mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
-                }
-            } else {
-                mapInstance.setView([9.010, 38.761], 12);
+            if (window.EthioBizI18n && typeof window.EthioBizI18n.getLanguage === "function") {
+                return window.EthioBizI18n.getLanguage() || "en";
             }
-        } catch(e) {
-            mapInstance.setView([9.010, 38.761], 12);
+            return localStorage.getItem("ethiobiz_lang") || "en";
+        } catch (e) {
+            return "en";
         }
     }
 
-    // 7. PRODUCT DATA LOADER
-    function loadProducts(query, lat, lng) {
-        if (query === undefined) query = "";
-        const countText = document.getElementById("results-count-text");
-        if (countText) countText.innerText = "Loading products...";
+    function t(key, fallback) {
+        try {
+            if (window.EthioBizI18n && typeof window.EthioBizI18n.t === "function") {
+                const out = window.EthioBizI18n.t(key);
+                if (out && out !== key) return out;
+            }
+        } catch (e) { /* ignore */ }
+        return fallback === undefined ? key : fallback;
+    }
 
-        const searchInput = document.getElementById("magala-search-input");
-        const minPriceInput = document.getElementById("filter-min-price");
-        const maxPriceInput = document.getElementById("filter-max-price");
-        const sortSelect = document.getElementById("filter-sort-by");
-        const ratingRadio = document.querySelector("input[name='rating_filter']:checked");
-
-        const params = new URLSearchParams({
-            query: query || (searchInput ? searchInput.value.trim() : ""),
-            category: currentCategory === "all" ? "" : currentCategory,
-            company: selectedCompany || "",
-            min_price: (minPriceInput ? minPriceInput.value : "") || "",
-            max_price: (maxPriceInput ? maxPriceInput.value : "") || "",
-            min_rating: (ratingRadio && ratingRadio.value ? ratingRadio.value : ""),
-            sort_by: (sortSelect ? sortSelect.value : "relevance"),
-            page: currentPage,
-            limit: 20
+    function tpl(key, vars, fallback) {
+        let out = t(key, fallback === undefined ? key : fallback);
+        Object.keys(vars || {}).forEach(function (name) {
+            out = out.split("{" + name + "}").join(String(vars[name]));
         });
+        return out;
+    }
 
-        if (lat && lng) {
-            params.append("user_lat", lat);
-            params.append("user_lng", lng);
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+    function init() {
+        cacheElements();
+        if (!els.root) return;
+        readUrlState();
+        bindSearch();
+        bindFilters();
+        bindView();
+        bindItems();
+        bindPagination();
+        bindCart();
+        bindSticky();
+        restoreSidebarState();
+        applyView(false);
+        loadCategories();
+        loadProducts();
+        refreshCart();
+        if (state.view === "map") {
+            setTimeout(function () { initMap(false); }, 260);
         }
+        window.addEventListener("ethiobiz-lang-changed", onLanguageChange);
+        console.log("[Magala Shop] V3 engine ready");
+    }
 
-        fetch("/api/method/bismillah_ethiobiz.magala_shop_api.search_products?" + params.toString())
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data.message && data.message.status === "success") {
-                    const items = data.message.items || [];
-                    window.__lastFetchedItems = items;
-                    renderItems(items);
+    function onLanguageChange() {
+        updateCategoryStatus();
+        updateFilterToggleText();
+        renderCategoryRail();
+        renderCategoryFilters();
+        renderResultsSummary();
+        renderActiveFilters();
+        renderItems();
+        renderPagination();
+        updateStoreBanner(state.company);
+        refreshMapStatus();
+        if (window.MagalaCart && typeof window.MagalaCart.refresh === "function") {
+            window.MagalaCart.refresh().catch(function () { /* guest cart may be empty */ });
+        }
+    }
 
-                    if (countText) {
-                        if (items.length > 0) {
-                            countText.innerText = "Showing " + items.length + " of " + data.message.total + " products";
-                        } else if (selectedCompany) {
-                            countText.innerHTML = "No products currently listed for <strong>" + escapeHtml(selectedCompany) + "</strong>. <a href='/shop' style='color:#0d9488; font-weight:700; text-decoration:underline;'>Browse All Marketplace Products</a>";
-                        } else {
-                            countText.innerText = "No matching products found";
-                        }
-                    }
-                    renderPagination(data.message.total || 0, data.message.total_pages || 1);
-                } else {
-                    if (countText) countText.innerText = "No products found in this selection";
-                    renderItems([]);
-                }
+    /* ---------------------------------------------------------
+       Boot / helpers
+       --------------------------------------------------------- */
+    function cacheElements() {
+        els.root = document.getElementById("mgs-shop");
+        if (!els.root) return;
+        els.searchForm = document.getElementById("mgs-search-form");
+        els.searchInput = document.getElementById("magala-search-input");
+        els.clearSearch = document.getElementById("magala-clear-search");
+        els.typeahead = document.getElementById("magala-typeahead-dropdown");
+        els.nearMe = document.getElementById("btn-near-me");
+        els.heroPanel = document.querySelector("#page-shop .mgs-hero-panel");
+        els.categoryBar = document.getElementById("mgs-category-bar");
+        els.categoryStatus = document.getElementById("mgs-category-status");
+        els.categoryFilters = document.getElementById("mgs-category-filters");
+        els.layout = document.getElementById("mgs-layout");
+        els.sidebar = document.getElementById("mgs-filter-panel");
+        els.filterTop = document.querySelector("#page-shop .mgs-filter-top");
+        els.filterBackdrop = document.getElementById("mgs-filter-backdrop");
+        els.filterToggle = document.getElementById("btn-toggle-filters");
+        els.filterToggleText = document.getElementById("toggle-filter-text");
+        els.closeFilters = document.getElementById("mgs-close-filters");
+        els.applyFilters = document.getElementById("mgs-apply-filters");
+        els.resetFilters = document.getElementById("btn-reset-filters");
+        els.minPrice = document.getElementById("filter-min-price");
+        els.maxPrice = document.getElementById("filter-max-price");
+        els.sort = document.getElementById("filter-sort-by");
+        els.items = document.getElementById("magala-items-container");
+        els.results = document.getElementById("results-count-text");
+        els.resultsSub = document.getElementById("mgs-results-sub");
+        els.toolbar = document.getElementById("mgs-toolbar");
+        els.pagination = document.getElementById("magala-pagination");
+        els.activeFilters = document.getElementById("mgs-active-filters");
+        els.storeBanner = document.getElementById("mgs-store-banner");
+        els.storeName = document.getElementById("mgs-store-name");
+        els.clearStore = document.getElementById("mgs-clear-store");
+        els.mapWrap = document.getElementById("magala-embedded-map-container");
+        els.mapContainer = document.getElementById("magala-split-map");
+        els.mapStatus = document.getElementById("magala-map-status");
+        els.mapFit = document.getElementById("btn-magala-map-fit");
+        els.cartButton = document.getElementById("mgs-cart-button");
+        els.cartCount = document.getElementById("mgs-cart-count");
+        els.drawer = document.getElementById("magala-cart-drawer");
+        els.drawerCount = document.getElementById("cart-drawer-count");
+        els.drawerItems = document.getElementById("cart-drawer-items");
+        els.drawerTotal = document.getElementById("cart-drawer-total");
+        els.cartBackdrop = document.getElementById("cart-drawer-backdrop");
+        els.closeCart = document.getElementById("close-cart-drawer");
+        els.toast = document.getElementById("mgs-toast");
+        els.openHadeeda = document.getElementById("mgs-open-hadeeda");
+        els.ratingRadios = document.querySelectorAll('input[name="rating_filter"]');
+        els.viewButtons = document.querySelectorAll("#page-shop .view-btn");
+    }
+
+    function readUrlState() {
+        let params;
+        try {
+            params = new URLSearchParams(window.location.search);
+        } catch (e) {
+            params = new URLSearchParams("");
+        }
+        const storedView = localStorage.getItem("magala_view_mode");
+        if (["grid", "list", "map"].indexOf(storedView) >= 0) state.view = storedView;
+        const urlView = params.get("view");
+        if (["grid", "list", "map"].indexOf(urlView) >= 0) state.view = urlView;
+
+        state.query = params.get("q") || params.get("query") || "";
+        state.category = params.get("category") || "all";
+        state.sort = params.get("sort") || "relevance";
+        state.minPrice = params.get("min") || "";
+        state.maxPrice = params.get("max") || "";
+        state.rating = params.get("rating") || "";
+        state.company = params.get("company") || "";
+        const page = parseInt(params.get("page") || "1", 10);
+        state.page = isFinite(page) && page > 0 ? page : 1;
+
+        if (els.searchInput) els.searchInput.value = state.query;
+        if (els.clearSearch) els.clearSearch.hidden = !state.query;
+        if (els.minPrice) els.minPrice.value = state.minPrice;
+        if (els.maxPrice) els.maxPrice.value = state.maxPrice;
+        if (els.sort) els.sort.value = state.sort;
+        els.ratingRadios.forEach(function (radio) {
+            radio.checked = String(radio.value) === String(state.rating || "");
+        });
+        if (state.company) updateStoreBanner(state.company);
+    }
+
+    function parseJson(res) {
+        if (!res.ok) throw new Error("Request failed (" + res.status + ")");
+        return res.json().then(function (payload) {
+            if (payload && payload.exc) throw new Error(cleanError(payload._server_messages || payload.exc));
+            return payload && payload.message !== undefined ? payload.message : payload;
+        });
+    }
+
+    function cleanError(err) {
+        const raw = err && err.message ? String(err.message) : String(err || t("Something went wrong.", "Something went wrong."));
+        return raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 260);
+    }
+
+    function csrf() {
+        if (window.frappe && window.frappe.csrf_token) return window.frappe.csrf_token;
+        const match = document.cookie.match(/csrf_token=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : "";
+    }
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return "";
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function stripHtml(value) {
+        return String(value || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function hashCode(value) {
+        let hash = 0;
+        const text = String(value || "");
+        for (let i = 0; i < text.length; i += 1) {
+            hash = ((hash << 5) - hash) + text.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+
+    function formatMoney(amount, currency) {
+        const number = Number(amount || 0);
+        return number.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " " + (currency || "ETB");
+    }
+
+    function categoryIcon(name) {
+        const text = String(name || "").toLowerCase();
+        if (text.indexOf("food") >= 0 || text.indexOf("restaurant") >= 0 || text.indexOf("dining") >= 0) return "🍽️";
+        if (text.indexOf("health") >= 0 || text.indexOf("clinic") >= 0 || text.indexOf("medical") >= 0 || text.indexOf("dental") >= 0) return "🩺";
+        if (text.indexOf("education") >= 0 || text.indexOf("course") >= 0 || text.indexOf("school") >= 0 || text.indexOf("learn") >= 0) return "🎓";
+        if (text.indexOf("salon") >= 0 || text.indexOf("beauty") >= 0 || text.indexOf("spa") >= 0) return "💅";
+        if (text.indexOf("hotel") >= 0 || text.indexOf("hospitality") >= 0 || text.indexOf("pension") >= 0) return "🏨";
+        if (text.indexOf("software") >= 0 || text.indexOf("saas") >= 0 || text.indexOf("cloud") >= 0) return "☁️";
+        if (text.indexOf("consumable") >= 0 || text.indexOf("supply") >= 0) return "📦";
+        if (text.indexOf("product") >= 0 || text.indexOf("retail") >= 0 || text.indexOf("shop") >= 0) return "🛍️";
+        return "🏷️";
+    }
+
+    function categoryLabel(name) {
+        const found = state.categories.find(function (item) { return item.name === name; });
+        return found ? found.label : name;
+    }
+
+    function priceHtml(item) {
+        const price = Number(item.price || 0);
+        if (price > 0) {
+            return '<div class="mgs-price">' + escapeHtml(item.formatted_price || formatMoney(price, "ETB")) +
+                '<small>' + escapeHtml(t("incl. VAT", "incl. VAT")) + '</small></div>';
+        }
+        return '<div class="mgs-price mgs-price--request">' + escapeHtml(t("Price on request", "Price on request")) +
+            '<small>' + escapeHtml(t("Contact seller", "Contact seller")) + '</small></div>';
+    }
+
+    function ratingHtml(item) {
+        const reviews = Number(item.total_reviews || 0);
+        if (!reviews) {
+            return '<span class="mgs-new-pill">' + escapeHtml(t("New arrival", "New arrival")) + '</span>';
+        }
+        const rating = Number(item.rating || 0);
+        return '<span class="mgs-stars" title="' + escapeHtml(tpl("{n} out of 5", { n: rating.toFixed(1) }, rating.toFixed(1) + " out of 5")) + '">★ ' +
+            escapeHtml(rating.toFixed(1)) + '</span><span>(' + reviews + ')</span>';
+    }
+
+    function thumbHtml(item, context) {
+        const group = item.item_group || "Products";
+        const icon = categoryIcon(group);
+        const tone = "tone-" + (hashCode(group + (item.company || "") + (item.item_code || "")) % 6);
+        const image = item.website_image || item.image || "";
+        const alt = escapeHtml(item.web_item_name || item.item_name || t("Product image", "Product image"));
+        if (!image || PLACEHOLDER_RE.test(image)) {
+            return '<div class="mgs-thumb-fallback ' + tone + '">' +
+                '<span class="mgs-fallback-icon" aria-hidden="true">' + icon + '</span>' +
+                '<span class="mgs-fallback-label">' + escapeHtml(group) + '</span></div>';
+        }
+        const classes = context === "list" ? "mgs-card-img mgs-list-img" : "mgs-card-img";
+        return '<img class="' + classes + '" src="' + escapeHtml(image) + '" alt="' + alt +
+            '" loading="lazy" decoding="async" data-fallback-tone="' + tone +
+            '" data-fallback-icon="' + escapeHtml(icon) +
+            '" data-fallback-label="' + escapeHtml(group) + '" />';
+    }
+
+    function attachImageFallbacks(scope) {
+        scope.querySelectorAll("img.mgs-card-img").forEach(function (img) {
+            img.addEventListener("error", function () {
+                const media = img.closest(".mgs-card-media, .mgs-list-media");
+                if (!media) return;
+                const fallback = document.createElement("div");
+                fallback.className = "mgs-thumb-fallback " + (img.getAttribute("data-fallback-tone") || "tone-0");
+                const icon = document.createElement("span");
+                icon.className = "mgs-fallback-icon";
+                icon.setAttribute("aria-hidden", "true");
+                icon.textContent = img.getAttribute("data-fallback-icon") || "🏷️";
+                const label = document.createElement("span");
+                label.className = "mgs-fallback-label";
+                label.textContent = img.getAttribute("data-fallback-label") || t("Product", "Product");
+                fallback.appendChild(icon);
+                fallback.appendChild(label);
+                media.replaceChildren(fallback);
+            }, { once: true });
+        });
+    }
+
+    /* ---------------------------------------------------------
+       Categories
+       --------------------------------------------------------- */
+    function loadCategories() {
+        if (!els.categoryBar) return;
+        fetch(API.categories, { credentials: "same-origin", headers: { Accept: "application/json" } })
+            .then(parseJson)
+            .then(function (data) {
+                const raw = data && Array.isArray(data.categories) ? data.categories : [];
+                state.categories = normalizeCategories(raw);
+                state.categoriesReady = true;
+                updateCategoryStatus();
+                renderCategoryRail();
+                renderCategoryFilters();
             })
-            .catch(function(err) {
-                console.error("[Magala Shop] Error loading products:", err);
-                if (countText) {
-                    if (selectedCompany) {
-                        countText.innerHTML = "Storefront for <strong>" + escapeHtml(selectedCompany) + "</strong>. <a href='/shop' style='color:#0d9488; font-weight:700;'>View All Marketplace Items</a>";
-                    } else {
-                        countText.innerText = "Explore Magala Marketplace Products";
-                    }
-                }
+            .catch(function () {
+                state.categories = FALLBACK_CATEGORIES.map(function (category) {
+                    return { name: category.name, label: category.label, count: category.count };
+                });
+                state.categoriesReady = true;
+                updateCategoryStatus();
+                renderCategoryRail();
+                renderCategoryFilters();
             });
     }
 
-    function renderItems(items) {
-        const container = document.getElementById("magala-items-container");
-        if (!container) return;
-        container.innerHTML = "";
+    function updateCategoryStatus() {
+        if (!els.categoryStatus) return;
+        els.categoryStatus.textContent = state.categories.length
+            ? tpl("{n} categories · updated live", { n: state.categories.length },
+                state.categories.length + " categories · updated live")
+            : t("Browse all categories", "Browse all categories");
+    }
 
-        if (!items || !items.length) {
-            container.innerHTML = `
-                <div style="grid-column: 1/-1; padding:40px 20px; text-align:center; color:#64748b;">
-                    <div style="font-size:2.5rem; margin-bottom:12px;">🛍️</div>
-                    <h3 style="color:#0f172a; margin-bottom:8px; font-weight:700;">No matching products found</h3>
-                    <p style="margin:0 0 16px 0; font-size:0.92rem;">Try choosing "All Categories", clearing search terms, or exploring other verified stores.</p>
-                    <a href="/shop" style="display:inline-block; background:#0d9488; color:#ffffff !important; padding:8px 18px; border-radius:8px; font-weight:700; text-decoration:none;">View All Products</a>
-                </div>
-            `;
+    function normalizeCategories(raw) {
+        const seen = {};
+        return (raw || [])
+            .filter(function (category) {
+                return category && category.item_group && !TEST_CATEGORY_RE.test(category.item_group) &&
+                    !/(test|demo|sample)/i.test(category.item_group);
+            })
+            .map(function (category) {
+                return {
+                    name: category.item_group,
+                    label: category.item_group_name || category.item_group,
+                    count: Number(category.product_count || 0)
+                };
+            })
+            .filter(function (category) {
+                if (category.count <= 0 || seen[category.name]) return false;
+                seen[category.name] = true;
+                return true;
+            })
+            .sort(function (a, b) { return b.count - a.count; })
+            .slice(0, 14);
+    }
+
+    function renderCategoryRail() {
+        if (!els.categoryBar) return;
+        const categories = state.categories.length ? state.categories : FALLBACK_CATEGORIES;
+        const known = categories.some(function (category) { return category.name === state.category; });
+        let html = chipHtml("all", t("All products", "All products"), "✨", state.total || null);
+        if (state.category !== "all" && !known) {
+            html += chipHtml(state.category, state.category, categoryIcon(state.category), null);
+        }
+        html += categories.map(function (category) {
+            return chipHtml(category.name, category.label, categoryIcon(category.name), category.count);
+        }).join("");
+        els.categoryBar.innerHTML = html;
+    }
+
+    function chipHtml(value, label, icon, count) {
+        const active = String(state.category) === String(value);
+        return '<button type="button" class="cat-pill' + (active ? " active" : "") +
+            '" data-category="' + escapeHtml(value) + '" role="listitem" aria-pressed="' +
+            (active ? "true" : "false") + '">' +
+            '<span class="mgs-chip-icon" aria-hidden="true">' + icon + '</span>' +
+            '<span class="mgs-chip-label">' + escapeHtml(label) + '</span>' +
+            (count ? '<span class="mgs-chip-count">' + escapeHtml(count) + '</span>' : "") +
+            '</button>';
+    }
+
+    function renderCategoryFilters() {
+        if (!els.categoryFilters) return;
+        const categories = state.categories.length ? state.categories : FALLBACK_CATEGORIES;
+        const known = categories.some(function (category) { return category.name === state.category; });
+        let html = '<button type="button" class="mgs-cat-filter' +
+            (state.category === "all" ? " active" : "") +
+            '" data-category="all"><span>' + escapeHtml(t("All products", "All products")) + '</span><span>' +
+            (state.total ? escapeHtml(state.total) : "") + '</span></button>';
+        if (state.category !== "all" && !known) {
+            html += '<button type="button" class="mgs-cat-filter active" data-category="' +
+                escapeHtml(state.category) + '"><span>' + escapeHtml(state.category) +
+                '</span><span></span></button>';
+        }
+        html += categories.map(function (category) {
+            const active = String(state.category) === String(category.name);
+            return '<button type="button" class="mgs-cat-filter' + (active ? " active" : "") +
+                '" data-category="' + escapeHtml(category.name) + '"><span>' +
+                escapeHtml(category.label) + '</span><span>' +
+                (category.count ? escapeHtml(category.count) : "") + '</span></button>';
+        }).join("");
+        els.categoryFilters.innerHTML = html;
+    }
+
+    function updateAllCount() {
+        if (els.categoryBar) {
+            const chip = els.categoryBar.querySelector('.cat-pill[data-category="all"]');
+            if (chip) {
+                let countEl = chip.querySelector(".mgs-chip-count");
+                if (!countEl && state.total) {
+                    countEl = document.createElement("span");
+                    countEl.className = "mgs-chip-count";
+                    chip.appendChild(countEl);
+                }
+                if (countEl) countEl.textContent = state.total ? String(state.total) : "";
+            }
+        }
+        if (els.categoryFilters) {
+            const allFilter = els.categoryFilters.querySelector('.mgs-cat-filter[data-category="all"] span:last-child');
+            if (allFilter) allFilter.textContent = state.total ? String(state.total) : "";
+        }
+    }
+
+    /* ---------------------------------------------------------
+       Search & typeahead
+       --------------------------------------------------------- */
+    function bindSearch() {
+        if (els.searchForm) {
+            els.searchForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                applySearch(true);
+            });
+        }
+        if (els.searchInput) {
+            els.searchInput.addEventListener("input", function () {
+                if (els.clearSearch) els.clearSearch.hidden = !els.searchInput.value;
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () {
+                    applySearch(false);
+                }, 340);
+            });
+            els.searchInput.addEventListener("focus", function () {
+                if (state.lastResponse && state.query) {
+                    renderTypeahead(state.lastResponse, state.query);
+                }
+            });
+            els.searchInput.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") hideTypeahead();
+            });
+        }
+        if (els.clearSearch) {
+            els.clearSearch.addEventListener("click", function () {
+                if (els.searchInput) els.searchInput.value = "";
+                els.clearSearch.hidden = true;
+                state.query = "";
+                state.page = 1;
+                hideTypeahead();
+                loadProducts();
+                if (els.searchInput) els.searchInput.focus();
+            });
+        }
+        if (els.typeahead) {
+            els.typeahead.addEventListener("click", function (event) {
+                const target = event.target.closest("[data-suggest-type]");
+                if (!target) return;
+                const type = target.getAttribute("data-suggest-type");
+                const value = target.getAttribute("data-suggest-value") || "";
+                if (type === "product") {
+                    window.location.href = target.getAttribute("data-suggest-url") || "/shop";
+                } else if (type === "category") {
+                    hideTypeahead();
+                    setCategory(value);
+                } else if (type === "company") {
+                    hideTypeahead();
+                    setCompany(value);
+                }
+            });
+        }
+        document.addEventListener("click", function (event) {
+            if (els.heroPanel && !els.heroPanel.contains(event.target) &&
+                els.typeahead && !els.typeahead.contains(event.target)) hideTypeahead();
+        });
+        window.addEventListener("scroll", function () {
+            if (els.typeahead && !els.typeahead.hidden) positionTypeahead();
+        }, { passive: true });
+        window.addEventListener("resize", function () {
+            if (els.typeahead && !els.typeahead.hidden) positionTypeahead();
+        });
+        if (els.nearMe) {
+            els.nearMe.addEventListener("click", locateUser);
+        }
+    }
+
+    function applySearch(immediate) {
+        if (!els.searchInput) return;
+        const query = els.searchInput.value.trim();
+        if (query === state.query && !immediate) return;
+        state.query = query;
+        state.page = 1;
+        hideTypeahead();
+        if (immediate) els.searchInput.blur();
+        loadProducts();
+    }
+
+    function positionTypeahead() {
+        if (!els.typeahead || !els.searchForm) return;
+        const rect = els.searchForm.getBoundingClientRect();
+        const width = Math.min(Math.max(rect.width, 260), window.innerWidth - 24);
+        let left = rect.left;
+        if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
+        els.typeahead.style.left = Math.max(12, left) + "px";
+        els.typeahead.style.top = (rect.bottom + 8) + "px";
+        els.typeahead.style.width = width + "px";
+    }
+
+    function renderTypeahead(data, query) {
+        if (!els.typeahead || !query || !data) return;
+        const products = Array.isArray(data.items) ? data.items.slice(0, 4) : [];
+        const categories = Array.isArray(data.categories_matched) ? data.categories_matched.slice(0, 3) : [];
+        const companies = Array.isArray(data.companies_matched) ? data.companies_matched.slice(0, 3) : [];
+        if (!products.length && !categories.length && !companies.length) {
+            hideTypeahead();
             return;
         }
+        let html = "";
+        if (products.length) {
+            html += '<div class="mgs-typeahead-group-label">' + escapeHtml(t("Products", "Products")) + '</div>';
+            html += products.map(function (item) {
+                const imageSrc = item.website_image || item.image || "";
+                const image = imageSrc && !PLACEHOLDER_RE.test(imageSrc)
+                    ? '<img src="' + escapeHtml(imageSrc) + '" alt="" loading="lazy" />'
+                    : '<span class="mgs-typeahead-thumb" aria-hidden="true">' + categoryIcon(item.item_group) + '</span>';
+                const price = Number(item.price || 0) > 0
+                    ? escapeHtml(item.formatted_price || formatMoney(item.price, "ETB"))
+                    : t("Price on request", "Price on request");
+                return '<button type="button" class="mgs-typeahead-item" data-suggest-type="product" data-suggest-value="' +
+                    escapeHtml(item.item_code) + '" data-suggest-url="' + escapeHtml(productDetailUrl(item)) + '">' +
+                    image + '<span>' + escapeHtml(item.web_item_name || item.item_name || item.item_code) +
+                    '<small>' + escapeHtml(item.company_name || t("Verified seller", "Verified seller")) + ' · ' + price + '</small></span></button>';
+            }).join("");
+        }
+        if (categories.length) {
+            html += '<div class="mgs-typeahead-group-label">' + escapeHtml(t("Categories", "Categories")) + '</div>';
+            html += categories.map(function (category) {
+                return '<button type="button" class="mgs-typeahead-item" data-suggest-type="category" data-suggest-value="' +
+                    escapeHtml(category.name) + '"><span class="mgs-typeahead-thumb" aria-hidden="true">' +
+                    categoryIcon(category.name) + '</span><span>' + escapeHtml(category.item_group_name || category.name) +
+                    '<small>' + escapeHtml(t("Browse category", "Browse category")) + '</small></span></button>';
+            }).join("");
+        }
+        if (companies.length) {
+            html += '<div class="mgs-typeahead-group-label">' + escapeHtml(t("Stores", "Stores")) + '</div>';
+            html += companies.map(function (company) {
+                return '<button type="button" class="mgs-typeahead-item" data-suggest-type="company" data-suggest-value="' +
+                    escapeHtml(company.name) + '"><span class="mgs-typeahead-thumb" aria-hidden="true">🏬</span><span>' +
+                    escapeHtml(company.company_name || company.name) + '<small>' + escapeHtml(t("View storefront", "View storefront")) + '</small></span></button>';
+            }).join("");
+        }
+        els.typeahead.innerHTML = html;
+        positionTypeahead();
+        els.typeahead.hidden = false;
+    }
 
-        items.forEach(function(it) {
-            const detailUrl = "/product/" + encodeURIComponent(it.item_code);
-            const fallbackImg = "/assets/bismillah_ethiobiz/img/walta_real_logo.png";
+    function hideTypeahead() {
+        if (!els.typeahead) return;
+        els.typeahead.hidden = true;
+        els.typeahead.innerHTML = "";
+    }
 
-            if (currentView === "list") {
-                const row = document.createElement("div");
-                row.className = "product-list-row";
-                row.style.cursor = "pointer";
-                row.innerHTML = `
-                    <div style="width:100%; height:160px; overflow:hidden; border-radius:10px; background:#f8fafc;">
-                        <img src="${it.image || fallbackImg}" alt="${it.item_name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${fallbackImg}'" />
-                    </div>
-                    <div>
-                        <div class="product-seller-badge">${it.company_name || it.company} • ${it.seller_address || 'Ethiopia'}</div>
-                        <h4 class="product-title">${it.item_name}</h4>
-                        <div class="product-rating">⭐ ${it.rating || '5.0'} (${it.total_reviews || 0} reviews)</div>
-                        <p class="text-muted" style="font-size:0.9rem;">${(it.description || '').replace(/<[^>]*>?/gm, '').substring(0, 120)}...</p>
-                    </div>
-                    <div class="d-flex flex-column justify-content-between align-items-end">
-                        <span class="price-tag">${it.formatted_price || it.price}</span>
-                        <button class="btn-add-cart" data-cart-item="${it.item_code}">Add to Cart 🛒</button>
-                    </div>
-                `;
-                row.addEventListener("click", function(e) {
-                    if (e.target.closest(".btn-add-cart")) {
-                        e.stopPropagation();
-                        addToCart(it.item_code);
-                    } else {
-                        window.location.href = detailUrl;
-                    }
-                });
-                container.appendChild(row);
-            } else {
-                const card = document.createElement("div");
-                card.className = "product-card";
-                card.style.cursor = "pointer";
-                card.innerHTML = `
-                    <div class="product-img-wrapper">
-                        <img src="${it.image || fallbackImg}" alt="${it.item_name}" loading="lazy" onerror="this.src='${fallbackImg}'" />
-                    </div>
-                    <div class="product-info-box">
-                        <span class="product-seller-badge">${it.company_name || it.company}</span>
-                        <h4 class="product-title">${it.item_name}</h4>
-                        <div class="product-rating">⭐ ${it.rating || '5.0'} (${it.total_reviews || 0})</div>
-                        <div class="product-price-row">
-                            <span class="price-tag">${it.formatted_price || it.price}</span>
-                            <button class="btn-add-cart" data-cart-item="${it.item_code}">Add</button>
-                        </div>
-                    </div>
-                `;
-                card.addEventListener("click", function(e) {
-                    if (e.target.closest(".btn-add-cart")) {
-                        e.stopPropagation();
-                        addToCart(it.item_code);
-                    } else {
-                        window.location.href = detailUrl;
-                    }
-                });
-                container.appendChild(card);
+    /* ---------------------------------------------------------
+       Filters
+       --------------------------------------------------------- */
+    function bindFilters() {
+        if (els.categoryBar) {
+            els.categoryBar.addEventListener("click", function (event) {
+                const chip = event.target.closest(".cat-pill");
+                if (chip) setCategory(chip.getAttribute("data-category") || "all");
+            });
+        }
+        if (els.categoryFilters) {
+            els.categoryFilters.addEventListener("click", function (event) {
+                const button = event.target.closest("[data-category]");
+                if (button) setCategory(button.getAttribute("data-category") || "all");
+            });
+        }
+        if (els.minPrice) {
+            els.minPrice.addEventListener("change", applyPriceFilter);
+            els.minPrice.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") { event.preventDefault(); applyPriceFilter(); }
+            });
+        }
+        if (els.maxPrice) {
+            els.maxPrice.addEventListener("change", applyPriceFilter);
+            els.maxPrice.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") { event.preventDefault(); applyPriceFilter(); }
+            });
+        }
+        els.ratingRadios.forEach(function (radio) {
+            radio.addEventListener("change", function () {
+                state.rating = radio.value || "";
+                state.page = 1;
+                loadProducts();
+            });
+        });
+        if (els.sort) {
+            els.sort.addEventListener("change", function () {
+                state.sort = els.sort.value || "relevance";
+                state.page = 1;
+                loadProducts();
+            });
+        }
+        if (els.resetFilters) {
+            els.resetFilters.addEventListener("click", resetFilters);
+        }
+        if (els.filterToggle) {
+            els.filterToggle.addEventListener("click", toggleFilters);
+        }
+        if (els.closeFilters) {
+            els.closeFilters.addEventListener("click", function () { closeFilters(false); });
+        }
+        if (els.applyFilters) {
+            els.applyFilters.addEventListener("click", function () { closeFilters(false); });
+        }
+        if (els.filterBackdrop) {
+            els.filterBackdrop.addEventListener("click", function () { closeFilters(false); });
+        }
+        if (els.clearStore) {
+            els.clearStore.addEventListener("click", function () { setCompany(""); });
+        }
+        if (els.activeFilters) {
+            els.activeFilters.addEventListener("click", function (event) {
+                const clear = event.target.closest("[data-clear]");
+                if (clear) {
+                    clearFilter(clear.getAttribute("data-clear"));
+                    return;
+                }
+                if (event.target.closest("[data-clear-all]")) resetFilters();
+            });
+        }
+        if (els.openHadeeda) {
+            els.openHadeeda.addEventListener("click", function () {
+                if (window.HadeedaChat && typeof window.HadeedaChat.open === "function") {
+                    window.HadeedaChat.open();
+                } else {
+                    window.dispatchEvent(new CustomEvent("ethiobiz:open-chat"));
+                    showToast(t("Ask Hadeeda from the home page chat bubble. 🛍️", "Ask Hadeeda from the home page chat bubble. 🛍️"));
+                }
+            });
+        }
+        const media = window.matchMedia("(max-width: 1024px)");
+        const onChange = function () {
+            if (!media.matches) closeFilters(true);
+        };
+        if (media.addEventListener) media.addEventListener("change", onChange);
+        else if (media.addListener) media.addListener(onChange);
+    }
+
+    function applyPriceFilter() {
+        state.minPrice = els.minPrice && els.minPrice.value !== "" ? String(Math.max(0, Number(els.minPrice.value) || 0)) : "";
+        state.maxPrice = els.maxPrice && els.maxPrice.value !== "" ? String(Math.max(0, Number(els.maxPrice.value) || 0)) : "";
+        if (state.minPrice && state.maxPrice && Number(state.minPrice) > Number(state.maxPrice)) {
+            const swap = state.minPrice;
+            state.minPrice = state.maxPrice;
+            state.maxPrice = swap;
+            if (els.minPrice) els.minPrice.value = state.minPrice;
+            if (els.maxPrice) els.maxPrice.value = state.maxPrice;
+        }
+        state.page = 1;
+        loadProducts();
+    }
+
+    function setCategory(category) {
+        state.category = category || "all";
+        state.page = 1;
+        renderCategoryRail();
+        renderCategoryFilters();
+        loadProducts();
+    }
+
+    function setCompany(company) {
+        state.company = company || "";
+        state.page = 1;
+        updateStoreBanner(state.company);
+        loadProducts();
+    }
+
+    function updateStoreBanner(company) {
+        if (!els.storeBanner) return;
+        if (!company) {
+            els.storeBanner.hidden = true;
+            if (els.storeName) els.storeName.textContent = t("Verified store", "Verified store");
+            return;
+        }
+        els.storeBanner.hidden = false;
+        if (els.storeName) els.storeName.textContent = company;
+    }
+
+    function clearFilter(key) {
+        if (key === "query") {
+            state.query = "";
+            if (els.searchInput) els.searchInput.value = "";
+            if (els.clearSearch) els.clearSearch.hidden = true;
+        } else if (key === "category") {
+            state.category = "all";
+            renderCategoryRail();
+            renderCategoryFilters();
+        } else if (key === "price") {
+            state.minPrice = "";
+            state.maxPrice = "";
+            if (els.minPrice) els.minPrice.value = "";
+            if (els.maxPrice) els.maxPrice.value = "";
+        } else if (key === "rating") {
+            state.rating = "";
+            els.ratingRadios.forEach(function (radio) { radio.checked = radio.value === ""; });
+        } else if (key === "company") {
+            state.company = "";
+            updateStoreBanner("");
+        }
+        state.page = 1;
+        loadProducts();
+    }
+
+    function resetFilters() {
+        state.query = "";
+        state.category = "all";
+        state.minPrice = "";
+        state.maxPrice = "";
+        state.rating = "";
+        state.company = "";
+        state.sort = "relevance";
+        state.page = 1;
+        if (els.searchInput) els.searchInput.value = "";
+        if (els.clearSearch) els.clearSearch.hidden = true;
+        if (els.minPrice) els.minPrice.value = "";
+        if (els.maxPrice) els.maxPrice.value = "";
+        if (els.sort) els.sort.value = "relevance";
+        els.ratingRadios.forEach(function (radio) { radio.checked = radio.value === ""; });
+        updateStoreBanner("");
+        renderCategoryRail();
+        renderCategoryFilters();
+        hideTypeahead();
+        loadProducts();
+        if (window.matchMedia("(max-width: 1024px)").matches) closeFilters(false);
+    }
+
+    function toggleFilters() {
+        const mobile = window.matchMedia("(max-width: 1024px)").matches;
+        if (mobile) {
+            if (document.body.classList.contains("mgs-filters-open")) closeFilters(false);
+            else openFilters();
+            return;
+        }
+        const collapsed = els.layout.classList.toggle("sidebar-collapsed");
+        if (els.sidebar) els.sidebar.classList.toggle("collapsed", collapsed);
+        localStorage.setItem("magala_sidebar_collapsed", collapsed ? "true" : "false");
+        updateFilterToggleText();
+    }
+
+    function openFilters() {
+        state.lastFocused = document.activeElement;
+        document.body.classList.add("mgs-filters-open");
+        if (els.filterBackdrop) {
+            els.filterBackdrop.hidden = false;
+            requestAnimationFrame(function () { els.filterBackdrop.classList.add("is-open"); });
+        }
+        if (els.sidebar) els.sidebar.classList.remove("collapsed");
+        if (els.filterToggle) els.filterToggle.setAttribute("aria-expanded", "true");
+        setTimeout(function () {
+            if (els.closeFilters) els.closeFilters.focus();
+        }, 60);
+    }
+
+    function closeFilters(silent) {
+        document.body.classList.remove("mgs-filters-open");
+        if (els.filterBackdrop) {
+            els.filterBackdrop.classList.remove("is-open");
+            setTimeout(function () { if (els.filterBackdrop) els.filterBackdrop.hidden = true; }, 230);
+        }
+        if (els.filterToggle) els.filterToggle.setAttribute("aria-expanded", "false");
+        if (!silent && state.lastFocused && typeof state.lastFocused.focus === "function") {
+            state.lastFocused.focus();
+        }
+    }
+
+    function restoreSidebarState() {
+        if (!els.layout || !els.sidebar) return;
+        if (window.matchMedia("(max-width: 1024px)").matches) return;
+        const collapsed = localStorage.getItem("magala_sidebar_collapsed") === "true";
+        els.layout.classList.toggle("sidebar-collapsed", collapsed);
+        els.sidebar.classList.toggle("collapsed", collapsed);
+        updateFilterToggleText();
+    }
+
+    function updateFilterToggleText() {
+        if (!els.filterToggleText) return;
+        const collapsed = els.layout && els.layout.classList.contains("sidebar-collapsed");
+        els.filterToggleText.textContent = collapsed
+            ? t("Show filters", "Show filters")
+            : t("Filters", "Filters");
+    }
+
+    /* ---------------------------------------------------------
+       Products
+       --------------------------------------------------------- */
+    function loadProducts() {
+        if (!els.items) return;
+        const seq = ++state.requestSeq;
+        state.loading = true;
+        els.items.setAttribute("aria-busy", "true");
+        if (!state.items.length) renderSkeletons();
+        if (els.results && !state.items.length) els.results.textContent = t("Loading products…", "Loading products…");
+
+        const params = new URLSearchParams();
+        if (state.query) params.set("query", state.query);
+        if (state.category && state.category !== "all") params.set("category", state.category);
+        if (state.company) params.set("company", state.company);
+        if (state.minPrice) params.set("min_price", state.minPrice);
+        if (state.maxPrice) params.set("max_price", state.maxPrice);
+        if (state.rating) params.set("min_rating", state.rating);
+        if (state.sort) params.set("sort_by", state.sort);
+        params.set("page", String(state.page));
+        params.set("limit", String(PAGE_SIZE));
+
+        fetch(API.search + "?" + params.toString(), {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" }
+        })
+            .then(parseJson)
+            .then(function (data) {
+                if (seq !== state.requestSeq) return;
+                state.loading = false;
+                state.lastResponse = data || {};
+                state.items = data && Array.isArray(data.items) ? data.items : [];
+                state.total = Number((data && data.total) || 0);
+                state.totalPages = Math.max(1, Number((data && data.total_pages) || 1));
+                if (state.page > state.totalPages) state.page = state.totalPages;
+                els.items.setAttribute("aria-busy", "false");
+                updateStoreBannerFromItems();
+                renderResultsSummary();
+                updateAllCount();
+                renderActiveFilters();
+                renderItems();
+                renderPagination();
+                if (document.activeElement === els.searchInput) {
+                    renderTypeahead(data, state.query);
+                }
+                syncUrl();
+            })
+            .catch(function (error) {
+                if (seq !== state.requestSeq) return;
+                state.loading = false;
+                els.items.setAttribute("aria-busy", "false");
+                if (els.results) els.results.textContent = t("Could not load products", "Could not load products");
+                if (els.resultsSub) els.resultsSub.textContent = t("Check your connection and try again.", "Check your connection and try again.");
+                renderError(error);
+            });
+    }
+
+    function updateStoreBannerFromItems() {
+        if (!state.company) return;
+        const first = state.items[0];
+        if (first && first.company_name) {
+            updateStoreBanner(first.company_name);
+        }
+    }
+
+    function renderResultsSummary() {
+        if (!els.results) return;
+        const shown = state.items.length;
+        const total = state.total;
+        if (!total) {
+            els.results.innerHTML = escapeHtml(t("No products found", "No products found"));
+            if (els.resultsSub) {
+                els.resultsSub.textContent = state.query
+                    ? tpl("for “{query}” · try a broader search", { query: state.query },
+                        "for “" + state.query + "” · try a broader search")
+                    : t("Try adjusting your filters", "Try adjusting your filters");
+            }
+            return;
+        }
+        els.results.innerHTML = tpl("Showing {shown} of {total} products", {
+            shown: "<strong>" + shown + "</strong>",
+            total: "<strong>" + total + "</strong>"
+        }, "Showing <strong>" + shown + "</strong> of <strong>" + total + "</strong> " +
+            (total === 1 ? "product" : "products"));
+        if (els.resultsSub) {
+            const bits = [];
+            if (state.query) bits.push("“" + state.query + "”");
+            if (state.category !== "all") bits.push(categoryLabel(state.category));
+            if (state.company) bits.push(state.company);
+            els.resultsSub.textContent = bits.join(" · ");
+        }
+    }
+
+    function renderSkeletons() {
+        if (!els.items) return;
+        let html = "";
+        for (let i = 0; i < 8; i += 1) {
+            html += '<div class="mgs-skeleton-card mgs-skeleton" aria-hidden="true">' +
+                '<div class="mgs-skel mgs-skel-media"></div>' +
+                '<div class="mgs-skel mgs-skel-line"></div>' +
+                '<div class="mgs-skel mgs-skel-line short"></div>' +
+                '<div class="mgs-skel mgs-skel-line tiny"></div></div>';
+        }
+        els.items.innerHTML = html;
+    }
+
+    function renderItems() {
+        if (!els.items || state.view === "map") return;
+        if (!state.items.length) {
+            els.items.innerHTML = emptyStateHtml();
+            return;
+        }
+        const list = state.view === "list";
+        els.items.innerHTML = state.items.map(function (item) {
+            return list ? listRowHtml(item) : cardHtml(item);
+        }).join("");
+        attachImageFallbacks(els.items);
+    }
+
+    function productDetailUrl(item) {
+        const explicit = item && (item.detail_url || item.product_url);
+        if (explicit) return String(explicit);
+        return "/product/" + encodeURIComponent((item && item.item_code) || "");
+    }
+
+    function cardHtml(item) {
+        const code = escapeHtml(item.item_code || "");
+        const name = escapeHtml(item.web_item_name || item.item_name || item.item_code || t("Product", "Product"));
+        const company = escapeHtml(item.company_name || item.company || t("Verified seller", "Verified seller"));
+        const initial = escapeHtml((item.company_name || item.company || "S").trim().charAt(0).toUpperCase());
+        const group = escapeHtml(item.item_group || t("Products", "Products"));
+        const detail = productDetailUrl(item);
+        const summary = escapeHtml(stripHtml(item.short_description || item.description || "").slice(0, 120));
+        return '<article class="mgs-product-card" tabindex="0" role="link" aria-label="' + name +
+            '" data-item-code="' + code + '" data-detail-url="' + escapeHtml(detail) + '">' +
+            '<div class="mgs-card-media">' + thumbHtml(item, "card") +
+            '<div class="mgs-card-badges">' +
+            '<span class="mgs-badge mgs-badge--stock">● ' + escapeHtml(t(item.stock_status || "In Stock", item.stock_status || "In Stock")) + '</span>' +
+            '<span class="mgs-badge mgs-badge--category">' + group + '</span>' +
+            '</div></div>' +
+            '<div class="mgs-card-body">' +
+            '<div class="mgs-seller"><span class="mgs-seller-avatar">' + initial + '</span>' +
+            '<span class="mgs-seller-name">' + company + '</span></div>' +
+            '<h3 class="mgs-card-title">' + name + '</h3>' +
+            (summary ? '<p class="mgs-card-summary">' + summary + '</p>' : '') +
+            '<div class="mgs-card-meta">' + ratingHtml(item) + '<span>' + group + '</span></div>' +
+            '<div class="mgs-card-foot">' + priceHtml(item) +
+            '<button type="button" class="mgs-add-btn" data-cart-item="' + code +
+            '" aria-label="' + escapeHtml(tpl("Add {name} to cart", { name: name }, "Add " + name + " to cart")) + '"><span aria-hidden="true">＋</span>' +
+            '<span class="mgs-add-label">' + escapeHtml(t("Add", "Add")) + '</span></button>' +
+            '</div>' +
+            '<a class="mgs-view-btn" href="' + escapeHtml(detail) + '">' + escapeHtml(t("View details", "View details")) + ' <span aria-hidden="true">→</span></a>' +
+            '</div></article>';
+    }
+
+    function listRowHtml(item) {
+        const code = escapeHtml(item.item_code || "");
+        const name = escapeHtml(item.web_item_name || item.item_name || item.item_code || t("Product", "Product"));
+        const company = escapeHtml(item.company_name || item.company || t("Verified seller", "Verified seller"));
+        const initial = escapeHtml((item.company_name || item.company || "S").trim().charAt(0).toUpperCase());
+        const group = escapeHtml(item.item_group || t("Products", "Products"));
+        const detail = productDetailUrl(item);
+        const description = escapeHtml(stripHtml(item.short_description || item.description || "").slice(0, 190)) ||
+            t("Verified marketplace listing.", "Verified marketplace listing.");
+        return '<article class="mgs-list-row" tabindex="0" role="link" aria-label="' + name +
+            '" data-item-code="' + code + '" data-detail-url="' + escapeHtml(detail) + '">' +
+            '<div class="mgs-list-media">' + thumbHtml(item, "list") + '</div>' +
+            '<div class="mgs-list-body">' +
+            '<div class="mgs-seller"><span class="mgs-seller-avatar">' + initial + '</span>' +
+            '<span class="mgs-seller-name">' + company + '</span></div>' +
+            '<h3 class="mgs-card-title">' + name + '</h3>' +
+            '<p class="mgs-list-desc">' + description + '</p>' +
+            '<div class="mgs-card-meta">' + ratingHtml(item) + '<span>' + group + '</span></div>' +
+            '</div>' +
+            '<div class="mgs-list-side">' + priceHtml(item) +
+            '<button type="button" class="mgs-add-btn" data-cart-item="' + code +
+            '" aria-label="' + escapeHtml(tpl("Add {name} to cart", { name: name }, "Add " + name + " to cart")) + '"><span aria-hidden="true">＋</span>' +
+            '<span class="mgs-add-label">' + escapeHtml(t("Add to cart", "Add to cart")) + '</span></button>' +
+            '<a class="mgs-btn mgs-btn-ghost" href="' + escapeHtml(detail) + '">' + escapeHtml(t("View details", "View details")) + '</a>' +
+            '</div></article>';
+    }
+
+    function emptyStateHtml() {
+        return '<div class="mgs-empty">' +
+            '<div class="mgs-empty-icon" aria-hidden="true">🧭</div>' +
+            '<h3>' + escapeHtml(t("No products match your filters", "No products match your filters")) + '</h3>' +
+            '<p>' + escapeHtml(t("Try a different category, widen your price range, or clear the search to explore the whole marketplace.", "Try a different category, widen your price range, or clear the search to explore the whole marketplace.")) + '</p>' +
+            '<div class="mgs-empty-actions">' +
+            '<button type="button" class="mgs-btn mgs-btn-primary" data-clear-all>' + escapeHtml(t("Clear filters", "Clear filters")) + '</button>' +
+            '<a class="mgs-btn mgs-btn-ghost" href="/map">' + escapeHtml(t("Explore on the map", "Explore on the map")) + '</a>' +
+            '</div></div>';
+    }
+
+    function renderError(error) {
+        if (!els.items) return;
+        els.items.innerHTML = '<div class="mgs-error">' +
+            '<div class="mgs-error-icon" aria-hidden="true">⚠️</div>' +
+            '<h3>' + escapeHtml(t("We could not load the marketplace", "We could not load the marketplace")) + '</h3>' +
+            '<p>' + escapeHtml(cleanError(error)) + '</p>' +
+            '<div class="mgs-empty-actions">' +
+            '<button type="button" class="mgs-btn mgs-btn-primary" data-retry>' + escapeHtml(t("Try again", "Try again")) + '</button>' +
+            '<a class="mgs-btn mgs-btn-ghost" href="/shop">' + escapeHtml(t("Reload shop", "Reload shop")) + '</a>' +
+            '</div></div>';
+    }
+
+    function bindItems() {
+        if (!els.items) return;
+        els.items.addEventListener("click", function (event) {
+            if (event.target.closest("[data-retry]")) { loadProducts(); return; }
+            if (event.target.closest("[data-clear-all]")) { resetFilters(); return; }
+            const add = event.target.closest("[data-cart-item]");
+            if (add) {
+                event.preventDefault();
+                event.stopPropagation();
+                addToCart(add.getAttribute("data-cart-item"), add);
+                return;
+            }
+            if (event.target.closest("a")) return;
+            const card = event.target.closest("[data-detail-url]");
+            if (card) {
+                const url = card.getAttribute("data-detail-url");
+                if (url) window.location.href = url;
             }
         });
-        applyViewLayout();
+        els.items.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            if (event.target.closest("button, a")) return;
+            const card = event.target.closest("[data-detail-url]");
+            if (card) {
+                event.preventDefault();
+                const url = card.getAttribute("data-detail-url");
+                if (url) window.location.href = url;
+            }
+        });
     }
 
-    function renderPagination(total, totalPages) {
-        const pag = document.getElementById("magala-pagination");
-        if (!pag) return;
-        pag.innerHTML = "";
-        if (totalPages <= 1) return;
-
-        // Numbered pagination only. The old Prev/Next controls were removed
-        // per the launch UX standard; page numbers keep navigation intact.
-        const windowSize = 5;
-        let start = Math.max(1, currentPage - Math.floor(windowSize / 2));
-        if (start + windowSize - 1 > totalPages) {
-            start = Math.max(1, totalPages - windowSize + 1);
+    function renderActiveFilters() {
+        if (!els.activeFilters) return;
+        const chips = [];
+        if (state.query) chips.push(filterChip("query", tpl("Search: “{query}”", { query: state.query }, "Search: “" + state.query + "”")));
+        if (state.category !== "all") chips.push(filterChip("category", categoryLabel(state.category)));
+        if (state.minPrice || state.maxPrice) {
+            chips.push(filterChip("price", "ETB " + (state.minPrice || "0") + " – " + (state.maxPrice || "∞")));
         }
-        const end = Math.min(totalPages, start + windowSize - 1);
+        if (state.rating) chips.push(filterChip("rating", tpl("{rating}★ & above", { rating: state.rating }, state.rating + "★ & above")));
+        if (state.company) chips.push(filterChip("company", tpl("Store: {name}", { name: state.company }, "Store: " + state.company)));
+        if (!chips.length) {
+            els.activeFilters.hidden = true;
+            els.activeFilters.innerHTML = "";
+            return;
+        }
+        els.activeFilters.hidden = false;
+        els.activeFilters.innerHTML = chips.join("") +
+            '<button type="button" class="mgs-clear-all" data-clear-all>' + escapeHtml(t("Clear all", "Clear all")) + '</button>';
+    }
 
-        for (let p = start; p <= end; p++) {
-            const pageBtn = document.createElement("button");
-            pageBtn.className = "btn-page" + (p === currentPage ? " active" : "");
-            pageBtn.innerText = String(p);
-            pageBtn.disabled = (p === currentPage);
-            pageBtn.setAttribute("aria-label", `Page ${p}`);
-            if (p === currentPage) pageBtn.setAttribute("aria-current", "page");
-            pageBtn.addEventListener("click", function() {
-                if (p === currentPage) return;
-                currentPage = p;
-                loadProducts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+    function filterChip(key, text) {
+        return '<span class="mgs-filter-chip">' + escapeHtml(text) +
+            '<button type="button" data-clear="' + escapeHtml(key) +
+            '" aria-label="' + escapeHtml(tpl("Remove {name}", { name: text }, "Remove " + text)) + '">✕</button></span>';
+    }
+
+    function syncUrl() {
+        const params = new URLSearchParams();
+        if (state.company) params.set("company", state.company);
+        if (state.query) params.set("q", state.query);
+        if (state.category !== "all") params.set("category", state.category);
+        if (state.sort !== "relevance") params.set("sort", state.sort);
+        if (state.minPrice) params.set("min", state.minPrice);
+        if (state.maxPrice) params.set("max", state.maxPrice);
+        if (state.rating) params.set("rating", state.rating);
+        if (state.page > 1) params.set("page", String(state.page));
+        if (state.view !== "grid") params.set("view", state.view);
+        const query = params.toString();
+        const url = window.location.pathname + (query ? "?" + query : "") + window.location.hash;
+        try {
+            window.history.replaceState(null, "", url);
+        } catch (e) {
+            /* ignore history errors */
+        }
+    }
+
+    /* ---------------------------------------------------------
+       Pagination
+       --------------------------------------------------------- */
+    function renderPagination() {
+        if (!els.pagination) return;
+        if (state.totalPages <= 1) {
+            els.pagination.hidden = true;
+            els.pagination.innerHTML = "";
+            return;
+        }
+        els.pagination.hidden = false;
+        const pages = pageWindow(state.page, state.totalPages);
+        let html = '<button type="button" class="btn-page" data-page="' + (state.page - 1) +
+            '" aria-label="' + escapeHtml(t("Previous page", "Previous page")) + '"' + (state.page <= 1 ? " disabled" : "") + '>‹</button>';
+        pages.forEach(function (page) {
+            if (page === "…") {
+                html += '<span class="mgs-page-ellipsis">…</span>';
+            } else {
+                html += '<button type="button" class="btn-page' + (page === state.page ? " active" : "") +
+                    '" data-page="' + page + '"' + (page === state.page ? ' aria-current="page"' : "") +
+                    '>' + page + '</button>';
+            }
+        });
+        html += '<button type="button" class="btn-page" data-page="' + (state.page + 1) +
+            '" aria-label="' + escapeHtml(t("Next page", "Next page")) + '"' + (state.page >= state.totalPages ? " disabled" : "") + '>›</button>';
+        html += '<span class="mgs-page-indicator">' + escapeHtml(tpl("Page {page} of {pages}", {
+            page: state.page, pages: state.totalPages
+        }, "Page " + state.page + " of " + state.totalPages)) + '</span>';
+        els.pagination.innerHTML = html;
+    }
+
+    function pageWindow(current, total) {
+        if (total <= 7) {
+            const all = [];
+            for (let i = 1; i <= total; i += 1) all.push(i);
+            return all;
+        }
+        const pages = [1];
+        const start = Math.max(2, current - 1);
+        const end = Math.min(total - 1, current + 1);
+        if (start > 2) pages.push("…");
+        for (let i = start; i <= end; i += 1) pages.push(i);
+        if (end < total - 1) pages.push("…");
+        pages.push(total);
+        return pages;
+    }
+
+    function bindPagination() {
+        if (!els.pagination) return;
+        els.pagination.addEventListener("click", function (event) {
+            const button = event.target.closest("[data-page]");
+            if (!button || button.disabled) return;
+            const page = Number(button.getAttribute("data-page"));
+            if (!page || page === state.page || page < 1 || page > state.totalPages) return;
+            state.page = page;
+            loadProducts();
+            scrollToResults();
+        });
+    }
+
+    function scrollToResults() {
+        if (!els.toolbar) return;
+        const top = els.toolbar.getBoundingClientRect().top + window.scrollY - 96;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+
+    /* ---------------------------------------------------------
+       View switching & map
+       --------------------------------------------------------- */
+    function bindView() {
+        els.viewButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                setView(button.getAttribute("data-view") || "grid");
             });
-            pag.appendChild(pageBtn);
+        });
+        if (els.mapFit) {
+            els.mapFit.addEventListener("click", function () {
+                if (state.map.instance && state.map.companies.length) {
+                    fitMapToCompanies(state.map.companies);
+                }
+            });
         }
-
-        const pageIndicator = document.createElement("span");
-        pageIndicator.style.fontWeight = "700";
-        pageIndicator.style.color = "#0f172a";
-        pageIndicator.innerText = `${currentPage} / ${totalPages}`;
-        pag.appendChild(pageIndicator);
     }
 
-    // 8. COMPLETE SHOPPING CART & DRAWER SYSTEM
-    window.addToCart = function(itemCode) {
-        if (window.MagalaCart && window.MagalaCart.add) {
-            return window.MagalaCart.add(itemCode, 1);
+    function setView(view) {
+        if (["grid", "list", "map"].indexOf(view) < 0) view = "grid";
+        state.view = view;
+        localStorage.setItem("magala_view_mode", view);
+        applyView(true);
+        syncUrl();
+        if (view === "map") initMap(false);
+    }
+
+    function applyView(render) {
+        if (!els.items) return;
+        const isMap = state.view === "map";
+        const isList = state.view === "list";
+        els.items.hidden = isMap;
+        if (els.mapWrap) els.mapWrap.hidden = !isMap;
+        if (els.pagination) els.pagination.hidden = isMap || state.totalPages <= 1;
+        els.items.classList.toggle("mgs-grid", !isList);
+        els.items.classList.toggle("mgs-list", isList);
+        els.items.classList.toggle("magala-grid-view", !isList);
+        els.items.classList.toggle("magala-list-view", isList);
+        els.viewButtons.forEach(function (button) {
+            const active = button.getAttribute("data-view") === state.view;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        if (render && !isMap) renderItems();
+        if (render && isMap) initMap(false);
+    }
+
+    function locateUser() {
+        if (!navigator.geolocation) {
+            showToast(t("Geolocation is not supported by this browser.", "Geolocation is not supported by this browser."));
+            return;
+        }
+        const button = els.nearMe;
+        const original = button ? button.innerHTML : "";
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<span aria-hidden="true">⏳</span> Locating…';
+        }
+        navigator.geolocation.getCurrentPosition(function (position) {
+            state.userLat = position.coords.latitude;
+            state.userLng = position.coords.longitude;
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = original;
+            }
+            setView("map");
+            state.map.loaded = false;
+            state.map.retry = 0;
+            initMap(true);
+            showToast(t("Map centered on your location. 📍", "Map centered on your location. 📍"));
+        }, function () {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = original;
+            }
+            showToast(t("Location permission denied. You can still browse all products.", "Location permission denied. You can still browse all products."));
+        }, { enableHighAccuracy: false, timeout: 9000, maximumAge: 300000 });
+    }
+
+    function initMap(force) {
+        if (!els.mapContainer) return;
+        if (state.map.loading) return;
+        if (state.map.instance && !force) {
+            state.map.instance.invalidateSize();
+            return;
+        }
+        if (typeof window.L === "undefined") {
+            state.map.retry += 1;
+            if (state.map.retry < 40) {
+                setTimeout(function () { initMap(force); }, 200);
+            } else if (els.mapStatus) {
+                setMapStatus("Map library could not load. Please refresh the page.", {}, "Map library could not load. Please refresh the page.");
+            }
+            return;
+        }
+        state.map.loading = true;
+        if (els.mapStatus) els.mapStatus.textContent = "🗺️ Loading business locations…";
+        if (state.map.instance) {
+            try { state.map.instance.remove(); } catch (e) { /* ignore */ }
+            state.map.instance = null;
+            state.map.cluster = null;
+        }
+        const map = window.L.map(els.mapContainer, {
+            scrollWheelZoom: true,
+            zoomControl: true
+        }).setView([9.0192, 38.7525], 12);
+        window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        state.map.instance = map;
+        if (typeof window.L.markerClusterGroup === "function") {
+            state.map.cluster = window.L.markerClusterGroup({
+                showCoverageOnHover: false,
+                maxClusterRadius: 52
+            });
+            map.addLayer(state.map.cluster);
+        } else {
+            state.map.cluster = window.L.layerGroup().addTo(map);
         }
 
-        // Fallback only when the shared cart controller did not load.
-        return fetch("/api/method/bismillah_ethiobiz.magala_checkout.add_to_cart", {
+        const params = new URLSearchParams();
+        if (state.category && state.category !== "all") params.set("category", state.category);
+        if (state.userLat !== null && state.userLng !== null) {
+            params.set("user_lat", String(state.userLat));
+            params.set("user_lng", String(state.userLng));
+        }
+        fetch(API.map + (params.toString() ? "?" + params.toString() : ""), {
+            credentials: "same-origin",
+            headers: { Accept: "application/json" }
+        })
+            .then(parseJson)
+            .then(function (data) {
+                state.map.loading = false;
+                const allCompanies = data && Array.isArray(data.companies) ? data.companies : [];
+                const companies = state.company
+                    ? allCompanies.filter(function (company) {
+                        return company.company === state.company || company.company_name === state.company;
+                    })
+                    : allCompanies;
+                state.map.companies = companies;
+                state.map.loaded = true;
+                if (companies.length === 0) {
+                    setMapStatus(state.company
+                        ? "No map locations are published for this store yet."
+                        : "No verified business locations yet. New stores are added every week.", {},
+                        state.company
+                            ? "No map locations are published for this store yet."
+                            : "No verified business locations yet. New stores are added every week.");
+                    return;
+                }
+                renderMapMarkers(companies);
+                setMapStatus("{n} verified business locations on the map", { n: companies.length },
+                    companies.length + " verified business location" +
+                    (companies.length === 1 ? "" : "s") + " on the map");
+            })
+            .catch(function (error) {
+                state.map.loading = false;
+                setMapStatus("Could not load business locations. ", {}, "Could not load business locations. ",
+                    cleanError(error));
+            });
+    }
+
+    function setMapStatus(key, vars, fallback, suffix) {
+        state.map.status = { key: key, vars: vars || {}, fallback: fallback, suffix: suffix || "" };
+        if (!els.mapStatus) return;
+        els.mapStatus.textContent = tpl(key, vars, fallback) + (suffix ? " " + suffix : "");
+    }
+
+    function refreshMapStatus() {
+        if (!els.mapStatus || !state.map.status) return;
+        const status = state.map.status;
+        els.mapStatus.textContent = tpl(status.key, status.vars, status.fallback) +
+            (status.suffix ? " " + status.suffix : "");
+    }
+
+    function renderMapMarkers(companies) {
+        if (!state.map.cluster || !state.map.instance) return;
+        state.map.cluster.clearLayers();
+        companies.forEach(function (company) {
+            const lat = Number(company.lat);
+            const lng = Number(company.lng);
+            if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0)) return;
+            const color = company.pin_color || "#1FB6AE";
+            const initial = escapeHtml((company.company_name || company.name || "S").trim().charAt(0).toUpperCase());
+            const icon = window.L.divIcon({
+                className: "mgs-custom-pin",
+                html: '<div style="width:36px;height:36px;border-radius:50% 50% 50% 6px;transform:rotate(-45deg);' +
+                    "background:" + color + ';border:3px solid #ffffff;box-shadow:0 8px 18px rgba(15,23,42,.35);' +
+                    'display:flex;align-items:center;justify-content:center;">' +
+                    '<span style="transform:rotate(45deg);color:#fff;font-weight:900;font-size:14px;">' + initial + '</span></div>',
+                iconSize: [36, 36],
+                iconAnchor: [18, 36],
+                popupAnchor: [0, -34]
+            });
+            const marker = window.L.marker([lat, lng], { icon: icon, title: company.company_name || company.name });
+            marker.bindPopup(mapPopupHtml(company));
+            state.map.cluster.addLayer(marker);
+        });
+        if (companies.length) fitMapToCompanies(companies);
+    }
+
+    function fitMapToCompanies(companies) {
+        if (!state.map.instance) return;
+        const bounds = [];
+        companies.forEach(function (company) {
+            const lat = Number(company.lat);
+            const lng = Number(company.lng);
+            if (isFinite(lat) && isFinite(lng) && !(lat === 0 && lng === 0)) bounds.push([lat, lng]);
+        });
+        if (bounds.length) {
+            state.map.instance.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+        }
+    }
+
+    function mapPopupHtml(company) {
+        const name = escapeHtml(company.company_name || company.name || t("Verified seller", "Verified seller"));
+        const address = escapeHtml(company.address || t("Ethiopia", "Ethiopia"));
+        const phone = company.phone ? '<div style="font-size:12px;margin-bottom:8px;color:#334155;">📞 ' +
+            escapeHtml(company.phone) + '</div>' : "";
+        const distance = company.distance_km ? '<div style="font-size:11px;margin-bottom:8px;color:#64748b;">📍 ' +
+            escapeHtml(company.distance_km) + ' ' + escapeHtml(t("km away", "km away")) + '</div>' : "";
+        const url = "/shop?company=" + encodeURIComponent(company.company || company.company_name || "");
+        return '<div style="min-width:210px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">' +
+            '<strong style="display:block;color:#0f766e;font-size:14px;margin-bottom:4px;">' + name + '</strong>' +
+            '<div style="color:#64748b;font-size:12px;line-height:1.45;margin-bottom:8px;">' + address + '</div>' +
+            phone + distance +
+            '<a href="' + escapeHtml(url) + '" style="display:inline-block;background:#0d9488;color:#fff;' +
+            'padding:7px 11px;border-radius:8px;font-size:12px;font-weight:800;text-decoration:none;">' +
+            escapeHtml(t("View storefront →", "View storefront →")) + '</a></div>';
+    }
+
+    /* ---------------------------------------------------------
+       Cart
+       --------------------------------------------------------- */
+    function bindCart() {
+        if (els.cartButton) els.cartButton.addEventListener("click", openCart);
+        if (els.closeCart) els.closeCart.addEventListener("click", closeCart);
+        if (els.cartBackdrop) els.cartBackdrop.addEventListener("click", closeCart);
+        if (els.drawerItems) {
+            els.drawerItems.addEventListener("click", function (event) {
+                const button = event.target.closest("[data-cart-action]");
+                if (!button) return;
+                const itemCode = button.getAttribute("data-cart-item");
+                const action = button.getAttribute("data-cart-action");
+                const card = button.closest(".cart-drawer-card");
+                const qtyEl = card ? card.querySelector("[data-cart-qty]") : null;
+                const current = Number(qtyEl ? qtyEl.textContent : 1) || 1;
+                if (action === "remove") {
+                    cartAction("remove", itemCode, 0);
+                } else if (action === "inc") {
+                    cartAction("inc", itemCode, current + 1);
+                } else if (action === "dec") {
+                    cartAction("dec", itemCode, Math.max(0, current - 1));
+                }
+            });
+        }
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") return;
+            hideTypeahead();
+            closeCart();
+            if (document.body.classList.contains("mgs-filters-open")) closeFilters(false);
+        });
+        document.querySelectorAll("a.shopping-cart, .shopping-cart a, a.cart-icon, .cart-icon a").forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+                openCart();
+            });
+        });
+    }
+
+    function refreshCart() {
+        if (window.MagalaCart && typeof window.MagalaCart.refresh === "function") {
+            window.MagalaCart.refresh().catch(function () { /* ignore */ });
+            return;
+        }
+        fetch(API.cart, { credentials: "same-origin", headers: { Accept: "application/json" } })
+            .then(parseJson)
+            .then(renderShopCartDrawer)
+            .catch(function () { /* guest cart may be empty */ });
+    }
+
+    function openCart() {
+        if (!els.drawer) return;
+        state.lastFocused = document.activeElement;
+        els.drawer.classList.add("open");
+        els.drawer.setAttribute("aria-hidden", "false");
+        if (els.cartBackdrop) {
+            els.cartBackdrop.classList.add("open");
+            els.cartBackdrop.setAttribute("aria-hidden", "false");
+        }
+        document.body.classList.add("magala-cart-open");
+        setTimeout(function () {
+            if (els.closeCart) els.closeCart.focus();
+        }, 60);
+        if (window.MagalaCart && typeof window.MagalaCart.refresh === "function") {
+            window.MagalaCart.refresh().catch(function () { /* ignore */ });
+        }
+    }
+
+    function closeCart() {
+        if (!els.drawer || !els.drawer.classList.contains("open")) return;
+        els.drawer.classList.remove("open");
+        els.drawer.setAttribute("aria-hidden", "true");
+        if (els.cartBackdrop) {
+            els.cartBackdrop.classList.remove("open");
+            els.cartBackdrop.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.remove("magala-cart-open");
+        if (state.lastFocused && typeof state.lastFocused.focus === "function") {
+            state.lastFocused.focus();
+        }
+    }
+
+    function cartAction(action, itemCode, qty) {
+        if (!itemCode) return;
+        if (window.MagalaCart) {
+            if (action === "remove" && typeof window.MagalaCart.remove === "function") {
+                window.MagalaCart.remove(itemCode);
+                return;
+            }
+            if (typeof window.MagalaCart.updateQty === "function") {
+                window.MagalaCart.updateQty(itemCode, qty);
+                return;
+            }
+        }
+        postCart(API.qty, { item_code: itemCode, qty: qty })
+            .then(function (cart) {
+                renderShopCartDrawer(cart);
+                if (Number(qty) <= 0) showToast(t("Item removed from cart.", "Item removed from cart."));
+            })
+            .catch(function (error) {
+                handleCartError(error, t("Could not update cart quantity", "Could not update cart quantity"));
+            });
+    }
+
+    function addToCart(itemCode, button) {
+        if (!itemCode) return;
+        const original = button ? button.innerHTML : "";
+        if (button) {
+            button.classList.add("is-busy");
+            button.setAttribute("aria-busy", "true");
+            button.innerHTML = '<span class="mgs-add-label">' + escapeHtml(t("Adding…", "Adding…")) + '</span>';
+        }
+        const finish = function (ok) {
+            if (!button) return;
+            button.classList.remove("is-busy");
+            button.removeAttribute("aria-busy");
+            if (ok) {
+                button.classList.add("is-added");
+                button.innerHTML = '<span aria-hidden="true">✓</span><span class="mgs-add-label">' + escapeHtml(t("Added", "Added")) + '</span>';
+                setTimeout(function () {
+                    button.classList.remove("is-added");
+                    button.innerHTML = original;
+                }, 1500);
+            } else {
+                button.innerHTML = original;
+            }
+        };
+        if (window.MagalaCart && typeof window.MagalaCart.add === "function") {
+            window.MagalaCart.add(itemCode, 1).then(function () {
+                finish(true);
+            }).catch(function () {
+                finish(false);
+            });
+            return;
+        }
+        postCart(API.add, { item_code: itemCode, qty: 1 })
+            .then(function (cart) {
+                renderShopCartDrawer(cart);
+                openCart();
+                showToast(t('Added to cart. <a href="/cart">Checkout →</a>', 'Added to cart. <a href="/cart">Checkout →</a>'));
+                finish(true);
+            })
+            .catch(function (error) {
+                handleCartError(error, t("Could not add to cart", "Could not add to cart"));
+                finish(false);
+            });
+    }
+
+    function postCart(url, payload) {
+        return fetch(url, {
             method: "POST",
             credentials: "same-origin",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "X-Frappe-CSRF-Token": (window.frappe && frappe.csrf_token) || ""
+                "X-Frappe-CSRF-Token": csrf(),
+                Accept: "application/json"
             },
-            body: new URLSearchParams({ item_code: itemCode, qty: 1 })
-        }).then(function(r) {
-            return r.json();
-        }).then(function(res) {
-            const cart = (res && res.message) || {};
-            window.renderShopCartDrawer(cart);
-            if (window.MagalaCart && window.MagalaCart.open) window.MagalaCart.open();
-            return cart;
-        }).catch(function() {
-            // Keep the failure visible rather than silently doing nothing.
-            if (window.MagalaCart && window.MagalaCart.refresh) window.MagalaCart.refresh();
-        });
-    };
-
-    function closeShopCartDrawer() {
-        const drawer = document.getElementById("magala-cart-drawer");
-        if (drawer) {
-            drawer.classList.remove("open");
-            drawer.setAttribute("aria-hidden", "true");
-        }
-        document.body.classList.remove("magala-cart-open");
-        const backdrop = document.getElementById("cart-drawer-backdrop");
-        if (backdrop) {
-            backdrop.classList.remove("open");
-            backdrop.setAttribute("aria-hidden", "true");
-        }
+            body: new URLSearchParams(payload || {})
+        }).then(parseJson);
     }
 
-    function openShopCartDrawer() {
-        const drawer = document.getElementById("magala-cart-drawer");
-        if (!drawer) return false;
-        drawer.classList.add("open");
-        drawer.setAttribute("aria-hidden", "false");
-        document.body.classList.add("magala-cart-open");
-        const backdrop = document.getElementById("cart-drawer-backdrop");
-        if (backdrop) {
-            backdrop.classList.add("open");
-            backdrop.setAttribute("aria-hidden", "false");
-        }
-        if (window.MagalaCart && window.MagalaCart.refresh) {
-            window.MagalaCart.refresh();
-        }
-        return true;
-    }
-
-    window.renderShopCartDrawer = function(cart) {
-        const drawerItems = document.getElementById("cart-drawer-items");
-        const drawerTotal = document.getElementById("cart-drawer-total");
-        const countBadge = document.getElementById("cart-drawer-count");
-        if (!drawerItems) return;
-
-        const items = (cart && cart.items) || [];
-        const count = (cart && cart.count) || items.reduce(function(sum, it) { return sum + Number(it.qty || 0); }, 0);
-        const total = (cart && cart.total) || 0;
-
-        if (countBadge) countBadge.innerText = count;
-        if (drawerTotal) drawerTotal.innerText = Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
-
-        if (!items || items.length === 0) {
-            drawerItems.innerHTML = '<p class="empty-cart-msg" style="padding:30px 16px; text-align:center; color:#94a3b8; font-size:14px;">Your cart is empty. Explore items to add!</p>';
+    function handleCartError(error, fallback) {
+        const message = cleanError(error) || fallback;
+        if (/log in|login required|not permitted/i.test(message)) {
+            window.location.href = "/login?redirect-to=" + encodeURIComponent(window.location.pathname + window.location.search);
             return;
         }
-
-        let html = '<div class="cart-items-list" style="display:flex; flex-direction:column; gap:12px; padding:12px 0;">';
-        items.forEach(function(it) {
-            const itemCode = escapeHtml(it.item_code || "");
-            const itemName = escapeHtml(it.item_name || it.item_code || "Item");
-            const itemImg = escapeHtml(it.image || "/files/ethiobiz_butterfly_logo.png");
-            const itemPrice = Number(it.amount || (Number(it.qty || 1) * Number(it.rate || it.price || 0)) || 0)
-                .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
-            const qty = Number(it.qty || 1);
-            html += `
-                <div class="cart-drawer-card" data-item-code="${itemCode}" style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.12);">
-                    <img src="${itemImg}" alt="${itemName}" style="width:48px; height:48px; object-fit:cover; border-radius:8px; background:#fff;">
-                    <div style="flex:1; min-width:0;">
-                        <div style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${itemName}</div>
-                        <div style="font-size:12px; color:#5eead4; font-weight:800; margin-top:2px;">${itemPrice}</div>
-                        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                            <button type="button" data-cart-action="dec" data-code="${itemCode}" aria-label="Decrease quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">-</button>
-                            <span data-cart-qty style="font-size:12px; font-weight:700; color:#fff;">${qty}</span>
-                            <button type="button" data-cart-action="inc" data-code="${itemCode}" aria-label="Increase quantity" style="width:24px; height:24px; border-radius:4px; border:1px solid #475569; background:#1e293b; color:#fff; cursor:pointer;">+</button>
-                            <button type="button" data-cart-action="remove" data-code="${itemCode}" aria-label="Remove item" style="margin-left:auto; background:none; border:none; color:#f87171; cursor:pointer; font-size:13px;" title="Remove">&#10005;</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        drawerItems.innerHTML = html;
-    };
-
-    function initCart() {
-        const drawer = document.getElementById("magala-cart-drawer");
-        const drawerItems = document.getElementById("cart-drawer-items");
-
-        if (drawerItems) {
-            drawerItems.addEventListener("click", function(e) {
-                const btn = e.target.closest("[data-cart-action]");
-                if (!btn || !window.MagalaCart || !window.MagalaCart.updateQty) return;
-                const code = btn.getAttribute("data-code");
-                const row = btn.closest("[data-item-code]");
-                const qtyText = row ? row.querySelector("[data-cart-qty]") : null;
-                const qty = Number(qtyText ? qtyText.textContent : 1) || 1;
-                let next = qty;
-                if (btn.getAttribute("data-cart-action") === "inc") next = qty + 1;
-                if (btn.getAttribute("data-cart-action") === "dec") next = Math.max(0, qty - 1);
-                if (btn.getAttribute("data-cart-action") === "remove") next = 0;
-
-                btn.disabled = true;
-                window.MagalaCart.updateQty(code, next).finally(function() {
-                    btn.disabled = false;
-                });
-            });
-        }
-
-        const closeBtn = document.getElementById("close-cart-drawer");
-        if (closeBtn) closeBtn.addEventListener("click", closeShopCartDrawer);
-
-        const backdrop = document.getElementById("cart-drawer-backdrop");
-        if (backdrop) backdrop.addEventListener("click", closeShopCartDrawer);
-
-        document.addEventListener("keydown", function(e) {
-            if (e.key === "Escape") closeShopCartDrawer();
-        });
-
-        // Attach the middle navbar cart to the drawer. Never bind to the
-        // duplicate legacy badge or a count span.
-        const navCart = document.querySelector("a.shopping-cart, .shopping-cart a, a.cart-icon, .cart-icon a");
-        const navFallback = document.querySelector(".shopping-cart, .cart-icon");
-        const clickable = navCart || navFallback;
-        if (clickable && drawer) {
-            clickable.addEventListener("click", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (drawer.classList.contains("open")) {
-                    closeShopCartDrawer();
-                } else {
-                    openShopCartDrawer();
-                }
-            });
-        }
-
-        if (window.MagalaCart && window.MagalaCart.refresh) {
-            window.MagalaCart.refresh();
-        } else {
-            // Keep the drawer populated even if the shared controller is not
-            // present on this page build.
-            fetch("/api/method/bismillah_ethiobiz.magala_checkout.get_cart", { credentials: "same-origin" })
-                .then(function(r) { return r.json(); })
-                .then(function(res) { window.renderShopCartDrawer((res && res.message) || {}); })
-                .catch(function() {});
-        }
+        showToast(escapeHtml(message));
     }
 
-    function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    function renderShopCartDrawer(cart) {
+        cart = cart || { items: [], count: 0, total: 0 };
+        const items = Array.isArray(cart.items) ? cart.items : [];
+        const count = Number(cart.count || items.reduce(function (sum, item) {
+            return sum + Number(item.qty || 0);
+        }, 0));
+        const currency = cart.currency || "ETB";
+        const total = Number(cart.total || 0);
+        if (els.cartCount) els.cartCount.textContent = String(count);
+        if (els.drawerCount) els.drawerCount.textContent = String(count);
+        if (els.drawerTotal) els.drawerTotal.textContent = formatMoney(total, currency);
+        if (!els.drawerItems) return;
+        if (!items.length) {
+            els.drawerItems.innerHTML = '<p class="empty-cart-msg">' + escapeHtml(t("Your cart is empty. Explore items to add!", "Your cart is empty. Explore items to add!")) + '</p>';
+            return;
+        }
+        els.drawerItems.innerHTML = items.map(function (item) {
+            const code = escapeHtml(item.item_code || "");
+            const name = escapeHtml(item.item_name || item.item_code || t("Item", "Item"));
+            const qty = Number(item.qty || 1);
+            const amount = Number(item.amount || (Number(item.rate || 0) * qty) || 0);
+            const image = item.image && !PLACEHOLDER_RE.test(item.image)
+                ? '<img src="' + escapeHtml(item.image) + '" alt="' + name + '" loading="lazy" />'
+                : '<span class="mgs-cart-thumb-fallback" aria-hidden="true">' + categoryIcon(item.item_group) + '</span>';
+            return '<div class="cart-drawer-card" data-cart-code="' + code + '">' +
+                image +
+                '<div class="mgs-cart-item-main">' +
+                '<div class="mgs-cart-item-name">' + name + '</div>' +
+                '<div class="mgs-cart-item-price">' + formatMoney(amount, currency) + '</div>' +
+                '<div class="mgs-qty-row">' +
+                '<button type="button" class="mgs-qty-btn" data-cart-action="dec" data-cart-item="' + code +
+                '" aria-label="' + escapeHtml(t("Decrease quantity", "Decrease quantity")) + '">−</button>' +
+                '<span class="mgs-qty-value" data-cart-qty>' + qty + '</span>' +
+                '<button type="button" class="mgs-qty-btn" data-cart-action="inc" data-cart-item="' + code +
+                '" aria-label="' + escapeHtml(t("Increase quantity", "Increase quantity")) + '">+</button>' +
+                '<button type="button" class="mgs-remove-btn" data-cart-action="remove" data-cart-item="' +
+                code + '">' + escapeHtml(t("Remove", "Remove")) + '</button>' +
+                '</div></div></div>';
+        }).join("");
     }
-});
+
+    window.renderShopCartDrawer = renderShopCartDrawer;
+    window.addToCart = addToCart;
+
+    function showToast(html) {
+        if (!els.toast) return;
+        els.toast.innerHTML = html;
+        els.toast.classList.add("is-visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            els.toast.classList.remove("is-visible");
+        }, 3400);
+    }
+
+    /* ---------------------------------------------------------
+       Sticky toolbar
+       --------------------------------------------------------- */
+    function bindSticky() {
+        if (!els.toolbar) return;
+        let ticking = false;
+        const update = function () {
+            els.toolbar.classList.toggle("is-stuck", window.scrollY > 190);
+            ticking = false;
+        };
+        window.addEventListener("scroll", function () {
+            if (!ticking) {
+                window.requestAnimationFrame(update);
+                ticking = true;
+            }
+        }, { passive: true });
+        update();
+    }
+})();
