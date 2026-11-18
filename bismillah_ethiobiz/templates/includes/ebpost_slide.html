@@ -1,0 +1,301 @@
+{#
+  BISMALLAH AR-RAHMAN AR-RAHIM
+  EthioBiz immersive post slide
+  ------------------------------
+  One self-contained slide used by:
+    * www/post.html (server-rendered first slide, SEO + instant paint)
+    * post_api.get_post_slide (JS-prefetched neighbours for vertical swipe)
+
+  Keep every selector scoped under .ebpost-* and avoid ids here: the same
+  markup is cloned many times inside the snap viewport.
+#}
+{% set style = post.style or {} %}
+{% set accent = style.accent_color or '#14b8a6' %}
+{% set accent_rgb = style.accent_rgb or '20,184,166' %}
+{% set grad_start = style.gradient_start or accent %}
+{% set grad_end = style.gradient_end or accent %}
+{% set icon = style.icon or '✨' %}
+{% set type_label = style.label or post.portal_label or post.feed_type %}
+{% set is_external = (post.external_url or '').startswith('http') %}
+{% set cta_external = (post.cta_url or '').startswith('http') %}
+
+<article class="ebpost-slide{% if post.image %} has-media{% else %} no-media{% endif %}{% if not post.found %} is-missing{% endif %}"
+         data-doctype="{{ post.doctype|e }}"
+         data-name="{{ post.name|e }}"
+         data-feed-type="{{ post.feed_type|e }}"
+         data-post-url="{{ (post.share_path or '')|e }}"
+         data-portal-url="{{ (post.portal_url or '/')|e }}"
+         data-title="{{ (post.title or '')|e }}"
+         data-type-label="{{ type_label|e }}"
+         data-type-icon="{{ icon|e }}"
+         data-can-engage="{{ '1' if post.can_engage else '0' }}"
+         data-commentable="{{ '1' if post.commentable else '0' }}"
+         data-forum="{{ '1' if post.is_forum else '0' }}"
+         data-news="{{ '1' if post.is_news else '0' }}"
+         data-is-job="{{ '1' if post.is_job else '0' }}"
+         data-cta-url="{{ (post.cta_url or '')|e }}"
+         data-cta-label="{{ (post.cta_label or '')|e }}"
+         data-likes="{{ post.likes_count or 0 }}"
+         data-comments="{{ post.comments_count or 0 }}"
+         data-reposts="{{ post.reposts_count or 0 }}"
+         style="--eb-accent: {{ accent }}; --eb-accent-rgb: {{ accent_rgb }}; --eb-grad-start: {{ grad_start }}; --eb-grad-end: {{ grad_end }};">
+
+  <div class="ebpost-ambient" aria-hidden="true">
+    <span class="ebpost-orb ebpost-orb-a"></span>
+    <span class="ebpost-orb ebpost-orb-b"></span>
+    <span class="ebpost-orb ebpost-orb-c"></span>
+  </div>
+
+  {% if not post.found %}
+    <div class="ebpost-missing">
+      <span class="ebpost-missing-icon">🧭</span>
+      <span class="ebpost-missing-kicker">{{ labels.feed }}</span>
+      <h1>{{ post.title }}</h1>
+      <p>{{ labels.not_found_text }}</p>
+      <div class="ebpost-cta-row">
+        <a class="ebpost-cta" href="/#live-feed-section">{{ labels.explore }}</a>
+        <a class="ebpost-cta-ghost" href="/">{{ labels.home }}</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="ebpost-slide-grid">
+
+      {# ------------------------------------------------------------------
+         Visual column: full-height artwork, gallery or a designed fallback
+      ------------------------------------------------------------------ #}
+      <section class="ebpost-visual" aria-label="{{ post.title|e }}">
+        {% if post.image %}
+          <figure class="ebpost-media-frame">
+            <span class="ebpost-media-ambient" style="background-image:url('{{ post.image|e }}')" aria-hidden="true"></span>
+            <img class="ebpost-hero-img" src="{{ post.image|e }}" alt="{{ post.title|e }}" loading="eager" decoding="async">
+            <figcaption class="ebpost-media-caption">
+              <span class="ebpost-media-type">{{ icon }} {{ type_label }}</span>
+              {% if post.price %}<span class="ebpost-media-price">{{ post.price }}</span>{% endif %}
+            </figcaption>
+          </figure>
+          {% if post.gallery and post.gallery|length > 1 %}
+            <div class="ebpost-thumbs" role="group" aria-label="{{ labels.gallery }}">
+              {% for shot in post.gallery %}
+                {% if shot.image %}
+                  <button type="button"
+                          class="ebpost-thumb{% if loop.first %} is-active{% endif %}"
+                          data-eb-thumb
+                          data-src="{{ shot.image|e }}"
+                          aria-label="{{ labels.gallery }} {{ loop.index }}">
+                    <img src="{{ shot.image|e }}" alt="" loading="lazy">
+                  </button>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="ebpost-noimage">
+            <span class="ebpost-noimage-ring"></span>
+            <span class="ebpost-noimage-icon">{{ icon }}</span>
+            <span class="ebpost-noimage-kicker">{{ post.portal_label or labels.feed }}</span>
+            <span class="ebpost-noimage-title">{{ post.title }}</span>
+            {% if post.category %}<span class="ebpost-noimage-tag">{{ post.category }}</span>{% endif %}
+            {% if post.price %}<span class="ebpost-noimage-price">{{ post.price }}</span>{% endif %}
+          </div>
+        {% endif %}
+
+        <div class="ebpost-visual-badges">
+          <span class="ebpost-typechip">{{ icon }} {{ type_label }}</span>
+          {% if post.status %}<span class="ebpost-statuschip">{{ post.status }}</span>{% endif %}
+          {% if post.rating %}
+            <span class="ebpost-ratingchip">
+              <span class="ebpost-stars" aria-hidden="true">
+                {% for i in range(5) %}<span class="{% if i < post.rating|round(0, 'floor')|int %}is-full{% endif %}">★</span>{% endfor %}
+              </span>
+              {{ '%.1f'|format(post.rating) }}
+              {% if post.total_reviews %}<span class="ebpost-rating-count">({{ post.total_reviews }})</span>{% endif %}
+            </span>
+          {% endif %}
+        </div>
+      </section>
+
+      {# ------------------------------------------------------------------
+         Content column
+      ------------------------------------------------------------------ #}
+      <section class="ebpost-content">
+        <div class="ebpost-author">
+          {% if post.author_avatar %}
+            <img class="ebpost-avatar" src="{{ post.author_avatar|e }}" alt="" loading="lazy">
+          {% else %}
+            <span class="ebpost-avatar ebpost-avatar-fallback">{{ (post.author_name or post.portal_label or 'E')[0]|upper }}</span>
+          {% endif %}
+          <span class="ebpost-author-copy">
+            <span class="ebpost-author-name">{{ post.author_name or post.portal_label or 'EthioBiz' }}</span>
+            <span class="ebpost-author-sub">
+              {% if post.author_company %}{{ post.author_company }}{% elif post.author_handle %}{{ post.author_handle }}{% else %}{{ post.portal_label }}{% endif %}
+              {% if post.time_ago %}<span class="ebpost-dot">·</span>{{ post.time_ago }}{% endif %}
+            </span>
+          </span>
+          <span class="ebpost-verified" title="{{ labels.verified }}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12.5l2 2 4-4.5M12 2.5l2.4 2 3.1-.2.9 3 2.6 1.8-1.2 2.9 1.2 2.9-2.6 1.8-.9 3-3.1-.2-2.4 2-2.4-2-3.1.2-.9-3L2.6 15l1.2-2.9L2.6 9.2l2.6-1.8.9-3 3.1.2z"/></svg>
+            {{ labels.verified }}
+          </span>
+        </div>
+
+        {% if post.kicker %}<p class="ebpost-kicker">{{ post.kicker }}</p>{% endif %}
+        <h1 class="ebpost-title">{{ post.title }}</h1>
+        {% if post.subtitle %}<p class="ebpost-subtitle">{{ post.subtitle }}</p>{% endif %}
+
+        {% if post.body_html %}
+          <div class="ebpost-bodywrap">
+            <div class="ebpost-body is-collapsed" data-eb-body>{{ post.body_html|safe }}</div>
+            <div class="ebpost-body-fade" aria-hidden="true"></div>
+            <button type="button" class="ebpost-readmore" data-eb-readmore>
+              <span>{{ labels.read_full }}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+          <template class="ebpost-full-body">{{ post.body_html|safe }}</template>
+        {% endif %}
+
+        {% if post.highlights %}
+          <div class="ebpost-highlights" aria-label="{{ labels.highlights }}">
+            {% for item in post.highlights %}
+              <span class="ebpost-highlight"><span>{{ item.icon }}</span>{{ item.text }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if post.specs %}
+          <div class="ebpost-specs" aria-label="{{ labels.details }}">
+            {% for spec in post.specs %}
+              <div class="ebpost-spec">
+                <span class="ebpost-spec-label">{{ spec.label }}</span>
+                <span class="ebpost-spec-value">{{ spec.description }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if post.offers %}
+          <div class="ebpost-offers" aria-label="{{ labels.details }}">
+            {% for offer in post.offers %}
+              <div class="ebpost-offer">
+                <span class="ebpost-offer-title">{{ offer.offer_title }}</span>
+                {% if offer.offer_subtitle %}<span class="ebpost-offer-sub">{{ offer.offer_subtitle }}</span>{% endif %}
+                {% if offer.offer_details %}<span class="ebpost-offer-detail">{{ offer.offer_details }}</span>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if post.reviews %}
+          <div class="ebpost-reviews" aria-label="{{ labels.reviews }}">
+            <div class="ebpost-section-head">
+              <h2>{{ labels.reviews }}</h2>
+              {% if post.total_reviews %}<span>{{ post.total_reviews }}</span>{% endif %}
+            </div>
+            {% for review in post.reviews[:4] %}
+              <article class="ebpost-review">
+                <header>
+                  <span class="ebpost-review-avatar">{{ (review.user_name or 'V')[0]|upper }}</span>
+                  <span class="ebpost-review-who">
+                    <span class="ebpost-review-name">{{ review.user_name }}</span>
+                    {% if review.verified_purchase %}<span class="ebpost-review-verified">{{ labels.verified_customer }}</span>{% endif %}
+                  </span>
+                  <span class="ebpost-review-stars" aria-label="{{ review.rating_stars }} / 5">
+                    {% for i in range(5) %}<span class="{% if i < review.rating_stars %}is-full{% endif %}">★</span>{% endfor %}
+                  </span>
+                </header>
+                {% if review.review_title %}<h3>{{ review.review_title }}</h3>{% endif %}
+                <p>{{ review.comment }}</p>
+                {% if review.seller_response %}
+                  <div class="ebpost-seller-reply">
+                    <span>{{ labels.seller_reply }}</span>
+                    <p>{{ review.seller_response }}</p>
+                  </div>
+                {% endif %}
+                {% if review.date_label %}<time>{{ review.date_label }}</time>{% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if post.replies %}
+          <div class="ebpost-replies" aria-label="{{ labels.replies_title }}">
+            <div class="ebpost-section-head">
+              <h2>{{ labels.replies_title }}</h2>
+              <button type="button" class="ebpost-textbtn" data-eb-comment>{{ labels.see_all_reviews }}</button>
+            </div>
+            {% for reply in post.replies[:3] %}
+              <article class="ebpost-reply">
+                <header>
+                  {% if reply.avatar %}
+                    <img src="{{ reply.avatar|e }}" alt="" loading="lazy">
+                  {% else %}
+                    <span class="ebpost-reply-avatar">{{ (reply.author or 'W')[0]|upper }}</span>
+                  {% endif %}
+                  <span class="ebpost-reply-author">{{ reply.author }}</span>
+                  <time>{{ reply.time_ago }}</time>
+                </header>
+                <div class="ebpost-reply-body">{{ reply.content|safe }}</div>
+              </article>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="ebpost-cta-row">
+          {% if post.is_job %}
+            <button type="button" class="ebpost-cta" data-eb-apply
+                    data-job-name="{{ post.name|e }}"
+                    data-job-title="{{ post.title|e }}">
+              <span>{{ post.cta_icon }}</span>{{ post.cta_label }}
+            </button>
+          {% else %}
+            <a class="ebpost-cta"
+               href="{{ post.cta_url|e }}"
+               {% if cta_external or is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              <span>{{ post.cta_icon }}</span>{{ post.cta_label }}
+            </a>
+          {% endif %}
+          <a class="ebpost-cta-ghost" href="{{ post.portal_url|e }}">
+            {{ labels.open_portal }} {{ post.portal_label }}
+          </a>
+        </div>
+        {% if post.cta_note %}<p class="ebpost-cta-note">{{ post.cta_note }}</p>{% endif %}
+      </section>
+    </div>
+
+    {# ------------------------------------------------------------------
+       Sticky engagement rail
+    ------------------------------------------------------------------ #}
+    <footer class="ebpost-actionbar">
+      <button type="button"
+              class="ebpost-action{% if post.viewer_liked %} is-on{% endif %}"
+              data-eb-like
+              aria-label="{{ labels.like }}"
+              aria-pressed="{{ 'true' if post.viewer_liked else 'false' }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="ebpost-action-count ebpost-like-count">{{ post.likes_count or 0 }}</span>
+      </button>
+      <button type="button" class="ebpost-action" data-eb-comment aria-label="{{ labels.comment }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg>
+        <span class="ebpost-action-count ebpost-comment-count">{{ post.comments_count or 0 }}</span>
+      </button>
+      <button type="button"
+              class="ebpost-action{% if post.viewer_reposted %} is-on{% endif %}"
+              data-eb-repost
+              aria-label="{{ labels.repost }}"
+              aria-pressed="{{ 'true' if post.viewer_reposted else 'false' }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span class="ebpost-action-count ebpost-repost-count">{{ post.reposts_count or 0 }}</span>
+      </button>
+      <button type="button" class="ebpost-action" data-eb-share aria-label="{{ labels.share }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+      </button>
+      <button type="button" class="ebpost-action" data-eb-analyze aria-label="{{ labels.analyze }}" title="{{ labels.analyze }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M4.2 7.2l2.1 2.1M17.7 14.7l2.1 2.1M3 12h3M18 12h3M4.2 16.8l2.1-2.1M17.7 9.3l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+      </button>
+      <span class="ebpost-action-spacer"></span>
+      <span class="ebpost-swipe-hint">{{ labels.swipe_next }}</span>
+      <button type="button" class="ebpost-action ebpost-action-next" data-eb-next aria-label="{{ labels.next }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </button>
+    </footer>
+  {% endif %}
+</article>

@@ -366,7 +366,7 @@ def get_infinite_feed(start=0, limit=12, filter_type=None, search=None):
                     "icon": "📰",
                     "action_label": "Read Article →",
                     "action_url": n.get("url") or "/news",
-                    "post_url": n.get("url") or "/news",
+                    "post_url": "/post?doctype=News&name=%s&ft=news" % quote(str(n.get("id") or n.get("url") or "")),
                     "is_booking": False,
                     "created_at": frappe.utils.now()
                 })
@@ -463,13 +463,16 @@ def get_home_recommendations():
         for it in items:
             prices = frappe.get_all("Item Price", filters={"item_code": it.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             pr_str = f"{prices[0].price_list_rate:,.0f} {prices[0].currency}" if prices else "Available"
+            post_url = f"/post?doctype=Item&name={quote(str(it.name))}&ft=products"
             recs.append({
                 "badge": f"🛍️ {it.item_group or 'Product'}",
                 "stats": "⭐ 4.9 • Top Rated",
                 "title": it.item_name,
                 "desc": f"Verified product from {it.company or 'EthioBiz Merchant'}",
                 "price": pr_str,
-                "action_url": f"/post?doctype=Item&name={it.name}"
+                "feed_type": "products",
+                "post_url": post_url,
+                "action_url": post_url
             })
 
     # 2. Top jobs
@@ -489,7 +492,9 @@ def get_home_recommendations():
                 "title": j.job_title,
                 "desc": f"Opportunity at {j.company or 'EthioBiz Partner'} ({j.location or 'Addis Ababa'})",
                 "price": sal,
-                "action_url": f"/post?doctype=Job%20Opening&name={j.name}"
+                "feed_type": "jobs",
+                "post_url": f"/post?doctype=Job%20Opening&name={quote(str(j.name))}&ft=jobs",
+                "action_url": f"/post?doctype=Job%20Opening&name={quote(str(j.name))}&ft=jobs"
             })
 
     # 3. Top services (with safety try-except and correct schema fields)
@@ -513,7 +518,9 @@ def get_home_recommendations():
                     "title": s_title,
                     "desc": f"Delivered by {s_comp}",
                     "price": s_price,
-                    "action_url": f"/post?doctype=BizService%20Listing&name={s.name}"
+                    "feed_type": "bizservices",
+                    "post_url": f"/post?doctype=BizService%20Listing&name={quote(str(s.name))}&ft=bizservices",
+                    "action_url": f"/post?doctype=BizService%20Listing&name={quote(str(s.name))}&ft=bizservices"
                 })
         except Exception as e:
             frappe.log_error(f"Error fetching BizService recommendations: {str(e)}")
@@ -527,6 +534,8 @@ def get_home_recommendations():
                 "title": "Single-Origin Yirgacheffe Specialty Coffee",
                 "desc": "Freshly roasted artisanal Ethiopian beans from Habesha Coffee Roasters",
                 "price": "850 ETB",
+                "feed_type": "products",
+                "post_url": "/shop",
                 "action_url": "/shop"
             },
             {
@@ -535,6 +544,8 @@ def get_home_recommendations():
                 "title": "Senior Full-Stack Cloud Engineer",
                 "desc": "Exciting high-growth opportunity at EthioBiz Cloud Infrastructure",
                 "price": "Competitive",
+                "feed_type": "jobs",
+                "post_url": "/jobs",
                 "action_url": "/jobs"
             },
             {
@@ -543,6 +554,8 @@ def get_home_recommendations():
                 "title": "Enterprise Cloud ERP Implementation & Training",
                 "desc": "Hands-on rollout by certified DOBiz SmartERP consultants",
                 "price": "Book Assessment",
+                "feed_type": "bizservices",
+                "post_url": "/dobiz",
                 "action_url": "/dobiz"
             },
             {
@@ -551,6 +564,8 @@ def get_home_recommendations():
                 "title": "Ethiopian E-Invoicing & VAT Compliance Mastery",
                 "desc": "Comprehensive digital finance certification for local businesses",
                 "price": "Free Enrollment",
+                "feed_type": "dagu",
+                "post_url": "/courses",
                 "action_url": "/courses"
             },
             {
@@ -559,6 +574,8 @@ def get_home_recommendations():
                 "title": "Axumite & Lalibela Architectural Wisdom",
                 "desc": "Reflections on ancient Ethiopian engineering, faith, and unity",
                 "price": "Read Free",
+                "feed_type": "tibeb",
+                "post_url": "/tibeb",
                 "action_url": "/tibeb"
             }
         ]

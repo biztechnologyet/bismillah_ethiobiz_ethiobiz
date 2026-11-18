@@ -1907,6 +1907,19 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             else:
                 it["open_url"] = "/"
 
+        # Internal single-post permalink. The card body opens this rich page,
+        # while the CTA button keeps using action_url so "Order Product",
+        # "Apply Now", "Join Topic" and friends still land on their native
+        # destinations (the published product page, /jobs?job=..., /forum?...).
+        if it.get("doctype") and it.get("docname"):
+            it["post_url"] = "/post?doctype=%s&name=%s&ft=%s" % (
+                quote(str(it["doctype"]), safe=""),
+                quote(str(it["docname"]), safe=""),
+                quote(str(it.get("feed_type") or ""), safe=""),
+            )
+        else:
+            it["post_url"] = it.get("open_url") or it.get("action_url") or "/"
+
         # User Affinity (0.0 to 1.0)
         cat_aff = cat_affinities.get(it.get("category", ""), 0.05)
         type_aff = type_affinities.get(it.get("type", ""), 0.1)

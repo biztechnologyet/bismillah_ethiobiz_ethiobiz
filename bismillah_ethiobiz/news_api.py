@@ -327,6 +327,17 @@ def get_live_news(categories=None, limit=12, page=1):
         except Exception:
             pass
 
+    # Keep a per-id lookup so /post can render one story without re-fetching
+    # every RSS source. One hour is enough for a permalink opened from the feed.
+    try:
+        for _item in cached_pool:
+            if _item.get("id"):
+                frappe.cache().set_value(
+                    "ebz_news_item_" + str(_item["id"]), _item, expires_in_sec=3600
+                )
+    except Exception:
+        pass
+
     # Genuine pagination
     start_idx = (page - 1) * limit
     end_idx = start_idx + limit
@@ -341,6 +352,43 @@ def get_live_news(categories=None, limit=12, page=1):
         "has_more": end_idx < len(cached_pool),
         "cached": bool(cached_pool)
     }
+
+@frappe.whitelist(allow_guest=True)
+def get_news_item(item_id=None):
+    """Return one live-news story by id for the single-post permalink.
+
+    Live news has no local doctype: the homepage receives the RSS payload
+    directly. This lookup reuses the cached pool so clicking a news card body
+    can open a real EthioBiz permalink instead of jumping straight off-site.
+    """
+    item_id = str(item_id or "").strip()
+    if not item_id:
+        return {"status": "error", "message": "News id is required"}
+
+    item = None
+    try:
+        item = frappe.cache().get_value("ebz_news_item_" + item_id)
+    except Exception:
+        item = None
+
+    if not item:
+        # Rebuild the default pool; this also repopulates the per-id cache.
+        try:
+            get_live_news(limit=50, page=1)
+            item = frappe.cache().get_value("ebz_news_item_" + item_id)
+        except Exception:
+            item = None
+
+    if not item:
+        for fallback in FALLBACK_NEWS:
+            if str(fallback.get("id")) == item_id:
+                item = fallback
+                break
+
+    if not item:
+        return {"status": "error", "message": "News story not found"}
+    return {"status": "success", "news": item}
+
 
 @frappe.whitelist()
 def save_user_news_preferences(categories):

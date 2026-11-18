@@ -405,9 +405,17 @@
     .search-group-title { font-size: 11px; font-weight: 900; color: var(--ethio-teal); padding: 6px 12px; text-transform: uppercase; }
     .search-suggestion-item {
       display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: var(--ethio-radius-sm);
-      text-decoration: none !important; color: var(--ethio-text-main); font-size: 13.5px; font-weight: 700; transition: background 0.15s ease;
+      text-decoration: none !important; color: var(--ethio-text-main); font-size: 13.5px; font-weight: 700; transition: background 0.15s ease, border-color 0.15s ease;
+      --feed-accent: #0d9488; --feed-accent-rgb: 13, 148, 136;
+      border-left: 3px solid var(--feed-accent);
+      margin-bottom: 2px;
+      background: linear-gradient(90deg, rgba(var(--feed-accent-rgb), .07), rgba(255, 255, 255, .92) 58%);
     }
-    .search-suggestion-item:hover { background: rgba(240, 253, 250, 0.95); color: var(--ethio-teal); }
+    .search-suggestion-item:hover {
+      background: linear-gradient(90deg, rgba(var(--feed-accent-rgb), .17), rgba(255, 255, 255, .97) 62%);
+      color: #0f172a;
+    }
+    .search-suggestion-item .sugg-brand { font-size: 11px; font-weight: 900; color: var(--feed-accent); white-space: nowrap; }
 
     /* ================= 4. HERO SECTION - FULL-SCREEN EDGE-TO-EDGE ================= */
     .hero-masterpiece {
@@ -888,17 +896,28 @@
     .for-you-slider-track::-webkit-scrollbar { display: none; }
 
     .for-you-card {
+      --feed-accent: #0d9488; --feed-accent-rgb: 13, 148, 136;
+      --feed-grad-start: #0f766e; --feed-grad-end: #14b8a6; --feed-on-accent: #ffffff;
       flex: 0 0 280px; scroll-snap-align: start;
       background: var(--ethio-glass-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1.5px solid var(--ethio-glass-border); border-radius: var(--ethio-radius-md); padding: 16px;
+      border: 1.5px solid rgba(var(--feed-accent-rgb), .28); border-top: 3px solid var(--feed-accent);
+      border-radius: var(--ethio-radius-md); padding: 16px;
       text-decoration: none !important; color: inherit; display: flex; flex-direction: column; justify-content: space-between;
       transition: all 0.25s ease; box-shadow: var(--ethio-glass-shadow); position: relative; overflow: hidden;
     }
-    .for-you-card:hover { transform: translateY(-3px); background: var(--ethio-glass-card-elevated); box-shadow: var(--ethio-card-hover); border-color: var(--ethio-teal); }
-    .for-you-card-genre { font-size: 11px; font-weight: 900; color: var(--ethio-teal); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+    .for-you-card::before {
+      content: ''; position: absolute; inset: 0 0 auto 0; height: 4px;
+      background: linear-gradient(90deg, var(--feed-grad-start), var(--feed-grad-end)); opacity: .95;
+    }
+    .for-you-card:hover {
+      transform: translateY(-3px); background: var(--ethio-glass-card-elevated);
+      box-shadow: 0 18px 38px rgba(var(--feed-accent-rgb), .28);
+      border-color: var(--feed-accent);
+    }
+    .for-you-card-genre { font-size: 11px; font-weight: 900; color: var(--feed-accent); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .for-you-card-title { font-size: 14.5px; font-weight: 900; color: var(--ethio-text-heading); margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .for-you-card-desc { font-size: 12.5px; color: var(--ethio-text-muted); line-height: 1.5; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 600; }
-    .for-you-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(0, 0, 0, 0.06); font-size: 12.5px; font-weight: 800; color: var(--ethio-teal); }
+    .for-you-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(var(--feed-accent-rgb), .18); font-size: 12.5px; font-weight: 800; color: var(--feed-accent); }
 
     /* ================= 8. LIVE FEED FILTER TOOLBAR ================= */
     .stream-filter-shell {
@@ -945,12 +964,25 @@
     .stream-filter-bar::-webkit-scrollbar-thumb { background: rgba(0, 128, 128, 0.35); border-radius: 4px; }
 
     .stream-filter-btn {
-      padding: 6px 14px; border-radius: 20px; border: 1px solid transparent; background: rgba(241, 245, 249, 0.75);
+      --feed-accent: #0d9488; --feed-accent-rgb: 13, 148, 136;
+      --feed-grad-start: #0f766e; --feed-grad-end: #14b8a6; --feed-on-accent: #ffffff;
+      padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(var(--feed-accent-rgb), .30);
+      background: linear-gradient(135deg, rgba(var(--feed-accent-rgb), .11), rgba(255, 255, 255, .94));
       color: #1e293b; font-size: 12px; font-weight: 800; font-family: inherit; cursor: pointer; transition: all 0.2s ease;
       white-space: nowrap; flex: 0 0 auto; scroll-snap-align: start;
+      box-shadow: 0 2px 8px rgba(var(--feed-accent-rgb), .09);
     }
-    .stream-filter-btn.active, .stream-filter-btn:hover {
-      background: linear-gradient(135deg, var(--ethio-teal) 0%, var(--ethio-teal-light) 100%); color: #ffffff !important;
+    .stream-filter-btn:hover {
+      border-color: var(--feed-accent);
+      background: rgba(var(--feed-accent-rgb), .17);
+      color: #0f172a;
+      transform: translateY(-1px);
+    }
+    .stream-filter-btn.active {
+      background: linear-gradient(135deg, var(--feed-grad-start) 0%, var(--feed-grad-end) 100%);
+      color: var(--feed-on-accent) !important;
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(var(--feed-accent-rgb), .34);
     }
 
     .subfilters-container {
@@ -1332,16 +1364,26 @@
       display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px;
     }
     .ethio-feed-cat {
-      min-height: 46px; border-radius: 14px; border: 1.5px solid rgba(13, 148, 136, 0.18);
-      background: rgba(255, 255, 255, 0.92); color: #123b3f;
+      --feed-accent: #0d9488; --feed-accent-rgb: 13, 148, 136;
+      --feed-grad-start: #0f766e; --feed-grad-end: #14b8a6; --feed-on-accent: #ffffff;
+      min-height: 46px; border-radius: 14px; border: 1.5px solid rgba(var(--feed-accent-rgb), .22);
+      background: linear-gradient(135deg, rgba(var(--feed-accent-rgb), .09), rgba(255, 255, 255, .94));
+      color: #123b3f;
       font-size: 12.5px; font-weight: 800; font-family: inherit; text-align: left;
-      padding: 9px 12px; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      padding: 9px 12px; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
     }
     .ethio-feed-cat:hover,
-    .ethio-feed-cat:focus-visible { background: #ecfdf5; border-color: #14b8a6; outline: none; }
+    .ethio-feed-cat:focus-visible {
+      background: rgba(var(--feed-accent-rgb), .16);
+      border-color: var(--feed-accent);
+      transform: translateY(-1px);
+      outline: none;
+    }
     .ethio-feed-cat.is-active {
-      background: linear-gradient(135deg, #0f766e, #0d9488); color: #ffffff;
-      border-color: #0f766e; box-shadow: 0 8px 18px rgba(13, 148, 136, 0.25);
+      background: linear-gradient(135deg, var(--feed-grad-start), var(--feed-grad-end));
+      color: var(--feed-on-accent);
+      border-color: transparent;
+      box-shadow: 0 8px 18px rgba(var(--feed-accent-rgb), .28);
     }
     #live-feed-section { scroll-margin-top: 86px; }
 
@@ -1641,21 +1683,37 @@
     </div>
     <div class="search-suggestions-dropdown" id="search-suggestions">
       <div class="search-group-title" data-i18n="search-sugg-title">⚡ Instant Ecosystem Suggestions</div>
-      <a href="/shop" class="search-suggestion-item">
+      <a href="/shop" class="search-suggestion-item" data-feed-type="products">
         <span data-i18n="sugg-shop">🛍️ Trending Products &amp; Goods</span>
-        <span data-i18n="sugg-brand-shop" style="font-size:11px; color:#0d9488;">Dikko Shop ➔</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-shop">Dikko Shop ➔</span>
       </a>
-      <a href="/jobs" class="search-suggestion-item">
+      <a href="/jobs" class="search-suggestion-item" data-feed-type="jobs">
         <span data-i18n="sugg-jobs">💼 Verified Ethiopian Job Openings</span>
-        <span data-i18n="sugg-brand-jobs" style="font-size:11px; color:#0d9488;">Oosoo Jobs ➔</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-jobs">Oosoo Jobs ➔</span>
       </a>
-      <a href="/bizservices" class="search-suggestion-item">
+      <a href="/bizservices" class="search-suggestion-item" data-feed-type="bizservices">
         <span data-i18n="sugg-services">⚡ Instant BizServices &amp; Bookings</span>
-        <span data-i18n="sugg-brand-services" style="font-size:11px; color:#0d9488;">BizServices ➔</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-services">BizServices ➔</span>
       </a>
-      <a href="/courses" class="search-suggestion-item">
+      <a href="/bizhealth" class="search-suggestion-item" data-feed-type="bizhealth">
+        <span data-i18n="sugg-health">🩺 Verified Doctors &amp; Clinics</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-health">BizHealth ➔</span>
+      </a>
+      <a href="/courses" class="search-suggestion-item" data-feed-type="dagu">
         <span data-i18n="sugg-courses">🎓 LMS Academy &amp; DOBiz ERP Courses</span>
-        <span data-i18n="sugg-brand-courses" style="font-size:11px; color:#0d9488;">Dagu Learning ➔</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-courses">Dagu Learning ➔</span>
+      </a>
+      <a href="/tibeb" class="search-suggestion-item" data-feed-type="tibeb">
+        <span data-i18n="sugg-tibeb">📖 Tibeb Wisdom &amp; Heritage</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-tibeb">Tibeb ➔</span>
+      </a>
+      <a href="/social" class="search-suggestion-item" data-feed-type="social">
+        <span data-i18n="sugg-social">💬 Afocha Social &amp; Community Stories</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-social">Afocha Social ➔</span>
+      </a>
+      <a href="/forum" class="search-suggestion-item" data-feed-type="forum">
+        <span data-i18n="sugg-forum">🗣️ Walta Forum Discussions</span>
+        <span class="sugg-brand" data-i18n="sugg-brand-forum">Walta Forum ➔</span>
       </a>
     </div>
   </section>
@@ -2547,11 +2605,19 @@ window.ethioBizTranslations = {
     "sugg-shop": "🛍️ Trending Products & Goods",
     "sugg-jobs": "💼 Verified Ethiopian Job Openings",
     "sugg-services": "⚡ Instant BizServices & Bookings",
+    "sugg-health": "🩺 Verified Doctors & Clinics",
     "sugg-courses": "🎓 LMS Academy & DOBiz ERP Courses",
+    "sugg-tibeb": "📖 Tibeb Wisdom & Heritage",
+    "sugg-social": "💬 Afocha Social & Community Stories",
+    "sugg-forum": "🗣️ Walta Forum Discussions",
     "sugg-brand-shop": "Dikko Shop ➔",
     "sugg-brand-jobs": "Oosoo Jobs ➔",
     "sugg-brand-services": "BizServices ➔",
+    "sugg-brand-health": "BizHealth ➔",
     "sugg-brand-courses": "Dagu Learning ➔",
+    "sugg-brand-tibeb": "Tibeb ➔",
+    "sugg-brand-social": "Afocha Social ➔",
+    "sugg-brand-forum": "Walta Forum ➔",
     "floating-live-feed-label": "Live Feed",
     "feed-fab-aria": "Search and browse live feed categories",
     "feed-live-aria": "Go to Live Feed",
@@ -2786,11 +2852,19 @@ window.ethioBizTranslations = {
     "sugg-shop": "🛍️ ተወዳጅ ምርቶች እና ሸቀጦች",
     "sugg-jobs": "💼 የተረጋገጡ ክፍት የስራ ቦታዎች",
     "sugg-services": "⚡ ፈጣን የቢዝሰርቪስ ቀጠሮዎች",
+    "sugg-health": "🩺 የተረጋገጡ ሐኪሞች እና ክሊኒኮች",
     "sugg-courses": "🎓 የLMS አካዳሚ እና የDOBiz ERP ኮርሶች",
+    "sugg-tibeb": "📖 የጥበብ እና የቅርስ ትምህርት",
+    "sugg-social": "💬 የአፎቻ ማህበራዊ ታሪኮች",
+    "sugg-forum": "🗣️ የዋልታ ፎረም ውይይቶች",
     "sugg-brand-shop": "ዲኮ ሾፕ ➔",
     "sugg-brand-jobs": "ኦሶ ስራዎች ➔",
     "sugg-brand-services": "ቢዝሰርቪስ ➔",
+    "sugg-brand-health": "ቢዝሄልዝ ➔",
     "sugg-brand-courses": "ዳጉ ትምህርት ➔",
+    "sugg-brand-tibeb": "ጥበብ ➔",
+    "sugg-brand-social": "አፎቻ ሶሻል ➔",
+    "sugg-brand-forum": "ዋልታ ፎረም ➔",
     "floating-live-feed-label": "የቀጥታ ዥረት",
     "feed-fab-aria": "ፍለጋ እና የቀጥታ ፊድ ምድቦችን ያስሱ",
     "feed-live-aria": "ወደ ቀጥታ ዥረት ይሂዱ",
@@ -3089,6 +3163,13 @@ checkFirstVisitLanguageModal();
       btn.setAttribute('role', 'option');
       btn.setAttribute('aria-selected', source.classList.contains('active') ? 'true' : 'false');
       btn.dataset.filter = source.getAttribute('data-filter') || 'all';
+      // Copy the already-painted feed colours from the toolbar button. The
+      // floating sheet lives in a different IIFE, so reading the computed
+      // custom properties avoids reaching across scopes.
+      ['--feed-accent', '--feed-accent-rgb', '--feed-grad-start', '--feed-grad-end', '--feed-on-accent'].forEach(function(prop) {
+        const value = source.style.getPropertyValue(prop);
+        if (value) btn.style.setProperty(prop, value);
+      });
       btn.textContent = source.textContent.trim();
       btn.addEventListener('click', function() { selectCategory(btn.dataset.filter); });
       cats.appendChild(btn);
@@ -3471,8 +3552,9 @@ checkFirstVisitLanguageModal();
     sliderTrack.innerHTML = '';
     cards.forEach(item => {
       const card = document.createElement('a');
-      card.href = item.action_url || '/shop';
+      card.href = item.post_url || item.action_url || '/shop';
       card.className = 'for-you-card';
+      card.dataset.feedType = String(item.feed_type || 'all').toLowerCase();
       const statsText = (item.stats || '⭐ 4.9').split('•')[0];
       card.innerHTML = `
         <div class="for-you-card-genre"><span>${item.badge || 'Featured'}</span> <span>${statsText}</span></div>
@@ -3482,6 +3564,8 @@ checkFirstVisitLanguageModal();
       `;
       sliderTrack.appendChild(card);
     });
+    // Paint with the live Theme colours as soon as the cards exist.
+    if (window.EthioBizFeedPaint) window.EthioBizFeedPaint();
   }
 
   function fetchRecommendations() {
@@ -4159,6 +4243,50 @@ checkFirstVisitLanguageModal();
     });
   }
 
+  // Toolbar filter keys differ from feed_type keys for products ("shop" vs
+  // "products"). This map is the single translation used by every surface that
+  // paints a category control: the toolbar, the floating sheet, and search.
+  const FILTER_FEED_TYPE = {
+    all: 'all', shop: 'products', products: 'products', jobs: 'jobs',
+    bizservices: 'bizservices', bizhealth: 'bizhealth', bizhome: 'bizhome',
+    bizfix: 'bizfix', dagu: 'dagu', tibeb: 'tibeb', social: 'social',
+    forum: 'forum', news: 'news', ad: 'ad'
+  };
+
+  function feedTypeForFilter(filter) {
+    return FILTER_FEED_TYPE[String(filter || 'all').toLowerCase()] || 'all';
+  }
+
+  function paintFilterButtons() {
+    document.querySelectorAll('.stream-filter-btn').forEach(function(btn) {
+      const ft = feedTypeForFilter(btn.getAttribute('data-filter'));
+      btn.dataset.feedType = ft;
+      applyFeedStyle(btn, feedStyleFor({ feed_type: ft }));
+    });
+  }
+
+  function paintSearchSuggestions() {
+    document.querySelectorAll('.search-suggestion-item[data-feed-type]').forEach(function(el) {
+      applyFeedStyle(el, feedStyleFor({ feed_type: el.getAttribute('data-feed-type') }));
+    });
+  }
+
+  function paintExistingRecommendations() {
+    document.querySelectorAll('.for-you-card[data-feed-type]').forEach(function(card) {
+      applyFeedStyle(card, feedStyleFor({ feed_type: card.getAttribute('data-feed-type') }));
+    });
+  }
+
+  function paintAllFeedSurfaces() {
+    paintExistingFeedCards();
+    paintFilterButtons();
+    paintSearchSuggestions();
+    paintExistingRecommendations();
+  }
+  // Recommendations render in a different IIFE; this hook lets that code ask
+  // for a repaint as soon as its cards exist.
+  window.EthioBizFeedPaint = paintAllFeedSurfaces;
+
   function loadFeedStyles() {
     fetch('/api/method/bismillah_ethiobiz.home_api.get_feed_sources', { credentials: 'same-origin' })
       .then(function(r) { return r.json(); })
@@ -4166,12 +4294,14 @@ checkFirstVisitLanguageModal();
         const message = (res && res.message) || {};
         if (message.styles && typeof message.styles === 'object') {
           FEED_STYLE_MAP = message.styles;
-          paintExistingFeedCards();
         }
+        paintAllFeedSurfaces();
       })
-      .catch(function() { /* fallbacks keep every card coloured */ });
+      .catch(function() { paintAllFeedSurfaces(); /* fallbacks keep every surface coloured */ });
   }
   loadFeedStyles();
+  paintFilterButtons();
+  paintSearchSuggestions();
 
   function renderFeedCard(item) {
     const card = document.createElement('article');
@@ -4181,6 +4311,9 @@ checkFirstVisitLanguageModal();
     const content = item.content || item.desc || '';
     const actionUrl = safeUrl(item.action_url, '/shop');
     const openUrl = safeUrl(item.open_url, actionUrl || '/shop');
+    // Card body opens the EthioBiz single-post page; the CTA keeps its native
+    // destination. Older payloads without post_url fall back to open_url.
+    const postUrl = safeUrl(item.post_url, '');
     const badgeClass = item.badge_class || 'badge-product';
     const likes = Number.isFinite(Number(item.likes_count)) ? Number(item.likes_count) : 0;
     const commentCount = Number.isFinite(Number(item.comments_count)) ? Number(item.comments_count) : 0;
@@ -4226,6 +4359,7 @@ checkFirstVisitLanguageModal();
     card.dataset.commentable = commentable ? '1' : '0';
     card.dataset.feedType = String(item.feed_type || item.source_type || 'all').toLowerCase();
     card.dataset.openUrl = openUrl;
+    card.dataset.postUrl = postUrl;
     applyFeedStyle(card, feedStyleFor(item));
 
     const headerIsRepost = isRepost && !!repostInfo;
@@ -4290,10 +4424,9 @@ checkFirstVisitLanguageModal();
     card.addEventListener('click', (e) => {
       if (e.target.closest('.engage-btn, .feed-thread, .feed-card-action-footer, button, input, textarea, .feed-expand-btn')) return;
       e.preventDefault();
-      // Server picks the correct destination per card family: the published
-      // single item page for products, the post page for discussions, and the
-      // vertical's own action URL everywhere else.
-      const destination = card.dataset.openUrl || '';
+      // Card body opens the redesigned single-post page. CTAs inside the
+      // footer/header keep their native destinations.
+      const destination = card.dataset.postUrl || card.dataset.openUrl || '';
       if (destination) {
         window.location.href = destination;
         return;
@@ -4339,6 +4472,9 @@ checkFirstVisitLanguageModal();
                 badge: `${n.icon || '📰'} ${n.category}`,
                 badge_class: 'badge-news',
                 feed_type: 'news',
+                doctype: 'News',
+                docname: n.id || n.url,
+                post_url: '/post?doctype=News&name=' + encodeURIComponent(n.id || n.url || '') + '&ft=news',
                 action_url: n.url,
                 open_url: n.url,
                 image_url: n.image_url,

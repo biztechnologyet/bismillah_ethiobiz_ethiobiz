@@ -1,769 +1,2491 @@
 {% extends "templates/web.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ post.meta_title or post.title }}{% endblock %}
 
 {% block page_content %}
-<meta name="csrf-token" content="{{ frappe.session.csrf_token }}">
-<script>window.csrf_token = "{{ frappe.session.csrf_token }}";</script>
+<meta name="csrf-token" content="{{ csrf_token }}">
+<script>window.ebpost_csrf = "{{ csrf_token }}";</script>
+<script type="application/json" id="ebpost-labels">{{ labels|tojson }}</script>
 
 <style>
-/* BISMALLAH ETHIOBIZ FULL-PAGE POST STYLES */
+/* ============================================================
+   ETHIOBIZ IMMERSIVE POST VIEWER
+   Scoped .ebpost-* design system. Full-viewport, X.com-style
+   reader with vertical snap navigation, comment drawer and a
+   full-screen reading overlay. Colours come from Theme -> Feed
+   Type Styles, so every family keeps its own identity.
+   ============================================================ */
 
-/* Modern X/Facebook Inspired Styling */
-.post-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    color: #0f766e;
-    font-weight: 700;
-    font-size: 0.88rem;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    margin-bottom: 16px;
-    transition: all 0.2s ease;
+body.ebpost-body {
+  overflow: hidden !important;
+  background: #05070b !important;
 }
-.post-back-btn:hover {
-    background: #0d9488;
-    color: #ffffff;
-    transform: translateX(-3px);
+body.ebpost-body .page_content,
+body.ebpost-body #page-content,
+body.ebpost-body .main-section {
+  padding: 0 !important;
+  max-width: 100% !important;
+  transform: none !important;
+  filter: none !important;
 }
-.post-image-container {
-    width: 100%;
-    max-height: 520px;
-    background: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-.post-image-container img {
-    width: 100%;
-    height: auto;
-    max-height: 520px;
-    object-fit: contain;
-}
-.post-text-only-highlight {
-    font-size: 1.28rem;
-    line-height: 1.65;
-    color: #1e293b;
-    padding: 24px 32px;
-    border-left: 4px solid #0d9488;
-    background: linear-gradient(135deg, rgba(240, 253, 250, 0.5) 0%, rgba(255, 255, 255, 0.9) 100%);
-    border-radius: 0 16px 16px 0;
-    margin: 16px 0 24px 0;
+/* The viewer is deliberately the only surface on this route. */
+body.ebpost-body #ethiobiz-welcome-lang-modal,
+body.ebpost-body .ethio-floating-dock,
+body.ebpost-body #ethiobiz-chat-widget,
+body.ebpost-body .hadeeda-widget,
+body.ebpost-body .ethiobiz-floating-widget {
+  display: none !important;
 }
 
-.post-page-wrapper {
-    max-width: 860px;
-    margin: 40px auto 80px auto;
-    padding: 0 20px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #1e293b;
+.ebpost-app {
+  --eb-accent: {{ post.style.accent_color or '#14b8a6' }};
+  --eb-accent-rgb: {{ post.accent_rgb or '20,184,166' }};
+  --eb-grad-start: {{ post.style.gradient_start or '#0f766e' }};
+  --eb-grad-end: {{ post.style.gradient_end or '#14b8a6' }};
+  --eb-on-accent: {{ post.style.text_color or '#ffffff' }};
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #05070b;
+  color: #f8fafc;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.ebpost-app *,
+.ebpost-app *::before,
+.ebpost-app *::after { box-sizing: border-box; }
+.ebpost-app a { text-decoration: none; }
+.ebpost-app button { font-family: inherit; }
+
+/* ---------------- top bar ---------------- */
+.ebpost-topbar {
+  flex: 0 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 clamp(12px, 2.4vw, 28px);
+  background: rgba(5, 7, 11, .86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  position: relative;
+  z-index: 6;
+}
+.ebpost-iconbtn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .05);
+  color: #e2e8f0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background .18s, transform .18s, border-color .18s;
+}
+.ebpost-iconbtn:hover {
+  background: rgba(255, 255, 255, .12);
+  border-color: rgba(255, 255, 255, .22);
+  transform: translateY(-1px);
+}
+.ebpost-iconbtn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ebpost-brand {
+  font-weight: 900;
+  letter-spacing: -.04em;
+  color: #fff;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+.ebpost-brand span { color: var(--eb-accent); }
+.ebpost-topchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(var(--eb-accent-rgb), .14);
+  border: 1px solid rgba(var(--eb-accent-rgb), .34);
+  color: #fff;
+  font-size: .74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background .25s, border-color .25s;
+}
+.ebpost-topchip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ebpost-topspacer { flex: 1; }
+.ebpost-counter {
+  color: #94a3b8;
+  font-size: .78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ebpost-counter b { color: #fff; }
+
+/* ---------------- snap viewport ---------------- */
+.ebpost-viewport {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.ebpost-viewport::-webkit-scrollbar { display: none; }
+
+.ebpost-slide {
+  position: relative;
+  min-height: calc(100dvh - 60px);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 620px at 12% -10%, rgba(var(--eb-accent-rgb), .22), transparent 62%),
+    radial-gradient(900px 520px at 105% 110%, rgba(var(--eb-accent-rgb), .13), transparent 64%),
+    linear-gradient(180deg, #080b10 0%, #05070b 100%);
+}
+.ebpost-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ebpost-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  opacity: .3;
+  transition: opacity .4s;
+}
+.ebpost-orb-a {
+  width: 440px;
+  height: 440px;
+  background: var(--eb-grad-start);
+  top: -140px;
+  left: -90px;
+}
+.ebpost-orb-b {
+  width: 380px;
+  height: 380px;
+  background: var(--eb-grad-end);
+  bottom: -130px;
+  right: -70px;
+}
+.ebpost-orb-c {
+  width: 240px;
+  height: 240px;
+  background: var(--eb-accent);
+  top: 42%;
+  left: 46%;
+  opacity: .15;
 }
 
-.post-breadcrumbs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: #64748b;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-.post-breadcrumbs a {
-    color: #0d9488;
-    text-decoration: none;
-    font-weight: 600;
-}
-.post-breadcrumbs a:hover {
-    text-decoration: underline;
+/* ---------------- slide grid ---------------- */
+.ebpost-slide-grid {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr);
+  gap: clamp(18px, 3vw, 42px);
+  padding: clamp(16px, 2.4vw, 32px) clamp(16px, 3.4vw, 48px) 0;
 }
 
-.post-article-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+/* ---------------- visual column ---------------- */
+.ebpost-visual {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+.ebpost-media-frame {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: #0a0f16;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  max-height: calc(100dvh - 230px);
+}
+.ebpost-media-ambient {
+  position: absolute;
+  inset: -40px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(42px) saturate(1.3);
+  opacity: .42;
+  transform: scale(1.12);
+}
+.ebpost-hero-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100dvh - 240px);
+  object-fit: contain;
+}
+.ebpost-media-caption {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(5, 7, 11, .64);
+  border: 1px solid rgba(255, 255, 255, .12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.ebpost-media-type {
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #e2e8f0;
+}
+.ebpost-media-price {
+  font-size: .88rem;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+}
+.ebpost-thumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.ebpost-thumbs::-webkit-scrollbar { display: none; }
+.ebpost-thumb {
+  flex: 0 0 62px;
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: #0a0f16;
+  cursor: pointer;
+  opacity: .62;
+  transition: opacity .18s, border-color .18s, transform .18s;
+}
+.ebpost-thumb:hover { opacity: .9; transform: translateY(-1px); }
+.ebpost-thumb.is-active {
+  border-color: var(--eb-accent);
+  opacity: 1;
+}
+.ebpost-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.post-header-strip {
-    padding: 28px 32px 20px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f1f5f9;
-    flex-wrap: wrap;
-    gap: 16px;
+/* no-image visual */
+.ebpost-noimage {
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+  max-height: calc(100dvh - 230px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: clamp(24px, 4vw, 54px);
+  text-align: center;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background:
+    radial-gradient(120% 120% at 18% 8%, rgba(255, 255, 255, .24), transparent 46%),
+    linear-gradient(150deg, var(--eb-grad-start), var(--eb-grad-end));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .18);
 }
-.post-author-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+.ebpost-noimage-ring {
+  position: absolute;
+  width: 130%;
+  aspect-ratio: 1;
+  top: -46%;
+  right: -36%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .18);
+  pointer-events: none;
 }
-.post-author-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
-    object-fit: cover;
-    border: 1px solid #cbd5e1;
+.ebpost-noimage-ring::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, .2);
 }
-.post-author-name {
-    font-weight: 800;
-    font-size: 1.05rem;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.ebpost-noimage-icon {
+  font-size: clamp(3.2rem, 7vw, 6rem);
+  line-height: 1;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .35));
 }
-.post-author-meta {
-    font-size: 0.82rem;
-    color: #64748b;
-    margin-top: 2px;
+.ebpost-noimage-kicker {
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .17em;
+  color: rgba(255, 255, 255, .82);
 }
-.post-category-pill {
-    background: rgba(13, 148, 136, 0.1);
-    color: #0d9488;
-    border: 1px solid rgba(13, 148, 136, 0.3);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.ebpost-noimage-title {
+  max-width: 18ch;
+  font-size: clamp(1.35rem, 2.6vw, 2.35rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, .28);
+  text-wrap: balance;
+}
+.ebpost-noimage-tag,
+.ebpost-noimage-price {
+  display: inline-flex;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(5, 7, 11, .28);
+  border: 1px solid rgba(255, 255, 255, .22);
+  font-size: .78rem;
+  font-weight: 800;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.ebpost-visual-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ebpost-typechip,
+.ebpost-statuschip,
+.ebpost-ratingchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+.ebpost-typechip {
+  color: #fff;
+  background: rgba(var(--eb-accent-rgb), .16);
+  border-color: rgba(var(--eb-accent-rgb), .38);
+}
+.ebpost-ratingchip { gap: 5px; }
+.ebpost-stars {
+  display: inline-flex;
+  gap: 1px;
+  color: #475569;
+  font-size: .74rem;
+  letter-spacing: .5px;
+}
+.ebpost-stars .is-full,
+.ebpost-review-stars .is-full { color: #fbbf24; }
+.ebpost-rating-count { color: #7f8ea3; font-weight: 700; }
+
+/* ---------------- content column ---------------- */
+.ebpost-content {
+  position: relative;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 6px 26px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .18) transparent;
+}
+.ebpost-content::-webkit-scrollbar { width: 6px; }
+.ebpost-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .18);
+  border-radius: 999px;
+}
+.ebpost-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.ebpost-avatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, .18);
+}
+.ebpost-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+}
+.ebpost-author-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ebpost-author-name {
+  font-size: .94rem;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ebpost-author-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .76rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ebpost-dot { opacity: .6; }
+.ebpost-verified {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--eb-accent);
+  background: rgba(var(--eb-accent-rgb), .12);
+  border: 1px solid rgba(var(--eb-accent-rgb), .28);
+  white-space: nowrap;
+}
+.ebpost-verified svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.ebpost-kicker {
+  margin: 0 0 6px;
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  color: var(--eb-accent);
+}
+.ebpost-title {
+  margin: 0 0 10px;
+  font-size: clamp(1.65rem, 3vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+  font-weight: 900;
+  color: #fff;
+  text-wrap: balance;
+}
+.ebpost-subtitle {
+  margin: 0 0 18px;
+  font-size: clamp(.94rem, 1.2vw, 1.08rem);
+  line-height: 1.55;
+  color: #a8b6c5;
+}
+.ebpost-bodywrap {
+  position: relative;
+  margin: 0 0 18px;
+}
+.ebpost-body {
+  font-size: .97rem;
+  line-height: 1.72;
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+.ebpost-body.is-collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ebpost-body p { margin: 0 0 .85em; }
+.ebpost-body h1,
+.ebpost-body h2,
+.ebpost-body h3 {
+  margin: 1.1em 0 .5em;
+  line-height: 1.2;
+  color: #fff;
+}
+.ebpost-body a { color: var(--eb-accent); }
+.ebpost-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+}
+.ebpost-body blockquote {
+  margin: 1em 0;
+  padding: .2em 0 .2em 1em;
+  border-left: 3px solid var(--eb-accent);
+  color: #e2e8f0;
+}
+.ebpost-body-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 36px;
+  height: 92px;
+  background: linear-gradient(180deg, transparent, #080b10 82%);
+  pointer-events: none;
+}
+.ebpost-bodywrap.is-short .ebpost-body-fade,
+.ebpost-bodywrap.is-short .ebpost-readmore { display: none; }
+.ebpost-readmore {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--eb-accent);
+  font-size: .84rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.ebpost-readmore svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform .2s;
+}
+.ebpost-readmore:hover svg { transform: translateY(2px); }
+.ebpost-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.ebpost-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+  font-size: .76rem;
+  font-weight: 700;
+  color: #dbe4ee;
+}
+.ebpost-specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.ebpost-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.ebpost-spec-label {
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #7f8ea3;
+}
+.ebpost-spec-value {
+  font-size: .84rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.ebpost-offers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.ebpost-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(var(--eb-accent-rgb), .1), rgba(255, 255, 255, .03));
+  border: 1px solid rgba(var(--eb-accent-rgb), .2);
+}
+.ebpost-offer-title { font-size: .88rem; font-weight: 800; color: #fff; }
+.ebpost-offer-sub { font-size: .74rem; font-weight: 800; color: var(--eb-accent); }
+.ebpost-offer-detail { font-size: .78rem; color: #a8b6c5; }
+.ebpost-reviews,
+.ebpost-replies { margin: 0 0 20px; }
+.ebpost-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ebpost-section-head h2 {
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  color: #94a3b8;
+}
+.ebpost-section-head > span {
+  font-size: .72rem;
+  color: #64748b;
+}
+.ebpost-textbtn {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--eb-accent);
+  font-size: .76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.ebpost-review,
+.ebpost-reply {
+  margin-bottom: 8px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+.ebpost-review header,
+.ebpost-reply header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.ebpost-review-avatar,
+.ebpost-reply-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  font-size: .7rem;
+  font-weight: 900;
+  color: #fff;
+}
+.ebpost-review header img,
+.ebpost-reply header img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.ebpost-review-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ebpost-review-name,
+.ebpost-reply-author {
+  font-size: .78rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+.ebpost-review-verified {
+  font-size: .62rem;
+  font-weight: 700;
+  color: var(--eb-accent);
+}
+.ebpost-review-stars {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 1px;
+  color: #475569;
+  font-size: .7rem;
+  letter-spacing: .5px;
+}
+.ebpost-review h3 {
+  margin: 0 0 4px;
+  font-size: .84rem;
+  color: #fff;
+}
+.ebpost-review p,
+.ebpost-reply-body {
+  margin: 0;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: #b6c3d1;
+}
+.ebpost-review time,
+.ebpost-reply time {
+  display: block;
+  margin-top: 6px;
+  font-size: .66rem;
+  color: #64748b;
+}
+.ebpost-seller-reply {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: rgba(var(--eb-accent-rgb), .08);
+  border-left: 3px solid var(--eb-accent);
+}
+.ebpost-seller-reply > span {
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--eb-accent);
+}
+.ebpost-seller-reply p { margin: 4px 0 0; font-size: .78rem; }
+.ebpost-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 6px 0 4px;
+}
+.ebpost-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  color: #fff;
+  font-size: .94rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 34px rgba(var(--eb-accent-rgb), .28);
+  transition: transform .18s, box-shadow .18s;
+}
+.ebpost-cta:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(var(--eb-accent-rgb), .36);
+}
+.ebpost-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  color: #e2e8f0;
+  font-size: .84rem;
+  font-weight: 800;
+  transition: background .18s, color .18s;
+}
+.ebpost-cta-ghost:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+}
+.ebpost-cta-note {
+  margin: 8px 0 0;
+  font-size: .72rem;
+  color: #7f8ea3;
 }
 
-.post-title-main {
-    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-    font-weight: 900;
-    line-height: 1.25;
-    color: #0f172a;
-    margin: 0;
-    padding: 24px 32px 12px 32px;
+/* ---------------- action bar ---------------- */
+.ebpost-actionbar {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px clamp(16px, 3.4vw, 48px);
+  background: linear-gradient(180deg, rgba(5, 7, 11, 0), rgba(5, 7, 11, .86) 36%, rgba(5, 7, 11, .97));
+  border-top: 1px solid rgba(255, 255, 255, .06);
+}
+.ebpost-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .04);
+  color: #a8b6c5;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .18s, color .18s, border-color .18s, transform .18s;
+}
+.ebpost-action svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ebpost-action:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .1);
+  transform: translateY(-1px);
+}
+.ebpost-action.is-on {
+  color: var(--eb-accent);
+  border-color: rgba(var(--eb-accent-rgb), .42);
+  background: rgba(var(--eb-accent-rgb), .12);
+}
+.ebpost-action.is-on svg { fill: currentColor; }
+.ebpost-action-count { font-variant-numeric: tabular-nums; }
+.ebpost-action-spacer { flex: 1; }
+.ebpost-swipe-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .7rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+.ebpost-swipe-hint::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .2);
+  background: linear-gradient(180deg, transparent 48%, rgba(255, 255, 255, .22) 48%);
+}
+.ebpost-swipe-hint.is-hidden { opacity: 0; transition: opacity .4s; }
+.ebpost-action-next { display: none; }
+
+/* ---------------- missing / skeleton ---------------- */
+.ebpost-missing {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 22px;
+  text-align: center;
+}
+.ebpost-missing-icon { font-size: 3.4rem; }
+.ebpost-missing-kicker {
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--eb-accent);
+}
+.ebpost-missing h1 {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  line-height: 1.12;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+.ebpost-missing p {
+  max-width: 46ch;
+  margin: 0;
+  color: #a8b6c5;
+  line-height: 1.6;
+}
+.ebpost-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ebpost-skeleton {
+  width: min(1200px, 88%);
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 24px;
+}
+.ebpost-skeleton span {
+  display: block;
+  border-radius: 24px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .09), rgba(255, 255, 255, .04));
+  background-size: 220% 100%;
+  animation: ebpost-shimmer 1.4s infinite linear;
+}
+.ebpost-skeleton span:nth-child(1) { height: min(58vh, 520px); }
+.ebpost-skeleton span:nth-child(2) { height: min(40vh, 340px); align-self: center; }
+@keyframes ebpost-shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
 }
 
-.post-hero-media-wrap {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 480px;
-    overflow: hidden;
-    background: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* ---------------- drawer ---------------- */
+.ebpost-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, .56);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
 }
-.post-hero-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    transition: transform 0.4s ease;
+.ebpost-scrim.is-open {
+  opacity: 1;
+  pointer-events: auto;
 }
-.post-hero-image:hover {
-    transform: scale(1.02);
+.ebpost-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: #0b1017;
+  border-left: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: -30px 0 80px rgba(0, 0, 0, .5);
+  transform: translateX(102%);
+  transition: transform .32s cubic-bezier(.22, .8, .28, 1);
 }
-
-/* SPEC HIGHLIGHTS BAR */
-.post-highlights-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    padding: 20px 32px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+.ebpost-drawer.is-open { transform: translateX(0); }
+.ebpost-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
-.post-highlight-item {
-    background: #ffffff;
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+.ebpost-drawer-head h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: #fff;
 }
-.post-highlight-label {
-    font-size: 0.75rem;
-    color: #64748b;
-    font-weight: 700;
-    text-transform: uppercase;
+.ebpost-drawer-head p {
+  margin: 3px 0 0;
+  font-size: .74rem;
+  color: #7f8ea3;
 }
-.post-highlight-val {
-    font-size: 1.05rem;
-    color: #0f172a;
-    font-weight: 800;
-    margin-top: 2px;
+.ebpost-drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px;
 }
-
-/* POST ACTION CTA BANNER */
-.post-cta-banner {
-    padding: 20px 32px;
-    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%);
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+.ebpost-drawer-empty {
+  padding: 30px 10px;
+  text-align: center;
+  color: #7f8ea3;
+  font-size: .84rem;
+  line-height: 1.6;
 }
-.post-cta-btn {
-    background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
-    color: #ffffff !important;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 1rem;
-    padding: 12px 28px;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+.ebpost-comment {
+  display: flex;
+  gap: 10px;
 }
-.post-cta-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+.ebpost-comment-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  font-size: .78rem;
+  font-weight: 900;
+  color: #fff;
 }
-
-.post-content-body {
-    padding: 32px;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #334155;
+.ebpost-comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.post-content-body p {
-    margin-bottom: 1.5em;
+.ebpost-comment-body { flex: 1; min-width: 0; }
+.ebpost-comment-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
-/* ENGAGEMENT BAR */
-.post-engage-bar {
-    padding: 14px 32px;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    gap: 12px;
+.ebpost-comment-author {
+  font-size: .8rem;
+  font-weight: 800;
+  color: #e2e8f0;
 }
-.post-engage-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.ebpost-comment-time {
+  font-size: .66rem;
+  color: #64748b;
 }
-.post-engage-btn:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+.ebpost-comment-text {
+  margin: 3px 0 0;
+  font-size: .84rem;
+  line-height: 1.6;
+  color: #b6c3d1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
-.post-engage-btn.active-like {
-    color: #e11d48;
+.ebpost-drawer-form {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 18px 18px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
 }
-
-/* COMMENTS SECTION */
-.post-comments-container {
-    padding: 32px;
+.ebpost-drawer-form.is-open { display: flex; }
+.ebpost-drawer-form textarea {
+  width: 100%;
+  min-height: 76px;
+  max-height: 160px;
+  resize: vertical;
+  padding: 11px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: .86rem;
+  outline: none;
 }
-.post-comments-title {
-    font-size: 1.3rem;
-    font-weight: 800;
-    margin-bottom: 20px;
-    color: #0f172a;
+.ebpost-drawer-form textarea:focus {
+  border-color: var(--eb-accent);
+  box-shadow: 0 0 0 3px rgba(var(--eb-accent-rgb), .16);
 }
-.post-comment-input-wrap {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 30px;
+.ebpost-drawer-form button {
+  align-self: flex-end;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
 }
-.post-comment-textarea {
-    flex: 1;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    outline: none;
-    resize: vertical;
-    min-height: 60px;
+.ebpost-drawer-login,
+.ebpost-drawer-forum {
+  display: none;
+  padding: 14px 18px 20px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
 }
-.post-comment-textarea:focus {
-    border-color: #0d9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
-}
-.btn-submit-comment {
-    background: #0d9488;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 0 22px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.btn-submit-comment:hover {
-    background: #0f766e;
-}
-.comment-card {
-    display: flex;
-    gap: 14px;
-    padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-.comment-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.comment-body {
-    flex: 1;
-}
-.comment-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-}
-.comment-author-name {
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: #0f172a;
-}
-.comment-time {
-    font-size: 0.78rem;
-    color: #94a3b8;
-}
-.comment-text {
-    font-size: 0.95rem;
-    color: #334155;
-    line-height: 1.5;
-    margin: 0;
+.ebpost-drawer-login.is-open,
+.ebpost-drawer-forum.is-open { display: block; }
+.ebpost-drawer-login a,
+.ebpost-drawer-forum a {
+  display: inline-flex;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(var(--eb-accent-rgb), .16);
+  border: 1px solid rgba(var(--eb-accent-rgb), .36);
+  color: #fff;
+  font-weight: 800;
+  font-size: .84rem;
 }
 
-/* APPLICATION MODAL */
-.job-apply-modal-backdrop {
-    display: none;
-    position: fixed;
-    top: 0;
+/* ---------------- reader overlay ---------------- */
+.ebpost-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 36px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.ebpost-reader.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ebpost-reader-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 4, 8, .74);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ebpost-reader-card {
+  position: relative;
+  z-index: 1;
+  width: min(880px, 100%);
+  max-height: min(88dvh, 980px);
+  display: flex;
+  flex-direction: column;
+  background: #0b1017;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 26px;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, .65);
+  transform: translateY(18px) scale(.985);
+  transition: transform .3s cubic-bezier(.22, .8, .28, 1);
+}
+.ebpost-reader.is-open .ebpost-reader-card {
+  transform: translateY(0) scale(1);
+}
+.ebpost-reader-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.ebpost-reader-kicker {
+  margin-bottom: 5px;
+  font-size: .68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  color: var(--eb-accent);
+}
+.ebpost-reader-title {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.65rem);
+  line-height: 1.18;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  color: #fff;
+}
+.ebpost-reader-close { margin-left: auto; }
+.ebpost-reader-body {
+  padding: 20px 24px 30px;
+  overflow-y: auto;
+  font-size: .98rem;
+  line-height: 1.78;
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+.ebpost-reader-body p { margin: 0 0 1em; }
+.ebpost-reader-body h1,
+.ebpost-reader-body h2,
+.ebpost-reader-body h3 {
+  margin: 1.2em 0 .5em;
+  line-height: 1.2;
+  color: #fff;
+}
+.ebpost-reader-body a { color: var(--eb-accent); }
+.ebpost-reader-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+.ebpost-reader-body blockquote {
+  margin: 1em 0;
+  padding: .2em 0 .2em 1em;
+  border-left: 3px solid var(--eb-accent);
+  color: #e2e8f0;
+}
+
+/* ---------------- analyze panel ---------------- */
+.ebpost-analyze {
+  position: fixed;
+  inset: 0;
+  z-index: 32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 36px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.ebpost-analyze.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ebpost-analyze-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 4, 8, .74);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ebpost-analyze-card {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  max-height: min(86dvh, 820px);
+  overflow-y: auto;
+  padding: 0 0 22px;
+  background: #0b1017;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 26px;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, .65);
+  transform: translateY(18px) scale(.985);
+  transition: transform .3s cubic-bezier(.22, .8, .28, 1);
+}
+.ebpost-analyze.is-open .ebpost-analyze-card {
+  transform: translateY(0) scale(1);
+}
+.ebpost-analyze-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.ebpost-analyze-sub {
+  margin: 16px 22px 0;
+  font-size: .86rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+.ebpost-analyze-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 22px 0;
+}
+.ebpost-analyze-row {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .03);
+}
+.ebpost-analyze-row dt {
+  margin-bottom: 5px;
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #7f8ea3;
+}
+.ebpost-analyze-row dd {
+  margin: 0;
+  font-size: .9rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  overflow-wrap: anywhere;
+}
+.ebpost-analyze-note {
+  margin: 16px 22px 0;
+  font-size: .8rem;
+  line-height: 1.6;
+  color: #8fa0b5;
+}
+.ebpost-analyze-research {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 22px 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--eb-accent), rgba(var(--eb-accent-rgb), .7));
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+.ebpost-analyze-research:hover { filter: brightness(1.08); }
+.ebpost-analyze-research svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------- apply modal ---------------- */
+.ebpost-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 4, 8, .72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.ebpost-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ebpost-modal-card {
+  width: min(520px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: #0b1017;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .6);
+}
+.ebpost-modal-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #fff;
+}
+.ebpost-modal-card p {
+  margin: 0 0 16px;
+  font-size: .82rem;
+  color: #94a3b8;
+}
+.ebpost-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.ebpost-field label {
+  font-size: .68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #7f8ea3;
+}
+.ebpost-field input,
+.ebpost-field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: .86rem;
+  outline: none;
+}
+.ebpost-field input:focus,
+.ebpost-field textarea:focus {
+  border-color: var(--eb-accent);
+  box-shadow: 0 0 0 3px rgba(var(--eb-accent-rgb), .14);
+}
+.ebpost-field textarea { min-height: 82px; resize: vertical; }
+.ebpost-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+.ebpost-modal-actions button {
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .05);
+  color: #e2e8f0;
+  font-weight: 800;
+  cursor: pointer;
+}
+.ebpost-modal-actions button[type="submit"] {
+  border: 0;
+  background: linear-gradient(135deg, var(--eb-grad-start), var(--eb-grad-end));
+  color: #fff;
+}
+
+/* ---------------- toast ---------------- */
+.ebpost-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 86px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(15, 23, 42, .96);
+  color: #f8fafc;
+  font-size: .8rem;
+  font-weight: 700;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s, transform .25s;
+}
+.ebpost-toast.is-open {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+body.ebpost-locked .ebpost-viewport { overflow: hidden; }
+
+/* ---------------- responsive ---------------- */
+@media (min-width: 981px) {
+  .ebpost-slide { height: calc(100dvh - 60px); }
+}
+@media (max-width: 980px) {
+  .ebpost-slide-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+  .ebpost-media-frame {
+    min-height: 240px;
+    max-height: 56dvh;
+  }
+  .ebpost-hero-img { max-height: 56dvh; }
+  .ebpost-noimage {
+    min-height: 300px;
+    max-height: 52dvh;
+  }
+  .ebpost-content {
+    overflow: visible;
+    padding-bottom: 10px;
+  }
+  .ebpost-title { font-size: clamp(1.45rem, 6vw, 2.2rem); }
+  .ebpost-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ebpost-swipe-hint { display: none; }
+  .ebpost-action-next { display: inline-flex; }
+  .ebpost-skeleton { grid-template-columns: 1fr; }
+  .ebpost-skeleton span:nth-child(1) { height: 34vh; }
+  .ebpost-skeleton span:nth-child(2) { height: 26vh; }
+  .ebpost-drawer {
+    top: auto;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-}
-.job-apply-modal {
-    background: #ffffff;
-    border-radius: 20px;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    max-width: 520px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-    overflow: hidden;
+    height: min(86dvh, 760px);
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 22px 22px 0 0;
+    transform: translateY(102%);
+  }
+  .ebpost-drawer.is-open { transform: translateY(0); }
 }
-.modal-header-strip {
-    padding: 20px 24px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.modal-header-strip h3 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #0f172a;
-}
-.modal-body-form {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-.form-input-field {
+@media (max-width: 560px) {
+  .ebpost-brand { display: none; }
+  .ebpost-topbar { gap: 6px; }
+  .ebpost-topchip {
+    max-width: 44vw;
+    padding: 6px 10px;
+    font-size: .68rem;
+  }
+  .ebpost-actionbar { gap: 5px; padding: 8px 10px; }
+  .ebpost-action { padding: 8px 10px; }
+  .ebpost-action-count { font-size: .7rem; }
+  .ebpost-specs { grid-template-columns: 1fr; }
+  .ebpost-cta { width: 100%; }
+  .ebpost-cta-ghost { width: 100%; justify-content: center; }
+  .ebpost-reader { padding: 0; }
+  .ebpost-reader-card {
     width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    outline: none;
-    box-sizing: border-box;
-}
-.form-input-field:focus {
-    border-color: #0d9488;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .ebpost-analyze {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .ebpost-analyze-card {
+    width: 100%;
+    max-height: 88dvh;
+    border-radius: 22px 22px 0 0;
+  }
+  .ebpost-analyze-grid { grid-template-columns: 1fr; }
 }
 </style>
 
-<div class="post-page-wrapper">
-    <!-- BREADCRUMBS -->
-    <nav class="post-breadcrumbs" aria-label="Breadcrumb">
-        <a href="/">Home</a>
-        <span>›</span>
-        <a href="/#live-feed">Feed</a>
-        {% if post_found %}
-        <span>›</span>
-        <a href="{{ post.portal_route }}">{{ post.doctype }}</a>
-        <span>›</span>
-        <span>{{ post.title }}</span>
-        {% else %}
-        <span>›</span>
-        <span>Explore</span>
-        {% endif %}
-    </nav>
+<div class="ebpost-app" id="ebpost-app"
+     data-login-url="{{ login_url|e }}"
+     data-is-logged-in="{{ '1' if is_logged_in else '0' }}">
 
-    {% if post_found %}
-    <article class="post-article-card">
-        <!-- HEADER STRIP -->
-        <div class="post-header-strip">
-            <div class="post-author-block">
-                <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-author-avatar" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
-                <div>
-                    <div class="post-author-name">
-                        {{ post.author_name }}
-                        <span style="color:#0d9488; font-size:0.95rem;" title="Verified EthioBiz Entity">✓</span>
-                    </div>
-                    <div class="post-author-meta">
-                        <span>{{ post.date_str }}</span>
-                        {% if post.company_name %}
-                        <span>• {{ post.company_name }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="post-category-pill">
-                {{ post.category }}
-            </div>
+  <header class="ebpost-topbar">
+    <button type="button" class="ebpost-iconbtn" id="ebpost-back" aria-label="{{ labels.back }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <a class="ebpost-brand" href="/">EthioBiz<span>.ET</span></a>
+    <span class="ebpost-topchip" id="ebpost-topchip">
+      <span id="ebpost-topicon">{{ post.style.icon or '✨' }}</span>
+      <span id="ebpost-toplabel">{{ post.style.label or post.portal_label or labels.feed }}</span>
+    </span>
+    <span class="ebpost-topspacer"></span>
+    <span class="ebpost-counter"><b id="ebpost-index">1</b>/<span id="ebpost-total">1</span></span>
+    <button type="button" class="ebpost-iconbtn" id="ebpost-topshare" aria-label="{{ labels.share }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+    </button>
+  </header>
+
+  <main class="ebpost-viewport" id="ebpost-viewport" aria-label="{{ labels.feed }}">
+    {% include "templates/includes/ebpost_slide.html" %}
+  </main>
+
+  <div class="ebpost-scrim" id="ebpost-scrim" hidden></div>
+
+  <aside class="ebpost-drawer" id="ebpost-drawer" aria-hidden="true" aria-label="{{ labels.comments_title }}">
+    <header class="ebpost-drawer-head">
+      <div>
+        <h2 id="ebpost-drawer-title">{{ labels.comments_title }}</h2>
+        <p id="ebpost-drawer-sub"></p>
+      </div>
+      <button type="button" class="ebpost-iconbtn" data-eb-drawer-close aria-label="{{ labels.close }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="ebpost-drawer-list" id="ebpost-drawer-list"></div>
+    <form class="ebpost-drawer-form" id="ebpost-drawer-form">
+      <textarea id="ebpost-drawer-input" rows="3" maxlength="1200" placeholder="{{ labels.comment_placeholder }}"></textarea>
+      <button type="submit" id="ebpost-drawer-submit">{{ labels.post }}</button>
+    </form>
+    <div class="ebpost-drawer-login" id="ebpost-drawer-login">
+      <a id="ebpost-drawer-login-link" href="{{ login_url }}">{{ labels.login_to_comment }}</a>
+    </div>
+    <div class="ebpost-drawer-forum" id="ebpost-drawer-forum">
+      <a id="ebpost-drawer-forum-link" href="#">{{ labels.forum_cta }}</a>
+    </div>
+  </aside>
+
+  <div class="ebpost-reader" id="ebpost-reader" aria-hidden="true">
+    <div class="ebpost-reader-scrim" data-eb-reader-close></div>
+    <article class="ebpost-reader-card" role="dialog" aria-modal="true" aria-labelledby="ebpost-reader-title">
+      <header class="ebpost-reader-head">
+        <div>
+          <div class="ebpost-reader-kicker" id="ebpost-reader-kicker"></div>
+          <h2 class="ebpost-reader-title" id="ebpost-reader-title"></h2>
         </div>
-
-        <!-- MAIN TITLE -->
-        <h1 class="post-title-main">{{ post.title }}</h1>
-
-        <!-- HERO IMAGE -->
-        {% if post.image %}
-        <div class="post-hero-media-wrap">
-            <img src="{{ post.image }}" alt="{{ post.title }}" class="post-hero-image" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
-        </div>
-        {% endif %}
-
-        <!-- KEY HIGHLIGHTS (Extras) -->
-        {% if post.extras %}
-        <div class="post-highlights-grid">
-            {% for k, v in post.extras.items() %}
-            <div class="post-highlight-item">
-                <div class="post-highlight-label">{{ k }}</div>
-                <div class="post-highlight-val">{{ v }}</div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- DYNAMIC CTA BANNER -->
-        <div class="post-cta-banner">
-            <div>
-                <strong style="font-size:1.05rem; color:#0f172a; display:block;">Interested in this opportunity?</strong>
-                <span style="font-size:0.85rem; color:#64748b;">Direct verified fulfillment powered by EthioBiz Cloud Infrastructure.</span>
-            </div>
-            {% if post.doctype == "Job Opening" %}
-            <button class="post-cta-btn" id="btn-open-job-modal">
-                <span>{{ post.cta_icon }}</span> <span>{{ post.cta_label }}</span>
-            </button>
-            {% else %}
-            <a href="{{ post.portal_route }}" class="post-cta-btn">
-                <span>{{ post.cta_icon }}</span> <span>{{ post.cta_label }}</span>
-            </a>
-            {% endif %}
-        </div>
-
-        <!-- ARTICLE BODY -->
-        <div class="post-content-body">
-            {{ post.body | safe }}
-        </div>
-
-        <!-- ENGAGEMENT STRIP -->
-        <div class="post-engage-bar">
-            <button class="post-engage-btn {% if post.user_liked %}active-like{% endif %}" id="btn-post-like" data-doctype="{{ post.doctype }}" data-name="{{ post.name }}">
-                <span id="like-icon">{% if post.user_liked %}❤️{% else %}🤍{% endif %}</span>
-                <span id="like-count">{{ post.likes_count }}</span> Likes
-            </button>
-            <button class="post-engage-btn" onclick="document.getElementById('comment-box').focus();">
-                <span>💬</span>
-                <span id="comment-count">{{ post.comments_count }}</span> Comments
-            </button>
-            <button class="post-engage-btn" id="btn-post-share">
-                <span>↗️</span> Share
-            </button>
-        </div>
-
-        <!-- COMMENTS SECTION -->
-        <section class="post-comments-container" id="post-comments-section" style="display:none; transition: all 0.3s ease;">
-            <h3 class="post-comments-title">Discussion & Feedback</h3>
-            
-            <div class="post-comment-input-wrap">
-                <textarea id="comment-box" class="post-comment-textarea" placeholder="Write a verified response or inquiry..."></textarea>
-                <button class="btn-submit-comment" id="btn-send-comment">Post</button>
-            </div>
-
-            <div id="comments-list">
-                {% if post.comments %}
-                    {% for c in post.comments %}
-                    <div class="comment-card">
-                        <img src="{{ c.avatar }}" alt="{{ c.author }}" class="comment-avatar" onerror="this.src='/assets/bismillah_ethiobiz/img/walta_real_logo.png'" />
-                        <div class="comment-body">
-                            <div class="comment-header">
-                                <span class="comment-author-name">{{ c.author }}</span>
-                                <span class="comment-time">{{ c.time }}</span>
-                            </div>
-                            <p class="comment-text">{{ c.content }}</p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p id="no-comments-msg" style="color:#64748b; font-size:0.95rem; text-align:center; padding:20px 0;">No comments yet. Start the conversation!</p>
-                {% endif %}
-            </div>
-        </section>
+        <button type="button" class="ebpost-iconbtn ebpost-reader-close" data-eb-reader-close aria-label="{{ labels.close }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+      <div class="ebpost-reader-body" id="ebpost-reader-body"></div>
     </article>
+  </div>
 
-    <!-- JOB APPLICATION MODAL -->
-    {% if post.doctype == "Job Opening" %}
-    <div id="job-modal-backdrop" class="job-apply-modal-backdrop">
-        <div class="job-apply-modal">
-            <div class="modal-header-strip">
-                <h3>💼 Apply for {{ post.title }}</h3>
-                <button id="btn-close-job-modal" style="background:transparent; border:none; font-size:1.4rem; cursor:pointer;">&times;</button>
-            </div>
-            <form id="job-apply-form" class="modal-body-form">
-                <div>
-                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Full Name *</label>
-                    <input type="text" id="app-name" class="form-input-field" required placeholder="Abebe Kebede" />
-                </div>
-                <div>
-                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Email Address *</label>
-                    <input type="email" id="app-email" class="form-input-field" required placeholder="abebe@example.com" />
-                </div>
-                <div>
-                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Phone Number</label>
-                    <input type="tel" id="app-phone" class="form-input-field" placeholder="+251 9..." />
-                </div>
-                <div>
-                    <label style="font-size:0.82rem; font-weight:700; color:#475569;">Cover Note / Summary</label>
-                    <textarea id="app-cover" class="form-input-field" rows="3" placeholder="Explain your relevant qualifications..."></textarea>
-                </div>
-                <button type="submit" class="post-cta-btn" style="justify-content:center; margin-top:8px;">
-                    Submit Application
-                </button>
-            </form>
+  <div class="ebpost-analyze" id="ebpost-analyze" aria-hidden="true">
+    <div class="ebpost-analyze-scrim" data-eb-analyze-close></div>
+    <article class="ebpost-analyze-card" role="dialog" aria-modal="true" aria-labelledby="ebpost-analyze-title">
+      <header class="ebpost-analyze-head">
+        <div>
+          <div class="ebpost-reader-kicker" id="ebpost-analyze-kicker"></div>
+          <h2 class="ebpost-reader-title" id="ebpost-analyze-title">{{ labels.analyze_title }}</h2>
         </div>
-    </div>
-    {% endif %}
+        <button type="button" class="ebpost-iconbtn ebpost-reader-close" data-eb-analyze-close aria-label="{{ labels.close }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+      <p class="ebpost-analyze-sub">{{ labels.analyze_sub }}</p>
+      <dl class="ebpost-analyze-grid" id="ebpost-analyze-grid"></dl>
+      <p class="ebpost-analyze-note">{{ labels.analyze_note }}</p>
+      <a class="ebpost-analyze-research" id="ebpost-analyze-research" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg>
+        <span>{{ labels.research }}</span>
+      </a>
+    </article>
+  </div>
 
-    {% else %}
-    <!-- FALLBACK FEED IF NOT FOUND -->
-    <div style="text-align:center; padding:60px 20px; background:#fff; border-radius:20px; border:1px solid #e2e8f0;">
-        <div style="font-size:3rem; margin-bottom:12px;">📰</div>
-        <h2 style="font-size:1.8rem; font-weight:800; color:#0f172a; margin-bottom:8px;">Story or Item Not Found</h2>
-        <p style="color:#64748b; max-width:500px; margin:0 auto 24px auto;">The requested post may have been updated, relocated, or expired. Explore our verified opportunities below.</p>
-        <a href="/#live-feed" class="post-cta-btn" style="display:inline-flex;">
-            Browse Live Feed ➔
-        </a>
+  <div class="ebpost-modal" id="ebpost-apply-modal" aria-hidden="true">
+    <div class="ebpost-modal-card" role="dialog" aria-modal="true" aria-labelledby="ebpost-apply-title">
+      <h2 id="ebpost-apply-title">{{ labels.apply_title }}</h2>
+      <p>{{ labels.send_application }} · {{ labels.application_sent }}</p>
+      <form id="ebpost-apply-form">
+        <div class="ebpost-field">
+          <label for="ebpost-applicant-name">{{ labels.full_name }}</label>
+          <input id="ebpost-applicant-name" name="applicant_name" required autocomplete="name">
+        </div>
+        <div class="ebpost-field">
+          <label for="ebpost-applicant-email">{{ labels.email }}</label>
+          <input id="ebpost-applicant-email" name="email_id" type="email" required autocomplete="email">
+        </div>
+        <div class="ebpost-field">
+          <label for="ebpost-applicant-phone">{{ labels.phone }}</label>
+          <input id="ebpost-applicant-phone" name="phone_number" autocomplete="tel">
+        </div>
+        <div class="ebpost-field">
+          <label for="ebpost-applicant-letter">{{ labels.cover_letter }}</label>
+          <textarea id="ebpost-applicant-letter" name="cover_letter" rows="4"></textarea>
+        </div>
+        <div class="ebpost-modal-actions">
+          <button type="button" id="ebpost-apply-cancel">{{ labels.cancel }}</button>
+          <button type="submit" id="ebpost-apply-submit">{{ labels.send_application }}</button>
+        </div>
+      </form>
     </div>
-    {% endif %}
+  </div>
+
+  <div class="ebpost-toast" id="ebpost-toast" role="status" aria-live="polite"></div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+(function () {
+  'use strict';
 
-    // Wire Comment Drawer Toggle
-    const btnCommentToggle = document.getElementById("btn-post-comment");
-    const commentsSec = document.getElementById("post-comments-section") || document.querySelector(".post-comments-container");
-    if (btnCommentToggle && commentsSec) {
-        btnCommentToggle.setAttribute("data-wired", "btn-post-comment-toggle-wired");
-        btnCommentToggle.addEventListener("click", function(e) {
-            e.preventDefault();
-            const isHidden = (commentsSec.style.display === "none" || !commentsSec.style.display);
-            if (isHidden) {
-                commentsSec.style.display = "block";
-                btnCommentToggle.style.color = "#0d9488";
-                commentsSec.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                const box = document.getElementById("comment-box");
-                if (box) box.focus();
-            } else {
-                commentsSec.style.display = "none";
-                btnCommentToggle.style.color = "";
-            }
+  var app = document.getElementById('ebpost-app');
+  if (!app) return;
+
+  // Fixed positioning must not be trapped by a transformed theme wrapper.
+  if (app.parentNode !== document.body) {
+    try { document.body.appendChild(app); } catch (e) {}
+  }
+
+  var viewport = document.getElementById('ebpost-viewport');
+  var initial = viewport ? viewport.querySelector('.ebpost-slide') : null;
+  if (!viewport || !initial) return;
+
+  var labels = {};
+  try {
+    labels = JSON.parse(document.getElementById('ebpost-labels').textContent || '{}');
+  } catch (e) { labels = {}; }
+
+  var csrf = window.ebpost_csrf || '';
+  var loginUrl = app.getAttribute('data-login-url') || '/login';
+  var isLoggedIn = app.getAttribute('data-is-logged-in') === '1';
+
+  var queue = [];
+  var current = 0;
+  var initialized = false;
+  var hasMore = false;
+  var totalKnown = 1;
+  var loadingMore = false;
+  var loading = {};
+  var toastTimer = null;
+
+  var drawer = document.getElementById('ebpost-drawer');
+  var drawerList = document.getElementById('ebpost-drawer-list');
+  var drawerSub = document.getElementById('ebpost-drawer-sub');
+  var drawerForm = document.getElementById('ebpost-drawer-form');
+  var drawerInput = document.getElementById('ebpost-drawer-input');
+  var drawerSubmit = document.getElementById('ebpost-drawer-submit');
+  var drawerLogin = document.getElementById('ebpost-drawer-login');
+  var drawerLoginLink = document.getElementById('ebpost-drawer-login-link');
+  var drawerForum = document.getElementById('ebpost-drawer-forum');
+  var drawerForumLink = document.getElementById('ebpost-drawer-forum-link');
+  var scrim = document.getElementById('ebpost-scrim');
+  var reader = document.getElementById('ebpost-reader');
+  var readerKicker = document.getElementById('ebpost-reader-kicker');
+  var readerTitle = document.getElementById('ebpost-reader-title');
+  var readerBody = document.getElementById('ebpost-reader-body');
+  var analyze = document.getElementById('ebpost-analyze');
+  var analyzeGrid = document.getElementById('ebpost-analyze-grid');
+  var analyzeKicker = document.getElementById('ebpost-analyze-kicker');
+  var analyzeResearch = document.getElementById('ebpost-analyze-research');
+  var applyModal = document.getElementById('ebpost-apply-modal');
+  var applyForm = document.getElementById('ebpost-apply-form');
+  var applySubmit = document.getElementById('ebpost-apply-submit');
+  var toastEl = document.getElementById('ebpost-toast');
+
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function parseServerMessages(data) {
+    try {
+      var list = JSON.parse(data._server_messages || '[]');
+      return list.map(function (m) {
+        try { return JSON.parse(m).message; } catch (e) { return m; }
+      }).join(' ');
+    } catch (e) {
+      return (data && data.exception) || 'Request failed';
+    }
+  }
+
+  function api(method, args) {
+    var body = new URLSearchParams();
+    Object.keys(args || {}).forEach(function (key) {
+      var value = args[key];
+      if (value !== undefined && value !== null) body.append(key, value);
+    });
+    return fetch('/api/method/' + method, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Frappe-CSRF-Token': csrf,
+        'Accept': 'application/json'
+      },
+      body: body.toString()
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) {
+          throw new Error(parseServerMessages(data) || ('Request failed (' + response.status + ')'));
+        }
+        return data && data.message !== undefined ? data.message : data;
+      });
+    });
+  }
+
+  function apiGet(method, args) {
+    var params = new URLSearchParams();
+    Object.keys(args || {}).forEach(function (key) {
+      var value = args[key];
+      if (value !== undefined && value !== null) params.append(key, value);
+    });
+    return fetch('/api/method/' + method + '?' + params.toString(), {
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) throw new Error(parseServerMessages(data) || 'Request failed');
+        return data && data.message !== undefined ? data.message : data;
+      });
+    });
+  }
+
+  function toast(message, actionLabel, actionHref) {
+    if (!toastEl) return;
+    toastEl.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = message || '';
+    toastEl.appendChild(span);
+    if (actionLabel && actionHref) {
+      var link = document.createElement('a');
+      link.href = actionHref;
+      link.textContent = actionLabel;
+      link.style.cssText = 'margin-left:10px;color:var(--eb-accent);font-weight:900;text-decoration:none;white-space:nowrap;';
+      toastEl.appendChild(link);
+    }
+    toastEl.classList.add('is-open');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-open'); }, 3400);
+  }
+
+  function needLogin() {
+    toast(labels.login_to_engage || 'Log in to like, comment and repost.',
+      labels.login_to_comment || 'Log in', loginUrl);
+  }
+
+  function slideAt(index) {
+    return viewport.querySelector('.ebpost-slide[data-queue-index="' + index + '"]');
+  }
+
+  function findSlide(item) {
+    if (!item) return null;
+    var slides = viewport.querySelectorAll('.ebpost-slide');
+    for (var i = 0; i < slides.length; i += 1) {
+      if (slides[i].dataset.doctype === item.doctype && slides[i].dataset.name === item.name) {
+        return slides[i];
+      }
+    }
+    return null;
+  }
+
+  function queueItemFromSlide(slide) {
+    return {
+      doctype: slide.dataset.doctype || '',
+      name: slide.dataset.name || '',
+      feed_type: slide.dataset.feedType || '',
+      post_url: slide.dataset.postUrl || '',
+      title: slide.dataset.title || '',
+      type_label: slide.dataset.typeLabel || '',
+      icon: slide.dataset.typeIcon || ''
+    };
+  }
+
+  function updateCounter() {
+    var indexEl = document.getElementById('ebpost-index');
+    var totalEl = document.getElementById('ebpost-total');
+    if (indexEl) indexEl.textContent = String(current + 1);
+    if (totalEl) {
+      if (hasMore) totalEl.textContent = (totalKnown ? String(totalKnown) : String(queue.length)) + '+';
+      else totalEl.textContent = String(Math.max(queue.length, current + 1));
+    }
+  }
+
+  function updateTopbar(slide) {
+    if (!slide) return;
+    var iconEl = document.getElementById('ebpost-topicon');
+    var labelEl = document.getElementById('ebpost-toplabel');
+    if (iconEl) iconEl.textContent = slide.dataset.typeIcon || '✨';
+    if (labelEl) labelEl.textContent = slide.dataset.typeLabel || (labels.feed || 'Live feed');
+    ['--eb-accent', '--eb-accent-rgb', '--eb-grad-start', '--eb-grad-end'].forEach(function (key) {
+      var value = slide.style.getPropertyValue(key);
+      if (value) app.style.setProperty(key, value);
+    });
+  }
+
+  function setActive(index) {
+    if (index < 0) return;
+    var slide = slideAt(index);
+    if (!slide) return;
+    if (initialized && index === current) {
+      updateCounter();
+      return;
+    }
+    current = index;
+    initialized = true;
+    if (analyze && analyze.classList.contains('is-open')) closeAnalyze();
+    updateTopbar(slide);
+    updateCounter();
+    if (slide.dataset.postUrl) {
+      try { history.replaceState(null, '', slide.dataset.postUrl); } catch (e) {}
+    }
+    ensureSlide(index + 1);
+    ensureSlide(index + 2);
+    if (index > 0) ensureSlide(index - 1);
+    var hint = slide.querySelector('.ebpost-swipe-hint');
+    if (hint) hint.classList.add('is-hidden');
+  }
+
+  function goTo(index) {
+    if (index < 0) {
+      var first = slideAt(0) || initial;
+      window.location.href = first.dataset.portalUrl || '/#live-feed-section';
+      return;
+    }
+    if (index >= queue.length && !hasMore) return;
+    ensureSlide(index).then(function (slide) {
+      if (!slide) return;
+      viewport.scrollTo({ top: slide.offsetTop, behavior: 'smooth' });
+    });
+  }
+
+  var observer = null;
+  if ('IntersectionObserver' in window) {
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.55) return;
+        var index = parseInt(entry.target.dataset.queueIndex, 10);
+        if (!isNaN(index)) setActive(index);
+      });
+    }, { root: viewport, threshold: [0.55, 0.75] });
+  }
+
+  function observe(slide) {
+    if (observer && slide) observer.observe(slide);
+  }
+
+  function ensureSlide(index) {
+    if (index < 0) return Promise.resolve(null);
+    if (index >= queue.length) {
+      if (!hasMore) return Promise.resolve(null);
+      return loadMore().then(function () { return ensureSlide(index); });
+    }
+    var item = queue[index];
+    var existing = findSlide(item);
+    if (existing) {
+      if (!existing.dataset.queueIndex) existing.dataset.queueIndex = String(index);
+      return Promise.resolve(existing);
+    }
+    if (loading[index]) return Promise.resolve(null);
+    loading[index] = true;
+
+    var placeholder = document.createElement('article');
+    placeholder.className = 'ebpost-slide ebpost-placeholder';
+    placeholder.dataset.queueIndex = String(index);
+    placeholder.innerHTML = '<div class="ebpost-skeleton"><span></span><span></span></div>';
+    var previous = slideAt(index - 1);
+    if (previous && previous.parentNode === viewport) {
+      viewport.insertBefore(placeholder, previous.nextSibling);
+    } else {
+      viewport.appendChild(placeholder);
+    }
+
+    return apiGet('bismillah_ethiobiz.post_api.get_post_slide', {
+      doctype: item.doctype,
+      name: item.name,
+      ft: item.feed_type || ''
+    }).then(function (payload) {
+      if (!payload || !payload.html) throw new Error('empty slide');
+      var holder = document.createElement('div');
+      holder.innerHTML = payload.html;
+      var slide = holder.firstElementChild;
+      if (!slide) throw new Error('bad slide');
+      slide.dataset.queueIndex = String(index);
+      placeholder.parentNode.replaceChild(slide, placeholder);
+      observe(slide);
+      return slide;
+    }).catch(function () {
+      placeholder.innerHTML = '<div class="ebpost-missing">' +
+        '<span class="ebpost-missing-icon">⚠️</span>' +
+        '<h1>' + esc(labels.not_found_title || 'Could not load this post') + '</h1>' +
+        '<div class="ebpost-cta-row"><button type="button" class="ebpost-cta" data-eb-retry>Retry</button></div>' +
+        '</div>';
+      placeholder.dataset.retryIndex = String(index);
+      return placeholder;
+    }).finally(function () {
+      delete loading[index];
+    });
+  }
+
+  function loadMore() {
+    if (!hasMore || loadingMore) return Promise.resolve();
+    loadingMore = true;
+    return apiGet('bismillah_ethiobiz.post_api.get_post_queue', {
+      start: queue.length,
+      limit: 16
+    }).then(function (payload) {
+      var items = (payload && payload.items) || [];
+      items.forEach(function (item) {
+        if (!item || !item.doctype || !item.name) return;
+        var duplicate = queue.some(function (entry) {
+          return entry.doctype === item.doctype && entry.name === item.name;
         });
-    }
-    
-    const btnLike = document.getElementById("btn-post-like");
-    const btnShare = document.getElementById("btn-post-share");
-    const btnSendComment = document.getElementById("btn-send-comment");
-    const commentBox = document.getElementById("comment-box");
+        if (!duplicate) queue.push(item);
+      });
+      hasMore = !!(payload && payload.has_more);
+      totalKnown = Math.max(totalKnown, queue.length);
+      updateCounter();
+    }).catch(function () {
+      hasMore = false;
+    }).finally(function () {
+      loadingMore = false;
+    });
+  }
 
-    // 1. LIKE TOGGLE
-    if (btnLike) {
-        btnLike.addEventListener("click", function() {
-            const doctype = this.dataset.doctype;
-            const name = this.dataset.name;
+  function loadQueue() {
+    var first = queueItemFromSlide(initial);
+    queue = [first];
+    initial.dataset.queueIndex = '0';
+    observe(initial);
+    updateTopbar(initial);
+    updateCounter();
 
-            fetch("/api/method/bismillah_ethiobiz.feed_engagement_api.toggle_like", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Frappe-CSRF-Token": window.csrf_token || ""
-                },
-                body: JSON.stringify({ doctype: doctype, name: name })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message && data.message.status === "ok") {
-                    const liked = data.message.liked;
-                    const count = data.message.likes_count;
-                    document.getElementById("like-count").innerText = count;
-                    document.getElementById("like-icon").innerText = liked ? "❤️" : "🤍";
-                    if (liked) btnLike.classList.add("active-like");
-                    else btnLike.classList.remove("active-like");
-                } else if (data.exc) {
-                    alert("Please sign in to like this story.");
-                }
-            })
-            .catch(() => alert("Please sign in to like this story."));
+    apiGet('bismillah_ethiobiz.post_api.get_post_queue', {
+      doctype: first.doctype,
+      name: first.name,
+      ft: first.feed_type,
+      start: 0,
+      limit: 16
+    }).then(function (payload) {
+      var items = (payload && payload.items) || [];
+      items.forEach(function (item) {
+        if (!item || !item.doctype || !item.name) return;
+        if (item.doctype === first.doctype && item.name === first.name) return;
+        var duplicate = queue.some(function (entry) {
+          return entry.doctype === item.doctype && entry.name === item.name;
         });
+        if (!duplicate) queue.push(item);
+      });
+      hasMore = !!(payload && payload.has_more);
+      totalKnown = Math.max((payload && payload.total) || 0, queue.length);
+      updateCounter();
+      ensureSlide(1);
+      ensureSlide(2);
+    }).catch(function () {
+      hasMore = false;
+      updateCounter();
+    });
+  }
+
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    scrim.hidden = false;
+    requestAnimationFrame(function () { scrim.classList.add('is-open'); });
+    document.body.classList.add('ebpost-locked');
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    scrim.classList.remove('is-open');
+    setTimeout(function () { scrim.hidden = true; }, 250);
+    document.body.classList.remove('ebpost-locked');
+  }
+
+  function appendComment(comment) {
+    if (!comment) return;
+    var row = document.createElement('div');
+    row.className = 'ebpost-comment';
+
+    var avatar = document.createElement('span');
+    avatar.className = 'ebpost-comment-avatar';
+    if (comment.avatar) {
+      var img = document.createElement('img');
+      img.src = comment.avatar;
+      img.alt = '';
+      avatar.appendChild(img);
+    } else {
+      avatar.textContent = String(comment.author || 'G').charAt(0).toUpperCase();
     }
 
-    // 2. COMMENT SUBMISSION
-    if (btnSendComment && commentBox) {
-        btnSendComment.addEventListener("click", function() {
-            const content = commentBox.value.trim();
-            if (!content) return;
+    var body = document.createElement('div');
+    body.className = 'ebpost-comment-body';
+    var top = document.createElement('div');
+    top.className = 'ebpost-comment-top';
+    var author = document.createElement('span');
+    author.className = 'ebpost-comment-author';
+    author.textContent = comment.author || 'Guest';
+    var time = document.createElement('span');
+    time.className = 'ebpost-comment-time';
+    time.textContent = comment.time_ago || '';
+    top.appendChild(author);
+    top.appendChild(time);
+    var text = document.createElement('p');
+    text.className = 'ebpost-comment-text';
+    text.textContent = comment.content || '';
+    body.appendChild(top);
+    body.appendChild(text);
 
-            const doctype = "{{ post.doctype if post else '' }}";
-            const name = "{{ post.name if post else '' }}";
+    row.appendChild(avatar);
+    row.appendChild(body);
+    drawerList.appendChild(row);
+  }
 
-            btnSendComment.disabled = true;
-            fetch("/api/method/bismillah_ethiobiz.feed_engagement_api.add_comment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Frappe-CSRF-Token": window.csrf_token || ""
-                },
-                body: JSON.stringify({ doctype: doctype, name: name, content: content })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btnSendComment.disabled = false;
-                if (data.message && data.message.status === "ok") {
-                    commentBox.value = "";
-                    const list = document.getElementById("comments-list");
-                    const noMsg = document.getElementById("no-comments-msg");
-                    if (noMsg) noMsg.remove();
+  function updateDrawerSub(count) {
+    if (!drawerSub) return;
+    var total = typeof count === 'number' ? count : 0;
+    drawerSub.textContent = total
+      ? total + ' ' + String(labels.comments_title || 'comments').toLowerCase()
+      : '';
+  }
 
-                    const newCard = document.createElement("div");
-                    newCard.className = "comment-card";
-                    newCard.innerHTML = `
-                        <img src="/assets/bismillah_ethiobiz/img/walta_real_logo.png" class="comment-avatar" />
-                        <div class="comment-body">
-                            <div class="comment-header">
-                                <span class="comment-author-name">You</span>
-                                <span class="comment-time">Just now</span>
-                            </div>
-                            <p class="comment-text">${escapeHtml(content)}</p>
-                        </div>
-                    `;
-                    list.prepend(newCard);
-                    const cntEl = document.getElementById("comment-count");
-                    if (cntEl) cntEl.innerText = parseInt(cntEl.innerText || 0) + 1;
-                } else {
-                    alert("Please log in to submit a comment.");
-                }
-            })
-            .catch(() => {
-                btnSendComment.disabled = false;
-                alert("Please log in to submit a comment.");
-            });
+  function openComments(slide) {
+    if (!slide) return;
+    drawer.dataset.doctype = slide.dataset.doctype || '';
+    drawer.dataset.name = slide.dataset.name || '';
+    drawer.dataset.feedType = slide.dataset.feedType || '';
+    drawer.dataset.forum = slide.dataset.forum || '0';
+    drawer.dataset.news = slide.dataset.news || '0';
+    drawer.dataset.ctaUrl = slide.dataset.ctaUrl || '#';
+
+    drawerList.innerHTML = '<div class="ebpost-drawer-empty">' + esc(labels.loading || 'Loading…') + '</div>';
+    drawerForm.classList.remove('is-open');
+    drawerLogin.classList.remove('is-open');
+    drawerForum.classList.remove('is-open');
+    updateDrawerSub(0);
+    openDrawer();
+
+    apiGet('bismillah_ethiobiz.post_api.get_post_comments', {
+      doctype: slide.dataset.doctype,
+      name: slide.dataset.name,
+      ft: slide.dataset.feedType
+    }).then(function (payload) {
+      drawerList.innerHTML = '';
+      var comments = (payload && payload.comments) || [];
+      comments.forEach(appendComment);
+      if (!comments.length) {
+        drawerList.innerHTML = '<div class="ebpost-drawer-empty">' +
+          esc(payload && payload.forum ? (labels.no_comments || '') : (labels.no_comments || '')) +
+          '</div>';
+      }
+      updateDrawerSub((payload && (payload.count || comments.length)) || 0);
+
+      if (payload && payload.commentable && payload.can_engage) {
+        drawerForm.classList.add('is-open');
+        drawerInput.placeholder = labels.comment_placeholder || 'Write a comment…';
+        drawerSubmit.textContent = labels.post || 'Post';
+        setTimeout(function () { drawerInput.focus(); }, 220);
+      } else if (payload && payload.commentable && !payload.can_engage) {
+        drawerLogin.classList.add('is-open');
+        drawerLoginLink.href = loginUrl;
+      } else if (payload && payload.forum) {
+        drawerForum.classList.add('is-open');
+        drawerForumLink.href = slide.dataset.ctaUrl || '#';
+      } else if (slide.dataset.news === '1') {
+        drawerList.insertAdjacentHTML('beforeend',
+          '<div class="ebpost-drawer-empty">' + esc(labels.news_comments || '') + '</div>');
+      } else {
+        drawerList.insertAdjacentHTML('beforeend',
+          '<div class="ebpost-drawer-empty">' + esc(labels.comments_closed || '') + '</div>');
+      }
+    }).catch(function (error) {
+      drawerList.innerHTML = '<div class="ebpost-drawer-empty">' + esc(error.message || 'Could not load comments.') + '</div>';
+    });
+  }
+
+  function openReader(slide) {
+    if (!slide) return;
+    var template = slide.querySelector('template.ebpost-full-body');
+    if (!template) return;
+    readerKicker.textContent = slide.dataset.typeLabel || '';
+    readerTitle.textContent = slide.dataset.title || '';
+    readerBody.innerHTML = '';
+    readerBody.appendChild(template.content.cloneNode(true));
+    reader.classList.add('is-open');
+    reader.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ebpost-locked');
+    setTimeout(function () { readerBody.scrollTop = 0; }, 0);
+  }
+
+  function closeReader() {
+    reader.classList.remove('is-open');
+    reader.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ebpost-locked');
+  }
+
+  function analyzeValue(slide, names) {
+    var rows = slide.querySelectorAll('.ebpost-spec');
+    for (var i = 0; i < rows.length; i++) {
+      var labelEl = rows[i].querySelector('.ebpost-spec-label');
+      var valueEl = rows[i].querySelector('.ebpost-spec-value');
+      var label = labelEl ? labelEl.textContent.trim().toLowerCase() : '';
+      var value = valueEl ? valueEl.textContent.trim() : '';
+      if (!label || !value) continue;
+      for (var j = 0; j < names.length; j++) {
+        if (label.indexOf(names[j]) !== -1) return value;
+      }
+    }
+    return '';
+  }
+
+  function analyzeRow(label, value) {
+    var row = document.createElement('div');
+    row.className = 'ebpost-analyze-row';
+    var dt = document.createElement('dt');
+    dt.textContent = label;
+    var dd = document.createElement('dd');
+    dd.textContent = value || (labels.none || '-');
+    row.appendChild(dt);
+    row.appendChild(dd);
+    return row;
+  }
+
+  function openAnalyze(slide) {
+    if (!slide || !analyze) return;
+    var typeLabel = slide.dataset.typeLabel || '';
+    var authorEl = slide.querySelector('.ebpost-author-name');
+    var priceEl = slide.querySelector('.ebpost-media-price, .ebpost-noimage-price');
+    var statusEl = slide.querySelector('.ebpost-statuschip');
+    var author = authorEl ? authorEl.textContent.trim() : '';
+    var price = priceEl ? priceEl.textContent.trim() : '';
+    var status = statusEl ? statusEl.textContent.trim() : '';
+    var location = analyzeValue(slide, ['location', 'city', 'address', 'subcity', 'clinic', 'area', 'አካባቢ', 'ከተማ']);
+    var likes = slide.dataset.likes || '0';
+    var comments = slide.dataset.comments || '0';
+    var reposts = slide.dataset.reposts || '0';
+    var engagement = likes + ' ' + (labels.like || 'likes') + ' · ' +
+      comments + ' ' + (labels.comments_title || 'comments') + ' · ' +
+      reposts + ' ' + (labels.repost || 'reposts');
+
+    analyzeKicker.textContent = typeLabel;
+    analyzeGrid.innerHTML = '';
+    analyzeGrid.appendChild(analyzeRow(labels.type || 'Type', typeLabel));
+    analyzeGrid.appendChild(analyzeRow(labels.posted_by || 'Posted by', author));
+    analyzeGrid.appendChild(analyzeRow(labels.engagement || 'Engagement', engagement));
+    analyzeGrid.appendChild(analyzeRow(labels.price || 'Price', price));
+    analyzeGrid.appendChild(analyzeRow(labels.status || 'Status', status));
+    analyzeGrid.appendChild(analyzeRow(labels.location || 'Location', location));
+
+    var title = slide.dataset.title || document.title;
+    var query = [title, typeLabel, 'Ethiopia'].filter(Boolean).join(' ');
+    analyzeResearch.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+
+    analyze.classList.add('is-open');
+    analyze.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ebpost-locked');
+  }
+
+  function closeAnalyze() {
+    if (!analyze) return;
+    analyze.classList.remove('is-open');
+    analyze.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ebpost-locked');
+  }
+
+  function openApply(slide, button) {
+    applyModal.dataset.jobName = (button && button.dataset.jobName) || slide.dataset.name || '';
+    applyModal.dataset.jobTitle = (button && button.dataset.jobTitle) || slide.dataset.title || '';
+    applyModal.classList.add('is-open');
+    applyModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ebpost-locked');
+    setTimeout(function () {
+      var nameInput = document.getElementById('ebpost-applicant-name');
+      if (nameInput) nameInput.focus();
+    }, 60);
+  }
+
+  function closeApply() {
+    applyModal.classList.remove('is-open');
+    applyModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ebpost-locked');
+  }
+
+  function toggleLike(slide, button) {
+    if (!slide || button.disabled) return;
+    if (slide.dataset.canEngage !== '1') { needLogin(); return; }
+    button.disabled = true;
+    api('bismillah_ethiobiz.feed_engagement_api.toggle_like', {
+      doctype: slide.dataset.doctype,
+      name: slide.dataset.name
+    }).then(function (result) {
+      var liked = !!(result && result.viewer_has_liked);
+      slide.querySelectorAll('[data-eb-like]').forEach(function (el) {
+        el.classList.toggle('is-on', liked);
+        el.setAttribute('aria-pressed', liked ? 'true' : 'false');
+      });
+      if (result && result.likes_count !== undefined) {
+        slide.querySelectorAll('.ebpost-like-count').forEach(function (el) {
+          el.textContent = String(result.likes_count);
         });
-    }
+      }
+    }).catch(function (error) {
+      toast(error.message || 'Could not like this post.');
+    }).finally(function () {
+      button.disabled = false;
+    });
+  }
 
-    // 3. SHARE LINK
-    if (btnShare) {
-        btnShare.addEventListener("click", function() {
-            if (navigator.share) {
-                navigator.share({
-                    title: document.title,
-                    url: window.location.href
-                }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-            }
+  function toggleRepost(slide, button) {
+    if (!slide || button.disabled) return;
+    if (slide.dataset.canEngage !== '1') { needLogin(); return; }
+    button.disabled = true;
+    api('bismillah_ethiobiz.feed_engagement_api.toggle_repost', {
+      doctype: slide.dataset.doctype,
+      name: slide.dataset.name
+    }).then(function (result) {
+      var reposted = !!(result && result.viewer_has_reposted);
+      slide.querySelectorAll('[data-eb-repost]').forEach(function (el) {
+        el.classList.toggle('is-on', reposted);
+        el.setAttribute('aria-pressed', reposted ? 'true' : 'false');
+      });
+      if (result && result.reposts_count !== undefined) {
+        slide.querySelectorAll('.ebpost-repost-count').forEach(function (el) {
+          el.textContent = String(result.reposts_count);
         });
-    }
+      }
+      toast(reposted ? (labels.reposted || 'Reposted to your feed.') : (labels.repost_removed || 'Repost removed.'));
+    }).catch(function (error) {
+      toast(error.message || 'Could not repost this post.');
+    }).finally(function () {
+      button.disabled = false;
+    });
+  }
 
-    // 4. JOB MODAL
-    const btnOpenJob = document.getElementById("btn-open-job-modal");
-    const jobModal = document.getElementById("job-modal-backdrop");
-    const btnCloseJob = document.getElementById("btn-close-job-modal");
-    const jobForm = document.getElementById("job-apply-form");
+  function fallbackCopy(text) {
+    var area = document.createElement('textarea');
+    area.value = text;
+    area.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(area);
+    area.select();
+    try {
+      document.execCommand('copy');
+      toast(labels.share_copied || 'Link copied');
+    } catch (e) {
+      toast(text);
+    }
+    document.body.removeChild(area);
+  }
 
-    if (btnOpenJob && jobModal) {
-        btnOpenJob.addEventListener("click", () => jobModal.style.display = "flex");
+  function share(slide) {
+    if (!slide) return;
+    var url = slide.dataset.postUrl || window.location.href;
+    try { url = new URL(url, window.location.origin).href; } catch (e) {}
+    var title = slide.dataset.title || document.title;
+    if (navigator.share) {
+      navigator.share({ title: title, url: url }).catch(function () {});
+      return;
     }
-    if (btnCloseJob && jobModal) {
-        btnCloseJob.addEventListener("click", () => jobModal.style.display = "none");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        toast(labels.share_copied || 'Link copied');
+      }).catch(function () { fallbackCopy(url); });
+      return;
     }
-    if (jobForm) {
-        jobForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const payload = {
-                job_title: "{{ post.title if post else '' }}",
-                applicant_name: document.getElementById("app-name").value.trim(),
-                email_id: document.getElementById("app-email").value.trim(),
-                phone_number: document.getElementById("app-phone").value.trim(),
-                company: "{{ post.company_name if post else '' }}",
-                cover_letter: document.getElementById("app-cover").value.trim()
-            };
-            fetch("/api/method/bismillah_ethiobiz.www.jobs.submit_job_application", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Frappe-CSRF-Token": window.csrf_token || ""
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message && data.message.status === "success") {
-                    alert("Application submitted successfully! Our hiring team will contact you.");
-                    jobModal.style.display = "none";
-                } else {
-                    alert(data.message?.message || "Application submitted.");
-                    jobModal.style.display = "none";
-                }
-            })
-            .catch(() => {
-                alert("Application submitted successfully!");
-                jobModal.style.display = "none";
-            });
+    fallbackCopy(url);
+  }
+
+  app.addEventListener('click', function (event) {
+    var slide = event.target.closest('.ebpost-slide');
+    var target;
+
+    if ((target = event.target.closest('[data-eb-thumb]'))) {
+      if (!slide) return;
+      var src = target.getAttribute('data-src');
+      var hero = slide.querySelector('.ebpost-hero-img');
+      if (hero && src) hero.src = src;
+      slide.querySelectorAll('[data-eb-thumb]').forEach(function (el) {
+        el.classList.toggle('is-active', el === target);
+      });
+      return;
+    }
+    if (event.target.closest('[data-eb-readmore]')) { openReader(slide); return; }
+    if (event.target.closest('[data-eb-reader-close]')) { closeReader(); return; }
+    if (event.target.closest('[data-eb-drawer-close]')) { closeDrawer(); return; }
+    if (event.target.closest('[data-eb-analyze-close]')) { closeAnalyze(); return; }
+    if (event.target.closest('[data-eb-analyze]')) { openAnalyze(slide); return; }
+    if ((target = event.target.closest('[data-eb-apply]'))) { openApply(slide, target); return; }
+    if ((target = event.target.closest('[data-eb-like]'))) { toggleLike(slide, target); return; }
+    if (event.target.closest('[data-eb-comment]')) { openComments(slide); return; }
+    if ((target = event.target.closest('[data-eb-repost]'))) { toggleRepost(slide, target); return; }
+    if (event.target.closest('[data-eb-share]')) { share(slide); return; }
+    if (event.target.closest('[data-eb-next]')) { goTo(current + 1); return; }
+    if (event.target.closest('[data-eb-retry]')) {
+      var retry = event.target.closest('[data-eb-retry]').closest('.ebpost-slide');
+      if (retry) {
+        var index = parseInt(retry.dataset.retryIndex, 10);
+        if (!isNaN(index)) {
+          retry.dataset.queueIndex = String(index);
+          retry.remove();
+          ensureSlide(index);
+        }
+      }
+    }
+  });
+
+  scrim.addEventListener('click', closeDrawer);
+  reader.addEventListener('click', function (event) {
+    if (event.target === reader) closeReader();
+  });
+  applyModal.addEventListener('click', function (event) {
+    if (event.target === applyModal) closeApply();
+  });
+  document.getElementById('ebpost-apply-cancel').addEventListener('click', closeApply);
+
+  var back = document.getElementById('ebpost-back');
+  if (back) {
+    back.addEventListener('click', function () {
+      if (current > 0) goTo(current - 1);
+      else {
+        var first = slideAt(0) || initial;
+        window.location.href = first.dataset.portalUrl || '/#live-feed-section';
+      }
+    });
+  }
+
+  var topShare = document.getElementById('ebpost-topshare');
+  if (topShare) {
+    topShare.addEventListener('click', function () {
+      share(slideAt(current) || initial);
+    });
+  }
+
+  drawerForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var text = (drawerInput.value || '').trim();
+    if (!text) return;
+    drawerSubmit.disabled = true;
+    api('bismillah_ethiobiz.feed_engagement_api.add_comment', {
+      doctype: drawer.dataset.doctype,
+      name: drawer.dataset.name,
+      content: text
+    }).then(function (result) {
+      drawerInput.value = '';
+      appendComment(result.comment);
+      var slide = findSlide({ doctype: drawer.dataset.doctype, name: drawer.dataset.name });
+      if (slide && result.comments_count !== undefined) {
+        slide.querySelectorAll('.ebpost-comment-count').forEach(function (el) {
+          el.textContent = String(result.comments_count);
         });
-    }
+        slide.dataset.comments = String(result.comments_count);
+      }
+      updateDrawerSub(result.comments_count || 0);
+      toast(labels.comment_posted || 'Comment posted.');
+    }).catch(function (error) {
+      toast(error.message || 'Could not post your comment.');
+    }).finally(function () {
+      drawerSubmit.disabled = false;
+    });
+  });
 
-    function escapeHtml(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  applyForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    applySubmit.disabled = true;
+    api('bismillah_ethiobiz.www.jobs.submit_job_application', {
+      job_title: applyModal.dataset.jobTitle || '',
+      applicant_name: document.getElementById('ebpost-applicant-name').value,
+      email_id: document.getElementById('ebpost-applicant-email').value,
+      phone_number: document.getElementById('ebpost-applicant-phone').value,
+      cover_letter: document.getElementById('ebpost-applicant-letter').value
+    }).then(function () {
+      closeApply();
+      applyForm.reset();
+      toast(labels.application_sent || 'Application sent.');
+    }).catch(function (error) {
+      toast(error.message || 'Could not send your application.');
+    }).finally(function () {
+      applySubmit.disabled = false;
+    });
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      if (reader.classList.contains('is-open')) { closeReader(); return; }
+      if (drawer.classList.contains('is-open')) { closeDrawer(); return; }
+      if (analyze.classList.contains('is-open')) { closeAnalyze(); return; }
+      if (applyModal.classList.contains('is-open')) { closeApply(); return; }
+      return;
     }
-});
+    if (reader.classList.contains('is-open') ||
+        drawer.classList.contains('is-open') ||
+        analyze.classList.contains('is-open') ||
+        applyModal.classList.contains('is-open')) return;
+    var tag = (event.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
+    if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === 'j' || event.key === 'J') {
+      event.preventDefault();
+      goTo(current + 1);
+    } else if (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'k' || event.key === 'K') {
+      event.preventDefault();
+      goTo(current - 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      goTo(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      goTo(Math.max(0, queue.length - 1));
+    }
+  });
+
+  // Hide the swipe hint after the first deliberate scroll.
+  viewport.addEventListener('scroll', function () {
+    var hint = viewport.querySelector('.ebpost-slide[data-queue-index="' + current + '"] .ebpost-swipe-hint');
+    if (hint) hint.classList.add('is-hidden');
+  }, { passive: true });
+
+  // Detect whether a body really needs the read-more affordance.
+  function tuneBody(slide) {
+    var wrap = slide.querySelector('.ebpost-bodywrap');
+    var body = slide.querySelector('.ebpost-body');
+    if (!wrap || !body) return;
+    if (body.scrollHeight <= body.clientHeight + 6) wrap.classList.add('is-short');
+  }
+  function tuneAllBodies() {
+    viewport.querySelectorAll('.ebpost-slide').forEach(tuneBody);
+  }
+
+  loadQueue();
+  tuneAllBodies();
+  setActive(0);
+  // New slides arrive after the first paint.
+  var tuneTimer = setInterval(tuneAllBodies, 1200);
+  setTimeout(function () { clearInterval(tuneTimer); }, 12000);
+})();
 </script>
 {% endblock %}
