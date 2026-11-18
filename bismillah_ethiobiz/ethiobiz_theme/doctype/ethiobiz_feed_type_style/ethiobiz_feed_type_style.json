@@ -1,0 +1,102 @@
+{
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2026-11-18 10:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "feed_type",
+    "label",
+    "label_am",
+    "icon",
+    "accent_color",
+    "gradient_start",
+    "gradient_end",
+    "text_color",
+    "is_enabled",
+    "sort_order"
+  ],
+  "fields": [
+    {
+      "fieldname": "feed_type",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Feed Type Key",
+      "reqd": 1,
+      "description": "Stable key shared with the feed API: products, jobs, bizhealth, bizservices, bizhome, bizfix, dagu, tibeb, social, forum, news, ad."
+    },
+    {
+      "fieldname": "label",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Button Label (English)",
+      "reqd": 1
+    },
+    {
+      "fieldname": "label_am",
+      "fieldtype": "Data",
+      "label": "Button Label (Amharic)"
+    },
+    {
+      "default": "✨",
+      "fieldname": "icon",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Icon (Emoji / Text / SVG)"
+    },
+    {
+      "default": "#0d9488",
+      "fieldname": "accent_color",
+      "fieldtype": "Color",
+      "in_list_view": 1,
+      "label": "Accent Colour"
+    },
+    {
+      "default": "#0f766e",
+      "fieldname": "gradient_start",
+      "fieldtype": "Color",
+      "in_list_view": 1,
+      "label": "Gradient Start"
+    },
+    {
+      "default": "#14b8a6",
+      "fieldname": "gradient_end",
+      "fieldtype": "Color",
+      "in_list_view": 1,
+      "label": "Gradient End"
+    },
+    {
+      "default": "#ffffff",
+      "fieldname": "text_color",
+      "fieldtype": "Color",
+      "label": "Text On Accent"
+    },
+    {
+      "default": "1",
+      "fieldname": "is_enabled",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Enabled"
+    },
+    {
+      "default": "0",
+      "fieldname": "sort_order",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Sort Order"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2026-11-18 10:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "EthioBiz Theme",
+  "name": "EthioBiz Feed Type Style",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "sort_order",
+  "sort_order": "ASC",
+  "states": [],
+  "track_changes": 1
+}

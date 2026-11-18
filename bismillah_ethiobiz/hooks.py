@@ -51,7 +51,7 @@ app_include_css = [
 # JS included in desk (backend)
 app_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.5",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.7",
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
@@ -77,7 +77,7 @@ web_include_css = [
 web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.5",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.7",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
@@ -85,7 +85,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.1.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.1",
     "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=1.0.0",
 ]
 
@@ -113,6 +113,7 @@ website_route_rules = [
     {"from_route": "/shop", "to_route": "shop"},
     {"from_route": "/product/<path:item_code>", "to_route": "product"},
     {"from_route": "/bizhealth", "to_route": "bizhealth"},
+    {"from_route": "/doctor/<path:slug>", "to_route": "doctor_detail"},
     {"from_route": "/bizfix", "to_route": "bizfix"},
     {"from_route": "/bizride", "to_route": "bizride"},
     {"from_route": "/booking", "to_route": "booking"},

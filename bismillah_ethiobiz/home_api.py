@@ -1086,6 +1086,204 @@ def get_feed_filter_structure():
     return FEED_FILTER_STRUCTURE
 
 
+# ---------------------------------------------------------------------------
+# Live feed card colour identity
+# ---------------------------------------------------------------------------
+# One canonical row per feed family. These values are only FALLBACKS: the
+# administrator edits the real values in
+# EthioBiz Theme Setting -> "Live Feed Card Colours" -> Feed Type Styles.
+# Keeping the fallback here means the homepage always renders beautifully
+# even on a fresh install where the Theme child table is still empty.
+FEED_SOURCE_DEFAULTS = [
+    {
+        "feed_type": "products", "filter": "shop",
+        "label": "Dikka Shop", "label_am": "ዲካ ሾፕ", "icon": "🛍️",
+        "accent_color": "#2563eb", "gradient_start": "#1d4ed8",
+        "gradient_end": "#38bdf8", "text_color": "#ffffff",
+        "subsystem": "enable_dikka_shop", "sort_order": 10,
+    },
+    {
+        "feed_type": "jobs", "filter": "jobs",
+        "label": "Oosoo Jobs", "label_am": "ኡሱ ስራዎች", "icon": "💼",
+        "accent_color": "#d97706", "gradient_start": "#b45309",
+        "gradient_end": "#fbbf24", "text_color": "#ffffff",
+        "subsystem": "enable_oosoo_jobs", "sort_order": 20,
+    },
+    {
+        "feed_type": "bizservices", "filter": "bizservices",
+        "label": "BizServices", "label_am": "ቢዝ አገልግሎቶች", "icon": "🧰",
+        "accent_color": "#0d9488", "gradient_start": "#0f766e",
+        "gradient_end": "#2dd4bf", "text_color": "#ffffff",
+        "subsystem": "enable_bizservices", "sort_order": 30,
+    },
+    {
+        "feed_type": "bizhealth", "filter": "bizhealth",
+        "label": "BizHealth", "label_am": "ቢዝ ጤና", "icon": "🩺",
+        "accent_color": "#e11d48", "gradient_start": "#be123c",
+        "gradient_end": "#fb7185", "text_color": "#ffffff",
+        "subsystem": "enable_bizhealth", "sort_order": 40,
+    },
+    {
+        "feed_type": "bizhome", "filter": "bizhome",
+        "label": "BizHome", "label_am": "ቢዝ ቤት", "icon": "🏠",
+        "accent_color": "#7c3aed", "gradient_start": "#6d28d9",
+        "gradient_end": "#a78bfa", "text_color": "#ffffff",
+        "subsystem": "enable_bizhome", "sort_order": 50,
+    },
+    {
+        "feed_type": "bizfix", "filter": "bizfix",
+        "label": "BizFix", "label_am": "ቢዝ ጥገና", "icon": "🔧",
+        "accent_color": "#0891b2", "gradient_start": "#0e7490",
+        "gradient_end": "#22d3ee", "text_color": "#ffffff",
+        "subsystem": "enable_bizfix", "sort_order": 60,
+    },
+    {
+        "feed_type": "dagu", "filter": "dagu",
+        "label": "Dagu Academy", "label_am": "ዳጉ አካዳሚ", "icon": "🎓",
+        "accent_color": "#9333ea", "gradient_start": "#7e22ce",
+        "gradient_end": "#c084fc", "text_color": "#ffffff",
+        "subsystem": "enable_dagu_academy", "sort_order": 70,
+    },
+    {
+        "feed_type": "tibeb", "filter": "tibeb",
+        "label": "Tibeb", "label_am": "ጥበብ", "icon": "📖",
+        "accent_color": "#ca8a04", "gradient_start": "#a16207",
+        "gradient_end": "#facc15", "text_color": "#ffffff",
+        "subsystem": "enable_tibebs", "sort_order": 80,
+    },
+    {
+        "feed_type": "social", "filter": "social",
+        "label": "Afocha", "label_am": "አፎቻ", "icon": "💬",
+        "accent_color": "#059669", "gradient_start": "#047857",
+        "gradient_end": "#34d399", "text_color": "#ffffff",
+        "subsystem": "enable_afocha_social", "sort_order": 90,
+    },
+    {
+        "feed_type": "forum", "filter": "forum",
+        "label": "Walta Forum", "label_am": "ዋልታ መድረክ", "icon": "🗣️",
+        "accent_color": "#4f46e5", "gradient_start": "#4338ca",
+        "gradient_end": "#818cf8", "text_color": "#ffffff",
+        "subsystem": "enable_walta_forum", "sort_order": 100,
+    },
+    {
+        "feed_type": "news", "filter": "news",
+        "label": "Live News", "label_am": "ቀጥታ ዜና", "icon": "📰",
+        "accent_color": "#dc2626", "gradient_start": "#b91c1c",
+        "gradient_end": "#f87171", "text_color": "#ffffff",
+        "subsystem": "enable_live_news", "sort_order": 110,
+    },
+    {
+        "feed_type": "ad", "filter": "",
+        "label": "Sponsored", "label_am": "ተስፋፊ", "icon": "📢",
+        "accent_color": "#b45309", "gradient_start": "#92400e",
+        "gradient_end": "#f59e0b", "text_color": "#ffffff",
+        "subsystem": "enable_dikka_shop", "sort_order": 120,
+    },
+]
+
+# Style keys every card may need, including families that never get a button
+# (sponsored ads) and the repost wrapper (which inherits its source colour).
+FEED_STYLE_KEYS = [row["feed_type"] for row in FEED_SOURCE_DEFAULTS]
+
+
+def _feed_style_payload(row):
+    return {
+        "feed_type": row.get("feed_type"),
+        "label": row.get("label") or row.get("feed_type"),
+        "label_am": row.get("label_am") or row.get("label") or row.get("feed_type"),
+        "icon": row.get("icon") or "✨",
+        "accent_color": row.get("accent_color") or "#0d9488",
+        "gradient_start": row.get("gradient_start") or "#0f766e",
+        "gradient_end": row.get("gradient_end") or "#14b8a6",
+        "text_color": row.get("text_color") or "#ffffff",
+    }
+
+
+def _theme_feed_styles():
+    """Administrator overrides from EthioBiz Theme -> Feed Type Styles."""
+    if not frappe.db.exists("DocType", "EthioBiz Theme"):
+        return {}
+    try:
+        theme = frappe.get_single("EthioBiz Theme")
+        rows = theme.get("feed_type_styles") or []
+    except Exception as exc:
+        frappe.logger("home_api").warning("Feed type styles lookup failed: %s", exc)
+        return {}
+
+    out = {}
+    for row in rows:
+        key = (row.get("feed_type") or "").strip().lower()
+        if not key:
+            continue
+        out[key] = {
+            "feed_type": key,
+            "label": row.get("label") or key,
+            "label_am": row.get("label_am") or row.get("label") or key,
+            "icon": row.get("icon") or "✨",
+            "accent_color": row.get("accent_color") or "#0d9488",
+            "gradient_start": row.get("gradient_start") or "#0f766e",
+            "gradient_end": row.get("gradient_end") or "#14b8a6",
+            "text_color": row.get("text_color") or "#ffffff",
+            "is_enabled": int(row.get("is_enabled") if row.get("is_enabled") is not None else 1),
+            "sort_order": int(row.get("sort_order") or 0),
+        }
+    return out
+
+
+@frappe.whitelist(allow_guest=True)
+def get_feed_sources():
+    """Feed-type buttons + per-type card colours for the home live feed.
+
+    Sources are the administrator's Theme rows, gated by the subsystem toggle
+    that owns them. A disabled subsystem therefore disappears from the button
+    bar instead of opening an empty feed, and every card family carries its
+    own accent/gradient identity for the homepage renderer.
+    """
+    try:
+        subsystems = get_subsystem_settings() or {}
+    except Exception:
+        subsystems = {}
+
+    overrides = _theme_feed_styles()
+
+    styles = {}
+    for default in FEED_SOURCE_DEFAULTS:
+        key = default["feed_type"]
+        merged = dict(default)
+        merged.update(overrides.get(key) or {})
+        styles[key] = merged
+    # Administrator-defined extra families still get a colour.
+    for key, row in overrides.items():
+        if key not in styles:
+            styles[key] = dict(row)
+
+    sources = []
+    for default in FEED_SOURCE_DEFAULTS:
+        key = default["feed_type"]
+        merged = styles[key]
+        if not default.get("filter"):
+            continue  # sponsored ads are cards, not a feed-type button
+        subsystem_flag = int(subsystems.get(default["subsystem"], 1) or 0)
+        row_enabled = int(merged.get("is_enabled", 1) if merged.get("is_enabled") is not None else 1)
+        sources.append({
+            "feed_type": key,
+            "filter": default["filter"],
+            "label": merged.get("label"),
+            "label_am": merged.get("label_am"),
+            "icon": merged.get("icon"),
+            "enabled": bool(subsystem_flag and row_enabled),
+            "sort_order": int(merged.get("sort_order") or default.get("sort_order") or 0),
+        })
+    sources.sort(key=lambda s: (s["sort_order"], s["filter"]))
+
+    return {
+        "status": "success",
+        "sources": sources,
+        "styles": {key: _feed_style_payload(row) for key, row in styles.items()},
+        "updated_at": str(frappe.utils.now()),
+    }
+
+
 @frappe.whitelist(allow_guest=True)
 def get_dobiz_industries():
     """Return the enabled DOBiz signup industries from EthioBiz Theme.

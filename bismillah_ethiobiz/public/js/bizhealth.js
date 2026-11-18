@@ -282,7 +282,10 @@ document.addEventListener("DOMContentLoaded", function() {
             return matchQ && matchSpec && matchType;
         });
 
-        if (countEl) countEl.innerText = "Showing " + filtered.length + " verified healthcare institutes & facilities";
+        if (countEl) {
+            countEl.textContent = "Showing " + filtered.length + " verified healthcare institutes & facilities";
+            countEl.setAttribute("data-i18n-orig", countEl.textContent);
+        }
 
         if (!filtered.length) {
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +
@@ -353,7 +356,10 @@ document.addEventListener("DOMContentLoaded", function() {
             return matchQ && matchSpec && matchType;
         });
 
-        if (countEl) countEl.innerText = "Showing " + filtered.length + " verified medical specialists";
+        if (countEl) {
+            countEl.textContent = "Showing " + filtered.length + " verified medical specialists";
+            countEl.setAttribute("data-i18n-orig", countEl.textContent);
+        }
 
         if (!filtered.length) {
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +
@@ -432,7 +438,10 @@ document.addEventListener("DOMContentLoaded", function() {
             return matchQ && matchSpec && matchType;
         });
 
-        if (countEl) countEl.innerText = "Showing " + filtered.length + " Desk clinical services & diagnostic procedures";
+        if (countEl) {
+            countEl.textContent = "Showing " + filtered.length + " Desk clinical services & diagnostic procedures";
+            countEl.setAttribute("data-i18n-orig", countEl.textContent);
+        }
 
         if (!filtered.length) {
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:48px 20px;">' +

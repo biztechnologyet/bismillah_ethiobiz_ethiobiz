@@ -9,6 +9,7 @@ BISMA_Plans / ethiobiz_analysis/pw (v250/v251/v252).
 import hashlib
 import json
 import os
+import re
 import sys
 
 import requests
@@ -67,7 +68,14 @@ APP = "/home/frappe/frappe-bench/apps/bismillah_ethiobiz/bismillah_ethiobiz"
 THEME_PATH = APP + "/public/js/ethiobiz_theme.js"
 FLAT_PATH = "/home/frappe/frappe-bench/sites/assets_flat/bismillah_ethiobiz/js/ethiobiz_theme.js"
 BUILD_MARKER = "2026-11-18-v2.5.5-title-preserve"
-VERSION = "2.5.5"
+# Cache-buster is derived from hooks.py so intentional asset bumps do not break
+# the regression suite (was hardcoded to 2.5.5).
+try:
+    _hooks_src = open(APP + "/hooks.py", encoding="utf-8").read()
+    _ver_match = re.search(r"ethiobiz_theme\.js\?v=([0-9.]+)", _hooks_src)
+    VERSION = _ver_match.group(1) if _ver_match else "2.5.7"
+except Exception:
+    VERSION = "2.5.7"
 
 print("\n" + "=" * 60)
 print("SUITE 47: SIDEBAR THEME REGRESSION (v" + VERSION + ")")

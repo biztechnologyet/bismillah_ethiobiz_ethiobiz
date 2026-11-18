@@ -169,6 +169,143 @@
         cursor: pointer;
         font-size: 16px;
     }
+    /* ---- 2026-11 Jobs experience refresh (scoped, additive) ---- */
+    .jobs-wrapper { max-width: 1180px; padding: 26px 18px 72px; }
+    .jobs-hero {
+        position: relative; overflow: hidden;
+        background:
+            radial-gradient(900px 420px at 12% -10%, rgba(45, 212, 191, .35), transparent 60%),
+            radial-gradient(760px 380px at 92% 8%, rgba(56, 189, 248, .28), transparent 62%),
+            linear-gradient(135deg, #04252b 0%, #065f5b 46%, #0b3b6b 100%);
+        padding: 56px 26px 46px; border-radius: 32px; text-align: center;
+        box-shadow: 0 24px 60px rgba(4, 47, 52, .32);
+        border: 1px solid rgba(94, 234, 212, .22);
+    }
+    .jobs-hero::before {
+        content: ''; position: absolute; inset: 0;
+        background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
+        background-size: 26px 26px; opacity: .25; pointer-events: none;
+    }
+    .jobs-hero::after {
+        content: ''; position: absolute; width: 420px; height: 420px; right: -140px; top: -160px;
+        background: radial-gradient(circle, rgba(250, 204, 21, .35), transparent 65%);
+        filter: blur(10px); pointer-events: none;
+    }
+    .jobs-hero > * { position: relative; z-index: 1; }
+    .jobs-kicker {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(250, 204, 21, .16); color: #fde68a;
+        border: 1px solid rgba(250, 204, 21, .38);
+        padding: 7px 16px; border-radius: 999px;
+        font-size: 11.5px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+    .jobs-hero h1 {
+        font-size: clamp(1.9rem, 4.2vw, 3rem); font-weight: 900; line-height: 1.12;
+        letter-spacing: -0.8px; color: #fff; margin: 0 auto 12px; max-width: 840px;
+    }
+    .jobs-hero h1 .jobs-accent {
+        background: linear-gradient(100deg, #5eead4, #7dd3fc 55%, #fde68a);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .jobs-hero p.jobs-lede { color: rgba(236, 254, 255, .92); max-width: 700px; margin: 0 auto 26px; font-size: 15.5px; line-height: 1.65; font-weight: 500; }
+    .jobs-search-shell {
+        max-width: 660px; margin: 0 auto; display: flex; align-items: center; gap: 10px;
+        background: rgba(255,255,255,.97); border-radius: 999px; padding: 7px 8px 7px 18px;
+        box-shadow: 0 18px 40px rgba(2, 32, 36, .35); border: 1px solid rgba(255,255,255,.65);
+    }
+    .jobs-search-shell .jobs-search-icon { font-size: 17px; }
+    .jobs-search-shell input.jobs-search-input {
+        flex: 1; border: none; box-shadow: none; height: 46px; padding: 0 6px; margin: 0;
+        max-width: none; font-size: 15px; background: transparent; color: #0f172a; outline: none;
+    }
+    .jobs-search-hint {
+        background: linear-gradient(135deg, #0f766e, #0891b2); color: #fff; border: none;
+        border-radius: 999px; padding: 0 20px; height: 44px; font-weight: 800; font-size: 13px;
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .jobs-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+    .jobs-stat {
+        display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px;
+        background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+        color: #ecfeff; font-size: 12.5px; font-weight: 800; backdrop-filter: blur(6px);
+    }
+    .jobs-stat strong { color: #fff; font-size: 15px; }
+
+    .jobs-filter-panel {
+        position: sticky; top: 12px; z-index: 30;
+        background: rgba(255,255,255,.93); backdrop-filter: blur(14px) saturate(160%);
+        border: 1px solid rgba(13, 148, 136, .18);
+        border-radius: 22px; padding: 14px 18px;
+        box-shadow: 0 12px 34px rgba(2, 44, 48, .10);
+        margin-bottom: 26px;
+    }
+    .jobs-filter-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .jobs-filter-head .jobs-filter-label { font-size: 12px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: #0f766e; }
+    .jobs-filter-head .jobs-filter-count { font-size: 12px; font-weight: 800; color: #64748b; }
+    .job-chip {
+        padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(148,163,184,.45);
+        background: #f8fafc; color: #334155; font-size: 12.5px; font-weight: 800;
+        transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .job-chip:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(13,148,136,.16); }
+    .job-chip.active { background: linear-gradient(135deg, #0f766e, #0891b2); border-color: transparent; color: #fff !important; box-shadow: 0 8px 20px rgba(8,145,178,.32); }
+
+    #jobs-list-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .job-card {
+        position: relative; margin-bottom: 0; border-radius: 24px; padding: 22px 22px 18px;
+        background: linear-gradient(180deg, #ffffff, #fbfdfd);
+        border: 1px solid rgba(15, 118, 110, .14);
+        box-shadow: 0 10px 28px rgba(2, 44, 48, .06);
+        overflow: hidden;
+    }
+    .job-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+        background: linear-gradient(180deg, #14b8a6, #0891b2); opacity: .85;
+    }
+    .job-card:hover { transform: translateY(-4px); box-shadow: 0 22px 48px rgba(8, 145, 178, .18); border-color: rgba(13,148,136,.4); }
+    .job-card-top { display: flex; gap: 14px; align-items: flex-start; }
+    .job-company-mark {
+        width: 46px; height: 46px; border-radius: 14px; flex: 0 0 46px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 18px; color: #fff;
+        background: linear-gradient(135deg, #0f766e, #0891b2);
+        box-shadow: 0 8px 18px rgba(8,145,178,.28);
+    }
+    .job-card h3 { font-size: 18.5px; font-weight: 900; color: #0f172a; margin: 0 0 4px; line-height: 1.3; }
+    .job-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .job-meta-chip {
+        display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700;
+        color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 4px 10px;
+    }
+    .job-salary {
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+        font-size: 13px; font-weight: 900; color: #047857;
+        background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 6px 12px;
+    }
+    .job-desc { color: #475569; font-size: 13.5px; line-height: 1.62; margin: 14px 0 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .job-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 14px; border-top: 1px dashed rgba(148,163,184,.4); }
+    .job-verified { font-size: 11.5px; font-weight: 800; color: #0f766e; display: flex; align-items: center; gap: 6px; }
+    .job-btn-apply { padding: 10px 20px; border-radius: 999px; background: linear-gradient(135deg, #0f766e, #0891b2); box-shadow: 0 8px 18px rgba(8,145,178,.28); }
+    .job-btn-apply:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .jobs-empty {
+        grid-column: 1 / -1; text-align: center; padding: 46px 20px;
+        border: 1.5px dashed rgba(13,148,136,.35); border-radius: 24px; background: #f0fdfa;
+        color: #0f766e; font-weight: 800;
+    }
+    .jobs-empty .jobs-empty-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+
+    @media (max-width: 860px) {
+        #jobs-list-container { grid-template-columns: 1fr; }
+        .jobs-hero { padding: 44px 18px 36px; border-radius: 26px; }
+        .jobs-search-shell { flex-wrap: wrap; border-radius: 22px; padding: 10px; }
+        .jobs-search-shell input.jobs-search-input { width: 100%; flex: 1 1 100%; }
+        .jobs-search-hint { width: 100%; justify-content: center; }
+        .jobs-filter-panel { position: static; }
+        .job-card { padding: 18px; }
+        .job-card-foot { flex-direction: column; align-items: stretch; }
+        .job-btn-apply { width: 100%; text-align: center; }
+    }
 </style>
 {% endblock %}
 
@@ -176,19 +313,30 @@
 <div class="jobs-wrapper">
     <!-- HERO HEADER -->
     <div class="jobs-hero">
-        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill font-weight-bold mb-2">💼 ETHIOBIZ CAREERS & TALENT NETWORK</span>
-        <h1 class="display-6 font-weight-bold mb-2">Build the Future of Ethiopia's Digital Economy</h1>
-        <p style="opacity: 0.92; max-width: 650px; margin: 0 auto; font-size: 15px;">
-            Explore verified career openings across engineering, marketing, healthcare, hospitality, and management from premier Ethiopian enterprises.
+        <span class="jobs-kicker" data-i18n="💼 EthioBiz Careers &amp; Talent Network">💼 EthioBiz Careers &amp; Talent Network</span>
+        <h1><span data-i18n="Build the future of">Build the future of</span> <span class="jobs-accent" data-i18n="Ethiopia's digital economy">Ethiopia's digital economy</span></h1>
+        <p class="jobs-lede" data-i18n="Explore verified career openings across engineering, marketing, healthcare, hospitality and management — from Ethiopia's premier enterprises, with instant HR Desk routing.">
+            Explore verified career openings across engineering, marketing, healthcare, hospitality and management — from Ethiopia's premier enterprises, with instant HR Desk routing.
         </p>
 
-        <input type="text" id="jobs-live-search" class="form-control jobs-search-input" placeholder="🔍 Search job titles, skills, companies...">
+        <div class="jobs-search-shell">
+            <span class="jobs-search-icon" aria-hidden="true">🔍</span>
+            <input type="text" id="jobs-live-search" class="jobs-search-input" placeholder="Search job titles, skills, companies…" autocomplete="off" aria-label="Search jobs">
+            <span class="jobs-search-hint" data-i18n="Live search">Live search</span>
+        </div>
+
+        <div class="jobs-stats">
+            <span class="jobs-stat">💼 <strong>{{ jobs|length }}</strong> <span data-i18n="open roles">open roles</span></span>
+            <span class="jobs-stat">🏢 <strong>{{ companies|length }}</strong> <span data-i18n="hiring companies">hiring companies</span></span>
+            <span class="jobs-stat">✅ <strong data-i18n="Verified">Verified</strong> <span data-i18n="employers">employers</span></span>
+        </div>
     </div>
 
     <!-- FILTER TOOLBAR -->
     <div class="jobs-filter-panel">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="font-weight-bold text-dark font-size-13">🏢 Filter by Hiring Company:</span>
+        <div class="jobs-filter-head">
+            <span class="jobs-filter-label" data-i18n="🏢 Filter by hiring company">🏢 Filter by hiring company</span>
+            <span class="jobs-filter-count" id="jobs-visible-count">{{ jobs|length }} roles</span>
         </div>
         <div class="jobs-chips-wrapper" id="job-company-chips">
             <button class="job-chip active" data-comp="all">
@@ -207,32 +355,34 @@
         {% for j in jobs %}
         <div class="job-card job-entry-card" data-name="{{ j.name }}" data-title="{{ j.job_title }}" data-comp="{{ j.company }}">
             <div>
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                    <div>
-                        <span class="job-badge">💼 {{ j.employment_type or 'Full-time' }}</span>
-                        <h3 class="font-weight-bold text-dark mb-1" style="font-size: 20px;">{{ j.job_title }}</h3>
-                        <div class="text-muted small font-weight-bold">
-                            🏢 {{ j.company }} • 📍 {{ j.location or 'Addis Ababa, Ethiopia' }}
+                <div class="job-card-top">
+                    <div class="job-company-mark" aria-hidden="true">{{ (j.company or 'E')[0]|upper }}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <h3>{{ j.job_title }}</h3>
+                        <span class="job-salary">💰 {{ j.salary_str }}</span>
+                        <div class="job-meta">
+                            <span class="job-meta-chip">💼 {{ j.employment_type or 'Full-time' }}</span>
+                            <span class="job-meta-chip">🏢 {{ j.company }}</span>
+                            <span class="job-meta-chip">📍 {{ j.location or 'Addis Ababa, Ethiopia' }}</span>
                         </div>
-                    </div>
-                    <div class="text-end">
-                        <span class="font-weight-bold" style="color: #008080; font-size: 17px;">{{ j.salary_str }}</span>
                     </div>
                 </div>
 
-                <p class="text-muted mt-3 mb-3" style="font-size: 14px; line-height: 1.6;">
-                    {{ j.description }}
-                </p>
+                <p class="job-desc">{{ j.description }}</p>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                <span class="text-muted small">✨ Verified Employer • Instant HR Desk routing</span>
-                <button type="button" class="job-btn-apply btn-trigger-apply" data-job="{{ j.job_title }}" data-comp="{{ j.company }}">
-                    Apply for Position &rarr;
+            <div class="job-card-foot">
+                <span class="job-verified" data-i18n="✨ Verified employer · HR Desk routing">✨ Verified employer · HR Desk routing</span>
+                <button type="button" class="job-btn-apply btn-trigger-apply" data-job="{{ j.job_title }}" data-comp="{{ j.company }}" data-i18n="Apply for position →">
+                    Apply for position &rarr;
                 </button>
             </div>
         </div>
         {% endfor %}
+        <div class="jobs-empty" id="jobs-empty" style="display: none;" data-i18n="No openings match this search yet. Try another company or keyword.">
+            <span class="jobs-empty-icon" aria-hidden="true">🔍</span>
+            No openings match this search yet. Try another company or keyword.
+        </div>
     </div>
 </div>
 
@@ -329,6 +479,7 @@
 
     // Filter Cards
     function filterJobs() {
+        let visible = 0;
         document.querySelectorAll('.job-entry-card').forEach(card => {
             const comp = card.getAttribute('data-comp');
             const title = (card.getAttribute('data-title') || '').toLowerCase();
@@ -338,10 +489,18 @@
 
             if (matchComp && matchSearch) {
                 card.style.display = 'flex';
+                visible += 1;
             } else {
                 card.style.display = 'none';
             }
         });
+        const countEl = document.getElementById('jobs-visible-count');
+        if (countEl) {
+            countEl.textContent = visible + (visible === 1 ? ' role' : ' roles');
+            countEl.setAttribute('data-i18n-orig', countEl.textContent);
+        }
+        const emptyEl = document.getElementById('jobs-empty');
+        if (emptyEl) emptyEl.style.display = visible ? 'none' : 'block';
     }
 
     // Company Chips

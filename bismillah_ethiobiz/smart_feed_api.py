@@ -9,6 +9,7 @@ import math
 import json
 import random
 import re
+from urllib.parse import quote
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, now_datetime, getdate, get_datetime, add_to_date, get_url, strip_html_tags
@@ -339,6 +340,13 @@ _TEST_PRODUCT_RE = re.compile(
     re.I,
 )
 _TEST_GROUP_PREFIXES = ("Packing ", "FG ", "RM ", "Test ", "Demo ", "Sample ")
+# Name + long number artefacts created by automated suites (e.g. "Tuition 717566").
+# A real catalogue product such as "Tuition Fee Payment" must never match.
+_TEST_PRODUCT_ARTIFACT_RE = re.compile(
+    r"^(?:Tuition|Shop Item|WI Co Roundtrip|Fabric Test|T-Shirt Test|Carton Test|"
+    r"E2E|FG-TEE|FAB|CTN)[\s\-_]*\d{3,}$",
+    re.I,
+)
 _TEST_CONTENT_RE = re.compile(
     r"(?:^|[\s_\-])(?:csrf|e2e|probe|dummy|smoke)(?:[\s_\-]|$)|^(?:E2E|P15)[\-_]",
     re.I,
@@ -373,6 +381,8 @@ def _is_test_product(*values):
             continue
         if text.startswith(_TEST_GROUP_PREFIXES):
             return True
+        if _TEST_PRODUCT_ARTIFACT_RE.search(text):
+            return True
         if _TEST_PRODUCT_RE.search(text):
             return True
     return False
@@ -384,6 +394,54 @@ def _product_body(item_name, company, short_description=None, description=None):
     if raw and _norm_text(raw) == _norm_text(item_name):
         raw = ""
     return raw or "Available from %s on Dikka Shop." % (company or "a verified merchant")
+
+
+# Card type -> EthioBiz Theme feed-type key (used for colours + source chips).
+FEED_TYPE_BY_ITEM_TYPE = {
+    "product": "products",
+    "job": "jobs",
+    "doctor": "bizhealth",
+    "booking": "bizservices",
+    "property": "bizhome",
+    "fix_service": "bizfix",
+    "course": "dagu",
+    "blog": "tibeb",
+    "social": "social",
+    "forum": "forum",
+    "news": "news",
+    "ad": "ad",
+}
+
+
+def _website_item_map(item_codes):
+    """
+    item_code -> published Website Item row.
+
+    The feed's "Order Product" action must land on the published Website Item
+    page (the same page /shop and /all-products link to), not on a generic
+    /shop?product= listing URL. One bulk query keeps the feed cheap.
+    """
+    codes = [c for c in dict.fromkeys(item_codes or []) if c]
+    if not codes or not frappe.db.exists("DocType", "Website Item"):
+        return {}
+    try:
+        rows = frappe.get_all(
+            "Website Item",
+            filters={"item_code": ["in", codes], "published": 1},
+            fields=["name", "item_code", "route", "web_item_name",
+                    "website_image", "short_description", "web_long_description"],
+            limit=0,
+        )
+    except Exception:
+        return {}
+    return {row.get("item_code"): row for row in rows if row.get("item_code")}
+
+
+def _website_item_detail_url(wi, item_code):
+    route = str((wi or {}).get("route") or "").strip()
+    if route:
+        return "/" + route.lstrip("/")
+    return "/product/%s" % quote(str(item_code or ""), safe="")
 
 
 def _strip_author_signature(text, author):
@@ -685,21 +743,25 @@ def _hydrate_original(doctype, name):
                 limit=1,
             )
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
+            wi = _website_item_map([p.name]).get(p.name) or {}
+            detail_url = _website_item_detail_url(wi, p.name)
+            title = wi.get("web_item_name") or p.item_name
             return {
                 "id": p.name,
                 "type": "product",
+                "feed_type": "products",
                 "badge": p.item_group or "Product",
                 "badge_class": "badge-product",
-                "title": p.item_name,
+                "title": title,
                 "subtitle": f"{p.company or 'Verified Merchant'} • In Stock",
                 "content": _product_body(
-                    p.item_name,
+                    title,
                     p.company,
-                    p.get("short_description"),
-                    p.get("description"),
+                    wi.get("short_description") or p.get("short_description"),
+                    wi.get("web_long_description") or p.get("description"),
                 ),
                 "category": p.item_group or "General",
-                "image": _feed_image(p.image),
+                "image": _feed_image(wi.get("website_image") or p.image),
                 "author": p.company or "Verified Merchant",
                 "author_name": p.company or "Verified Merchant",
                 "rating": flt(p.get("average_product_rating") or 5.0),
@@ -708,8 +770,11 @@ def _hydrate_original(doctype, name):
                 "comments_count": 0,
                 "price": price_str,
                 "created": p.creation,
-                "action_url": f"/shop?product={p.name}",
+                "action_url": detail_url,
                 "action_label": "Order Product ➔",
+                "detail_url": detail_url,
+                "open_url": detail_url,
+                "website_item": wi.get("name"),
                 "doctype": "Item",
                 "docname": p.name,
                 "commentable": True,
@@ -1153,6 +1218,10 @@ def _repost_feed_items(pool, filter_type, search):
 
         card = dict(orig)
         card["id"] = "repost-" + row.name
+        # Keep the original's feed-type key so the card keeps the same colour
+        # identity (a reposted product stays a product-coloured card).
+        card["source_type"] = orig.get("type")
+        card["feed_type"] = orig.get("feed_type") or FEED_TYPE_BY_ITEM_TYPE.get(orig.get("type") or "", "all")
         card["type"] = "repost"
         card["created"] = row.creation
         card.pop("feed_score", None)
@@ -1215,27 +1284,37 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
             limit=25,
             order_by="creation desc"
         )
+        # Published Website Items carry the canonical product page. The feed's
+        # "Order Product" button must open that single item page, exactly like
+        # /shop and /all-products do, so resolve them in one bulk query.
+        wi_map = _website_item_map([p.name for p in products])
         for p in products:
             if _is_test_product(p.name, p.item_name, p.item_group):
                 continue
             prices = frappe.get_all("Item Price", filters={"item_code": p.name, "selling": 1}, fields=["price_list_rate", "currency"], limit=1)
             price_str = f"{prices[0].price_list_rate:,.2f} {prices[0].currency}" if prices else "Available Online"
+            wi = wi_map.get(p.name) or {}
+            # Published Website Item route when available, otherwise the
+            # /product/<item_code> fallback page (which renders Item data).
+            detail_url = _website_item_detail_url(wi, p.name)
+            title = wi.get("web_item_name") or p.item_name
             items.append({
                 "id": p.name,
                 "type": "product",
+                "feed_type": "products",
                 "badge": f"🛍️ {p.item_group or 'Product'}",
                 "badge_class": "badge-product",
-                "title": p.item_name,
+                "title": title,
                 "subtitle": f"🏢 {p.company or 'Verified Merchant'} • In Stock",
                 # The merchant's own words, not a marketing sentence about them.
                 "content": _product_body(
-                    p.item_name,
+                    title,
                     p.company,
-                    p.get("short_description"),
-                    p.get("description"),
+                    wi.get("short_description") or p.get("short_description"),
+                    wi.get("web_long_description") or p.get("description"),
                 ),
                 "category": p.item_group or "General",
-                "image": _feed_image(p.image),
+                "image": _feed_image(wi.get("website_image") or p.image),
                 "author": p.company or "Verified Merchant",
                 "author_name": p.company or "Verified Merchant",
                 "rating": flt(p.average_product_rating or 5.0),
@@ -1246,8 +1325,11 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
                 "comments_count": 0,
                 "price": price_str,
                 "created": p.creation,
-                "action_url": f"/shop?product={p.name}",
+                "action_url": detail_url,
                 "action_label": "Order Product ➔",
+                "detail_url": detail_url,
+                "open_url": detail_url,
+                "website_item": wi.get("name"),
                 "doctype": "Item",
                 "docname": p.name,
                 "commentable": True,
@@ -1777,8 +1859,10 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
     }
     items = [
         it for it in items
-        if not subsystem_type_map.get(it.get("type"))
-        or int(subsystems.get(subsystem_type_map[it.get("type")], 1) or 0) != 0
+        if not subsystem_type_map.get(it.get("type") or it.get("source_type") or "")
+        or int(subsystems.get(
+            subsystem_type_map.get(it.get("type") or it.get("source_type") or ""), 1
+        ) or 0) != 0
     ]
 
     # 13. Apply Personalization Algorithm (Facebook/TikTok/LinkedIn/Amazon Hybrid Scorer)
@@ -1797,6 +1881,31 @@ def get_personalized_feed(start=0, limit=12, filter_type=None, search=None):
         # renderer fall back to a hardcoded "Verified Enterprise"/"Verified Listing".
         it["time_ago"] = _feed_time_ago(it.get("created"))
         it["stats"] = "💬 %s" % cint(it.get("comments_count") or 0)
+
+        # Feed-type identity: one key per card family, consumed by the homepage
+        # to paint each card with its EthioBiz Theme colour and to rebuild the
+        # feed-type button row.
+        it["feed_type"] = (
+            it.get("feed_type")
+            or FEED_TYPE_BY_ITEM_TYPE.get(it.get("type") or "")
+            or FEED_TYPE_BY_ITEM_TYPE.get(it.get("source_type") or "")
+            or "all"
+        )
+        # The whole card opens the correct destination. Products go to the
+        # published single item page; verticals (jobs, doctors, courses...) use
+        # their own action URL; only discussion cards fall back to /post.
+        if not it.get("open_url"):
+            if it.get("detail_url"):
+                it["open_url"] = it["detail_url"]
+            elif it.get("action_url"):
+                it["open_url"] = it["action_url"]
+            elif it.get("commentable") and it.get("doctype") and it.get("docname"):
+                it["open_url"] = "/post?doctype=%s&name=%s" % (
+                    quote(str(it["doctype"]), safe=""),
+                    quote(str(it["docname"]), safe=""),
+                )
+            else:
+                it["open_url"] = "/"
 
         # User Affinity (0.0 to 1.0)
         cat_aff = cat_affinities.get(it.get("category", ""), 0.05)

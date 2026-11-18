@@ -988,14 +988,26 @@
     .stream-card-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
     
     .feed-post-card {
+      --feed-accent: #0d9488;
+      --feed-accent-rgb: 13, 148, 136;
+      --feed-grad-start: #0f766e;
+      --feed-grad-end: #14b8a6;
+      --feed-on-accent: #ffffff;
       content-visibility: auto; contain-intrinsic-size: auto 380px;
+      position: relative;
       background: var(--ethio-glass-card); backdrop-filter: blur(18px) saturate(180%);
-      border: 1.5px solid var(--ethio-glass-border); border-top: 1.5px solid var(--ethio-glass-border-specular);
+      border: 1.5px solid rgba(var(--feed-accent-rgb), 0.26);
+      border-top: 1.5px solid rgba(var(--feed-accent-rgb), 0.42);
       border-radius: var(--ethio-radius-lg); box-shadow: var(--ethio-glass-shadow); overflow: hidden;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .feed-post-card::before {
+      content: ''; display: block; height: 5px;
+      background: linear-gradient(100deg, var(--feed-grad-start), var(--feed-grad-end));
     }
     .feed-post-card:hover {
-      box-shadow: var(--ethio-card-hover); border-color: rgba(0, 128, 128, 0.55);
+      box-shadow: 0 18px 44px rgba(var(--feed-accent-rgb), 0.28);
+      border-color: rgba(var(--feed-accent-rgb), 0.62);
       transform: translateY(-2px); background: var(--ethio-glass-card-elevated);
     }
 
@@ -1007,6 +1019,12 @@
     .feed-author-sub { font-size: 12px; color: var(--ethio-text-muted); font-weight: 600; margin-top: 1px; }
 
     .badge-category { font-size: 11.5px; font-weight: 900; padding: 5px 12px; border-radius: 16px; letter-spacing: 0.3px; }
+    .feed-post-card .badge-category {
+      background: rgba(var(--feed-accent-rgb), 0.12) !important;
+      color: var(--feed-accent) !important;
+      border: 1px solid rgba(var(--feed-accent-rgb), 0.38) !important;
+      box-shadow: 0 2px 10px rgba(var(--feed-accent-rgb), 0.16);
+    }
     .badge-social { background: rgba(240, 253, 250, 0.9); color: #0f766e; border: 1px solid rgba(153, 246, 228, 0.9); }
     .badge-product { background: rgba(239, 246, 255, 0.9); color: #1d4ed8; border: 1px solid rgba(191, 219, 254, 0.9); }
     .badge-job { background: rgba(254, 243, 199, 0.9); color: #92400e; border: 1px solid rgba(253, 230, 138, 0.9); }
@@ -1025,29 +1043,42 @@
     .feed-post-card.is-textonly .feed-card-body { padding: 2px 20px 18px; }
     .feed-post-card.is-textonly .feed-post-title { font-size: 19px; margin-bottom: 10px; }
     .feed-post-card.is-textonly .feed-post-text {
-      background: linear-gradient(135deg, rgba(204, 251, 241, 0.42) 0%, rgba(248, 250, 252, 0.72) 100%);
-      border: 1px solid rgba(153, 246, 228, 0.55);
-      border-left: 3px solid var(--ethio-teal);
+      background: linear-gradient(135deg, rgba(var(--feed-accent-rgb), 0.12) 0%, rgba(248, 250, 252, 0.72) 100%);
+      border: 1px solid rgba(var(--feed-accent-rgb), 0.34);
+      border-left: 3px solid var(--feed-accent);
       border-radius: 12px; padding: 13px 15px; line-height: 1.78; font-weight: 600;
     }
     .feed-post-card.is-textonly .feed-card-header { padding-bottom: 12px; }
     .feed-post-card.is-textonly .feed-expand-slot { padding-top: 4px; }
     .feed-post-card.is-textonly .feed-media-container { display: none; }
 
-    .feed-card-price { font-size: 13.5px; font-weight: 900; color: var(--ethio-teal); }
+    .feed-card-price { font-size: 13.5px; font-weight: 900; color: var(--feed-accent); }
 
+    /* Full-height media: the whole picture is always visible (contain fit)
+       over a blurred, colour-matched ambient backdrop of the same image. */
     .feed-media-container {
-      width: 100%; background: #000;
-      border-radius: 12px; margin: 10px 0;
+      width: auto; background: #04121a;
+      border-radius: 14px; margin: 10px 14px 14px;
       overflow: hidden; display: flex; align-items: center; justify-content: center;
-      max-height: 480px; position: relative;
+      position: relative; isolation: isolate;
+      box-shadow: inset 0 0 0 1px rgba(var(--feed-accent-rgb), 0.24);
+      max-height: 680px; min-height: 200px;
+    }
+    .feed-media-ambient {
+      position: absolute; inset: -20px; z-index: 0;
+      background-image: var(--feed-media-bg, none);
+      background-size: cover; background-position: center;
+      filter: blur(26px) saturate(155%) brightness(0.5);
+      transform: scale(1.14); opacity: 0.95; pointer-events: none;
     }
     .feed-media-img {
-      width: 100%; height: 100%; max-height: 480px;
-      object-fit: cover; aspect-ratio: 16 / 9;
-      display: block; cursor: zoom-in; transition: transform 0.25s ease;
+      position: relative; z-index: 1;
+      width: 100%; height: auto; max-height: 680px;
+      object-fit: contain;
+      display: block; cursor: zoom-in; transition: transform 0.3s ease;
+      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
     }
-    .feed-media-img:hover { transform: scale(1.015); }
+    .feed-media-img:hover { transform: scale(1.012); }
 
     .ecosystem-pathways-section {
       max-width: 1240px; margin: 28px auto 40px auto; padding: 0 16px;
@@ -1146,8 +1177,9 @@
     .feed-toast-warn { background: #92400e; }
     .feed-toast-error { background: #991b1b; }
 
-    .feed-card-action-footer { background: rgba(248, 250, 252, 0.7); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(241, 245, 249, 0.9); }
-    .feed-action-cta-btn { background: linear-gradient(135deg, var(--ethio-teal) 0%, var(--ethio-teal-light) 100%); color: #ffffff !important; font-weight: 800; font-size: 13px; padding: 8px 18px; border-radius: 20px; text-decoration: none !important; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 128, 128, 0.25); }
+    .feed-card-action-footer { background: linear-gradient(180deg, rgba(var(--feed-accent-rgb), 0.05), rgba(248, 250, 252, 0.72)); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid rgba(var(--feed-accent-rgb), 0.18); }
+    .feed-action-cta-btn { background: linear-gradient(135deg, var(--feed-grad-start) 0%, var(--feed-grad-end) 100%); color: var(--feed-on-accent) !important; font-weight: 800; font-size: 13px; padding: 8px 18px; border-radius: 20px; text-decoration: none !important; border: none; cursor: pointer; box-shadow: 0 6px 16px rgba(var(--feed-accent-rgb), 0.32); transition: transform .18s ease, filter .18s ease, box-shadow .18s ease; }
+    .feed-action-cta-btn:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: 0 10px 22px rgba(var(--feed-accent-rgb), 0.4); }
 
     .feed-composer-card {
       background: var(--ethio-glass-card); backdrop-filter: blur(18px); border: 1.5px solid var(--ethio-glass-border);
@@ -4080,6 +4112,67 @@ checkFirstVisitLanguageModal();
     feedSeenObserver.observe(card);
   }
 
+  // ---------------------------------------------------------------------
+  // Feed-type colour identity (EthioBiz Theme Setting -> Live Feed Colours)
+  // ---------------------------------------------------------------------
+  let FEED_STYLE_MAP = {};
+  const FEED_STYLE_FALLBACK = {
+    all:        { accent_color: '#0d9488', gradient_start: '#0f766e', gradient_end: '#14b8a6', text_color: '#ffffff' },
+    products:   { accent_color: '#2563eb', gradient_start: '#1d4ed8', gradient_end: '#38bdf8', text_color: '#ffffff' },
+    jobs:       { accent_color: '#d97706', gradient_start: '#b45309', gradient_end: '#fbbf24', text_color: '#ffffff' },
+    bizservices:{ accent_color: '#0d9488', gradient_start: '#0f766e', gradient_end: '#2dd4bf', text_color: '#ffffff' },
+    bizhealth:  { accent_color: '#e11d48', gradient_start: '#be123c', gradient_end: '#fb7185', text_color: '#ffffff' },
+    bizhome:    { accent_color: '#7c3aed', gradient_start: '#6d28d9', gradient_end: '#a78bfa', text_color: '#ffffff' },
+    bizfix:     { accent_color: '#0891b2', gradient_start: '#0e7490', gradient_end: '#22d3ee', text_color: '#ffffff' },
+    dagu:       { accent_color: '#9333ea', gradient_start: '#7e22ce', gradient_end: '#c084fc', text_color: '#ffffff' },
+    tibeb:      { accent_color: '#ca8a04', gradient_start: '#a16207', gradient_end: '#facc15', text_color: '#ffffff' },
+    social:     { accent_color: '#059669', gradient_start: '#047857', gradient_end: '#34d399', text_color: '#ffffff' },
+    forum:      { accent_color: '#4f46e5', gradient_start: '#4338ca', gradient_end: '#818cf8', text_color: '#ffffff' },
+    news:       { accent_color: '#dc2626', gradient_start: '#b91c1c', gradient_end: '#f87171', text_color: '#ffffff' },
+    ad:         { accent_color: '#b45309', gradient_start: '#92400e', gradient_end: '#f59e0b', text_color: '#ffffff' }
+  };
+
+  function hexToRgbTriplet(hex) {
+    const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(String(hex || '').trim());
+    if (!match) return '13, 148, 136';
+    return [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)].join(', ');
+  }
+
+  function feedStyleFor(item) {
+    const key = String((item && (item.feed_type || item.source_type)) || 'all').toLowerCase();
+    return FEED_STYLE_MAP[key] || FEED_STYLE_FALLBACK[key] || FEED_STYLE_FALLBACK.all;
+  }
+
+  function applyFeedStyle(card, style) {
+    if (!card || !style) return;
+    const accent = style.accent_color || '#0d9488';
+    card.style.setProperty('--feed-accent', accent);
+    card.style.setProperty('--feed-accent-rgb', hexToRgbTriplet(accent));
+    card.style.setProperty('--feed-grad-start', style.gradient_start || accent);
+    card.style.setProperty('--feed-grad-end', style.gradient_end || accent);
+    card.style.setProperty('--feed-on-accent', style.text_color || '#ffffff');
+  }
+
+  function paintExistingFeedCards() {
+    document.querySelectorAll('.feed-post-card[data-feed-type]').forEach(function(card) {
+      applyFeedStyle(card, feedStyleFor({ feed_type: card.getAttribute('data-feed-type') }));
+    });
+  }
+
+  function loadFeedStyles() {
+    fetch('/api/method/bismillah_ethiobiz.home_api.get_feed_sources', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        const message = (res && res.message) || {};
+        if (message.styles && typeof message.styles === 'object') {
+          FEED_STYLE_MAP = message.styles;
+          paintExistingFeedCards();
+        }
+      })
+      .catch(function() { /* fallbacks keep every card coloured */ });
+  }
+  loadFeedStyles();
+
   function renderFeedCard(item) {
     const card = document.createElement('article');
     card.className = 'feed-post-card';
@@ -4087,6 +4180,7 @@ checkFirstVisitLanguageModal();
     const title = item.title || '';
     const content = item.content || item.desc || '';
     const actionUrl = safeUrl(item.action_url, '/shop');
+    const openUrl = safeUrl(item.open_url, actionUrl || '/shop');
     const badgeClass = item.badge_class || 'badge-product';
     const likes = Number.isFinite(Number(item.likes_count)) ? Number(item.likes_count) : 0;
     const commentCount = Number.isFinite(Number(item.comments_count)) ? Number(item.comments_count) : 0;
@@ -4107,7 +4201,7 @@ checkFirstVisitLanguageModal();
     const imageUrl = getFeedPostImageUrl(item);
     let mediaHtml = '';
     if (imageUrl) {
-      mediaHtml = `<div class="feed-media-container"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="feed-media-img" loading="lazy" decoding="async" onerror="this.parentElement.remove()"></div>`;
+      mediaHtml = `<div class="feed-media-container"><span class="feed-media-ambient" aria-hidden="true"></span><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="feed-media-img" loading="lazy" decoding="async" onerror="this.parentElement.remove()"></div>`;
     }
 
     const avatarUrl = getFeedAuthorAvatarUrl(item) || '/assets/frappe/images/default-avatar.png';
@@ -4130,6 +4224,9 @@ checkFirstVisitLanguageModal();
     card.dataset.reposts = String(reposts);
     card.dataset.reposted = viewerReposted ? '1' : '0';
     card.dataset.commentable = commentable ? '1' : '0';
+    card.dataset.feedType = String(item.feed_type || item.source_type || 'all').toLowerCase();
+    card.dataset.openUrl = openUrl;
+    applyFeedStyle(card, feedStyleFor(item));
 
     const headerIsRepost = isRepost && !!repostInfo;
     const headerAvatar = headerIsRepost ? (getFeedAuthorAvatarUrl({ avatar: repostInfo.avatar }) || avatarUrl) : avatarUrl;
@@ -4172,6 +4269,11 @@ checkFirstVisitLanguageModal();
       </div>
     `;
 
+    if (imageUrl) {
+      const media = card.querySelector('.feed-media-container');
+      if (media) media.style.setProperty('--feed-media-bg', 'url("' + String(imageUrl).replace(/"/g, '%22') + '")');
+    }
+
     wireFeedLike(card);
     wireFeedComments(card);
     wireFeedRepost(card);
@@ -4188,6 +4290,14 @@ checkFirstVisitLanguageModal();
     card.addEventListener('click', (e) => {
       if (e.target.closest('.engage-btn, .feed-thread, .feed-card-action-footer, button, input, textarea, .feed-expand-btn')) return;
       e.preventDefault();
+      // Server picks the correct destination per card family: the published
+      // single item page for products, the post page for discussions, and the
+      // vertical's own action URL everywhere else.
+      const destination = card.dataset.openUrl || '';
+      if (destination) {
+        window.location.href = destination;
+        return;
+      }
       const dt = card.dataset.doctype;
       const dn = card.dataset.docname;
       if (dt && dn) {
@@ -4228,7 +4338,9 @@ checkFirstVisitLanguageModal();
                 company: n.source,
                 badge: `${n.icon || '📰'} ${n.category}`,
                 badge_class: 'badge-news',
+                feed_type: 'news',
                 action_url: n.url,
+                open_url: n.url,
                 image_url: n.image_url,
                 time_ago: n.published_at,
                 likes_count: 0,

@@ -358,8 +358,8 @@
                 ? explicitTheme === 'dark'
                 : window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            const isWebsitePage = document.body.classList.contains('website-page') ||
-                                  document.getElementById('page-container') !== null && !window.location.hash.includes('#app');
+            const isWebsitePage = !!(document.body && document.body.classList.contains('website-page')) ||
+                                  (document.getElementById('page-container') !== null && !window.location.hash.includes('#app'));
 
             // Read from cached theme settings (fetched by the API)
             const cached = window.__ethiobizThemeSettings || null;
@@ -524,7 +524,14 @@
             root.style.removeProperty('--ethiobiz-dark-label-muted');
         }
         // live re-apply after short delay so later-rendered desk sections inherit
-        setTimeout(function () { document.body.setAttribute('data-eb-label-color', ethiobizDarkLabelColor || 'none'); }, 0);
+        var applyLabelAttr = function () {
+            if (!document.body) {
+                document.addEventListener('DOMContentLoaded', applyLabelAttr, { once: true });
+                return;
+            }
+            document.body.setAttribute('data-eb-label-color', ethiobizDarkLabelColor || 'none');
+        };
+        setTimeout(applyLabelAttr, 0);
     }
 
     // Fetch settings first, then init so updateBackground has correct flags

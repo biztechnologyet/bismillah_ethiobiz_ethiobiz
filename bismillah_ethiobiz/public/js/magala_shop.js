@@ -287,6 +287,8 @@
     }
 
     function categoryIcon(name) {
+        const found = state.categories.find(function (item) { return item.name === name; });
+        if (found && found.icon) return found.icon;
         const text = String(name || "").toLowerCase();
         if (text.indexOf("food") >= 0 || text.indexOf("restaurant") >= 0 || text.indexOf("dining") >= 0) return "🍽️";
         if (text.indexOf("health") >= 0 || text.indexOf("clinic") >= 0 || text.indexOf("medical") >= 0 || text.indexOf("dental") >= 0) return "🩺";
@@ -301,7 +303,15 @@
 
     function categoryLabel(name) {
         const found = state.categories.find(function (item) { return item.name === name; });
-        return found ? found.label : name;
+        if (!found) return name;
+        if (currentLang() === "am" && found.label_am) return found.label_am;
+        return found.label;
+    }
+
+    function categoryDisplayLabel(category) {
+        if (!category) return "";
+        if (currentLang() === "am" && category.label_am) return category.label_am;
+        return category.label || category.name;
     }
 
     function priceHtml(item) {
@@ -333,13 +343,13 @@
         if (!image || PLACEHOLDER_RE.test(image)) {
             return '<div class="mgs-thumb-fallback ' + tone + '">' +
                 '<span class="mgs-fallback-icon" aria-hidden="true">' + icon + '</span>' +
-                '<span class="mgs-fallback-label">' + escapeHtml(group) + '</span></div>';
+                '<span class="mgs-fallback-label">' + escapeHtml(categoryLabel(group)) + '</span></div>';
         }
         const classes = context === "list" ? "mgs-card-img mgs-list-img" : "mgs-card-img";
         return '<img class="' + classes + '" src="' + escapeHtml(image) + '" alt="' + alt +
             '" loading="lazy" decoding="async" data-fallback-tone="' + tone +
             '" data-fallback-icon="' + escapeHtml(icon) +
-            '" data-fallback-label="' + escapeHtml(group) + '" />';
+            '" data-fallback-label="' + escapeHtml(categoryLabel(group)) + '" />';
     }
 
     function attachImageFallbacks(scope) {
@@ -391,10 +401,18 @@
 
     function updateCategoryStatus() {
         if (!els.categoryStatus) return;
-        els.categoryStatus.textContent = state.categories.length
-            ? tpl("{n} categories · updated live", { n: state.categories.length },
-                state.categories.length + " categories · updated live")
-            : t("Browse all categories", "Browse all categories");
+        const count = state.categories.length;
+        const english = count
+            ? count + " categories · updated live"
+            : "Browse all categories";
+        // The global i18n engine caches each element's original English text in
+        // data-i18n-orig and re-applies it on the next translation pass. Without
+        // refreshing that cache the status would snap back to "Loading
+        // categories." on the Amharic storefront, so always sync both.
+        els.categoryStatus.setAttribute("data-i18n-orig", english);
+        els.categoryStatus.textContent = count
+            ? tpl("{n} categories · updated live", { n: count }, english)
+            : t("Browse all categories", english);
     }
 
     function normalizeCategories(raw) {
@@ -408,6 +426,8 @@
                 return {
                     name: category.item_group,
                     label: category.item_group_name || category.item_group,
+                    label_am: category.label_am || "",
+                    icon: category.icon || "",
                     count: Number(category.product_count || 0)
                 };
             })
@@ -429,7 +449,7 @@
             html += chipHtml(state.category, state.category, categoryIcon(state.category), null);
         }
         html += categories.map(function (category) {
-            return chipHtml(category.name, category.label, categoryIcon(category.name), category.count);
+            return chipHtml(category.name, categoryDisplayLabel(category), category.icon || categoryIcon(category.name), category.count);
         }).join("");
         els.categoryBar.innerHTML = html;
     }
@@ -462,7 +482,7 @@
             const active = String(state.category) === String(category.name);
             return '<button type="button" class="mgs-cat-filter' + (active ? " active" : "") +
                 '" data-category="' + escapeHtml(category.name) + '"><span>' +
-                escapeHtml(category.label) + '</span><span>' +
+                escapeHtml(categoryDisplayLabel(category)) + '</span><span>' +
                 (category.count ? escapeHtml(category.count) : "") + '</span></button>';
         }).join("");
         els.categoryFilters.innerHTML = html;

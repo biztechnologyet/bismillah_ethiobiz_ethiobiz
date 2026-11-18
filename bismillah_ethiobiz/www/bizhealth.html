@@ -8,13 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"></noscript>
-<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.2.0" />
+<link rel="stylesheet" href="/assets/bismillah_ethiobiz/css/bizhealth.css?v=4.3.0" />
 
 <div class="vertical-portal-wrapper">
     <!-- HERO SECTION -->
     <header class="vertical-hero health-hero">
         <div class="hero-content">
-            <span class="hero-badge" style="background:var(--health-100); color:var(--health-900);">🩺 EthioBiz Healthcare Ecosystem</span>
+            <span class="hero-badge" data-i18n="🩺 EthioBiz Healthcare Ecosystem" style="background:var(--health-100); color:var(--health-900);">🩺 EthioBiz Healthcare Ecosystem</span>
             <h1 class="hero-title">Your Health, Verified &amp; Connected</h1>
             <p class="hero-subtitle">Search healthcare institutes, book clinical services with smart automatic slot allocation, and schedule verified specialist doctors across Ethiopia.</p>
             
@@ -26,20 +26,27 @@
                 </div>
                 <button id="btn-search-health" class="btn-vertical-primary" style="background:var(--health-600);">Search Catalog</button>
             </div>
+
+            <div class="health-hero-stats">
+                <span class="health-hero-stat">🏥 <strong>Verified</strong> <span data-i18n="facilities">facilities</span></span>
+                <span class="health-hero-stat">⏱️ <strong data-i18n="Smart">Smart</strong> <span data-i18n="slot allocation">slot allocation</span></span>
+                <span class="health-hero-stat">💳 <strong>Telebirr</strong> <span data-i18n="&amp; CBE Birr">&amp; CBE Birr</span></span>
+                <span class="health-hero-stat">📋 <strong data-i18n="Digital">Digital</strong> <span data-i18n="prescriptions">prescriptions</span></span>
+            </div>
         </div>
     </header>
 
     <!-- HUB NAVIGATION TABS (INSTITUTES vs DOCTORS vs SERVICES) -->
     <div class="health-hub-nav-wrapper">
         <nav class="health-hub-nav" role="tablist">
-            <button class="health-hub-tab active" data-tab="institutes">
-                <span>🏥</span> Healthcare Institutes &amp; Hospitals
+            <button class="health-hub-tab active" data-tab="institutes" data-i18n="Healthcare Institutes &amp; Hospitals">
+                <span aria-hidden="true">🏥</span> Healthcare Institutes &amp; Hospitals
             </button>
-            <button class="health-hub-tab" data-tab="doctors">
-                <span>🩺</span> Specialist Medical Doctors
+            <button class="health-hub-tab" data-tab="doctors" data-i18n="Specialist Medical Doctors">
+                <span aria-hidden="true">🩺</span> Specialist Medical Doctors
             </button>
-            <button class="health-hub-tab" data-tab="services">
-                <span>🔬</span> Clinical &amp; Diagnostic Services
+            <button class="health-hub-tab" data-tab="services" data-i18n="Clinical &amp; Diagnostic Services">
+                <span aria-hidden="true">🔬</span> Clinical &amp; Diagnostic Services
             </button>
         </nav>
     </div>
@@ -49,7 +56,7 @@
         <div class="container-fluid px-lg-4">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <h3 class="section-title" style="margin-bottom:0;">Top Medical Specialties</h3>
-                <span style="font-size:0.78rem; color:#64748b; font-weight:600;">Scroll for more →</span>
+                <span style="font-size:0.78rem; color:#64748b; font-weight:600;" data-i18n="Scroll for more →">Scroll for more →</span>
             </div>
             <div class="specialty-chips-scroll">
                 <button class="spec-chip active" data-dept="all">🌟 All Specialties</button>
@@ -69,13 +76,13 @@
     </section>
 
     <!-- TRUST BANNER -->
-    <div style="background:#f0fdf4; border-bottom:1px solid #d1fae5; padding:10px 24px;">
-        <div style="display:flex; justify-content:center; gap:28px; flex-wrap:wrap;">
-            <span style="font-size:0.78rem; color:#047857; font-weight:700;">🏥 Verified Healthcare Facilities</span>
-            <span style="font-size:0.78rem; color:#047857; font-weight:700;">⏱️ Smart Free Slot Allocation</span>
-            <span style="font-size:0.78rem; color:#047857; font-weight:700;">💳 Telebirr &amp; CBEBirr Instant Pay</span>
-            <span style="font-size:0.78rem; color:#047857; font-weight:700;">📋 Digital Prescriptions &amp; Records</span>
-            <span style="font-size:0.78rem; color:#047857; font-weight:700;">🚗 Integrated BizRide Dispatch</span>
+    <div class="health-trust-strip">
+        <div class="health-trust-track">
+            <span class="health-trust-item" data-i18n="🏥 Verified healthcare facilities">🏥 Verified healthcare facilities</span>
+            <span class="health-trust-item" data-i18n="⏱️ Smart free slot allocation">⏱️ Smart free slot allocation</span>
+            <span class="health-trust-item" data-i18n="💳 Telebirr &amp; CBEBirr instant pay">💳 Telebirr &amp; CBEBirr instant pay</span>
+            <span class="health-trust-item" data-i18n="📋 Digital prescriptions &amp; records">📋 Digital prescriptions &amp; records</span>
+            <span class="health-trust-item" data-i18n="🚗 Integrated BizRide dispatch">🚗 Integrated BizRide dispatch</span>
         </div>
     </div>
 
@@ -310,5 +317,5 @@
 </div>
 
 <script src="/assets/bismillah_ethiobiz/js/ethiobiz_user_autofill.js?v=2.2.2"></script>
-<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.2.0"></script>
+<script src="/assets/bismillah_ethiobiz/js/bizhealth.js?v=4.3.1"></script>
 {% endblock %}

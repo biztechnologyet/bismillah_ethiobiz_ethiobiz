@@ -47,6 +47,54 @@ TEST_NAME_REGEX = (
 LISTING_LIMIT_DEFAULT = 24
 LISTING_LIMIT_MAX = 60
 
+# Dikka Shop category presentation (bilingual label + icon).  The Item Group is
+# the source of truth; this only decides how the chip/sidebar renders so the
+# Amharic storefront never falls back to English taxonomy names.
+CATEGORY_PRESENTATION = {
+    "Products": {"label_am": "ምርቶች", "icon": "🛍️"},
+    "Salon & Beauty": {"label_am": "ሳሎን እና ውበት", "icon": "💅"},
+    "Food & Dining": {"label_am": "ምግብ እና መመገቢያ", "icon": "🍽️"},
+    "Healthcare & Medical": {"label_am": "ጤና እና ህክምና", "icon": "🩺"},
+    "Hotel & Hospitality": {"label_am": "ሆቴል እና እንግዳ ተቀባይነት", "icon": "🏨"},
+    "Courses & Education": {"label_am": "ኮርሶች እና ትምህርት", "icon": "🎓"},
+    "SaaS": {"label_am": "ሳስ", "icon": "☁️"},
+    "Software & SaaS": {"label_am": "ሶፍትዌር እና ሳስ", "icon": "💻"},
+    "Sauce/Condiment": {"label_am": "ሶስ እና ቅመማ ቅመም", "icon": "🏷️"},
+    "Software": {"label_am": "ሶፍትዌር", "icon": "💻"},
+    "Fashion & Apparel": {"label_am": "ፋሽን እና ልብስ", "icon": "👗"},
+    "Electronics": {"label_am": "ኤሌክትሮኒክስ", "icon": "📱"},
+    "Home & Living": {"label_am": "ቤት እና ኑሮ", "icon": "🏠"},
+    "Agriculture": {"label_am": "እርሻ", "icon": "🌾"},
+    "Construction": {"label_am": "ግንባታ", "icon": "🏗️"},
+}
+
+
+def category_presentation(group_name: str) -> dict:
+    """Bilingual label + icon for a Dikka Shop category, with safe fallbacks."""
+    name = str(group_name or "").strip()
+    preset = CATEGORY_PRESENTATION.get(name) or {}
+    label_am = preset.get("label_am") or name
+    icon = preset.get("icon") or "🏷️"
+    if not preset:
+        lowered = name.lower()
+        if "food" in lowered or "dining" in lowered or "restaurant" in lowered:
+            icon = "🍽️"
+        elif "health" in lowered or "medical" in lowered or "clinic" in lowered:
+            icon = "🩺"
+        elif "course" in lowered or "education" in lowered or "school" in lowered:
+            icon = "🎓"
+        elif "salon" in lowered or "beauty" in lowered or "spa" in lowered:
+            icon = "💅"
+        elif "hotel" in lowered or "hospitality" in lowered:
+            icon = "🏨"
+        elif "software" in lowered or "saas" in lowered:
+            icon = "💻"
+        elif "sauce" in lowered or "condiment" in lowered:
+            icon = "🏷️"
+        elif "product" in lowered:
+            icon = "🛍️"
+    return {"label_am": label_am, "icon": icon}
+
 
 # ---------------------------------------------------------------------------
 # Small helpers
@@ -1278,6 +1326,8 @@ def get_categories(parent=None):
         out.append({
             "item_group": group,
             "item_group_name": row.get("item_group_name") or group,
+            "label_am": category_presentation(group)["label_am"],
+            "icon": category_presentation(group)["icon"],
             "parent_item_group": row.get("parent_item_group") or "",
             "is_group": cint(row.get("is_group")),
             "image": _img(row.get("image")),

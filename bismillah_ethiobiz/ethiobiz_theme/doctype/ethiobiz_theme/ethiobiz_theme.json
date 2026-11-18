@@ -191,6 +191,23 @@
       "options": "EthioBiz Card Portal Item"
     },
     {
+      "fieldname": "tab_feed_styles",
+      "fieldtype": "Tab Break",
+      "label": "🎨 Live Feed Card Colours"
+    },
+    {
+      "fieldname": "section_feed_styles",
+      "fieldtype": "Section Break",
+      "label": "Feed Type Colour Identity",
+      "description": "One row per live-feed card family. The homepage paints each card with its row's accent and gradient, and only enabled rows appear in the feed-type button bar. Missing rows fall back to built-in EthioBiz colours."
+    },
+    {
+      "fieldname": "feed_type_styles",
+      "fieldtype": "Table",
+      "label": "Feed Type Styles",
+      "options": "EthioBiz Feed Type Style"
+    },
+    {
       "fieldname": "tab_gradients",
       "fieldtype": "Tab Break",
       "label": "🎨 Appearance & Gradients"
@@ -507,6 +524,9 @@
     "tab_card_portals",
     "section_card_portals",
     "card_portal_items",
+    "tab_feed_styles",
+    "section_feed_styles",
+    "feed_type_styles",
     "tab_gradients",
     "section_gradients",
     "dark_gradient_style",
