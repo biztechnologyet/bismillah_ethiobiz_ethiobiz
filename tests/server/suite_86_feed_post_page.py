@@ -121,6 +121,25 @@ try:
 except Exception as _e:
     fl("86.29 analyze panel", str(_e)[:250])
 
+# ---------------------------------------------------------------- immersive layout
+try:
+    r = page(post_url("Item", "ABABA-DATA-001", "products"))
+    chk("86.61 scrollable stage markup",
+        "ebpost-stage" in r.text and "data-eb-stage" in r.text)
+    chk("86.62 collapsible detail sections",
+        "ebpost-collapse" in r.text and "data-eb-collapse" in r.text)
+    chk("86.63 scroll cue + next-post affordance",
+        "data-eb-scroll" in r.text and "ebpost-nextpost" in r.text)
+    chk("86.64 reading progress indicator", "data-eb-progress" in r.text)
+    chk("86.65 stage fit-to-screen CSS",
+        "ebpost-stage" in r.text and "height: 100%" in r.text and "100dvh" in r.text)
+    chk("86.66 next/scroll labels",
+        "Next post" in r.text and "Scroll for more" in r.text)
+    chk("86.67 stage resets on slide activation",
+        "stage.scrollTop = 0" in r.text and "wireStage" in r.text)
+except Exception as _e:
+    fl("86.61 immersive layout", str(_e)[:250])
+
 # ---------------------------------------------------------------- missing post
 try:
     r = page(post_url("Item", "NO-SUCH-POST-XYZ", "products"))
@@ -138,6 +157,8 @@ try:
     chk("86.36 Amharic labels present", "አስተያየቶች" in r.text or "ሙሉውን ያንብቡ" in r.text)
     chk("86.37 Amharic back label", "ወደ ቀጥታ ፍሰት ተመለስ" in r.text)
     chk("86.38 Amharic analyze labels", "ትንተና" in r.text and "ይህን ፖስት ይመርምሩ" in r.text)
+    chk("86.39 Amharic scroll/collapse labels",
+        "ቀጣይ ፖስት" in r.text and "ተጨማሪ ለማየት ይሸብልሉ" in r.text and "ዝርዝሮች" in r.text)
 except Exception as _e:
     fl("86.35 Amharic page", str(_e)[:250])
 
@@ -146,6 +167,7 @@ frappe.local.lang = "en"
 try:
     from bismillah_ethiobiz.www.post import load_post, LABELS
     rendered = 0
+    sample_html = ""
     for case in CASES:
         try:
             post = load_post(case["doctype"], case["name"], case["ft"])
@@ -154,6 +176,8 @@ try:
                 {"post": post, "labels": post.get("labels") or LABELS["en"],
                  "login_url": "/login", "is_logged_in": False},
             )
+            if case["label"] == "product":
+                sample_html = html
             if post.get("found") and "ebpost-slide" in html and "ebpost-actionbar" in html:
                 rendered += 1
             else:
@@ -162,6 +186,12 @@ try:
             fl("86.40 render %s" % case["label"], str(_e)[:200])
     chk("86.41 all feed families render the slide partial", rendered == len(CASES),
         "rendered=%s/%s" % (rendered, len(CASES)))
+    chk("86.42 new viewer label keys",
+        all(k in LABELS["en"] and k in LABELS["am"]
+            for k in ("next_post", "scroll_more", "see_all_replies")))
+    chk("86.43 stage/collapse in product slide",
+        "data-eb-stage" in sample_html and "ebpost-collapse" in sample_html
+        and "data-eb-progress" in sample_html)
 except Exception as _e:
     fl("86.41 direct render", str(_e)[:250])
 
@@ -185,6 +215,8 @@ try:
     chk("86.52 news comments payload", n.get("status") == "success" and n.get("commentable") is False)
     p = post_api.get_post_slide(doctype="Property", name=first("Property"), ft="bizhome")
     chk("86.53 property slide (raw-table fallback)", p.get("status") == "success" and "ebpost-slide" in (p.get("html") or ""))
+    chk("86.54 property slide avoids missing placeholder image",
+        "placeholder_property" not in (p.get("html") or ""))
 except Exception as _e:
     fl("86.45 viewer APIs", str(_e)[:300])
 

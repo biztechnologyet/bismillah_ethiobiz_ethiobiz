@@ -205,10 +205,13 @@ LABELS = {
         "news_comments": "Live news is discussed at the source.",
         "login_to_engage": "Log in to like, comment and repost.",
         "next": "Next",
+        "next_post": "Next post",
         "previous": "Previous",
         "close": "Close",
         "see_all_reviews": "See all reviews",
+        "see_all_replies": "See all replies",
         "replies_title": "Replies",
+        "scroll_more": "Scroll for more",
         "analyze": "Analyze",
         "analyze_title": "Post intelligence",
         "analyze_sub": "A quick read of what this post offers and what to check next.",
@@ -298,10 +301,13 @@ LABELS = {
         "news_comments": "ቀጥታ ዜና በምንጩ ይወያያል።",
         "login_to_engage": "ለመውደድ፣ አስተያየት ለመስጠት እና ለማጋራት ይግቡ።",
         "next": "ቀጣይ",
+        "next_post": "ቀጣይ ፖስት",
         "previous": "ቀዳሚ",
         "close": "ዝጋ",
         "see_all_reviews": "ሁሉንም አስተያየቶች ይመልከቱ",
+        "see_all_replies": "ሁሉንም መልሶች ይመልከቱ",
         "replies_title": "መልሶች",
+        "scroll_more": "ተጨማሪ ለማየት ይሸብልሉ",
         "analyze": "ትንተና",
         "analyze_title": "የፖስት ትንተና",
         "analyze_sub": "ይህ ፖስት ምን እንደሚያቀርብ እና ቀጥሎ ምን ማረጋገጥ እንዳለብዎ ፈጣን እይታ።",
@@ -901,6 +907,11 @@ def _load_property(name):
     price = flt(prop.get("price") or 0)
     price_str = "%s ETB / %s" % (f"{price:,.0f}", prop.get("price_unit") or "month") if price else "Price on request"
     amenities = prop.get("amenities") or []
+    # The BizHome API supplies a generic placeholder when a listing has no
+    # photo. Use the designed no-image hero here instead of a stock image.
+    image = _image(prop.get("image"))
+    if "placeholder_property" in image:
+        image = ""
 
     post.update({
         "title": prop.get("title") or name,
@@ -908,9 +919,9 @@ def _load_property(name):
         "category": prop.get("property_type") or "Property",
         "kicker": "BizHome · Verified listing",
         "body_html": _rich_html(prop.get("description")),
-        "image": _image(prop.get("image")),
-        "gallery": [{"image": _image(prop.get("image")), "caption": prop.get("title") or ""}]
-        if prop.get("image") else [],
+        "image": image,
+        "gallery": [{"image": image, "caption": prop.get("title") or ""}]
+        if image else [],
         "author_name": prop.get("company") or "Verified Lister",
         "author_company": prop.get("company") or "",
         "author_url": "/bizhome",
