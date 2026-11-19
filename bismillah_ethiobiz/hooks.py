@@ -122,8 +122,11 @@ website_route_rules = [
 # Render the canonical published Website Item route with the same rich Dikka
 # Shop single-item experience used by /product/<route>. The subclass keeps all
 # standard webshop Website Item behaviour and only swaps the website template.
+# EthioBiz multi-company: allow the same master User to be linked to Employees
+# in different companies (company-scoped Employee records).
 override_doctype_class = {
     "Website Item": "bismillah_ethiobiz.overrides.website_item.EthioBizWebsiteItem",
+    "Employee": "bismillah_ethiobiz.overrides.employee.EthioBizEmployee",
 }
 
 # ============================================

@@ -207,21 +207,45 @@ def _set_user_company_fields(user, company):
 
 
 def ensure_user_permission(user, company):
+    """Ensure a Company User Permission exists for the user.
+
+    Uses apply_to_all_doctypes so Frappe's native permission engine restricts
+    all doctypes with a Company field to the user's permitted companies (and
+    allows access across all companies the user is a member of).
+    """
     if not user or not company:
         return
     try:
-        exists = frappe.db.exists(
+        name = frappe.db.get_value(
             "User Permission",
             {"user": user, "allow": "Company", "for_value": company},
+            "name",
         )
-        if not exists:
-            frappe.get_doc({
-                "doctype": "User Permission",
-                "user": user,
-                "allow": "Company",
-                "for_value": company,
-                "is_default": 0,
-            }).insert(ignore_permissions=True)
+        if name:
+            # Normalize existing permission: multi-company access should apply to
+            # all doctypes; default-company flag is managed by set_default_company.
+            try:
+                doc = frappe.get_doc("User Permission", name)
+                changed = False
+                if not cint(getattr(doc, "apply_to_all_doctypes", 0)):
+                    doc.apply_to_all_doctypes = 1
+                    doc.applicable_for = None
+                    changed = True
+                if changed:
+                    doc.flags.ignore_permissions = True
+                    doc.save(ignore_permissions=True)
+            except Exception:
+                pass
+            return
+
+        frappe.get_doc({
+            "doctype": "User Permission",
+            "user": user,
+            "allow": "Company",
+            "for_value": company,
+            "apply_to_all_doctypes": 1,
+            "is_default": 0,
+        }).insert(ignore_permissions=True)
     except Exception as exc:
         frappe.logger("company_access").warning(
             "Could not sync User Permission for %s/%s: %s", user, company, exc
