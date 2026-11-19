@@ -291,6 +291,10 @@ def set_default_company(user, company):
         pass
     try:
         frappe.defaults.set_user_default("company", company, user)
+        # DefaultValue reads are cached in Redis; invalidate immediately so every
+        # interface (Desk boot, Hadeeda, HRMS) sees the newly active company.
+        frappe.defaults.clear_defaults_cache()
+        frappe.clear_cache(user=user)
     except Exception:
         pass
     try:

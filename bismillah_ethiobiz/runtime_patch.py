@@ -8,8 +8,116 @@ Ensures Helpdesk, LMS, Healthcare, Multi-Company, and Telephony fallbacks persis
 import os
 import frappe
 
+# frappe.db is a per-request LocalProxy. The patch must therefore be (re)applied
+# on every request, but the wrapper carries a marker so it is never nested.
+_SCOPE_MARKER = "__ethio_company_scoped_employee_lookup__"
+
+
+def ensure_employee_lookup_patch():
+    """Apply the employee lookup scope to the current request's db object."""
+    try:
+        patch_hrms_employee_lookup_company_scope()
+    except Exception:
+        pass
+
+
+def patch_hrms_employee_lookup_company_scope():
+    """Scope HRMS `user_id -> Employee` lookups to the active company.
+
+    ERPNext/HRMS often resolves the current Employee with only
+    ``{"user_id": frappe.session.user}``. Under EthioBiz's one-User/many-Employee
+    model that is ambiguous. This wrapper adds the user's active company only
+    when the user actually has more than one Employee, so single-company sites
+    keep the original behaviour untouched.
+    """
+    original_db_get_value = getattr(frappe.db, "get_value", None)
+    if not original_db_get_value or getattr(original_db_get_value, _SCOPE_MARKER, False):
+        return
+
+    def active_company_for(user):
+        try:
+            company = frappe.defaults.get_user_default("company", user)
+        except Exception:
+            company = None
+        if not company:
+            try:
+                # Second argument is the DefaultValue parent (the user), not the
+                # site-wide __default row.
+                company = frappe.db.get_default("company", user)
+            except Exception:
+                company = None
+        return company
+
+    def has_multiple_employees(user):
+        flag_key = "ethiobiz_multi_employee_%s" % user.replace("@", "_").replace(".", "_")
+        if flag_key not in frappe.flags:
+            try:
+                frappe.flags[flag_key] = (frappe.db.count("Employee", {"user_id": user}) or 0) > 1
+            except Exception:
+                frappe.flags[flag_key] = False
+        return bool(frappe.flags[flag_key])
+
+    def scoped_filters(filters, user):
+        if not isinstance(filters, dict) or filters.get("company"):
+            return None
+        if filters.get("user_id") != user:
+            return None
+        if not has_multiple_employees(user):
+            return None
+        company = active_company_for(user)
+        if not company:
+            return None
+        scoped = dict(filters)
+        scoped["company"] = company
+        return scoped
+
+    def patched_db_get_value(doctype, *args, **kwargs):
+        user = getattr(getattr(frappe, "session", None), "user", None)
+        if doctype == "Employee" and user and user not in ("Guest", "Administrator") and args:
+            new_filters = scoped_filters(args[0], user)
+            if new_filters is not None:
+                args = (new_filters,) + args[1:]
+        if doctype == "Employee" and user and user not in ("Guest", "Administrator") and "filters" in kwargs:
+            new_filters = scoped_filters(kwargs["filters"], user)
+            if new_filters is not None:
+                kwargs["filters"] = new_filters
+        return original_db_get_value(doctype, *args, **kwargs)
+
+    setattr(patched_db_get_value, _SCOPE_MARKER, True)
+    frappe.db.get_value = patched_db_get_value
+
+    original_get_value = getattr(frappe, "get_value", None)
+    if original_get_value and not getattr(original_get_value, _SCOPE_MARKER, False):
+        def patched_get_value(doctype, *args, **kwargs):
+            return patched_db_get_value(doctype, *args, **kwargs)
+        setattr(patched_get_value, _SCOPE_MARKER, True)
+        frappe.get_value = patched_get_value
+
+    original_get_all = getattr(frappe, "get_all", None)
+    if original_get_all and not getattr(original_get_all, _SCOPE_MARKER, False):
+        def patched_get_all(doctype, *args, **kwargs):
+            user = getattr(getattr(frappe, "session", None), "user", None)
+            if doctype == "Employee" and user and user not in ("Guest", "Administrator"):
+                if args and isinstance(args[0], dict):
+                    new_filters = scoped_filters(args[0], user)
+                    if new_filters is not None:
+                        args = (new_filters,) + args[1:]
+                elif "filters" in kwargs:
+                    new_filters = scoped_filters(kwargs["filters"], user)
+                    if new_filters is not None:
+                        kwargs["filters"] = new_filters
+            return original_get_all(doctype, *args, **kwargs)
+        setattr(patched_get_all, _SCOPE_MARKER, True)
+        frappe.get_all = patched_get_all
+
+    frappe.flags.ethiobiz_employee_lookup_patched = True
+
+
 def apply_runtime_patches():
     """Apply self-healing patches to monkey-patch and secure runtime endpoints."""
+    # 0. Multi-company HRMS employee resolution must follow the active company.
+    ensure_employee_lookup_patch()
+
     # 1. Telephony fallback
     try:
         import telephony.api

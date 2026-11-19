@@ -46,6 +46,34 @@
         return false;
     }
 
+    function patchEmployeeLookups() {
+        try {
+            if (!window.frappe || !frappe.db || typeof frappe.db.get_value !== 'function') return;
+            if (frappe.db.__ethioCompanyAwareEmployeeLookup) return;
+            var original = frappe.db.get_value;
+            frappe.db.get_value = function () {
+                var args = Array.prototype.slice.call(arguments);
+                var doctype = args[0];
+                var filters = args[1];
+                if (doctype === 'Employee' && filters && typeof filters === 'object' &&
+                    !Array.isArray(filters) && filters.user_id === frappe.session.user &&
+                    !filters.company) {
+                    var company = window.ethiobizActiveCompany ||
+                        (frappe.defaults && frappe.defaults.get_user_default &&
+                            frappe.defaults.get_user_default('company'));
+                    if (company) {
+                        var scoped = {};
+                        Object.keys(filters).forEach(function (k) { scoped[k] = filters[k]; });
+                        scoped.company = company;
+                        args[1] = scoped;
+                    }
+                }
+                return original.apply(frappe.db, args);
+            };
+            frappe.db.__ethioCompanyAwareEmployeeLookup = true;
+        } catch (e) {}
+    }
+
     function csrfToken() {
         try {
             return (window.frappe && (frappe.csrf_token || (frappe.session && frappe.session.csrf_token)))
@@ -638,6 +666,7 @@
 
     function boot() {
         if (isGuest()) return;
+        patchEmployeeLookups();
         ensureStyles();
         seedFromBoot();
         inject();

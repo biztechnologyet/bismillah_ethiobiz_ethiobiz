@@ -60,7 +60,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.0.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.1.0"
 ]
 
 # CSS for website (frontend/portal)
@@ -86,7 +86,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
     "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.0.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.1.0",
 ]
 
 # ============================================
@@ -152,7 +152,12 @@ update_website_context = "bismillah_ethiobiz.api.update_website_context"
 
 # Guest-safe webshop cart (prevents HTTP 500 on /cart for visitors without a
 # Customer party). See bismillah_ethiobiz/webshop_guest_cart.py.
-before_request = ["bismillah_ethiobiz.webshop_guest_cart.apply"]
+before_request = [
+    "bismillah_ethiobiz.webshop_guest_cart.apply",
+    # Ensure HRMS user_id -> Employee lookups follow the active company on
+    # every request (hooks.py itself may not be imported for API-only calls).
+    "bismillah_ethiobiz.runtime_patch.ensure_employee_lookup_patch",
+]
 
 # ============================================
 # DOC EVENTS
