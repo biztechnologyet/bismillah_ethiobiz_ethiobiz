@@ -60,7 +60,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=1.0.0"
+    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.0.0"
 ]
 
 # CSS for website (frontend/portal)
@@ -86,7 +86,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
     "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.0.0",
 ]
 
 # ============================================

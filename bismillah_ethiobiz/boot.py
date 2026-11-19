@@ -1,5 +1,6 @@
 import frappe
 from bismillah_ethiobiz.auto_company import ensure_company_default
+from bismillah_ethiobiz.company_access import get_company_context
 from bismillah_ethiobiz.workspace_cleaner import sanitize_boot_workspaces
 from bismillah_ethiobiz.api import _get_hadeeda_settings
 
@@ -12,6 +13,25 @@ def boot_session(bootinfo):
         bootinfo["ethiobiz_active_company"] = company_info.get("company")
         if company_info.get("needs_setup"):
             bootinfo["ethiobiz_company_needs_setup"] = True
+
+    # Seed the navbar company selector from boot so multi-company users see their
+    # current tenant immediately, without an extra round trip. The selector
+    # refreshes from get_my_companies in the background.
+    try:
+        user = frappe.session.user
+        if user and user != "Guest":
+            context = get_company_context(user)
+            companies = context.get("companies") or []
+            if companies:
+                bootinfo["ethiobiz_companies"] = companies
+                bootinfo["ethiobiz_active_company"] = (
+                    context.get("active_company")
+                    or context.get("default_company")
+                    or companies[0].get("name")
+                )
+                bootinfo["ethiobiz_default_company"] = context.get("default_company")
+    except Exception as e:
+        frappe.logger("ethiobiz").warning(f"Company boot context injection failed: {e}")
 
     sanitize_boot_workspaces(bootinfo)
 

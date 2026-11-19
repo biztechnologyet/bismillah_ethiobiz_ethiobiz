@@ -175,6 +175,8 @@ def get_company_context(user=None):
         "companies": [
             {
                 "name": m["company"],
+                "abbr": frappe.db.get_value("Company", m["company"], "abbr"),
+                "currency": _company_currency(m["company"]),
                 "is_default": bool(cint(m.get("is_default"))),
                 "role_profile": m.get("role_profile"),
                 "roles": m.get("roles"),
