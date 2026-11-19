@@ -3,6 +3,7 @@ import requests
 import json
 import re
 from frappe.utils.password import get_decrypted_password
+from frappe.utils import cint
 
 
 def _get_hadeeda_settings():
@@ -192,6 +193,81 @@ def _get_document_context(context):
         return ""
 
 
+def _get_hadeeda_company_context(user, active_company=None):
+    """Return membership-aware company context for Hadeeda/agent integrations."""
+    try:
+        from bismillah_ethiobiz import company_access
+        ctx = company_access.get_company_context(user) or {}
+    except Exception:
+        ctx = {}
+
+    companies = ctx.get("companies") or []
+    if not companies and active_company:
+        companies = [{"name": active_company, "is_default": True, "role_profile": None, "roles": None}]
+    active = ctx.get("active_company") or active_company or ""
+    default = ctx.get("default_company") or active
+    # Enrich each company with best-effort industry for agent context.
+    enriched = []
+    for c in companies:
+        name = c.get("name") if isinstance(c, dict) else c
+        if not name:
+            continue
+        try:
+            industry = frappe.db.get_value("Company", name, "custom_industry") or ""
+        except Exception:
+            industry = ""
+        enriched.append({
+            "name": name,
+            "is_default": bool(c.get("is_default")) if isinstance(c, dict) else (name == default),
+            "role_profile": c.get("role_profile") if isinstance(c, dict) else None,
+            "roles": c.get("roles") if isinstance(c, dict) else None,
+            "industry": industry,
+        })
+    return {
+        "user": user,
+        "companies": enriched,
+        "active_company": active,
+        "default_company": default,
+    }
+
+
+def _is_valid_hadeeda_service_token(settings=None):
+    """Best-effort service-token auth for machine callers (HADEEDA agent/n8n)."""
+    try:
+        settings = settings or _get_hadeeda_settings()
+        if not cint(getattr(settings, "enable_service_token_auth", 0)):
+            return False
+        token = ""
+        try:
+            token = settings.get_password("service_auth_token") or ""
+        except Exception:
+            token = getattr(settings, "service_auth_token", "") or ""
+        if not token:
+            return False
+        req = getattr(frappe, "request", None)
+        if not req:
+            return False
+        hdr = req.headers if getattr(req, "headers", None) else {}
+        provided = (
+            hdr.get("X-Hadeeda-Token")
+            or hdr.get("X-HADEEDA-TOKEN")
+            or ""
+        )
+        if not provided:
+            auth = hdr.get("Authorization") or ""
+            if auth.lower().startswith("bearer "):
+                provided = auth.split(" ", 1)[1].strip()
+        if not provided:
+            return False
+        try:
+            from frappe.utils.password import passlibctx  # noqa: F401
+        except Exception:
+            pass
+        return str(provided) == str(token)
+    except Exception:
+        return False
+
+
 @frappe.whitelist(allow_guest=True)
 def get_chat_config():
     user = frappe.session.user
@@ -210,6 +286,9 @@ def get_chat_config():
             "email": "",
             "username": "Guest",
             "company": "",
+            "active_company": "",
+            "default_company": "",
+            "companies": [],
             "department": "",
             "designation": "",
             "industry": "",
@@ -235,23 +314,28 @@ def get_chat_config():
     api_key, api_secret = _get_user_api_credentials(user)
     company = frappe.defaults.get_user_default("company") or ""
     department, designation = _get_user_department_designation(user)
+    company_ctx = _get_hadeeda_company_context(user, company)
+    active_company = company_ctx.get("active_company") or company
 
     return {
         "webhook_url": settings.chat_webhook_url,
         "is_guest": False,
         "enabled": bool(settings.enabled and settings.chat_enabled),
 
-        "session_id": f"{user}::{company}" if company else user,
+        "session_id": f"{user}::{active_company}" if active_company else user,
         "full_name": frappe.db.get_value("User", user, "full_name") or user,
         "email": frappe.db.get_value("User", user, "email") or "",
         "username": user,
-        "company": company,
+        "company": active_company,
+        "active_company": active_company,
+        "default_company": company_ctx.get("default_company") or active_company,
+        "companies": company_ctx.get("companies") or [],
         "department": department,
         "designation": designation,
         "industry": _get_user_industry_religion(user)[0],
         "religion": _get_user_industry_religion(user)[1],
-        "user_behaviour": _get_user_behaviour_and_company_industry(user)[0],
-        "company_industry": _get_user_behaviour_and_company_industry(user)[1],
+        "user_behaviour": _get_user_behaviour_and_company_industry(user, active_company)[0],
+        "company_industry": _get_user_behaviour_and_company_industry(user, active_company)[1],
         "language": _get_user_language(user),
         "api_key": api_key or "",
         "api_secret": api_secret or "",
@@ -334,43 +418,54 @@ def chat_webhook_proxy():
     except Exception:
         payload = dict(frappe.form_dict)
 
-    # Inject the user's API credentials server-side so the n8n workflow always
-    # receives the unmasked api_key/api_secret (same as chat_inline), regardless
-    # of what the @n8n/chat widget forwards in its client-side metadata.
-    user = frappe.session.user if (frappe.session.user and frappe.session.user != "Guest") else None
-    if not user and isinstance(payload.get("metadata"), dict):
-        user = payload["metadata"].get("username") or payload["metadata"].get("user_id")
+    # Inject user/company/API context server-side. Never trust client metadata for
+    # credentials or tenant context; only authenticated sessions or a valid
+    # HADEEDA service token may select a target user.
+    session_user = frappe.session.user if (frappe.session.user and frappe.session.user != "Guest") else None
+    target_user = session_user
+    metadata_in = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+    if not target_user and _is_valid_hadeeda_service_token(settings):
+        candidate = metadata_in.get("username") or metadata_in.get("user_id") or ""
+        if candidate and candidate != "Guest":
+            target_user = candidate
 
-    if user and user != "Guest" and frappe.db.exists("User", user):
+    if target_user and target_user != "Guest" and frappe.db.exists("User", target_user):
         try:
-            api_key, api_secret = _get_user_api_credentials(user)
-            company = frappe.defaults.get_user_default("company", user) or ""
-            full_name = frappe.db.get_value("User", user, "full_name") or user
-            department, designation = _get_user_department_designation(user)
+            api_key, api_secret = _get_user_api_credentials(target_user)
+            company = frappe.defaults.get_user_default("company", target_user) or ""
+            full_name = frappe.db.get_value("User", target_user, "full_name") or target_user
+            department, designation = _get_user_department_designation(target_user)
+            company_ctx = _get_hadeeda_company_context(target_user, company)
+            active_company = company_ctx.get("active_company") or company
 
-            metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
-            metadata["username"] = user
-            metadata["user_id"] = user
+            metadata = metadata_in.copy() if isinstance(metadata_in, dict) else {}
+            metadata["username"] = target_user
+            metadata["user_id"] = target_user
             metadata["full_name"] = full_name
-            metadata["company"] = company
+            metadata["company"] = active_company
+            metadata["active_company"] = active_company
+            metadata["default_company"] = company_ctx.get("default_company") or active_company
+            metadata["companies"] = company_ctx.get("companies") or []
             metadata["department"] = department
             metadata["designation"] = designation
-            metadata["language"] = _get_user_language(user)
-            industry, religion = _get_user_industry_religion(user)
+            metadata["language"] = _get_user_language(target_user)
+            industry, religion = _get_user_industry_religion(target_user)
             metadata["industry"] = industry
             metadata["religion"] = religion
-            ub, ci = _get_user_behaviour_and_company_industry(user, company)
+            ub, ci = _get_user_behaviour_and_company_industry(target_user, active_company)
             metadata["user_behaviour"] = ub
             metadata["company_industry"] = ci
-            metadata["source"] = "widget"
+            metadata["source"] = metadata.get("source") or "widget"
             metadata["api_key"] = api_key or ""
             metadata["api_secret"] = api_secret or ""
             payload["metadata"] = metadata
         except Exception as e:
             frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
+    else:
+        target_user = None
 
-    # Route to guest webhook if caller is Guest and guest webhook is configured
-    if not user or user == "Guest":
+    # Route to guest webhook if caller is Guest/unauthenticated for target context
+    if not target_user:
         webhook_url = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
     else:
         webhook_url = settings.chat_webhook_url
@@ -442,15 +537,18 @@ def chat_webhook_proxy():
 def get_user_credentials(username=None, telegram_username=None):
     """Return a user's API key + DECRYPTED API secret and profile as raw JSON.
 
-    Replaces the n8n erpNext 'Get user' node which reads the api_secret Password
-    field and gets the encrypted blob. This endpoint decrypts server-side via
-    get_decrypted_password so CIO can authenticate. Authenticated callers only.
+    Includes master-identity multi-company context so agents can operate across
+    all companies the user can access (e.g. Araya in Kistet + Sai Cakes).
+    Security: caller must be the target user, System Manager/Administrator, or
+    present a valid HADEEDA service token when service-token auth is enabled.
     """
     frappe.flags.ignore_csrf = True
     from werkzeug.wrappers import Response as WerkzeugResponse
 
+    settings = _get_hadeeda_settings()
     caller = frappe.session.user
-    if not caller or caller == "Guest":
+    service_call = _is_valid_hadeeda_service_token(settings)
+    if (not caller or caller == "Guest") and not service_call:
         return WerkzeugResponse(
             json.dumps({"error": "Authentication required"}),
             status=401, content_type="application/json"
@@ -465,25 +563,45 @@ def get_user_credentials(username=None, telegram_username=None):
             status=404, content_type="application/json"
         )
 
+    is_admin = caller in ("Administrator",) or ("System Manager" in (frappe.get_roles(caller) if caller and caller != "Guest" else []))
+    if not service_call and caller != target and not is_admin:
+        return WerkzeugResponse(
+            json.dumps({"error": "Not permitted"}),
+            status=403, content_type="application/json"
+        )
+
+    if not frappe.db.exists("User", target):
+        return WerkzeugResponse(
+            json.dumps({"error": "User not found"}),
+            status=404, content_type="application/json"
+        )
+
     api_key, api_secret = _get_user_api_credentials(target)
-    company = frappe.defaults.get_user_default("company", target) or ""
+    default_company = frappe.defaults.get_user_default("company", target) or ""
+    company_ctx = _get_hadeeda_company_context(target, default_company)
+    active_company = company_ctx.get("active_company") or default_company
     department, designation = _get_user_department_designation(target)
+    industry, religion = _get_user_industry_religion(target)
+    ub, ci = _get_user_behaviour_and_company_industry(target, active_company)
 
     data = {
         "name": target,
         "full_name": frappe.db.get_value("User", target, "full_name") or target,
         "first_name": frappe.db.get_value("User", target, "first_name") or "",
-        "company": company,
+        "company": active_company,
+        "active_company": active_company,
+        "default_company": company_ctx.get("default_company") or active_company,
+        "companies": company_ctx.get("companies") or [],
         "department": department,
         "designation": designation,
         "enabled": 1 if frappe.db.get_value("User", target, "enabled") else 0,
         "language": frappe.db.get_value("User", target, "language") or "",
         "api_key": api_key or "",
         "api_secret": api_secret or "",
-        "industry": _get_user_industry_religion(target)[0],
-        "religion": _get_user_industry_religion(target)[1],
-        "user_behaviour": _get_user_behaviour_and_company_industry(target, company)[0],
-        "company_industry": _get_user_behaviour_and_company_industry(target, company)[1],
+        "industry": industry,
+        "religion": religion,
+        "user_behaviour": ub,
+        "company_industry": ci,
     }
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
@@ -503,13 +621,17 @@ def chat_inline(prompt, context=None):
         full_name = "Guest"
         department, designation = "", ""
         session_id = f"guest::{frappe.utils.nowdate()}"
+        company_ctx = {"companies": [], "active_company": "", "default_company": ""}
     else:
         inline_url = settings.inline_webhook_url
         api_key, api_secret = _get_user_api_credentials(user)
         company = frappe.defaults.get_user_default("company") or ""
         full_name = frappe.db.get_value("User", user, "full_name") or user
         department, designation = _get_user_department_designation(user)
-        session_id = f"{user}::{company}" if company else user
+        company_ctx = _get_hadeeda_company_context(user, company)
+        active_company = company_ctx.get("active_company") or company
+        company = active_company
+        session_id = f"{user}::{active_company}" if active_company else user
 
     document_content = _get_document_context(context)
 
@@ -528,6 +650,9 @@ def chat_inline(prompt, context=None):
             "user_id": user or "Guest",
             "full_name": full_name,
             "company": company,
+            "active_company": company_ctx.get("active_company") or company,
+            "default_company": company_ctx.get("default_company") or company,
+            "companies": company_ctx.get("companies") or [],
             "department": department,
             "designation": designation,
             "industry": _get_user_industry_religion(user)[0] if not is_guest else "",
