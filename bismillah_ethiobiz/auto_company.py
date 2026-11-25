@@ -19,6 +19,60 @@ Fallback chain:
 import frappe
 
 
+def _user_can_access_company(user, company):
+    if not company:
+        return False
+    try:
+        if user == "Administrator" or "System Manager" in frappe.get_roles(user):
+            return True
+    except Exception:
+        pass
+    try:
+        if not frappe.db.exists("Company", company):
+            return False
+    except Exception:
+        return False
+    try:
+        # EthioBiz membership is the source of truth when present.
+        if frappe.db.exists("DocType", "EthioBiz Company Membership"):
+            active = frappe.get_all(
+                "EthioBiz Company Membership",
+                filters={"user": user, "company": company, "status": "Active"},
+                pluck="name",
+                limit=1,
+            )
+            if active:
+                return True
+            # If memberships exist for user, restrict to them.
+            any_mem = frappe.get_all(
+                "EthioBiz Company Membership",
+                filters={"user": user, "status": "Active"},
+                pluck="name",
+                limit=1,
+            )
+            if any_mem:
+                return False
+    except Exception:
+        pass
+    try:
+        if frappe.db.exists(
+            "User Permission", {"user": user, "allow": "Company", "for_value": company}
+        ):
+            return True
+        # If user has any Company user permissions, treat them as restrictive.
+        any_up = frappe.get_all(
+            "User Permission",
+            filters={"user": user, "allow": "Company"},
+            pluck="name",
+            limit=1,
+        )
+        if any_up:
+            return False
+    except Exception:
+        pass
+    return True
+
+
 def on_session_creation(login_manager):
     try:
         user = frappe.session.user
@@ -29,20 +83,31 @@ def on_session_creation(login_manager):
         old_default = frappe.defaults.get_user_default("Company")
 
         if current_default:
-            if old_default:
-                frappe.defaults.clear_user_default("Company")
-            return
+            if _user_can_access_company(user, current_default):
+                if old_default:
+                    frappe.defaults.clear_user_default("Company")
+                return
+            # Stale/inaccessible default (e.g. global company) - resolve from user context.
+            frappe.logger("ethiobiz").info(
+                f"Clearing inaccessible default company '{current_default}' for '{user}'"
+            )
+            current_default = None
 
         if old_default:
-            frappe.defaults.set_user_default("company", old_default)
-            frappe.defaults.clear_user_default("Company")
-            return
+            if _user_can_access_company(user, old_default):
+                frappe.defaults.set_user_default("company", old_default)
+                frappe.defaults.clear_user_default("Company")
+                return
+            old_default = None
 
         user_company, source = _resolve_user_company(user)
 
         if user_company:
             frappe.defaults.set_user_default("company", user_company)
-            frappe.db.set_value("User", user, "company", user_company)
+            try:
+                frappe.db.set_value("User", user, "company", user_company, update_modified=False)
+            except Exception:
+                pass
             frappe.logger("ethiobiz").info(
                 f"Auto-set company '{user_company}' for user '{user}' "
                 f"(source: {source}) on new session"
@@ -68,20 +133,30 @@ def ensure_company_default():
         old_default = frappe.defaults.get_user_default("Company")
 
         if current_default:
-            if old_default:
-                frappe.defaults.clear_user_default("Company")
-            return {"company": current_default, "source": "existing_default"}
+            if _user_can_access_company(user, current_default):
+                if old_default:
+                    frappe.defaults.clear_user_default("Company")
+                return {"company": current_default, "source": "existing_default"}
+            frappe.logger("ethiobiz").info(
+                f"Boot fallback: clearing inaccessible default company '{current_default}' for '{user}'"
+            )
+            current_default = None
 
         if old_default:
-            frappe.defaults.set_user_default("company", old_default)
-            frappe.defaults.clear_user_default("Company")
-            return {"company": old_default, "source": "migrated_from_uppercase"}
+            if _user_can_access_company(user, old_default):
+                frappe.defaults.set_user_default("company", old_default)
+                frappe.defaults.clear_user_default("Company")
+                return {"company": old_default, "source": "migrated_from_uppercase"}
+            old_default = None
 
         user_company, source = _resolve_user_company(user)
 
         if user_company:
             frappe.defaults.set_user_default("company", user_company)
-            frappe.db.set_value("User", user, "company", user_company)
+            try:
+                frappe.db.set_value("User", user, "company", user_company, update_modified=False)
+            except Exception:
+                pass
             frappe.logger("ethiobiz").info(
                 f"Boot fallback: set company '{user_company}' for '{user}' "
                 f"(source: {source})"
