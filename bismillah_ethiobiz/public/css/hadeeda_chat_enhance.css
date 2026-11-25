@@ -1,0 +1,264 @@
+/* ==========================================================================
+   Hadeeda standalone chat enhancement — additive, scoped to chat window.
+   Preserves the n8n widget, its messaging flow and existing copy/resize tools.
+   ========================================================================== */
+
+.chat-window-wrapper .chat-window,
+.chat-window {
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 32px 80px rgba(2, 24, 22, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.chat-window-wrapper .chat-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(420px 220px at 90% -8%, rgba(245, 200, 106, 0.16), transparent 62%),
+        radial-gradient(420px 260px at 4% 102%, rgba(31, 182, 174, 0.14), transparent 64%);
+}
+
+.chat-window-wrapper .chat-layout,
+.chat-window-wrapper .chat-body,
+.chat-window-wrapper .chat-footer,
+.chat-window-wrapper .chat-header {
+    position: relative;
+    z-index: 1;
+}
+
+.chat-window-wrapper .chat-message:not(.chat-message-transparent) {
+    margin-bottom: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16) !important;
+}
+
+.chat-window-wrapper .chat-message-from-user:not(.chat-message-transparent) {
+    border-color: rgba(31, 182, 174, 0.34) !important;
+}
+
+.chat-window-wrapper .chat-message-from-bot:not(.chat-message-transparent) {
+    border-color: rgba(245, 200, 106, 0.18) !important;
+}
+
+.chat-window-wrapper .hadeeda-chat-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 16px;
+    color: rgba(226, 232, 240, 0.58);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.chat-window-wrapper .hadeeda-chat-day::before,
+.chat-window-wrapper .hadeeda-chat-day::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.chat-window-wrapper .hadeeda-chat-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-window-wrapper .hadeeda-chat-quick button {
+    border: 1px solid rgba(31, 182, 174, 0.26);
+    border-radius: 999px;
+    background: rgba(31, 182, 174, 0.10);
+    color: #8af2e8;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.chat-window-wrapper .hadeeda-chat-quick button:hover {
+    background: rgba(31, 182, 174, 0.22);
+    transform: translateY(-1px);
+}
+
+html[data-theme='light'] .chat-window-wrapper .hadeeda-chat-quick button,
+[data-theme='light'] .chat-window-wrapper .hadeeda-chat-quick button {
+    color: #0f766e;
+    background: rgba(13, 148, 136, 0.08);
+}
+
+html[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day,
+[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day {
+    color: rgba(71, 85, 105, 0.72);
+}
+
+html[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day::before,
+html[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day::after,
+[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day::before,
+[data-theme='light'] .chat-window-wrapper .hadeeda-chat-day::after {
+    background: rgba(15, 23, 42, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-window-wrapper .hadeeda-chat-quick button {
+        transition: none !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Modern input composer: send, text writing, attach/file controls
+   -------------------------------------------------------------------------- */
+.chat-window-wrapper .chat-inputs,
+.chat-window-wrapper .chat-footer .chat-inputs {
+    gap: 10px !important;
+    padding: 12px 14px 14px !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0)) !important;
+}
+
+.chat-window-wrapper .chat-inputs textarea,
+.chat-window-wrapper textarea.chat-input,
+.chat-window-wrapper .chat-input textarea,
+.chat-window-wrapper .chat-inputs .chat-input {
+    min-height: 46px !important;
+    max-height: 160px !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    background: rgba(15, 23, 42, 0.42) !important;
+    color: #f8fafc !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 2px rgba(0,0,0,0.08) !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease !important;
+    resize: none !important;
+}
+
+.chat-window-wrapper .chat-inputs textarea::placeholder,
+.chat-window-wrapper textarea.chat-input::placeholder {
+    color: rgba(203, 213, 225, 0.62) !important;
+}
+
+.chat-window-wrapper .chat-inputs textarea:focus,
+.chat-window-wrapper textarea.chat-input:focus,
+.chat-window-wrapper .chat-input textarea:focus {
+    outline: none !important;
+    border-color: rgba(45, 212, 191, 0.55) !important;
+    background: rgba(15, 23, 42, 0.58) !important;
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.14), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+.chat-window-wrapper .chat-inputs-controls,
+.chat-window-wrapper .chat-input .chat-inputs-controls {
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+.chat-window-wrapper .chat-input-send-button,
+.chat-window-wrapper button.chat-input-send-button,
+.chat-window-wrapper .chat-inputs-controls button[type="submit"],
+.chat-window-wrapper .chat-inputs-controls .chat-input-send-button {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(20, 184, 166, 0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease !important;
+}
+
+.chat-window-wrapper .chat-input-send-button:hover:not(:disabled),
+.chat-window-wrapper button.chat-input-send-button:hover:not(:disabled) {
+    transform: translateY(-1px) scale(1.02) !important;
+    filter: brightness(1.03) !important;
+    box-shadow: 0 14px 28px rgba(20, 184, 166, 0.36), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+}
+
+.chat-window-wrapper .chat-input-send-button:active:not(:disabled) {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+.chat-window-wrapper .chat-input-send-button:disabled {
+    opacity: 0.45 !important;
+    box-shadow: none !important;
+    filter: grayscale(0.2) !important;
+}
+
+.chat-window-wrapper .chat-input-send-button svg,
+.chat-window-wrapper .chat-input-send-button path {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+.chat-window-wrapper .chat-input-file-button,
+.chat-window-wrapper button[aria-label*="attach" i],
+.chat-window-wrapper button[aria-label*="file" i],
+.chat-window-wrapper .chat-inputs-controls button:not(.chat-input-send-button):not([type="submit"]) {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 13px !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #cbd5e1 !important;
+    transition: all 160ms ease !important;
+}
+
+.chat-window-wrapper .chat-input-file-button:hover,
+.chat-window-wrapper button[aria-label*="attach" i]:hover,
+.chat-window-wrapper button[aria-label*="file" i]:hover,
+.chat-window-wrapper .chat-inputs-controls button:not(.chat-input-send-button):not([type="submit"]):hover {
+    background: rgba(20, 184, 166, 0.12) !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+    color: #99f6e4 !important;
+    transform: translateY(-1px) !important;
+}
+
+.chat-window-wrapper .chat-input-file-button svg,
+.chat-window-wrapper button[aria-label*="attach" i] svg,
+.chat-window-wrapper button[aria-label*="file" i] svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+html[data-theme='light'] .chat-window-wrapper .chat-inputs textarea,
+html[data-theme='light'] .chat-window-wrapper textarea.chat-input,
+[data-theme='light'] .chat-window-wrapper .chat-inputs textarea,
+[data-theme='light'] .chat-window-wrapper textarea.chat-input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+html[data-theme='light'] .chat-window-wrapper .chat-inputs textarea::placeholder,
+[data-theme='light'] .chat-window-wrapper .chat-inputs textarea::placeholder {
+    color: rgba(100, 116, 139, 0.8) !important;
+}
+
+html[data-theme='light'] .chat-window-wrapper .chat-input-file-button,
+html[data-theme='light'] .chat-window-wrapper button[aria-label*="attach" i],
+html[data-theme='light'] .chat-window-wrapper button[aria-label*="file" i],
+[data-theme='light'] .chat-window-wrapper .chat-input-file-button,
+[data-theme='light'] .chat-window-wrapper button[aria-label*="attach" i],
+[data-theme='light'] .chat-window-wrapper button[aria-label*="file" i] {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+}
+
+@media (max-width: 640px) {
+    .chat-window-wrapper .chat-inputs textarea,
+    .chat-window-wrapper textarea.chat-input {
+        font-size: 16px !important; /* prevent iOS zoom */
+    }
+}

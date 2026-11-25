@@ -276,11 +276,12 @@ def get_chat_config():
     is_guest = user == "Guest"
 
     if is_guest:
-        guest_webhook = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
+        # 2026-11-14 contract: guests must never receive the logged-in webhook.
+        guest_webhook = getattr(settings, "chat_webhook_url_guest", None) or ""
         return {
             "webhook_url": guest_webhook,
             "is_guest": True,
-            "enabled": bool(settings.enabled and settings.chat_enabled),
+            "enabled": bool(settings.enabled and settings.chat_enabled and guest_webhook),
             "session_id": f"guest::{frappe.utils.nowdate()}",
             "full_name": "Guest",
             "email": "",
@@ -463,17 +464,35 @@ def chat_webhook_proxy():
             frappe.logger("ethiobiz").error("chat_webhook_proxy metadata inject error: %s" % e)
     else:
         target_user = None
+        # Never forward client-supplied identity/credentials for guests.
+        guest_metadata = metadata_in.copy() if isinstance(metadata_in, dict) else {}
+        guest_metadata["username"] = "Guest"
+        guest_metadata["user_id"] = "Guest"
+        guest_metadata["full_name"] = "Guest"
+        guest_metadata["company"] = ""
+        guest_metadata["active_company"] = ""
+        guest_metadata["default_company"] = ""
+        guest_metadata["companies"] = []
+        guest_metadata["api_key"] = ""
+        guest_metadata["api_secret"] = ""
+        payload["metadata"] = guest_metadata
 
-    # Route to guest webhook if caller is Guest/unauthenticated for target context
+
+    # 2026-11-14 contract: guests use ONLY the dedicated guest webhook.
+    # Never fall back to the authenticated/logged-in webhook URL.
     if not target_user:
-        webhook_url = getattr(settings, "chat_webhook_url_guest", None) or settings.chat_webhook_url
+        webhook_url = getattr(settings, "chat_webhook_url_guest", None) or ""
+        missing_message = "Guest webhook URL is not configured."
+        missing_status = 503
     else:
         webhook_url = settings.chat_webhook_url
+        missing_message = "Webhook URL not configured."
+        missing_status = 500
 
     if not webhook_url:
         return WerkzeugResponse(
-            json.dumps({"output": "Webhook URL not configured."}),
-            status=500, content_type="application/json"
+            json.dumps({"output": missing_message}),
+            status=missing_status, content_type="application/json"
         )
 
 
@@ -584,14 +603,17 @@ def get_user_credentials(username=None, telegram_username=None):
     industry, religion = _get_user_industry_religion(target)
     ub, ci = _get_user_behaviour_and_company_industry(target, active_company)
 
+    companies = company_ctx.get("companies") or []
+    default_company = company_ctx.get("default_company") or active_company
     data = {
         "name": target,
         "full_name": frappe.db.get_value("User", target, "full_name") or target,
         "first_name": frappe.db.get_value("User", target, "first_name") or "",
         "company": active_company,
         "active_company": active_company,
-        "default_company": company_ctx.get("default_company") or active_company,
-        "companies": company_ctx.get("companies") or [],
+        "default_company": default_company,
+        "companies": companies,
+        "allowed_companies": companies,
         "department": department,
         "designation": designation,
         "enabled": 1 if frappe.db.get_value("User", target, "enabled") else 0,
@@ -606,32 +628,30 @@ def get_user_credentials(username=None, telegram_username=None):
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def chat_inline(prompt, context=None):
+    """2026-11-14 contract: inline AI is logged-in only and POST-only.
+
+    Guests are rejected before any webhook URL or credential is resolved, and
+    there is deliberately no guest fallback to the authenticated inline URL.
+    """
     user = frappe.session.user
     settings = _get_hadeeda_settings()
     if not settings.enabled or not settings.inline_ai_enabled:
         frappe.throw("Inline AI is disabled", frappe.PermissionError)
+    if not user or user == "Guest":
+        frappe.throw("Inline AI is available to signed-in users only.", frappe.PermissionError)
 
-    is_guest = not user or user == "Guest"
-    if is_guest:
-        inline_url = getattr(settings, "inline_webhook_url_guest", None) or settings.inline_webhook_url
-        api_key, api_secret = "", ""
-        company = ""
-        full_name = "Guest"
-        department, designation = "", ""
-        session_id = f"guest::{frappe.utils.nowdate()}"
-        company_ctx = {"companies": [], "active_company": "", "default_company": ""}
-    else:
-        inline_url = settings.inline_webhook_url
-        api_key, api_secret = _get_user_api_credentials(user)
-        company = frappe.defaults.get_user_default("company") or ""
-        full_name = frappe.db.get_value("User", user, "full_name") or user
-        department, designation = _get_user_department_designation(user)
-        company_ctx = _get_hadeeda_company_context(user, company)
-        active_company = company_ctx.get("active_company") or company
-        company = active_company
-        session_id = f"{user}::{active_company}" if active_company else user
+    inline_url = settings.inline_webhook_url
+    api_key, api_secret = _get_user_api_credentials(user)
+    company = frappe.defaults.get_user_default("company") or ""
+    full_name = frappe.db.get_value("User", user, "full_name") or user
+    department, designation = _get_user_department_designation(user)
+    company_ctx = _get_hadeeda_company_context(user, company)
+    active_company = company_ctx.get("active_company") or company
+    company = active_company
+    session_id = f"{user}::{active_company}" if active_company else user
+    is_guest = False
 
     document_content = _get_document_context(context)
 
@@ -767,6 +787,11 @@ def update_website_context(context):
         "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
         "/assets/bismillah_ethiobiz/css/walta.css",
         "/assets/bismillah_ethiobiz/css/magala_checkout.css",
+        "/assets/bismillah_ethiobiz/css/product_pages_atmosphere.css?v=1.1.1",
+        "/assets/bismillah_ethiobiz/css/ethiobiz_pages_atmosphere.css?v=1.0.1",
+        "/assets/bismillah_ethiobiz/css/ethiobiz_all_pages_polish.css?v=1.0.0",
+        "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.0.0",
+        "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.0.0",
     ]
     for css in css_files:
         if css not in context.web_include_css:
@@ -785,15 +810,20 @@ def update_website_context(context):
     js_files = [
         "/assets/bismillah_ethiobiz/js/ethiobiz_fetch.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/embedding_block.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.5",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.7",
         "/assets/bismillah_ethiobiz/js/walta.js",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.5",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.0",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.6",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.1",
         "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
         "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
         "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
-        "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.3.1",
-        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.1.0",
+        "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.4",
+        "/assets/bismillah_ethiobiz/js/product_pages_atmosphere.js?v=1.1.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_pages_atmosphere.js?v=1.0.1",
+        "/assets/bismillah_ethiobiz/js/ethiobiz_all_pages_polish.js?v=1.0.0",
+        "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
+        "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.0.0",
     ]
     for js in js_files:
         base = js.split("?")[0]

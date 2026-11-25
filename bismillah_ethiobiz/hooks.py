@@ -45,7 +45,9 @@ app_license = "MIT"
 app_include_css = [
     "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
-    "/assets/bismillah_ethiobiz/css/dagu.css"
+    "/assets/bismillah_ethiobiz/css/dagu.css",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.0.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.0"
 ]
 
 # JS included in desk (backend)
@@ -55,8 +57,10 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/workspace_dropdown_fix.js",
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.6",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.1",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js",
@@ -71,6 +75,11 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/magala_checkout.css",
     "/assets/bismillah_ethiobiz/css/magala_shop.css?v=3.2.0",
     "/assets/bismillah_ethiobiz/css/ethiobiz_map.css",
+    "/assets/bismillah_ethiobiz/css/product_pages_atmosphere.css?v=1.1.1",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_pages_atmosphere.css?v=1.0.1",
+    "/assets/bismillah_ethiobiz/css/ethiobiz_all_pages_polish.css?v=1.0.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.0.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.0",
 ]
 
 # JS for website (frontend/portal)
@@ -79,14 +88,21 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/embedding_block.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.7",
     "/assets/bismillah_ethiobiz/js/walta.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.5.0",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.6",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.1",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
     "/assets/bismillah_ethiobiz/js/magala_checkout.js?v=1.4.0",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_i18n.js?v=2.2.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_company_switcher.js?v=2.1.0",
+    "/assets/bismillah_ethiobiz/js/product_pages_atmosphere.js?v=1.1.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_pages_atmosphere.js?v=1.0.1",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_all_pages_polish.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
 ]
 
 # ============================================
@@ -111,7 +127,13 @@ website_route_rules = [
     {"from_route": "/map", "to_route": "map"},
     {"from_route": "/companies", "to_route": "map"},
     {"from_route": "/shop", "to_route": "shop"},
+    {"from_route": "/magala", "to_route": "shop"},
+    {"from_route": "/magala/<path:item_code>", "to_route": "product"},
     {"from_route": "/product/<path:item_code>", "to_route": "product"},
+    {"from_route": "/products/<path:item_code>", "to_route": "product"},
+    # Published Website Items under general Item Group routes (for example
+    # /food-dining/<slug>) use the same rich Dikko single-item experience.
+    {"from_route": "/food-dining/<path:item_code>", "to_route": "product"},
     {"from_route": "/bizhealth", "to_route": "bizhealth"},
     {"from_route": "/doctor/<path:slug>", "to_route": "doctor_detail"},
     {"from_route": "/bizfix", "to_route": "bizfix"},
@@ -119,7 +141,7 @@ website_route_rules = [
     {"from_route": "/booking", "to_route": "booking"},
 ]
 
-# Render the canonical published Website Item route with the same rich Dikka
+# Render the canonical published Website Item route with the same rich Dikko
 # Shop single-item experience used by /product/<route>. The subclass keeps all
 # standard webshop Website Item behaviour and only swaps the website template.
 # EthioBiz multi-company: allow the same master User to be linked to Employees
