@@ -194,38 +194,98 @@ def _get_document_context(context):
 
 
 def _get_hadeeda_company_context(user, active_company=None):
-    """Return membership-aware company context for Hadeeda/agent integrations."""
+    """Return company context for Hadeeda/agent integrations.
+
+    Includes all companies the user has privilege to (EthioBiz memberships and
+    Company User Permissions), with the default company clearly marked.
+    """
     try:
         from bismillah_ethiobiz import company_access
         ctx = company_access.get_company_context(user) or {}
     except Exception:
         ctx = {}
 
-    companies = ctx.get("companies") or []
-    if not companies and active_company:
-        companies = [{"name": active_company, "is_default": True, "role_profile": None, "roles": None}]
+    companies = list(ctx.get("companies") or [])
     active = ctx.get("active_company") or active_company or ""
     default = ctx.get("default_company") or active
-    # Enrich each company with best-effort industry for agent context.
+
+    # Union Company User Permissions so all privileged companies are exposed.
+    try:
+        ups = frappe.get_all(
+            "User Permission",
+            filters={"user": user, "allow": "Company"},
+            fields=["for_value", "is_default"],
+        )
+    except Exception:
+        ups = []
+
+    seen = {
+        (c.get("name") if isinstance(c, dict) else c)
+        for c in companies
+        if (c.get("name") if isinstance(c, dict) else c)
+    }
+    for up in ups:
+        name = up.get("for_value")
+        if not name or name in seen:
+            # If UP marks default, reflect it on existing entry.
+            if name and up.get("is_default"):
+                for c in companies:
+                    cname = c.get("name") if isinstance(c, dict) else c
+                    if cname == name and isinstance(c, dict):
+                        c["is_default"] = True
+            continue
+        companies.append(
+            {
+                "name": name,
+                "is_default": bool(up.get("is_default")),
+                "role_profile": None,
+                "roles": None,
+                "source": "User Permission",
+            }
+        )
+        seen.add(name)
+
+    if not companies and active_company:
+        companies = [{"name": active_company, "is_default": True, "role_profile": None, "roles": None}]
+        seen.add(active_company)
+
+    # Resolve default/active with privilege awareness.
+    default = default or next((c.get("name") for c in companies if isinstance(c, dict) and c.get("is_default")), "")
+    if not default and companies:
+        first = companies[0]
+        default = first.get("name") if isinstance(first, dict) else first
+    if active and active not in seen:
+        active = default
+    if not active:
+        active = default
+
     enriched = []
     for c in companies:
         name = c.get("name") if isinstance(c, dict) else c
         if not name:
             continue
         try:
-            industry = frappe.db.get_value("Company", name, "custom_industry") or ""
+            industry = frappe.db.get_value("Company", name, "custom_industry") or frappe.db.get_value("Company", name, "industry") or ""
         except Exception:
             industry = ""
+        is_default = bool(c.get("is_default")) if isinstance(c, dict) else (name == default)
+        if name == default:
+            is_default = True
         enriched.append({
             "name": name,
-            "is_default": bool(c.get("is_default")) if isinstance(c, dict) else (name == default),
+            "is_default": is_default,
             "role_profile": c.get("role_profile") if isinstance(c, dict) else None,
             "roles": c.get("roles") if isinstance(c, dict) else None,
             "industry": industry,
         })
+
+    # Keep default company first for consumer convenience, then others stable.
+    enriched.sort(key=lambda x: (0 if x.get("is_default") else 1, x.get("name") or ""))
+
     return {
         "user": user,
         "companies": enriched,
+        "allowed_companies": enriched,
         "active_company": active,
         "default_company": default,
     }

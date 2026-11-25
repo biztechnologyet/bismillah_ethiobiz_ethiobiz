@@ -47,7 +47,7 @@ app_include_css = [
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
     "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.0.0",
-    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.0"
+    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.2"
 ]
 
 # JS included in desk (backend)
@@ -60,7 +60,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.6",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.1",
     "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.2",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
     "/assets/bismillah_ethiobiz/js/delivery_find_bizride.js",
@@ -79,7 +79,7 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/ethiobiz_pages_atmosphere.css?v=1.0.1",
     "/assets/bismillah_ethiobiz/css/ethiobiz_all_pages_polish.css?v=1.0.0",
     "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.0.0",
-    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.1.2",
 ]
 
 # JS for website (frontend/portal)
@@ -91,7 +91,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.5.6",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.6.1",
     "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.2",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/all_products_custom.js?v=1.1.0",
@@ -102,7 +102,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_pages_atmosphere.js?v=1.0.1",
     "/assets/bismillah_ethiobiz/js/ethiobiz_all_pages_polish.js?v=1.0.0",
     "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.0.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.1.2",
 ]
 
 # ============================================
