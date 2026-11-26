@@ -35,6 +35,6 @@ html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--user, [data-
 html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input, [data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input { background:rgba(255,255,255,0.92); color:#0f172a; }
 @media (max-width: 520px) { .hadeeda-inline-popup .hadeeda-thread-msg { max-width:95%; } }
 @media (prefers-reduced-motion: reduce) { .hadeeda-inline-popup .hadeeda-thread-msg { animation:none !important; } }
-.hadeeda-inline-popup .hadeeda-inline-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;}
-.hadeeda-inline-popup .hadeeda-view-loading{flex:0 0 auto;}
+.hadeeda-inline-popup .hadeeda-inline-body{display:flex!important;flex-direction:column!important;flex:1 1 0%!important;min-height:0!important;height:0!important;max-height:none!important;overflow:hidden!important;}
+.hadeeda-inline-popup .hadeeda-view-loading{flex:0 0 auto!important;height:auto!important;min-height:100px;}
 .hadeeda-inline-popup .hadeeda-thread-follow{flex:0 0 auto!important;margin-top:0!important;}

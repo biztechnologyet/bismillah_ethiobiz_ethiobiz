@@ -459,9 +459,9 @@
                 .hadeeda-inline-body {
                     display: flex !important;
                     flex-direction: column !important;
-                    flex: 1 1 auto !important;
+                    flex: 1 1 0% !important;
                     min-height: 0 !important;
-                    height: auto !important;
+                    height: 0 !important;
                     padding: 12px 14px !important;
                     box-sizing: border-box !important;
                     position: relative !important;
@@ -535,8 +535,9 @@
                     flex-direction: column !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    flex: 1 1 auto !important;
-                    height: 100% !important;
+                    flex: 0 0 auto !important;
+                    height: auto !important;
+                    min-height: 100px !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                     padding: 24px 12px !important;

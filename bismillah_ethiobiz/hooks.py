@@ -1,10 +1,10 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 EthioBiz Theme - Frappe Hooks
 Bismillah Ar-Rahman Ar-Rahim
 
 Static theme deployment for EthioBiz ERPNext ecosystem.
-Ã‚Â© 2025 EthioBiz | Powered by Biz Technology Solutions
+Â© 2025 EthioBiz | Powered by Biz Technology Solutions
 """
 
 from __future__ import unicode_literals
@@ -46,7 +46,7 @@ app_include_css = [
     "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
-    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.3",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.4",
     "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.2.1"
 ]
 
@@ -58,7 +58,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/force_layout.js",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.3",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.4",
     "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.3",
     "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.2.1",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
@@ -78,7 +78,7 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/product_pages_atmosphere.css?v=1.1.1",
     "/assets/bismillah_ethiobiz/css/ethiobiz_pages_atmosphere.css?v=1.0.1",
     "/assets/bismillah_ethiobiz/css/ethiobiz_all_pages_polish.css?v=1.0.0",
-    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.3",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.4",
     "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.2.1",
 ]
 
@@ -89,7 +89,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/ethiobiz_theme.js?v=2.5.7",
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.1",
-    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.3",
+    "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.4",
     "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.3",
     "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.2.1",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
