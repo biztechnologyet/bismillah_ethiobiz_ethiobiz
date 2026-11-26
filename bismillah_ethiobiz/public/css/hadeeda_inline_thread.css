@@ -1,0 +1,188 @@
+/* Hadeeda inline-thread enhancement — chat-like continuous conversation. */
+.hadeeda-inline-popup .hadeeda-inline-thread-wrap {
+    margin: 10px 0 12px;
+    border: 1px solid rgba(31, 182, 174, 0.20);
+    border-radius: 18px;
+    background: rgba(22, 27, 34, 0.62);
+    overflow: hidden;
+}
+
+.hadeeda-inline-popup .hadeeda-thread-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+    font-weight: 800;
+    color: #9fe7df;
+}
+
+.hadeeda-inline-popup .hadeeda-thread-title { letter-spacing: 0.03em; }
+
+.hadeeda-inline-popup .hadeeda-thread-clear {
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.hadeeda-inline-popup .hadeeda-thread-clear:hover { color: #fff; }
+
+.hadeeda-inline-popup .hadeeda-inline-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+.hadeeda-inline-popup .hadeeda-inline-thread:empty::before {
+    content: "Start a conversation with Hadeeda...";
+    color: rgba(226,232,240,0.55);
+    font-size: 12px;
+}
+
+.hadeeda-inline-popup .hadeeda-thread-msg {
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    word-break: break-word;
+    white-space: pre-wrap;
+    animation: hadeeda-thread-in 180ms ease-out both;
+}
+.hadeeda-inline-popup .hadeeda-thread-msg--user {
+    align-self: flex-end;
+    border: 1px solid rgba(31,182,174,0.30);
+    background: linear-gradient(135deg, rgba(31,182,174,0.22), rgba(20,121,116,0.30));
+    color: #e8fffb;
+    border-bottom-right-radius: 5px;
+}
+.hadeeda-inline-popup .hadeeda-thread-msg--assistant {
+    align-self: flex-start;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(48,54,61,0.88);
+    color: #f1f5f9;
+    border-bottom-left-radius: 5px;
+}
+
+.hadeeda-inline-popup .hadeeda-thread-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 9.5px;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.72;
+}
+.hadeeda-inline-popup .hadeeda-thread-body { white-space: pre-wrap; }
+
+.hadeeda-inline-popup .hadeeda-thread-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+.hadeeda-inline-popup .hadeeda-thread-action {
+    border: 1px solid rgba(31,182,174,0.24);
+    border-radius: 999px;
+    background: rgba(31,182,174,0.10);
+    color: #7ff0e5;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 9px;
+    cursor: pointer;
+}
+.hadeeda-inline-popup .hadeeda-thread-action--insert {
+    background: rgba(31,182,174,0.22);
+}
+.hadeeda-inline-popup .hadeeda-thread-action:hover { background: rgba(31,182,174,0.28); }
+
+.hadeeda-inline-popup .hadeeda-thread-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 10px;
+}
+.hadeeda-inline-popup .hadeeda-thread-quick button,
+.hadeeda-inline-popup .hadeeda-thread-follow-send {
+    border: 1px solid rgba(31,182,174,0.24);
+    border-radius: 999px;
+    background: rgba(31,182,174,0.10);
+    color: #7ff0e5;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.hadeeda-inline-popup .hadeeda-thread-quick button:hover,
+.hadeeda-inline-popup .hadeeda-thread-follow-send:hover { background: rgba(31,182,174,0.22); }
+
+.hadeeda-inline-popup .hadeeda-thread-follow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+}
+.hadeeda-inline-popup .hadeeda-thread-follow-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 36px;
+    border: 1px solid rgba(31,182,174,0.24);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: #f1f5f9;
+    font-size: 11.5px;
+    padding: 6px 12px;
+    outline: none;
+}
+.hadeeda-inline-popup .hadeeda-thread-follow-input:focus {
+    border-color: rgba(31,182,174,0.52);
+    box-shadow: 0 0 0 3px rgba(31,182,174,0.12);
+}
+.hadeeda-inline-popup .hadeeda-thread-follow-send {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0 14px;
+}
+
+@keyframes hadeeda-thread-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+html[data-theme='light'] .hadeeda-inline-popup .hadeeda-inline-thread-wrap,
+[data-theme='light'] .hadeeda-inline-popup .hadeeda-inline-thread-wrap {
+    background: rgba(248,250,252,0.92);
+    border-color: rgba(13,148,136,0.18);
+}
+html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--user,
+[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--user {
+    background: linear-gradient(135deg, rgba(13,148,136,0.14), rgba(5,150,105,0.18));
+    color: #134e4a;
+}
+html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--assistant,
+[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--assistant {
+    background: rgba(255,255,255,0.96);
+    border-color: rgba(15,23,42,0.10);
+    color: #1e293b;
+}
+html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input,
+[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input {
+    background: rgba(255,255,255,0.92);
+    color: #0f172a;
+}
+
+@media (max-width: 520px) {
+    .hadeeda-inline-popup .hadeeda-inline-thread { max-height: 180px; }
+    .hadeeda-inline-popup .hadeeda-thread-msg { max-width: 94%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .hadeeda-inline-popup .hadeeda-thread-msg { animation: none !important; }
+}

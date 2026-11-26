@@ -19,22 +19,87 @@
     let lastGeneratedResponse = '';
     let contextMenu = null;
 
+    function getPageContext(el) {
+        const route = (window.frappe && frappe.get_route && frappe.get_route()) || [];
+        const routeStr = (window.frappe && frappe.get_route_str && frappe.get_route_str()) || window.location.pathname || '';
+        const ctx = {
+            page_type: 'Other',
+            route: route,
+            route_str: routeStr,
+            doctype: '',
+            docname: '',
+            field: '',
+            fieldtype: '',
+            is_editable: !!(el && isEditable(el)),
+            selected_text: (window.getSelection ? String(window.getSelection().toString() || '').trim().slice(0, 500) : ''),
+        };
+
+        try {
+            if (el && el.closest) {
+                const fieldEl = el.closest('[data-fieldname]');
+                if (fieldEl) {
+                    ctx.field = fieldEl.getAttribute('data-fieldname') || '';
+                    ctx.fieldtype = fieldEl.getAttribute('data-fieldtype') || '';
+                }
+            }
+        } catch (e) {}
+
+        // Form / document page
+        try {
+            if (window.cur_frm && cur_frm.doc) {
+                ctx.page_type = 'Form';
+                ctx.doctype = cur_frm.doc.doctype || ctx.doctype;
+                ctx.docname = cur_frm.doc.name || ctx.docname;
+            }
+        } catch (e) {}
+
+        // List view
+        try {
+            if (route[0] === 'List' && route[1]) {
+                ctx.page_type = 'List';
+                ctx.doctype = decodeURIComponent(route[1]);
+                if (window.cur_list) {
+                    ctx.list_view = cur_list.view_name || cur_list.view || '';
+                    ctx.filters = cur_list.get_filters_for_args ? cur_list.get_filters_for_args() : (cur_list.filter_area ? cur_list.filter_area.get() : undefined);
+                }
+            }
+        } catch (e) {}
+
+        // Report
+        try {
+            if (route[0] === 'query-report' && route[1]) {
+                ctx.page_type = 'Report';
+                ctx.report_name = decodeURIComponent(route[1]);
+                if (window.cur_frm && cur_frm.doc) {
+                    ctx.doctype = cur_frm.doc.doctype || ctx.doctype;
+                    ctx.docname = cur_frm.doc.name || ctx.docname;
+                }
+            }
+        } catch (e) {}
+
+        // Dashboard / Workspaces / other desk pages
+        try {
+            if (route[0] === 'dashboard-view') { ctx.page_type = 'Dashboard'; ctx.dashboard = route[1] || ''; }
+            if (route[0] === 'Workspaces' || route[0] === 'workspace') { ctx.page_type = 'Workspace'; ctx.workspace = route[1] || ''; }
+            if (route[0] === 'dashboard') { ctx.page_type = 'Dashboard'; ctx.dashboard = route[1] || ''; }
+        } catch (e) {}
+
+        // Fallback: if on a doctype form route without cur_frm
+        try {
+            if (!ctx.doctype && route[0] === 'Form' && route[1]) {
+                ctx.page_type = 'Form';
+                ctx.doctype = decodeURIComponent(route[1]);
+                ctx.docname = route[2] ? decodeURIComponent(route[2]) : '';
+            }
+        } catch (e) {}
+
+        // Fallback: use frappe.get_doc if available? avoid heavy calls; just route/cur_frm.
+
+        return JSON.stringify(ctx);
+    }
+
     function getFormContext(el) {
-        if (!cur_frm) return '';
-        const doc = cur_frm.doc || {};
-        const doctype = doc.doctype || '';
-        let fieldname = '';
-
-        const fieldEl = el.closest('[data-fieldname]');
-        if (fieldEl) {
-            fieldname = fieldEl.getAttribute('data-fieldname');
-        }
-
-        return JSON.stringify({
-            doctype: doctype,
-            docname: doc.name || '',
-            field: fieldname || '',
-        });
+        return getPageContext(el);
     }
 
     function isExcluded(el) {
@@ -722,8 +787,9 @@
 
 
         btnInsert.addEventListener('click', function () {
-            if (generatedResponse) {
-                doInsert(generatedResponse);
+            const text = generatedResponse || lastGeneratedResponse || (resultPreview && resultPreview.textContent) || '';
+            if (text) {
+                doInsert(text);
             }
             closePopup();
         });
@@ -1251,12 +1317,8 @@
         if (popup && popup.contains(el)) return;
         if (popup) closePopup();
 
-        const isEdit = isEditable(el) || el.closest("input, textarea, [contenteditable=\"true\"], .ql-editor, .note-editable, .frappe-control, .form-control");
-        const sel = window.getSelection ? window.getSelection().toString().trim() : "";
-
-        // Allow right click inside editable fields, on selected text, or with Alt key
-        if (!isEdit && !sel && !e.altKey) return;
-
+        // Show Hadeeda context menu everywhere on pages. When in editable/focused
+        // field, context is field-specific; otherwise document/list/report/page context is sent.
         e.preventDefault();
         showContextMenu(el, e.clientX, e.clientY);
     });

@@ -1027,6 +1027,10 @@
                     full_name: config.full_name,
                     email: config.email,
                     company: config.company,
+                    active_company: config.active_company || config.company || '',
+                    default_company: config.default_company || config.company || '',
+                    companies: config.companies || [],
+                    allowed_companies: config.companies || [],
                     department: config.department || '',
                     designation: config.designation || '',
                     language: config.language || config.default_language || 'en',
@@ -1058,19 +1062,15 @@
                 if (chatBody) {
                     chatBody.style.setProperty('flex', '1 1 0%', 'important');
                     chatBody.style.setProperty('min-height', '0px', 'important');
-                    chatBody.style.setProperty('height', 'auto', 'important');
-                    chatBody.style.setProperty('max-height', 'none', 'important');
                     chatBody.style.setProperty('overflow-y', 'auto', 'important');
                 }
 
                 const footer = chatWin.querySelector('.chat-footer, footer, [class*="_footer_"], [class*="chat-footer"]');
                 if (footer) {
-                    footer.style.setProperty('display', 'flex', 'important');
                     footer.style.setProperty('flex-shrink', '0', 'important');
-                    footer.style.setProperty('flex-grow', '0', 'important');
-                    footer.style.setProperty('min-height', '60px', 'important');
-                    footer.style.setProperty('height', 'auto', 'important');
                     footer.style.setProperty('width', '100%', 'important');
+                    footer.style.setProperty('max-width', '100%', 'important');
+                    footer.style.setProperty('overflow', 'visible', 'important');
                     footer.style.setProperty('visibility', 'visible', 'important');
                     footer.style.setProperty('opacity', '1', 'important');
                 }
@@ -1078,96 +1078,46 @@
                 const inputs = chatWin.querySelector('.chat-inputs, .chat-input-wrapper, form, [class*="_inputContainer_"], [class*="chat-inputs"]');
                 if (inputs) {
                     inputs.style.setProperty('display', 'flex', 'important');
-                    inputs.style.setProperty('flex-direction', 'column', 'important');
-                    inputs.style.setProperty('align-items', 'stretch', 'important');
+                    inputs.style.setProperty('flex-direction', 'row', 'important');
+                    inputs.style.setProperty('align-items', 'flex-end', 'important');
                     inputs.style.setProperty('width', '100%', 'important');
-                    inputs.style.setProperty('gap', '4px', 'important');
-                    inputs.style.setProperty('min-height', '40px', 'important');
+                    inputs.style.setProperty('max-width', '100%', 'important');
+                    inputs.style.setProperty('overflow', 'visible', 'important');
                     inputs.style.setProperty('visibility', 'visible', 'important');
                     inputs.style.setProperty('opacity', '1', 'important');
                 }
 
                 const textarea = chatWin.querySelector('.chat-input, textarea.chat-input, textarea, input[type="text"], [class*="_textarea_"]');
                 if (textarea) {
-                    textarea.style.setProperty('display', 'block', 'important');
                     textarea.style.setProperty('flex', '1 1 auto', 'important');
+                    textarea.style.setProperty('min-width', '0px', 'important');
                     textarea.style.setProperty('width', 'auto', 'important');
-                    textarea.style.setProperty('min-width', '50px', 'important');
-                    textarea.style.setProperty('min-height', '34px', 'important');
-                    textarea.style.setProperty('color', '#FFFFFF', 'important');
-                    textarea.style.setProperty('-webkit-text-fill-color', '#FFFFFF', 'important');
-                    textarea.style.setProperty('caret-color', '#1FB6AE', 'important');
                     textarea.style.setProperty('visibility', 'visible', 'important');
                     textarea.style.setProperty('opacity', '1', 'important');
                 }
 
                 const controls = chatWin.querySelector('.chat-inputs-controls, [class*="chat-inputs-controls"]');
                 if (controls) {
-                    controls.style.setProperty('display', 'flex', 'important');
-                    controls.style.setProperty('flex-direction', 'row', 'important');
-                    controls.style.setProperty('align-items', 'center', 'important');
-                    controls.style.setProperty('justify-content', 'flex-end', 'important');
-                    controls.style.setProperty('gap', '6px', 'important');
-                    controls.style.setProperty('flex', '0 0 auto', 'important');
-                    controls.style.setProperty('flex-shrink', '0', 'important');
-                    controls.style.setProperty('width', '100%', 'important');
+                    // Let enhance CSS control layout (display: contents / ordering). Only ensure visibility.
+                    controls.style.setProperty('max-width', '100%', 'important');
+                    controls.style.setProperty('overflow', 'visible', 'important');
                     controls.style.setProperty('visibility', 'visible', 'important');
                     controls.style.setProperty('opacity', '1', 'important');
                 }
 
-                // Enforce all buttons in footer (send, attach, file upload)
                 const sendBtn = chatWin.querySelector('.chat-input-send-button, button[class*="send-button"], button[type="submit"]');
                 if (sendBtn) {
                     sendBtn.style.setProperty('display', 'inline-flex', 'important');
-                    sendBtn.style.setProperty('align-items', 'center', 'important');
-                    sendBtn.style.setProperty('justify-content', 'center', 'important');
-                    sendBtn.style.setProperty('flex', '0 0 34px', 'important');
-                    sendBtn.style.setProperty('flex-shrink', '0', 'important');
-                    sendBtn.style.setProperty('width', '34px', 'important');
-                    sendBtn.style.setProperty('height', '34px', 'important');
-                    sendBtn.style.setProperty('min-width', '34px', 'important');
-                    sendBtn.style.setProperty('min-height', '34px', 'important');
-                    sendBtn.style.setProperty('background', 'linear-gradient(135deg, #1FB6AE 0%, #147974 100%)', 'important');
-                    sendBtn.style.setProperty('color', '#FFFFFF', 'important');
                     sendBtn.style.setProperty('visibility', 'visible', 'important');
                     sendBtn.style.setProperty('opacity', '1', 'important');
-                    const svg = sendBtn.querySelector('svg');
-                    if (svg) {
-                        svg.style.setProperty('fill', '#FFFFFF', 'important');
-                        svg.style.setProperty('stroke', '#FFFFFF', 'important');
-                        svg.style.setProperty('color', '#FFFFFF', 'important');
-                        svg.style.setProperty('width', '18px', 'important');
-                        svg.style.setProperty('height', '18px', 'important');
-                        svg.style.setProperty('display', 'block', 'important');
-                    }
                 }
 
                 const fileBtn = chatWin.querySelector('.chat-input-file-button, button[class*="file-button"], [data-test-id="chat-attach-file-button"]');
                 if (fileBtn) {
                     fileBtn.style.setProperty('display', 'inline-flex', 'important');
-                    fileBtn.style.setProperty('align-items', 'center', 'important');
-                    fileBtn.style.setProperty('justify-content', 'center', 'important');
-                    fileBtn.style.setProperty('flex', '0 0 34px', 'important');
-                    fileBtn.style.setProperty('flex-shrink', '0', 'important');
-                    fileBtn.style.setProperty('width', '34px', 'important');
-                    fileBtn.style.setProperty('height', '34px', 'important');
-                    fileBtn.style.setProperty('min-width', '34px', 'important');
-                    fileBtn.style.setProperty('min-height', '34px', 'important');
-                    fileBtn.style.setProperty('background', 'rgba(31, 182, 174, 0.18)', 'important');
-                    fileBtn.style.setProperty('border', '1px solid rgba(31, 182, 174, 0.45)', 'important');
-                    fileBtn.style.setProperty('color', '#1FB6AE', 'important');
                     fileBtn.style.setProperty('visibility', 'visible', 'important');
                     fileBtn.style.setProperty('opacity', '1', 'important');
-                    const svg = fileBtn.querySelector('svg');
-                    if (svg) {
-                        svg.style.setProperty('stroke', '#1FB6AE', 'important');
-                        svg.style.setProperty('color', '#1FB6AE', 'important');
-                        svg.style.setProperty('width', '18px', 'important');
-                        svg.style.setProperty('height', '18px', 'important');
-                        svg.style.setProperty('display', 'block', 'important');
-                    }
                 }
-
             }
 
 
