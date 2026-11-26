@@ -668,7 +668,14 @@
         function switchView(viewName) {
             viewPrompt.style.setProperty('display', (viewName === 'prompt') ? 'flex' : 'none', 'important');
             viewLoading.style.setProperty('display', (viewName === 'loading') ? 'flex' : 'none', 'important');
-            viewResult.style.setProperty('display', (viewName === 'result') ? 'flex' : 'none', 'important');
+            // Hide duplicate "Generated Response" block; thread shows responses.
+            viewResult.style.setProperty('display', 'none', 'important');
+            var follow = popup.querySelector('.hadeeda-thread-follow');
+            if (follow) follow.style.setProperty('display', 'flex', 'important');
+            var threadWrap = popup.querySelector('.hadeeda-inline-thread-wrap');
+            if (threadWrap) threadWrap.style.setProperty('display', 'block', 'important');
+            var quick = popup.querySelector('.hadeeda-thread-quick');
+            if (quick) quick.style.setProperty('display', (viewName === 'prompt') ? 'flex' : 'none', 'important');
             if (status) status.style.display = 'none';
             if (typeof syncInnerSizes === 'function') syncInnerSizes();
             if (viewName === 'prompt') {
