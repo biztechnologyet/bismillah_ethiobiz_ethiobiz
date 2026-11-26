@@ -1110,6 +1110,7 @@
                     textarea.style.setProperty('flex', '1 1 auto', 'important');
                     textarea.style.setProperty('min-width', '0px', 'important');
                     textarea.style.setProperty('width', 'auto', 'important');
+                    textarea.style.setProperty('order', '2', 'important');
                     textarea.style.setProperty('visibility', 'visible', 'important');
                     textarea.style.setProperty('opacity', '1', 'important');
                 }
@@ -1126,6 +1127,8 @@
                 const sendBtn = chatWin.querySelector('.chat-input-send-button, button[class*="send-button"], button[type="submit"]');
                 if (sendBtn) {
                     sendBtn.style.setProperty('display', 'inline-flex', 'important');
+                    sendBtn.style.setProperty('order', '3', 'important');
+                    sendBtn.style.setProperty('flex', '0 0 auto', 'important');
                     sendBtn.style.setProperty('visibility', 'visible', 'important');
                     sendBtn.style.setProperty('opacity', '1', 'important');
                 }
@@ -1133,6 +1136,8 @@
                 const fileBtn = chatWin.querySelector('.chat-input-file-button, button[class*="file-button"], [data-test-id="chat-attach-file-button"]');
                 if (fileBtn) {
                     fileBtn.style.setProperty('display', 'inline-flex', 'important');
+                    fileBtn.style.setProperty('order', '1', 'important');
+                    fileBtn.style.setProperty('flex', '0 0 auto', 'important');
                     fileBtn.style.setProperty('visibility', 'visible', 'important');
                     fileBtn.style.setProperty('opacity', '1', 'important');
                 }

@@ -103,7 +103,7 @@ except Exception as e:
 # 5. deployed assets contain key strings
 try:
     checks = [
-        ("86.15 chat js no 850 max", "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.0", "850", False),
+        ("86.15 chat js no 850 max", "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.1", "850", False),
         ("86.16 chat js full width", "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.0", "window.innerWidth - 16", True),
         ("86.17 inline js select-all", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0", "select-all", True),
         ("86.18 inline js getPageContext", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0", "getPageContext", True),
