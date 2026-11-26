@@ -368,6 +368,10 @@
             border-radius: 12px !important;
             box-shadow: 0 12px 36px rgba(0,0,0,0.6), 0 0 24px rgba(31, 182, 174, 0.25) !important;
             width: 440px !important;
+            height: min(560px, calc(100vh - 32px)) !important;
+            max-height: calc(100vh - 32px) !important;
+            display: flex !important;
+            flex-direction: column !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif !important;
             font-size: 13px !important;
             overflow: hidden !important;
@@ -455,18 +459,28 @@
                     display: flex !important;
                     flex-direction: column !important;
                     flex: 1 1 auto !important;
-                    height: calc(100% - 46px) !important;
+                    min-height: 0 !important;
+                    height: auto !important;
                     padding: 12px 14px !important;
                     box-sizing: border-box !important;
                     position: relative !important;
                     overflow: hidden !important;
                 }
-                .hadeeda-view-prompt,
-                .hadeeda-view-result {
+                .hadeeda-view-prompt {
                     display: flex !important;
                     flex-direction: column !important;
-                    flex: 1 1 auto !important;
-                    height: 100% !important;
+                    flex: 0 0 auto !important;
+                    height: auto !important;
+                    max-height: 38vh !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
+                }
+                .hadeeda-view-result {
+                    display: none !important;
+                    flex-direction: column !important;
+                    flex: 0 0 auto !important;
+                    height: auto !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
                 }
@@ -673,7 +687,7 @@
             var follow = popup.querySelector('.hadeeda-thread-follow');
             if (follow) follow.style.setProperty('display', 'flex', 'important');
             var threadWrap = popup.querySelector('.hadeeda-inline-thread-wrap');
-            if (threadWrap) threadWrap.style.setProperty('display', 'block', 'important');
+            if (threadWrap) threadWrap.style.setProperty('display', 'flex', 'important');
             var quick = popup.querySelector('.hadeeda-thread-quick');
             if (quick) quick.style.setProperty('display', (viewName === 'prompt') ? 'flex' : 'none', 'important');
             if (status) status.style.display = 'none';
@@ -834,40 +848,25 @@
             try {
                 var sz = JSON.parse(localStorage.getItem(szKey));
                 if (sz && sz.w && sz.h) {
-                    popup.style.width = sz.w + 'px';
-                    popup.style.height = sz.h + 'px';
+                    popup.style.setProperty('width', sz.w + 'px', 'important');
+                    popup.style.setProperty('height', sz.h + 'px', 'important');
                 }
             } catch(e) {}
 
-            // Synchronize inner elements (textarea, result preview) with popup size
+            // Keep inner elements responsive in flex layout
             function syncInnerSizes() {
-                var popH = popup.offsetHeight;
-                var headerH = 44;
-                var bodyPadding = 24;
-                var quickOptsH = 46;
-                var actionsH = 38;
-
-                // Auto-size the textarea to take all remaining vertical height
                 var ta = popup.querySelector('.hadeeda-inline-input');
                 if (ta) {
-                    var availH = popH - headerH - bodyPadding - quickOptsH - actionsH - 12;
-                    var taH = Math.max(70, availH);
+                    var popH = popup.offsetHeight || 560;
+                    var taH = Math.max(70, Math.min(180, Math.floor(popH * 0.28)));
                     ta.style.height = taH + 'px';
                     ta.style.minHeight = '70px';
-                    ta.style.maxHeight = taH + 'px';
+                    ta.style.maxHeight = '180px';
                     ta.style.width = '100%';
                     ta.style.boxSizing = 'border-box';
                 }
-
-                // Auto-size the result preview to take all remaining vertical height
                 var rp = popup.querySelector('.hadeeda-result-preview');
-                if (rp) {
-                    var rpAvailH = popH - headerH - bodyPadding - actionsH - 25;
-                    var rpH = Math.max(90, rpAvailH);
-                    rp.style.height = rpH + 'px';
-                    rp.style.maxHeight = rpH + 'px';
-                    rp.style.overflowY = 'auto';
-                }
+                if (rp) { rp.style.height = 'auto'; rp.style.maxHeight = 'none'; }
             }
 
             // Initial sync
@@ -891,8 +890,8 @@
                     // Viewport boundary safety
                     nw = Math.min(nw, window.innerWidth - popup.offsetLeft - 8);
                     nh = Math.min(nh, window.innerHeight - popup.offsetTop - 8);
-                    popup.style.width = nw + 'px';
-                    popup.style.height = nh + 'px';
+                    popup.style.setProperty('width', nw + 'px', 'important');
+                    popup.style.setProperty('height', nh + 'px', 'important');
                     syncInnerSizes();
                 }
                 function onUp() {

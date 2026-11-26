@@ -1,9 +1,9 @@
 /* Hadeeda inline-thread enhancement — chat-like continuous conversation. */
-.hadeeda-inline-popup .hadeeda-inline-thread-wrap { margin: 10px 0 12px; border: 1px solid rgba(31,182,174,0.20); border-radius: 18px; background: rgba(22,27,34,0.62); overflow: hidden; display:flex; flex-direction:column; flex:1 1 auto; min-height:180px; }
+.hadeeda-inline-popup .hadeeda-inline-thread-wrap { margin: 10px 0 12px; border: 1px solid rgba(31,182,174,0.20); border-radius: 18px; background: rgba(22,27,34,0.62); overflow: hidden; display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
 .hadeeda-inline-popup .hadeeda-thread-topbar { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.06); font-size:11px; font-weight:800; color:#9fe7df; }
 .hadeeda-inline-popup .hadeeda-thread-clear { border:0; background:transparent; color:rgba(255,255,255,0.65); font-size:10px; font-weight:800; cursor:pointer; }
 .hadeeda-inline-popup .hadeeda-thread-clear:hover { color:#fff; }
-.hadeeda-inline-popup .hadeeda-inline-thread { display:flex; flex-direction:column; gap:10px; padding:12px; flex:1 1 auto; min-height:160px; max-height:none; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.hadeeda-inline-popup .hadeeda-inline-thread { display:flex; flex-direction:column; gap:10px; padding:12px; flex:1 1 auto; min-height:0; max-height:none; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
 .hadeeda-inline-popup .hadeeda-inline-thread:empty::before { content:"Start a conversation with Hadeeda..."; color:rgba(226,232,240,0.55); font-size:12px; }
 .hadeeda-inline-popup .hadeeda-thread-msg { max-width:92%; padding:10px 12px; border-radius:14px; font-size:12.5px; line-height:1.6; word-break:break-word; animation:hadeeda-thread-in 180ms ease-out both; }
 .hadeeda-inline-popup .hadeeda-thread-msg--user { align-self:flex-end; border:1px solid rgba(31,182,174,0.30); background:linear-gradient(135deg, rgba(31,182,174,0.22), rgba(20,121,116,0.30)); color:#e8fffb; border-bottom-right-radius:5px; }
@@ -33,7 +33,8 @@ html[data-theme='light'] .hadeeda-inline-popup .hadeeda-inline-thread-wrap, [dat
 html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--assistant, [data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--assistant { background:rgba(255,255,255,0.96); border-color:rgba(15,23,42,0.10); color:#1e293b; }
 html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--user, [data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-msg--user { background:linear-gradient(135deg, rgba(13,148,136,0.14), rgba(5,150,105,0.18)); color:#134e4a; }
 html[data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input, [data-theme='light'] .hadeeda-inline-popup .hadeeda-thread-follow-input { background:rgba(255,255,255,0.92); color:#0f172a; }
-@media (max-width: 520px) { .hadeeda-inline-popup .hadeeda-inline-thread { max-height:200px; } .hadeeda-inline-popup .hadeeda-thread-msg { max-width:95%; } }
+@media (max-width: 520px) { .hadeeda-inline-popup .hadeeda-thread-msg { max-width:95%; } }
 @media (prefers-reduced-motion: reduce) { .hadeeda-inline-popup .hadeeda-thread-msg { animation:none !important; } }
-.hadeeda-inline-popup .hadeeda-inline-body{display:flex!important;flex-direction:column!important;max-height:calc(80vh - 70px)!important;overflow:hidden!important;}
+.hadeeda-inline-popup .hadeeda-inline-body{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;}
 .hadeeda-inline-popup .hadeeda-view-loading{flex:0 0 auto;}
+.hadeeda-inline-popup .hadeeda-thread-follow{flex:0 0 auto!important;margin-top:0!important;}
