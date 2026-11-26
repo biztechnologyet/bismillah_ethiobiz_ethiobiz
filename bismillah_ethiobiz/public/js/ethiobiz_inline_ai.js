@@ -311,6 +311,7 @@
 
         popup = document.createElement('div');
         popup.className = 'hadeeda-inline-popup';
+        popup._hadeedaInlineSessionId = 'inline_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
         popup.innerHTML = `
             <div class="hadeeda-inline-header">
                 <div class="hadeeda-inline-brand">
@@ -718,7 +719,11 @@
                     'Content-Type': 'application/json; charset=utf-8',
                     'X-Frappe-CSRF-Token': frappe.csrf_token
                 },
-                body: JSON.stringify({ prompt: promptText, context: context })
+                body: JSON.stringify({
+                    prompt: promptText,
+                    context: context,
+                    session_id: (popup && popup._hadeedaInlineSessionId) ? popup._hadeedaInlineSessionId : ''
+                })
             })
             .then(r => r.json())
             .then(data => {

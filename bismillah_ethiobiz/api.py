@@ -701,7 +701,7 @@ def get_user_credentials(username=None, telegram_username=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-def chat_inline(prompt, context=None):
+def chat_inline(prompt, context=None, session_id=None):
     """Inline AI endpoint.
 
     Routing contract (2026-11-26):
@@ -714,6 +714,8 @@ def chat_inline(prompt, context=None):
     if not settings.enabled or not settings.inline_ai_enabled:
         frappe.throw("Inline AI is disabled", frappe.PermissionError)
 
+    client_session = (session_id or "").strip()[:128]
+
     is_guest = not user or user == "Guest"
     if is_guest:
         frappe.flags.ignore_csrf = True
@@ -724,7 +726,7 @@ def chat_inline(prompt, context=None):
         department, designation = "", ""
         company_ctx = {"active_company": "", "default_company": "", "companies": []}
         active_company = ""
-        session_id = f"guest::{frappe.utils.nowdate()}"
+        session_id = client_session or f"guest::{frappe.utils.nowdate()}"
         document_content = ""
     else:
         inline_url = settings.inline_webhook_url
@@ -735,7 +737,7 @@ def chat_inline(prompt, context=None):
         company_ctx = _get_hadeeda_company_context(user, company)
         active_company = company_ctx.get("active_company") or company
         company = active_company
-        session_id = f"{user}::{active_company}" if active_company else user
+        session_id = client_session or (f"{user}::{active_company}" if active_company else user)
         document_content = _get_document_context(context)
 
     chat_input = prompt

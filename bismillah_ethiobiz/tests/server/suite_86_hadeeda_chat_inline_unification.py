@@ -105,10 +105,11 @@ try:
     checks = [
         ("86.15 chat js no 850 max", "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.1", "850", False),
         ("86.16 chat js full width", "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.0", "window.innerWidth - 16", True),
-        ("86.17 inline js select-all", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0", "select-all", True),
-        ("86.18 inline js getPageContext", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0", "getPageContext", True),
-        ("86.19 thread js markdown", "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.2", "renderMarkdown", True),
-        ("86.20 thread js insert at cursor", "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.2", "Insert at cursor", True),
+        ("86.17 inline js select-all", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.3", "select-all", True),
+        ("86.18 inline js getPageContext", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.3", "getPageContext", True),
+        ("86.19 thread js markdown", "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.3", "renderMarkdown", True),
+        ("86.20 thread js insert at cursor", "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.3", "Insert at cursor", True),
+        ("86.21 inline js sessionId", "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.3", "_hadeedaInlineSessionId", True),
     ]
     for nid, path, needle, should_exist in checks:
         r = _req.get(BASE + path, timeout=20, verify=False)
