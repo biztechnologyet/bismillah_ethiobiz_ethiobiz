@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     'use strict';
 
     if (window.__ethiobizChatInitialized) return;
@@ -79,40 +79,58 @@
     }
 
     /** Ensure Header Title and Close Button are always beautifully visible */
-    function fixHeaderTitle(titleText) {
+    function fixHeaderTitle(titleText, config) {
+        config = config || window.__hadeeda_chat_config || {};
+        var avatar = config.bot_avatar || '/assets/bismillah_ethiobiz/images/hadeeda_logo.png';
+        var label = titleText || config.widget_title || 'HADEEDA BizAi';
+        var subtitle = config.widget_subtitle || '';
         const headers = document.querySelectorAll('.chat-header, .chat-layout header, [class*="_header_"]');
         headers.forEach(header => {
+            header.style.background = 'linear-gradient(135deg, #0f766e 0%, #1FB6AE 55%, #34d399 140%)';
+            header.style.borderBottom = '1px solid rgba(255,255,255,0.18)';
+            header.style.minHeight = '62px';
+            header.style.padding = '12px 14px';
             if (!header.querySelector('.hadeeda-custom-title-wrapper')) {
-                // Look for existing title element or inject clean one
                 let titleEl = header.querySelector('.chat-header-title, [class*="_title_"], h1, h2');
+                var inner = '<img src="' + avatar + '" style="width:30px;height:30px;border-radius:10px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.18);" />' +
+                    '<div style="display:flex;flex-direction:column;line-height:1.15"><span style="font-weight:800;font-size:14.5px;color:#FFFFFF;letter-spacing:0.2px;">' + label + '</span>' +
+                    (subtitle ? '<span style="font-weight:500;font-size:10.5px;color:rgba(255,255,255,0.85);margin-top:2px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + subtitle + '</span>' : '') + '</div>';
                 if (titleEl) {
-                    titleEl.style.display = 'flex';
-                    titleEl.style.alignItems = 'center';
-                    titleEl.style.gap = '8px';
-                    titleEl.style.color = '#FFFFFF';
-                    titleEl.style.fontWeight = '700';
-                    titleEl.style.fontSize = '14.5px';
-                    if (!titleEl.textContent.trim()) {
-                        titleEl.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span>${titleText || 'HADEEDA BizAi'}</span>`;
-                    }
+                    titleEl.style.display = 'flex'; titleEl.style.alignItems = 'center'; titleEl.style.gap = '10px'; titleEl.style.color = '#FFFFFF';
+                    if (!titleEl.querySelector('img')) titleEl.innerHTML = inner;
                 } else {
                     const customTitle = document.createElement('div');
                     customTitle.className = 'hadeeda-custom-title-wrapper';
-                    customTitle.innerHTML = `<img src="/assets/bismillah_ethiobiz/images/hadeeda_logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" /> <span style="font-weight:700;font-size:14.5px;color:#FFFFFF;letter-spacing:0.2px;">${titleText || 'HADEEDA BizAi'}</span>`;
-                    customTitle.style.cssText = 'display:flex;align-items:center;gap:8px;color:#FFFFFF;flex:1;';
+                    customTitle.innerHTML = inner;
+                    customTitle.style.cssText = 'display:flex;align-items:center;gap:10px;color:#FFFFFF;flex:1;min-width:0;';
                     header.insertBefore(customTitle, header.firstChild);
                 }
             }
-
-            // Ensure prominent Close button is always present in header
             if (!header.querySelector('.hadeeda-chat-close-btn')) {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'chat-header-close hadeeda-chat-close-btn';
-                closeBtn.title = 'Close Chat (Collapse)';
-                closeBtn.innerHTML = '✕';
+                closeBtn.title = 'Close chat';
+                closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
                 header.appendChild(closeBtn);
             }
+            const closeBtn = header.querySelector('.hadeeda-chat-close-btn');
+            if (closeBtn) {
+                closeBtn.style.cssText = 'margin-left:auto;width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s ease;flex:0 0 auto;';
+                closeBtn.onmouseenter = function(){ this.style.background='rgba(255,255,255,0.22)'; this.style.transform='scale(1.04)'; };
+                closeBtn.onmouseleave = function(){ this.style.background='rgba(255,255,255,0.12)'; this.style.transform='scale(1)'; };
+            }
         });
+    }
+
+    function applyFloatingButtonConfig(config) {
+        config = config || window.__hadeeda_chat_config || {};
+        var label = config.chat_floating_button_label || 'HADEEDA BizAi';
+        var icon = config.chat_floating_button_icon || '/assets/bismillah_ethiobiz/images/hadeeda_logo.png';
+        var styleId = 'hadeeda-floating-config-style';
+        var style = document.getElementById(styleId);
+        if (!style) { style = document.createElement('style'); style.id = styleId; document.head.appendChild(style); }
+        style.textContent = '.chat-window-wrapper .chat-window-toggle::before{content:' + JSON.stringify(label) + ' !important;}' +
+            '.chat-window-wrapper .chat-window-toggle::after{background-image:url(' + JSON.stringify(icon).slice(1,-1) + ') !important;}';
     }
 
     /** Setup Drag-to-Resize for Floating & Inline Chat */
@@ -133,7 +151,7 @@
             if (!isMobile()) {
                 const savedW = px(localStorage.getItem('hadeeda_chat_width'), 0);
                 if (savedW) {
-                    const maxW = Math.max(300, Math.min(850, window.innerWidth - 16));
+                    const maxW = Math.max(300, window.innerWidth - 16);
                     chatWin.style.setProperty('width', Math.min(maxW, Math.max(300, savedW)) + 'px', 'important');
                 }
             }
@@ -218,7 +236,7 @@
                 const dy = cy - startY;
 
                 const minW = 300;
-                const maxW = Math.max(minW, Math.min(850, window.innerWidth - 16));
+                const maxW = Math.max(minW, window.innerWidth - 16);
                 const minH = 320;
                 const maxH = Math.max(minH, window.innerHeight - 16);
 
@@ -479,7 +497,7 @@
                     overflow: hidden !important;
                     box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 24px rgba(31,182,174,0.25) !important;
                     min-width: 300px !important;
-                    max-width: min(850px, calc(100vw - 16px)) !important;
+                    max-width: calc(100vw - 16px) !important;
                     min-height: 320px !important;
                     max-height: calc(100vh - 100px) !important;
                     width: min(420px, calc(100vw - 24px));
@@ -1125,7 +1143,7 @@
             // Continuously enforce copy buttons, resizability, header title, and footer layout
             function setupObservers() {
                 injectCopyButtons();
-                fixHeaderTitle(config.widget_title);
+                fixHeaderTitle(config.widget_title, config);
                 setupResizableWindow();
                 enforceFooterLayout();
 
@@ -1133,7 +1151,7 @@
                 if (chatBody) {
                     const observer = new MutationObserver(() => {
                         injectCopyButtons();
-                        fixHeaderTitle(config.widget_title);
+                        fixHeaderTitle(config.widget_title, config);
                         enforceFooterLayout();
                     });
                     observer.observe(chatBody, { childList: true, subtree: true });
@@ -1168,7 +1186,7 @@
                         if (chatWin) {
                             chatWin.style.setProperty('display', 'flex', 'important');
                             setupResizableWindow();
-                            fixHeaderTitle(config.widget_title);
+                            fixHeaderTitle(config.widget_title, config);
                             enforceFooterLayout();
                             setTimeout(enforceFooterLayout, 100);
                             setTimeout(enforceFooterLayout, 300);
@@ -1220,3 +1238,4 @@
         initChat();
     }
 })();
+

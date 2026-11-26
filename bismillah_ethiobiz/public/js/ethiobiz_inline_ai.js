@@ -314,8 +314,8 @@
         popup.innerHTML = `
             <div class="hadeeda-inline-header">
                 <div class="hadeeda-inline-brand">
-                    <span class="hadeeda-inline-badge">H</span>
-                    <span class="hadeeda-inline-title-text">HADEEDA BizAi</span>
+                    <span class="hadeeda-inline-badge" id="hadeeda-inline-badge-el">H</span>
+                    <span class="hadeeda-inline-title-text" id="hadeeda-inline-title-el">HADEEDA BizAi</span>
                 </div>
                 <button class="hadeeda-inline-close" title="Close (Esc)">&times;</button>
             </div>
@@ -405,6 +405,19 @@
         popup.style.top = top + 'px';
 
         document.body.appendChild(popup);
+        try {
+            var hc = window.__hadeeda_chat_config || {};
+            var inlineTitle = hc.inline_widget_title || 'HADEEDA BizAi';
+            var inlineIcon = hc.inline_widget_icon || '';
+            var inlineBadge = hc.inline_badge_text || 'H';
+            var tEl = popup.querySelector('#hadeeda-inline-title-el');
+            var bEl = popup.querySelector('#hadeeda-inline-badge-el');
+            if (tEl) tEl.textContent = inlineTitle;
+            if (bEl) {
+                if (inlineIcon) { bEl.innerHTML = '<img src="' + inlineIcon + '" style="width:100%;height:100%;border-radius:8px;object-fit:cover;" />'; bEl.style.padding='0'; bEl.style.overflow='hidden'; }
+                else bEl.textContent = inlineBadge;
+            }
+        } catch(e) {}
 
         if (!document.getElementById('hadeeda-inline-styles')) {
             const headerStyle = document.createElement('style');
@@ -1184,15 +1197,15 @@
             onClick: function () { showPopup(el, x, y, 'Improve clarity and professional tone', true); }
         });
         addItem('hadeeda-summary', 'Summary', {
-            icon: '📝', disabled: !editable,
-            onClick: function () { showPopup(el, x, y, 'Summarize into key bullet points', true); }
+            icon: '📝', disabled: false,
+            onClick: function () { showPopup(el, x, y, 'Summarize this page/document/list/report context into key bullet points', true); }
         });
         addItem('hadeeda-amharic', 'Amharic', {
             icon: '🌐', disabled: !editable,
             onClick: function () { showPopup(el, x, y, 'Translate text into Amharic', true); }
         });
-        addItem('hadeeda-generate', 'Generate with HADEEDA', {
-            icon: '✨', disabled: !editable,
+        addItem('hadeeda-generate', 'Ask HADEEDA', {
+            icon: '✨', disabled: false,
             onClick: function () { showPopup(el, x, y, null, true); }
         });
         addItem('hadeeda-insert', 'Insert Last AI Response', {
@@ -1230,6 +1243,33 @@
         addItem('paste', 'Paste', {
             icon: '📎', disabled: !editable,
             onClick: function () { pasteIntoState(state); }
+        });
+        addItem('select-all', 'Select All', {
+            icon: '☑️', disabled: false,
+            onClick: function () {
+                try {
+                    if (editable && el) {
+                        if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                            el.focus(); el.select(); return;
+                        }
+                        var editableRoot = el.closest('[contenteditable="true"]') || el.closest('.ql-editor') || el.closest('.note-editable') || el;
+                        if (editableRoot) {
+                            var range = document.createRange();
+                            range.selectNodeContents(editableRoot);
+                            var sel = window.getSelection();
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                            return;
+                        }
+                    }
+                    var sel2 = window.getSelection();
+                    var range2 = document.createRange();
+                    var main = document.querySelector('.layout-main-section') || document.querySelector('main') || document.querySelector('.page-content') || document.body;
+                    range2.selectNodeContents(main);
+                    sel2.removeAllRanges();
+                    sel2.addRange(range2);
+                } catch (e) { try { document.execCommand('selectAll'); } catch (e2) {} }
+            }
         });
 
         menu.addEventListener('contextmenu', function (ev) {

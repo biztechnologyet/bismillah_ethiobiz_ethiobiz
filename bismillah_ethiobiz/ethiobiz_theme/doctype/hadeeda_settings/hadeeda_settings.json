@@ -47,6 +47,12 @@
                        "default":  "https://bizflow.ethiobiz.et/webhook/b15677a6-6611-42c8-88e2-43e0eb66f1b6/chat"
                    },
                    {
+                       "fieldtype":  "Data",
+                       "label":  "Website Guest Hadeeda Webhook URL",
+                       "description":  "Used for Guest chat and Guest inline requests. Logged-in chat uses Chat Widget Webhook URL; logged-in inline uses Inline AI Webhook URL.",
+                       "fieldname":  "chat_webhook_url_guest"
+                   },
+                   {
                        "fieldname":  "webhook_auth_header",
                        "fieldtype":  "Data",
                        "label":  "Webhook Auth Header Name (optional)"
@@ -59,7 +65,7 @@
                    {
                        "fieldname":  "api_credentials_section",
                        "fieldtype":  "Section Break",
-                       "label":  "API & HADEEDA Service Credentials"
+                       "label":  "API \u0026 HADEEDA Service Credentials"
                    },
                    {
                        "fieldname":  "enable_service_token_auth",
@@ -124,6 +130,18 @@
                        "default":  "#1FB6AE"
                    },
                    {
+                       "fieldtype":  "Data",
+                       "label":  "Floating Button Label",
+                       "default":  "Chat with us",
+                       "fieldname":  "chat_floating_button_label"
+                   },
+                   {
+                       "fieldtype":  "Data",
+                       "label":  "Floating Button Icon URL",
+                       "description":  "Optional image/icon URL for the floating chat button. Leave empty for default icon.",
+                       "fieldname":  "chat_floating_button_icon"
+                   },
+                   {
                        "fieldname":  "widget_mode",
                        "fieldtype":  "Select",
                        "label":  "Widget Mode",
@@ -157,6 +175,25 @@
                        "fieldtype":  "Check",
                        "label":  "Enable Inline AI Assistant",
                        "default":  "1"
+                   },
+                   {
+                       "fieldtype":  "Data",
+                       "label":  "Inline Widget Title",
+                       "default":  "HADEEDA BizAi",
+                       "fieldname":  "inline_widget_title"
+                   },
+                   {
+                       "fieldtype":  "Data",
+                       "label":  "Inline Widget Icon URL",
+                       "description":  "Optional icon/avatar URL for inline assistant popup. Leave empty for default badge.",
+                       "fieldname":  "inline_widget_icon"
+                   },
+                   {
+                       "fieldtype":  "Data",
+                       "label":  "Inline Badge Text",
+                       "default":  "H",
+                       "description":  "Short badge text shown when no inline icon URL is set.",
+                       "fieldname":  "inline_badge_text"
                    },
                    {
                        "fieldname":  "trigger_character",

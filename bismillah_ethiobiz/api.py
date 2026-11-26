@@ -1,4 +1,4 @@
-import frappe
+﻿import frappe
 import requests
 import json
 import re
@@ -370,6 +370,12 @@ def get_chat_config():
             "allowed_mime_types": settings.allowed_mime_types or "",
             "default_language": settings.default_language or "en",
             "enable_streaming": bool(getattr(settings, "enable_streaming", 1)),
+            "bot_avatar": getattr(settings, "bot_avatar", "") or "",
+            "chat_floating_button_label": getattr(settings, "chat_floating_button_label", "") or "Chat with us",
+            "chat_floating_button_icon": getattr(settings, "chat_floating_button_icon", "") or "",
+            "inline_widget_title": getattr(settings, "inline_widget_title", "") or "HADEEDA BizAi",
+            "inline_widget_icon": getattr(settings, "inline_widget_icon", "") or "",
+            "inline_badge_text": getattr(settings, "inline_badge_text", "") or "H",
         }
 
     api_key, api_secret = _get_user_api_credentials(user)
@@ -411,6 +417,12 @@ def get_chat_config():
         "allowed_mime_types": settings.allowed_mime_types or "",
         "default_language": settings.default_language or "en",
         "enable_streaming": bool(getattr(settings, "enable_streaming", 1)),
+        "bot_avatar": getattr(settings, "bot_avatar", "") or "",
+        "chat_floating_button_label": getattr(settings, "chat_floating_button_label", "") or "Chat with us",
+        "chat_floating_button_icon": getattr(settings, "chat_floating_button_icon", "") or "",
+        "inline_widget_title": getattr(settings, "inline_widget_title", "") or "HADEEDA BizAi",
+        "inline_widget_icon": getattr(settings, "inline_widget_icon", "") or "",
+        "inline_badge_text": getattr(settings, "inline_badge_text", "") or "H",
     }
 
 
@@ -688,34 +700,44 @@ def get_user_credentials(username=None, telegram_username=None):
     return WerkzeugResponse(json.dumps(data), status=200, content_type="application/json")
 
 
-@frappe.whitelist(methods=["POST"])
+@frappe.whitelist(allow_guest=True, methods=["POST"])
 def chat_inline(prompt, context=None):
-    """2026-11-14 contract: inline AI is logged-in only and POST-only.
+    """Inline AI endpoint.
 
-    Guests are rejected before any webhook URL or credential is resolved, and
-    there is deliberately no guest fallback to the authenticated inline URL.
+    Routing contract (2026-11-26):
+    - Guest users: Website Guest Hadeeda Webhook URL (`chat_webhook_url_guest`) only.
+    - Logged-in users: Inline AI Webhook URL (`inline_webhook_url`) only.
+    Guests never receive logged-in credentials, API keys, or private company context.
     """
     user = frappe.session.user
     settings = _get_hadeeda_settings()
     if not settings.enabled or not settings.inline_ai_enabled:
         frappe.throw("Inline AI is disabled", frappe.PermissionError)
-    if not user or user == "Guest":
-        frappe.throw("Inline AI is available to signed-in users only.", frappe.PermissionError)
 
-    inline_url = settings.inline_webhook_url
-    api_key, api_secret = _get_user_api_credentials(user)
-    company = frappe.defaults.get_user_default("company") or ""
-    full_name = frappe.db.get_value("User", user, "full_name") or user
-    department, designation = _get_user_department_designation(user)
-    company_ctx = _get_hadeeda_company_context(user, company)
-    active_company = company_ctx.get("active_company") or company
-    company = active_company
-    session_id = f"{user}::{active_company}" if active_company else user
-    is_guest = False
+    is_guest = not user or user == "Guest"
+    if is_guest:
+        frappe.flags.ignore_csrf = True
+        inline_url = getattr(settings, "chat_webhook_url_guest", None) or ""
+        api_key, api_secret = "", ""
+        company = ""
+        full_name = "Guest"
+        department, designation = "", ""
+        company_ctx = {"active_company": "", "default_company": "", "companies": []}
+        active_company = ""
+        session_id = f"guest::{frappe.utils.nowdate()}"
+        document_content = ""
+    else:
+        inline_url = settings.inline_webhook_url
+        api_key, api_secret = _get_user_api_credentials(user)
+        company = frappe.defaults.get_user_default("company") or ""
+        full_name = frappe.db.get_value("User", user, "full_name") or user
+        department, designation = _get_user_department_designation(user)
+        company_ctx = _get_hadeeda_company_context(user, company)
+        active_company = company_ctx.get("active_company") or company
+        company = active_company
+        session_id = f"{user}::{active_company}" if active_company else user
+        document_content = _get_document_context(context)
 
-    document_content = _get_document_context(context)
-
-    # Embed the actual document content directly into the message
     chat_input = prompt
     if document_content:
         chat_input = "%s\n\n[DOCUMENT CONTEXT]\n%s" % (prompt, document_content)
@@ -725,9 +747,9 @@ def chat_inline(prompt, context=None):
         "sessionId": session_id,
         "chatInput": chat_input,
         "metadata": {
-            "source": "widget",
-            "username": user or "Guest",
-            "user_id": user or "Guest",
+            "source": "inline",
+            "username": "Guest" if is_guest else user,
+            "user_id": "Guest" if is_guest else user,
             "full_name": full_name,
             "company": company,
             "active_company": company_ctx.get("active_company") or company,
@@ -735,19 +757,21 @@ def chat_inline(prompt, context=None):
             "companies": company_ctx.get("companies") or [],
             "department": department,
             "designation": designation,
-            "industry": _get_user_industry_religion(user)[0] if not is_guest else "",
-            "religion": _get_user_industry_religion(user)[1] if not is_guest else "",
-            "user_behaviour": _get_user_behaviour_and_company_industry(user, company)[0] if not is_guest else "",
-            "company_industry": _get_user_behaviour_and_company_industry(user, company)[1] if not is_guest else "",
-            "language": _get_user_language(user) if not is_guest else (settings.default_language or "en"),
+            "industry": "" if is_guest else _get_user_industry_religion(user)[0],
+            "religion": "" if is_guest else _get_user_industry_religion(user)[1],
+            "user_behaviour": "" if is_guest else _get_user_behaviour_and_company_industry(user, company)[0],
+            "company_industry": "" if is_guest else _get_user_behaviour_and_company_industry(user, company)[1],
+            "language": (settings.default_language or "en") if is_guest else _get_user_language(user),
             "api_key": api_key or "",
             "api_secret": api_secret or "",
-            "field_context": context or "",
+            "field_context": "" if is_guest else (context or ""),
             "document_content": document_content,
         }
     }
 
     if not inline_url:
+        if is_guest:
+            frappe.throw("Guest webhook URL is not configured for inline AI", frappe.DoesNotExistError)
         frappe.throw("Inline AI webhook URL is not configured", frappe.DoesNotExistError)
 
     headers = {"Content-Type": "application/json"}
@@ -764,12 +788,10 @@ def chat_inline(prompt, context=None):
 
         raw_text = resp.text
 
-        # 1. Try NDJSON parsing first (n8n Formatter node output)
         clean_text = _parse_ndjson(raw_text)
         if clean_text:
             return {"reply": clean_text}
 
-        # 2. Try standard JSON
         try:
             data = json.loads(raw_text)
             if isinstance(data, list) and len(data) > 0:
@@ -788,8 +810,7 @@ def chat_inline(prompt, context=None):
 
     except Exception as e:
         frappe.logger("ethiobiz").error(f"chat_inline error: {e}")
-        return {"reply": "⚠️ Sorry, I encountered an error processing your request. Please try again."}
-
+        return {"reply": "âš ï¸ Sorry, I encountered an error processing your request. Please try again."}
 
 def ensure_csrf_token():
     """Mint a CSRF token for every non-guest session so website pages render
@@ -962,5 +983,7 @@ def get_user_particle_pref():
         return {"enabled": bool(int(global_val or 1))}
     except Exception:
         return {"enabled": True}
+
+
 
 
