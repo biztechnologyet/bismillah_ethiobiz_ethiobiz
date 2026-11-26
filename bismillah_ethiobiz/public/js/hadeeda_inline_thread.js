@@ -102,7 +102,7 @@
                 if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(value);
                 var old = btn.textContent; btn.textContent = "Copied"; setTimeout(function () { btn.textContent = old; }, 1400);
             });
-            addAction("Insert", "hadeeda-thread-action--insert", function () {
+            addAction("Insert at cursor", "hadeeda-thread-action--insert", function () {
                 var popup = thread.closest(".hadeeda-inline-popup");
                 if (!popup) return;
                 var preview = popup.querySelector(".hadeeda-result-preview");

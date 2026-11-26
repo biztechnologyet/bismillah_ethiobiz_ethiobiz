@@ -46,7 +46,7 @@ app_include_css = [
     "/assets/bismillah_ethiobiz/css/ethiobiz_theme.css?v=2.3.1",
     "/assets/bismillah_ethiobiz/css/walta.css",
     "/assets/bismillah_ethiobiz/css/dagu.css",
-    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.1",
     "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.2.0"
 ]
 
@@ -59,7 +59,7 @@ app_include_js = [
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.0",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.1",
     "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.2.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_desk_filters.js",
@@ -78,7 +78,7 @@ web_include_css = [
     "/assets/bismillah_ethiobiz/css/product_pages_atmosphere.css?v=1.1.1",
     "/assets/bismillah_ethiobiz/css/ethiobiz_pages_atmosphere.css?v=1.0.1",
     "/assets/bismillah_ethiobiz/css/ethiobiz_all_pages_polish.css?v=1.0.0",
-    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.0",
+    "/assets/bismillah_ethiobiz/css/hadeeda_inline_thread.css?v=1.2.1",
     "/assets/bismillah_ethiobiz/css/hadeeda_chat_enhance.css?v=1.2.0",
 ]
 
@@ -90,7 +90,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/walta.js",
     "/assets/bismillah_ethiobiz/js/ethiobiz_chat.js?v=2.6.0",
     "/assets/bismillah_ethiobiz/js/ethiobiz_inline_ai.js?v=2.7.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.1",
     "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.2.0",
     "/assets/bismillah_ethiobiz/js/pwa_register.js?v=1.0.4",
     "/assets/bismillah_ethiobiz/js/ethiobiz_particles.js?v=1.0.0",
@@ -101,7 +101,7 @@ web_include_js = [
     "/assets/bismillah_ethiobiz/js/product_pages_atmosphere.js?v=1.1.1",
     "/assets/bismillah_ethiobiz/js/ethiobiz_pages_atmosphere.js?v=1.0.1",
     "/assets/bismillah_ethiobiz/js/ethiobiz_all_pages_polish.js?v=1.0.0",
-    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.0",
+    "/assets/bismillah_ethiobiz/js/hadeeda_inline_thread.js?v=1.2.1",
     "/assets/bismillah_ethiobiz/js/hadeeda_chat_enhance.js?v=1.2.0",
 ]
 
